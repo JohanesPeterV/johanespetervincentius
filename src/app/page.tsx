@@ -1,4 +1,3 @@
-import Image from "next/image";
 import SnapScrollContainer from "./components/snap-scroll-container";
 
 export default function Home() {
