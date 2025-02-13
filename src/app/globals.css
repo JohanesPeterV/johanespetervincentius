@@ -64,9 +64,10 @@ body {
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border ease-in-out;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background transition-colors duration-500 ease-in-out;
   }
 }
+
