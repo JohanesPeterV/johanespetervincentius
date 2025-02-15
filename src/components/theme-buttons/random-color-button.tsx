@@ -1,7 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-theme-config";
 import { baseColors } from "@/registry/registry-base-colors";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export default function RandomColorButton({
   className,
@@ -9,6 +10,11 @@ export default function RandomColorButton({
 }: React.ComponentProps<typeof Button>) {
   const { resolvedTheme } = useTheme();
   const [config, setConfig] = useConfig();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <Button
@@ -28,14 +34,16 @@ export default function RandomColorButton({
           theme: getRandomDifferentColor(),
         });
       }}
-      className={`${className} m-o p-0 background-[--theme-primary] text-[--theme-primary]`}
+      className={`${className} background-[--theme-primary] text-[--theme-primary]`}
       style={
-        {
-          "--theme-primary": `hsl(${
-            baseColors.find((baseColor) => baseColor.name === config.theme)
-              ?.activeColor[resolvedTheme === "dark" ? "dark" : "light"]
-          })`,
-        } as React.CSSProperties
+        mounted
+          ? ({
+              "--theme-primary": `hsl(${
+                baseColors.find((baseColor) => baseColor.name === config.theme)
+                  ?.activeColor[resolvedTheme === "dark" ? "dark" : "light"]
+              })`,
+            } as React.CSSProperties)
+          : undefined
       }
     >
       o

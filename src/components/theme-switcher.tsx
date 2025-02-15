@@ -7,7 +7,6 @@ import { useTheme } from "next-themes";
 export function ThemeSwitcher() {
   const [config] = useConfig();
   const { resolvedTheme } = useTheme();
-
   const color = baseColors.find((color) => color.name === config.theme)
     ?.cssVars[resolvedTheme as "light" | "dark"] as { [key: string]: string };
   for (const key in color) {
