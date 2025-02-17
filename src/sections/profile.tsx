@@ -7,7 +7,7 @@ export default function Profile() {
         className="  scroll-m-20
       font-poppins text-4xl font-bold
       tracking-tight lg:text-6xl
-animate-gradient      text-transparent bg-red bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 bg-clip-text
+animate-gradient       text-transparent bg-red bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 bg-clip-text
 
       "
       >
