@@ -1,14 +1,17 @@
 "use client";
 import ThreeBackground from "@/components/background";
 import SnapScrollContainer from "@/components/snap-scroll-container";
+import Test from "@/components/test";
 import Profile from "@/sections/profile";
 
 export default function Home() {
   return (
     <div>
-      <main className="bg-card">
+      <main className="relative">
+        {/* <Test /> */}
         <ThreeBackground />
-        <SnapScrollContainer>
+
+        <SnapScrollContainer className="relative z-10">
           <Profile />
           <h1
             className="  scroll-m-20

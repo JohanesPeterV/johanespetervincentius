@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/hooks/use-theme-config";
+import { useConfig } from "@/hooks/use-config";
 import { baseColors } from "@/registry/registry-base-colors";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
