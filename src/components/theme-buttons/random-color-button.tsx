@@ -1,8 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-config";
-import { baseColors } from "@/registry/registry-base-colors";
+import { hslCssToHex } from "@/lib/utils";
+import {
+  baseColors,
+  DEFAULT_BASE_COLOR,
+} from "@/registry/registry-base-colors";
+import { useGLTF } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 export default function RandomColorButton({
   className,
@@ -34,7 +40,7 @@ export default function RandomColorButton({
           theme: getRandomDifferentColor(),
         });
       }}
-      className={`${className} background-[--theme-primary] text-[--theme-primary]`}
+      className={`p-0 m-0 ${className} background-[--theme-primary] text-[--theme-primary]`}
       style={
         mounted
           ? ({

@@ -1,5 +1,5 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Stars, OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Stars, OrbitControls, useGLTF } from "@react-three/drei";
 import { useConfig } from "@/hooks/use-config";
 import { useTheme } from "next-themes";
 import {
@@ -7,6 +7,8 @@ import {
   DEFAULT_BASE_COLOR,
 } from "@/registry/registry-base-colors";
 import { hslCssToHex } from "@/lib/utils";
+import { Suspense, useEffect, useRef } from "react";
+import * as THREE from "three";
 
 export default function StarsBackground() {
   const [config] = useConfig();
@@ -17,38 +19,54 @@ export default function StarsBackground() {
     baseColors.find(({ name }) => name === config.theme) ?? DEFAULT_BASE_COLOR;
 
   const baseColor = hslCssToHex(baseColorCss.activeColor[themeMode]);
-  const backgroundBaseColor = hslCssToHex(
-    baseColorCss.cssVars[themeMode].background
-  );
 
   return (
     <div className="fixed top-0 left-0 w-full h-full z-[-1] pointer-events-none">
       <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
         <ambientLight intensity={0.5} />
-        <ParallaxCamera />
         <Stars
           radius={200}
           depth={1}
-          count={3000}
+          count={200}
           factor={4}
           saturation={222}
           fade
           speed={1}
         />
-        <OrbitControls enableZoom={false} />
+        <Suspense fallback={null}>
+          <MushroomOSaurusModel />
+        </Suspense>
+        <OrbitControls enableZoom={true} />
       </Canvas>
     </div>
   );
 }
 
-function ParallaxCamera() {
-  const { camera, mouse } = useThree();
+function MushroomOSaurusModel() {
+  const { scene } = useGLTF("/models/mushroom-o-saurus/scene.gltf");
+  const mushroomRef = useRef<THREE.Group>(null);
 
-  useFrame(() => {
-    camera.position.x += (mouse.x * 2 - camera.position.x) * 0.05;
-    camera.position.y += (-mouse.y * 2 - camera.position.y) * 0.05;
-    camera.lookAt(0, 0, 0);
+  useEffect(() => {
+    scene.scale.set(0.7, 0.7, 0.7);
+
+    scene.rotation.y = Math.PI / 2;
+
+    scene.position.set(-10, 0, 0);
+  }, [scene]);
+
+  useFrame((_, delta) => {
+    if (mushroomRef.current) {
+      mushroomRef.current.position.x += delta * 2;
+
+      mushroomRef.current.rotation.y += delta * 0.1;
+      mushroomRef.current.rotation.x += delta * 0.3;
+      mushroomRef.current.rotation.z += delta * 0.3;
+
+      if (mushroomRef.current.position.x > 10) {
+        mushroomRef.current.position.x = -10;
+      }
+    }
   });
 
-  return null;
+  return <primitive object={scene} ref={mushroomRef} />;
 }

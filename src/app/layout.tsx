@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`
-          ${poppins.variable} antialiased`}
+          ${poppins.variable} antialiased font-poppins `}
       >
         <ThemeProvider
           attribute="class"
