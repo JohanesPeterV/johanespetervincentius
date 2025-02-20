@@ -13,17 +13,6 @@ export default function Home() {
 
         <SnapScrollContainer className="relative z-10">
           <Profile />
-          <h1
-            className="  scroll-m-20
-                font-poppins text-4xl font-bold
-                tracking-tight lg:text-6xl
-          animate-gradient      text-transparent bg-red bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 bg-clip-text
-          
-                "
-          >
-            J hanes Peter Vincentius
-            <br />
-          </h1>
           <div className="h-full w-full text-foreground ">
             <div>content 2</div>
           </div>
