@@ -1,5 +1,5 @@
+"use client";
 import RandomColorButton from "@/components/theme-buttons/random-color-button";
-import { Button } from "@/components/ui/button";
 
 export default function Profile() {
   return (

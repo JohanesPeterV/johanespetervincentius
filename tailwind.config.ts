@@ -6,6 +6,7 @@ export default {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/section/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
@@ -20,9 +21,9 @@ export default {
       backgroundSize: {
         "300%": "300%",
       },
-      animation: {
-        gradient: "animatedgradient 6s linear infinite alternate",
-      },
+      // animation: {
+      //   gradient: "animatedgradient 6s linear infinite alternate",
+      // },
       fontFamily: {
         poppins: ["var(--font-poppins)", "sans-serif"],
       },
