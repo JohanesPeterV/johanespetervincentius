@@ -71,7 +71,10 @@ body {
   }
 }
 
+
 .animate-gradient {
+
+
   background-size: 300%;
   -webkit-animation: animatedgradient 6s linear infinite alternate;
   -moz-animation: animatedgradient 6s linear infinite alternate;

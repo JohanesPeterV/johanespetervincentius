@@ -1,12 +1,12 @@
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Stars, OrbitControls, useGLTF } from "@react-three/drei";
 import { useConfig } from "@/hooks/use-config";
-import { useTheme } from "next-themes";
+import { hslCssToHex } from "@/lib/utils";
 import {
   baseColors,
   DEFAULT_BASE_COLOR,
 } from "@/registry/registry-base-colors";
-import { hslCssToHex } from "@/lib/utils";
+import { OrbitControls, Stars, useGLTF } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useTheme } from "next-themes";
 import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 
@@ -23,7 +23,7 @@ export default function StarsBackground() {
   return (
     <div className="fixed top-0 left-0 w-full h-full z-[-1] pointer-events-none">
       <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={themeMode === "dark" ? 0.5 : 1.3} />
         <Stars
           radius={200}
           depth={1}

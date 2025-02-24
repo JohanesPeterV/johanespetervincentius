@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@funtech-inc/use-shader-fx": "^1.1.43",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-switch": "^1.1.3",
     "@react-three/drei": "^10.0.0",

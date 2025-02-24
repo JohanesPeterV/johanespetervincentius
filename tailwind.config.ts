@@ -21,9 +21,9 @@ export default {
       backgroundSize: {
         "300%": "300%",
       },
-      // animation: {
-      //   gradient: "animatedgradient 6s linear infinite alternate",
-      // },
+      animation: {
+        gradient: "animatedgradient 6s linear infinite alternate",
+      },
       fontFamily: {
         poppins: ["var(--font-poppins)", "sans-serif"],
       },
