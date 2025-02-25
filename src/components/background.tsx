@@ -1,9 +1,4 @@
 import { useConfig } from "@/hooks/use-config";
-import { hslCssToHex } from "@/lib/utils";
-import {
-  baseColors,
-  DEFAULT_BASE_COLOR,
-} from "@/registry/registry-base-colors";
 import { OrbitControls, Stars, useGLTF } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useTheme } from "next-themes";
@@ -14,11 +9,6 @@ export default function StarsBackground() {
   const [config] = useConfig();
   const { resolvedTheme } = useTheme();
   const themeMode = (resolvedTheme as "light" | "dark") ?? "dark";
-
-  const baseColorCss =
-    baseColors.find(({ name }) => name === config.theme) ?? DEFAULT_BASE_COLOR;
-
-  const baseColor = hslCssToHex(baseColorCss.activeColor[themeMode]);
 
   return (
     <div className="fixed top-0 left-0 w-full h-full z-[-1] pointer-events-none">
