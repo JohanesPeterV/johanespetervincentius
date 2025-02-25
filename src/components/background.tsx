@@ -2,7 +2,7 @@ import { useConfig } from "@/hooks/use-config";
 import { OrbitControls, Stars, useGLTF } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useTheme } from "next-themes";
-import { Suspense, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 export default function StarsBackground() {
@@ -17,15 +17,15 @@ export default function StarsBackground() {
         <Stars
           radius={200}
           depth={1}
-          count={200}
+          count={600}
           factor={4}
           saturation={222}
           fade
           speed={1}
         />
-        <Suspense fallback={null}>
+        {/* <Suspense fallback={null}>
           <MushroomOSaurusModel />
-        </Suspense>
+        </Suspense> */}
         <OrbitControls enableZoom={true} />
       </Canvas>
     </div>
