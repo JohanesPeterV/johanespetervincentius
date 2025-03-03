@@ -1,14 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-config";
-import { hslCssToHex } from "@/lib/utils";
-import {
-  baseColors,
-  DEFAULT_BASE_COLOR,
-} from "@/registry/registry-base-colors";
-import { useGLTF } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { baseColors } from "@/registry/registry-base-colors";
 import { useTheme } from "next-themes";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function RandomColorButton({
   className,

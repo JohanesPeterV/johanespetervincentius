@@ -1,5 +1,5 @@
 "use client";
-import ThreeBackground from "@/components/background";
+import ThreeBackground from "@/components/backgrounds/starry-sky-background";
 import SnapScrollContainer from "@/components/snap-scroll-container";
 import Profile from "@/sections/profile";
 
