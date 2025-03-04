@@ -25,9 +25,9 @@ export default function StarsBackground() {
         <Suspense fallback={null}>
           <Rotating3dModel
             position={{
-              x: -10,
+              x: 0,
               y: 2,
-              z: 0,
+              z: -12,
             }}
             path="/models/moon/scene.gltf"
           />
