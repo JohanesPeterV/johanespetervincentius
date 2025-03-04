@@ -12,18 +12,14 @@ export default function Profile() {
         className={`
           text-4xl font-bold tracking-tight lg:text-6xl
           text-transparent bg-gradient-to-r 
-          
-
           ${
-            themeMode === "dark" && "from-purple-500 via-blue-500 to-purple-500"
+            themeMode === "dark" && "from-blue-500 via-purple-500 to-pink-500"
           }
           ${
             themeMode === "light" &&
-            "from-purple-300 via-blue-300 to-purple-300"
+            "from-blue-300 via-purple-300 to-pink-300"
           }
-
           animate-gradient bg-clip-text 
-          
           `}
       >
         J
