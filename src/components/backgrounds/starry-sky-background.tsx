@@ -25,11 +25,12 @@ export default function StarsBackground() {
         <Suspense fallback={null}>
           <Rotating3dModel
             position={{
-              x: 0,
+              x: -18,
               y: 2,
               z: -12,
             }}
             path="/models/moon/scene.gltf"
+            chanceOfAppearing={0.0001}
           />
         </Suspense>
         <OrbitControls enableZoom={true} />
