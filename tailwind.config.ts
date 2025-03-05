@@ -22,7 +22,7 @@ export default {
         "300%": "300%",
       },
       animation: {
-        gradient: "animatedgradient 6s linear infinite alternate",
+        gradient: "animatedgradient 8s linear infinite alternate",
       },
       fontFamily: {
         poppins: ["var(--font-poppins)", "sans-serif"],
