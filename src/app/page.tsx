@@ -1,5 +1,5 @@
 "use client";
-import StarrySkyBackground from "@/components/backgrounds/starry-sky-background";
+import HomeBackground from "@/components/backgrounds/home-background";
 import SnapScrollContainer from "@/components/snap-scroll-container";
 import Profile from "@/sections/profile";
 
@@ -7,8 +7,7 @@ export default function Home() {
   return (
     <div>
       <main className="relative">
-        <StarrySkyBackground />
-
+        <HomeBackground />
         <SnapScrollContainer className="relative z-10">
           <Profile />
 
