@@ -8,7 +8,7 @@ export default function Home() {
     <div>
       <main className="relative">
         <HomeBackground />
-        <SnapScrollContainer className="relative z-10">
+        <SnapScrollContainer className="relative">
           <Profile />
 
           <div className="h-full w-full text-foreground ">
