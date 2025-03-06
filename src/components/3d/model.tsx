@@ -5,6 +5,7 @@ import * as THREE from "three";
 type ModelProps = {
   path: string;
   position?: THREE.Vector3Like;
+  acceleration?: THREE.Vector3Like;
   scale?: THREE.Vector3Like | number;
   rotation?: THREE.Vector3Like;
   rotateOnAxis?: THREE.Vector3Like;
@@ -13,6 +14,7 @@ type ModelProps = {
 export default function Model({
   path,
   position = new THREE.Vector3(0, 0, 0),
+  acceleration = new THREE.Vector3(0, 0, 0),
   scale = new THREE.Vector3(1, 1, 1),
   rotation = new THREE.Vector3(0, 0, 0),
   rotateOnAxis = new THREE.Vector3(0, 0, 0),
@@ -36,6 +38,7 @@ export default function Model({
       new THREE.Vector3(rotateOnAxis.x, rotateOnAxis.y, rotateOnAxis.z),
       0.01
     );
+    scene.position.add(acceleration);
   });
 
   return <primitive object={scene} ref={modelRef} />;
