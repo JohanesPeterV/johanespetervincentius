@@ -34,7 +34,7 @@ export default function RandomColorButton({
           theme: getRandomDifferentColor(),
         });
       }}
-      className={`p-0 m-0 ${className} background-[--theme-primary] text-[--theme-primary]`}
+      className={`p-0 m-0 ${className} text-[--theme-primary]`}
       style={
         mounted
           ? ({
@@ -42,6 +42,7 @@ export default function RandomColorButton({
                 baseColors.find((baseColor) => baseColor.name === config.theme)
                   ?.activeColor[resolvedTheme === "dark" ? "dark" : "light"]
               })`,
+              backgroundColor: "transparent",
             } as React.CSSProperties)
           : undefined
       }

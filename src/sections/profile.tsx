@@ -11,9 +11,9 @@ export default function Profile() {
       className={`
       text-transparent bg-gradient-to-r 
       ${themeMode === "dark" && "from-blue-500 via-purple-500 to-pink-500"}
-      ${themeMode === "light" && "from-blue-300 via-purple-300 to-pink-300"}
-      animate-gradient  bg-clip-text
-    `}
+      ${themeMode === "light" && "from-blue-400 via-purple-400 to-pink-400"}
+      animate-gradient  bg-clip-text        
+  `}
     >
       <h1 className=" text-4xl font-bold tracking-tight lg:text-6xl p-0">
         J

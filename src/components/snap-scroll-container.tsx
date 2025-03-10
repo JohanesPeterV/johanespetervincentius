@@ -12,7 +12,7 @@ export default function SnapScrollContainer({
   children,
   className,
 }: SnapScrollContainerProps) {
-  const [config, setConfig] = useConfig();
+  const [, setConfig] = useConfig();
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function SnapScrollContainer({
       },
       {
         root: null,
-        threshold: 0.5, // Trigger when 50% of the section is in view
+        threshold: 0.5,
       }
     );
 

@@ -9,6 +9,7 @@ type ModelProps = {
   scale?: THREE.Vector3Like | number;
   rotation?: THREE.Vector3Like;
   rotateOnAxis?: THREE.Vector3Like;
+  rotateOnWorldAxis?: THREE.Vector3Like;
 };
 
 export default function Model({
@@ -18,6 +19,7 @@ export default function Model({
   scale = new THREE.Vector3(1, 1, 1),
   rotation = new THREE.Vector3(0, 0, 0),
   rotateOnAxis = new THREE.Vector3(0, 0, 0),
+  rotateOnWorldAxis = new THREE.Vector3(0, 0, 0),
 }: ModelProps) {
   const { scene } = useGLTF(path);
   const modelRef = useRef<THREE.Group>(null);
@@ -30,12 +32,29 @@ export default function Model({
       scene.scale.set(scale.x, scale.y, scale.z);
     }
     scene.rotation.set(rotation.x, rotation.y, rotation.z);
-  }, [scene, position, scale, rotation]);
+  }, [
+    position.x,
+    position.y,
+    position.z,
+    rotation.x,
+    rotation.y,
+    rotation.z,
+    scale,
+    scene,
+  ]);
 
   useFrame(() => {
     if (!modelRef.current) return;
     modelRef.current.rotateOnAxis(
       new THREE.Vector3(rotateOnAxis.x, rotateOnAxis.y, rotateOnAxis.z),
+      0.01
+    );
+    modelRef.current.rotateOnWorldAxis(
+      new THREE.Vector3(
+        rotateOnWorldAxis.x,
+        rotateOnWorldAxis.y,
+        rotateOnWorldAxis.z
+      ),
       0.01
     );
     scene.position.add(acceleration);

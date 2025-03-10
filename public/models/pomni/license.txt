@@ -1,0 +1,11 @@
+Model Information:
+* title:	POMNI PLUSHIE
+* source:	https://sketchfab.com/3d-models/pomni-plushie-1cf8e80aca674c92ab92302868952546
+* author:	Emilioelpro (https://sketchfab.com/Emilioelpro)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "POMNI PLUSHIE" (https://sketchfab.com/3d-models/pomni-plushie-1cf8e80aca674c92ab92302868952546) by Emilioelpro (https://sketchfab.com/Emilioelpro) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
