@@ -11,7 +11,7 @@ export default function Profile() {
       className={`
       text-transparent bg-gradient-to-r 
       ${themeMode === "dark" && "from-blue-500 via-purple-500 to-pink-500"}
-      ${themeMode === "light" && "from-blue-400 via-purple-400 to-pink-400"}
+      ${themeMode === "light" && "from-blue-500 via-purple-500 to-pink-500"}
       animate-gradient  bg-clip-text        
   `}
     >

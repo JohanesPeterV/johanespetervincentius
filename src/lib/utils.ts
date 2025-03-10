@@ -17,6 +17,13 @@ export function hslCssToHex(hsl: string): number {
     "0x" + rgb.map((c) => Math.round(c).toString(16).padStart(2, "0")).join("")
   );
 }
+export function darkenHsl(hsl: string, amount: number): string {
+  const [h, s, l] = hsl.replace(/%/g, "").split(" ").map(parseFloat); // Parse H, S, L values
+
+  const darkenedL = Math.max(l - amount, 0); // Reduce lightness but keep ≥ 0
+
+  return `${h} ${s}% ${darkenedL}%`; // Keep the original format
+}
 
 function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   if (s === 0) return [l * 255, l * 255, l * 255];

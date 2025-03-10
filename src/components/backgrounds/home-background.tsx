@@ -1,5 +1,5 @@
 import { useConfig } from "@/hooks/use-config";
-import { hslCssToHex } from "@/lib/utils";
+import { darkenHsl, hslCssToHex } from "@/lib/utils";
 import {
   baseColors,
   DEFAULT_BASE_COLOR,
@@ -17,7 +17,20 @@ export default function HomeBackground() {
     baseColors.find(({ name }) => name === theme) ?? DEFAULT_BASE_COLOR;
 
   const themeMode = resolvedTheme === "light" ? "light" : "dark";
-  const baseColor = `#${hslCssToHex(baseColorCss.activeColor[themeMode])
+  const baseColor = `#${hslCssToHex(
+    darkenHsl(
+      baseColorCss.activeColor[themeMode],
+      themeMode === "dark" ? 25 : 0
+    )
+  )
+    .toString(16)
+    .padStart(6, "0")}`;
+  const baseBackgroundColor = `#${hslCssToHex(
+    darkenHsl(
+      baseColorCss.cssVars[themeMode].background,
+      themeMode === "dark" ? 0 : 13
+    )
+  )
     .toString(16)
     .padStart(6, "0")}`;
   return (
@@ -31,10 +44,15 @@ export default function HomeBackground() {
         height: "100vh",
         pointerEvents: "auto",
       }}
+      {...(themeMode === "light" && { className: "bg-slate-200" })}
       camera={{ fov: 75, near: 0.1, far: 1000, position: [0, 0, 5] }}
     >
       <EffectComposer>
-        <Fluid showBackground={false} fluidColor={baseColor} />
+        <Fluid
+          backgroundColor={baseBackgroundColor}
+          fluidColor={baseColor}
+          densityDissipation={0.98}
+        />
       </EffectComposer>
     </Canvas>
   );
