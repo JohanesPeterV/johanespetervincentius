@@ -48,11 +48,12 @@ export default function HomeBackground() {
         width: "100vw",
         height: "100vh",
         pointerEvents: "auto",
+        zIndex: -10,
       }}
       {...(themeMode === "light" && { className: "bg-slate-200" })}
       camera={{ fov: 75, near: 0.1, far: 1000, position: [0, 0, 5] }}
     >
-      <ambientLight intensity={themeMode === "dark" ? 0.5 : 1.3} />
+      <pointLight position={[5, 5, 5]} intensity={200} />
       <EffectComposer>
         <Fluid
           backgroundColor={baseBackgroundColor}
