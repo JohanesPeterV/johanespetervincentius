@@ -9,10 +9,15 @@ import { Fluid } from "@whatisjery/react-fluid-distortion";
 import { useTheme } from "next-themes";
 
 import { EffectComposer } from "@react-three/postprocessing";
+import { useEffect, useState } from "react";
 export default function HomeBackground() {
   const { resolvedTheme } = useTheme();
   const [{ theme }] = useConfig();
+  const [eventSource, setEventSource] = useState<HTMLElement | null>(null);
 
+  useEffect(() => {
+    setEventSource(document.body);
+  }, []);
   const baseColorCss =
     baseColors.find(({ name }) => name === theme) ?? DEFAULT_BASE_COLOR;
 
@@ -35,7 +40,7 @@ export default function HomeBackground() {
     .padStart(6, "0")}`;
   return (
     <Canvas
-      eventSource={document.body}
+      eventSource={eventSource || undefined}
       style={{
         position: "fixed",
         top: 0,
