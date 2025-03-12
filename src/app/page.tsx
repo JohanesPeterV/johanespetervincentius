@@ -12,7 +12,9 @@ export default function Home() {
         <Profile />
 
         <MacbookShowcase>
-          <Links />
+          <div className="flex items-center h-full justify-center">
+            <Links />
+          </div>
         </MacbookShowcase>
 
         <div className="h-full w-full text-foreground ">
