@@ -6,11 +6,13 @@ import { useEffect, useRef } from "react";
 interface SnapScrollContainerProps {
   children: React.ReactNode[];
   className?: string;
+  heightFillContainer?: boolean;
 }
 
 export default function SnapScrollContainer({
   children,
   className,
+  heightFillContainer,
 }: SnapScrollContainerProps) {
   const [, setConfig] = useConfig();
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -44,7 +46,9 @@ export default function SnapScrollContainer({
 
   return (
     <div
-      className={`${className} h-screen w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide`}
+      className={`${className} ${
+        heightFillContainer ? "h-full" : "h-screen"
+      } w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide`}
     >
       {children.map((child, index) => (
         <div
@@ -53,7 +57,9 @@ export default function SnapScrollContainer({
             sectionRefs.current[index] = el;
           }}
           data-index={index}
-          className="h-screen w-full snap-center flex items-center justify-center"
+          className={`w-full ${
+            heightFillContainer ? "h-full" : "h-screen"
+          } snap-center flex items-center justify-center`}
         >
           {child}
         </div>

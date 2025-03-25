@@ -19,7 +19,7 @@ export default function Profile() {
       sm:space-y-0 space-y-3
   `}
       >
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight lg:text-6xl p-0">
+        <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold tracking-tight p-0">
           J
           <RandomColorButton className="text-3xl sm:text-4xl lg:text-6xl font-extrabold p-0" />
           hanes Peter Vincentius
