@@ -1,7 +1,7 @@
-import { Html, OrbitControls, useGLTF } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { ReactElement, useRef, useState } from "react";
-import * as THREE from "three";
+import { Html, OrbitControls, useGLTF } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { ReactElement, useRef, useState } from 'react';
+import * as THREE from 'three';
 
 type MacbookShowcaseParams = {
   children: ReactElement;
@@ -48,7 +48,7 @@ type MacModelProps = {
 };
 
 function MacModel({ children, mouseOffset }: MacModelProps) {
-  const { nodes, materials } = useGLTF("/models/mac-transformed.glb");
+  const { nodes, materials } = useGLTF('/models/mac-transformed.glb');
   const group = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -58,19 +58,19 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
     group.current.position.y = THREE.MathUtils.lerp(
       group.current.position.y,
       (-2 + Math.sin(t * 0.3)) / 3,
-      0.1
+      0.1,
     );
 
     group.current.rotation.x = THREE.MathUtils.lerp(
       group.current.rotation.x,
       Math.cos(t * 0.3) * 0.05 + 0.2 + mouseOffset.y,
-      0.1
+      0.1,
     );
 
     group.current.rotation.y = THREE.MathUtils.lerp(
       group.current.rotation.y,
       Math.sin(t * 0.2) * 0.05 + mouseOffset.x,
-      0.1
+      0.1,
     );
   });
 
@@ -115,18 +115,18 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
           occlude
           className="bg-background overflow-y-hidden "
           style={{
-            width: "116px",
-            height: "72px",
-            scrollbarWidth: "none",
+            width: '116px',
+            height: '72px',
+            scrollbarWidth: 'none',
           }}
           scale={1}
         >
           <div
             style={{
-              transform: "scale(0.2)",
-              width: 116 * 5 + "px",
-              height: 72 * 5 + "px",
-              transformOrigin: "top left",
+              transform: 'scale(0.2)',
+              width: 116 * 5 + 'px',
+              height: 72 * 5 + 'px',
+              transformOrigin: 'top left',
             }}
           >
             {children}

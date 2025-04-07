@@ -8,7 +8,6 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import Autoplay from 'embla-carousel-autoplay';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import React from 'react';
 import { projects } from './projects';
@@ -27,14 +26,7 @@ export const Projects = () => {
         opts={{
           align: 'start',
           active: true,
-          dragFree: true,
         }}
-        plugins={[
-          Autoplay({
-            stopOnInteraction: true,
-            stopOnFocusIn: true,
-          }),
-        ]}
       >
         <CarouselContent>
           {projects.map((project, index) => {

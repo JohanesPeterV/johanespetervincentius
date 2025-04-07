@@ -1,0 +1,14 @@
+.transition-in{
+    max-height: 0;
+    transition: max-height 0.3s ease-out;
+    overflow: hidden;
+}
+.transition-out{
+    max-height: 100vh;
+    transition: max-height 0.3s ease-in;
+}
+
+
+
+
+
