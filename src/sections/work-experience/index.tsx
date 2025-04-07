@@ -1,15 +1,16 @@
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
+import { Title } from '@/components/title';
 import { Card, CardContent } from '@/components/ui/card';
 import { WORK_EXPERIENCES } from './work-experiences';
 
 export default function WorkExperience() {
   return (
     <div className="flex flex-col items-center justify-center relative space-y-4">
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold p-0">
+      <Title>
         W
-        <RandomColorButton className="text-2xl sm:text-3xl lg:text-4xl font-extrabold p-0" />
+        <RandomColorButton />
         rk Experience
-      </h1>
+      </Title>
       <div className="space-y-2">
         {WORK_EXPERIENCES.map((workExperience, index) => (
           <div key={index} className="p-1 max-w-3xl">
@@ -46,6 +47,7 @@ export default function WorkExperience() {
           </div>
         ))}
       </div>
+      <div className="space-y-2"></div>
     </div>
   );
 }

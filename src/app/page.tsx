@@ -1,8 +1,9 @@
-"use client";
-import HomeBackground from "@/components/backgrounds/home-background";
-import SnapScrollContainer from "@/components/snap-scroll-container";
-import Profile from "@/sections/profile";
-import WorkExperience from "@/sections/work-experience";
+'use client';
+import HomeBackground from '@/components/backgrounds/home-background';
+import SnapScrollContainer from '@/components/snap-scroll-container';
+import Profile from '@/sections/profile';
+import { Projects } from '@/sections/projects';
+import WorkExperience from '@/sections/work-experience';
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
         <Profile />
 
         <WorkExperience />
+        <Projects />
 
         <div className="h-full w-full text-foreground ">
           <div>content 2</div>
