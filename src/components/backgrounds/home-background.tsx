@@ -33,7 +33,7 @@ export default function HomeBackground() {
   const baseBackgroundColor = `#${hslCssToHex(
     darkenHsl(
       baseColorCss.cssVars[themeMode].background,
-      themeMode === 'dark' ? 0 : 3,
+      themeMode === 'dark' ? 0 : 7,
     ),
   )
     .toString(16)
@@ -59,6 +59,7 @@ export default function HomeBackground() {
           backgroundColor={baseBackgroundColor}
           fluidColor={baseColor}
           densityDissipation={0.98}
+          blend={0}
         />
       </EffectComposer>
     </Canvas>
