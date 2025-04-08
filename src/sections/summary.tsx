@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
-import Links from './links';
-import RandomColorButton from './theme-buttons/random-color-button';
-import { Title } from './title';
+import Links from '../components/links';
+import RandomColorButton from '../components/theme-buttons/random-color-button';
+import { Title } from '../components/title';
 
 export function Summary({ className }: { className?: string }) {
   const currentYear = new Date().getFullYear();

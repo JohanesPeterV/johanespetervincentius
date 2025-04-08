@@ -1,9 +1,9 @@
 'use client';
 import HomeBackground from '@/components/backgrounds/home-background';
 import SnapScrollContainer from '@/components/snap-scroll-container';
-import { Summary } from '@/components/summary';
 import Profile from '@/sections/profile';
 import { Projects } from '@/sections/projects';
+import { Summary } from '@/sections/summary';
 import Technologies from '@/sections/technologies';
 import WorkExperience from '@/sections/work-experience';
 
