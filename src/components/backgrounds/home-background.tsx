@@ -45,19 +45,14 @@ export default function HomeBackground() {
 
     const themeMode = resolvedTheme === 'light' ? 'light' : 'dark';
 
-    const baseColor = `#${hslCssToHex(
-      darkenHsl(
-        baseColorCss.activeColor[themeMode],
-        themeMode === 'dark' ? 0 : 0,
-      ),
-    )
+    const baseColor = `#${hslCssToHex(baseColorCss.activeColor[themeMode])
       .toString(16)
       .padStart(6, '0')}`;
 
     const baseBackgroundColor = `#${hslCssToHex(
       darkenHsl(
         baseColorCss.cssVars[themeMode].background,
-        themeMode === 'dark' ? 0 : 7,
+        themeMode === 'dark' ? 0 : 5,
       ),
     )
       .toString(16)
