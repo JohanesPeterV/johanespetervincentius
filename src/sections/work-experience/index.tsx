@@ -1,3 +1,4 @@
+import ScrollContainer from '@/components/scroll-container';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +16,7 @@ export default function WorkExperience() {
           </Title>
         </div>
         <div className="w-full max-w-3xl mx-auto px-4 overflow-hidden">
-          <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 scrollbar-track-transparent pr-2">
+          <ScrollContainer className="pr-2">
             <div className="space-y-4">
               {WORK_EXPERIENCES.map((workExperience, index) => (
                 <Card
@@ -52,7 +53,7 @@ export default function WorkExperience() {
                 </Card>
               ))}
             </div>
-          </div>
+          </ScrollContainer>
         </div>
       </div>
     </div>

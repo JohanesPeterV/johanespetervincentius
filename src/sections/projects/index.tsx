@@ -1,3 +1,4 @@
+import ScrollContainer from '@/components/scroll-container';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,7 @@ export const Projects = () => {
           </Title>
         </div>
         <div className="w-full max-w-7xl mx-auto px-4 overflow-hidden">
-          <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 scrollbar-track-transparent pr-2">
+          <ScrollContainer className="pr-2">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-4">
               {projects.map((project, index) => (
                 <Card
@@ -52,7 +53,7 @@ export const Projects = () => {
                 </Card>
               ))}
             </div>
-          </div>
+          </ScrollContainer>
         </div>
       </div>
     </div>
