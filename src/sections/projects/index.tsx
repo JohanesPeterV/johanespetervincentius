@@ -3,17 +3,14 @@ import { Title } from '@/components/title';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Carousel,
-  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import React from 'react';
 import { projects } from './projects';
 
 export const Projects = () => {
-  const [api, setApi] = React.useState<CarouselApi>();
   return (
     <div className="flex flex-col items-center justify-center relative py-8 w-full overflow-hidden">
       <Title className="mb-8">
@@ -23,7 +20,6 @@ export const Projects = () => {
       </Title>
       <div className="w-full max-w-[90%] sm:max-w-[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1140px] mx-auto">
         <Carousel
-          {...{ setApi }}
           className="w-full"
           opts={{
             align: 'start',
