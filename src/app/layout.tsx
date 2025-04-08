@@ -6,8 +6,8 @@ import './globals.css';
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['400', '700'], // Adjust weights as needed
-  variable: '--font-poppins', // Creates a CSS variable
+  weight: ['400', '700'],
+  variable: '--font-poppins',
 });
 
 const configureViewportSettings = (): Viewport => ({
@@ -29,9 +29,7 @@ const configureMetadata = (): Metadata => ({
     index: true,
     follow: true,
   },
-  // App install banner metadata
   manifest: '/manifest.json',
-  // Disable non-essential third-party resources for privacy/perf
   other: {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
@@ -41,15 +39,6 @@ const configureMetadata = (): Metadata => ({
 
 export const metadata = configureMetadata();
 
-const getHardwareAccelerationStyles = () => ({
-  transform: 'translateZ(0)',
-  backfaceVisibility: 'hidden',
-  width: '100vw',
-  height: '100vh',
-  overflowX: 'hidden',
-  overflowY: 'auto',
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -58,7 +47,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preload critical assets */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -68,13 +56,11 @@ export default function RootLayout({
       <body
         className={`
           ${poppins.variable} antialiased font-poppins overflow-x-hidden min-h-screen bg-background`}
-        style={getHardwareAccelerationStyles()}
       >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
-          // Force immediate theme application to reduce layout shift
           disableTransitionOnChange
         >
           {children}
