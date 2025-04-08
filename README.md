@@ -17,10 +17,11 @@ A modern, interactive portfolio website built with Next.js and React, featuring 
 - **Framework**: Next.js 15 with TypeScript
 - **Styling**: TailwindCSS
 - **UI Components**: shadcn/ui
-- **Animations**:
-  - Framer Motion
-  - GSAP
+- **Animations & 3D**:
   - Three.js
+  - React Three Fiber
+  - React Three Drei
+  - react-fluid-distortion (Cursor-based fluid effects)
 - **Carousel**: Embla Carousel
 - **Icons**: React Icons, Lucide React
 
