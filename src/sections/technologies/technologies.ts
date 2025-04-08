@@ -8,53 +8,6 @@ export type Technology = {
 
 export const TECHNOLOGIES: Technology[] = [
   {
-    category: 'Programming',
-    contents: [
-      { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
-
-      {
-        name: 'JavaScript',
-        link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-      },
-      {
-        name: 'C/C++',
-        link: 'https://en.wikipedia.org/wiki/C%2B%2B',
-      },
-      {
-        name: 'C#',
-        link: 'https://docs.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/',
-      },
-      { name: 'R', link: 'https://www.r-project.org/' },
-      { name: 'Java', link: 'https://docs.oracle.com/en/java/' },
-      { name: 'Dart', link: 'https://dart.dev/guides' },
-      {
-        name: 'Kotlin',
-        link: 'https://developer.android.com/kotlin?gclid=Cj0KCQjwtrSLBhCLARIsACh6RmhUfKr2tiXSAp33Ka688qBDNF1CIEs53jGAXBkiMzvxFOsQg8of-FQaAv8eEALw_wcB&gclsrc=aw.ds',
-      },
-      { name: 'Python', link: 'https://docs.python.org/3/' },
-      { name: 'PHP', link: 'https://www.php.net/docs.php' },
-      { name: 'Go', link: 'https://golang.org/doc/' },
-    ],
-  },
-  {
-    category: 'Database',
-    contents: [
-      {
-        name: 'SQL Server',
-        link: 'https://docs.microsoft.com/en-us/sql/sql-server/?view=sql-server-ver15',
-      },
-      { name: 'MongoDB', link: 'https://docs.mongodb.com/' },
-      {
-        name: 'Cloud Firestore',
-        link: 'https://firebase.google.com/docs/firestore',
-      },
-      { name: 'MySQL', link: 'https://dev.mysql.com/doc/' },
-      { name: 'SQLite', link: 'https://www.sqlite.org/index.html' },
-      { name: 'PostgreSQL', link: 'https://www.postgresql.org/' },
-    ],
-  },
-
-  {
     category: 'Front End',
     contents: [
       { name: 'Next.js', link: 'https://nextjs.org/' },
@@ -109,6 +62,53 @@ export const TECHNOLOGIES: Technology[] = [
       },
     ],
   },
+  {
+    category: 'Programming',
+    contents: [
+      { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
+
+      {
+        name: 'JavaScript',
+        link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+      },
+      {
+        name: 'C/C++',
+        link: 'https://en.wikipedia.org/wiki/C%2B%2B',
+      },
+      {
+        name: 'C#',
+        link: 'https://docs.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/',
+      },
+      { name: 'R', link: 'https://www.r-project.org/' },
+      { name: 'Java', link: 'https://docs.oracle.com/en/java/' },
+      { name: 'Dart', link: 'https://dart.dev/guides' },
+      {
+        name: 'Kotlin',
+        link: 'https://developer.android.com/kotlin?gclid=Cj0KCQjwtrSLBhCLARIsACh6RmhUfKr2tiXSAp33Ka688qBDNF1CIEs53jGAXBkiMzvxFOsQg8of-FQaAv8eEALw_wcB&gclsrc=aw.ds',
+      },
+      { name: 'Python', link: 'https://docs.python.org/3/' },
+      { name: 'PHP', link: 'https://www.php.net/docs.php' },
+      { name: 'Go', link: 'https://golang.org/doc/' },
+    ],
+  },
+  {
+    category: 'Database',
+    contents: [
+      {
+        name: 'SQL Server',
+        link: 'https://docs.microsoft.com/en-us/sql/sql-server/?view=sql-server-ver15',
+      },
+      { name: 'MongoDB', link: 'https://docs.mongodb.com/' },
+      {
+        name: 'Cloud Firestore',
+        link: 'https://firebase.google.com/docs/firestore',
+      },
+      { name: 'MySQL', link: 'https://dev.mysql.com/doc/' },
+      { name: 'SQLite', link: 'https://www.sqlite.org/index.html' },
+      { name: 'PostgreSQL', link: 'https://www.postgresql.org/' },
+    ],
+  },
+
   {
     category: 'Cloud',
     contents: [

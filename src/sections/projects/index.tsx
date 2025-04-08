@@ -1,75 +1,57 @@
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
+import { FaGithub } from 'react-icons/fa';
 import { projects } from './projects';
 
 export const Projects = () => {
   return (
-    <div className="flex flex-col items-center justify-center relative py-8 w-full overflow-hidden">
-      <Title className="mb-8">
-        Pr
-        <RandomColorButton />
-        jects
-      </Title>
-      <div className="w-full max-w-[90%] sm:max-w-[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1140px] mx-auto">
-        <Carousel
-          className="w-full"
-          opts={{
-            align: 'start',
-            loop: true,
-            containScroll: 'trimSnaps',
-          }}
-        >
-          <CarouselContent className="-ml-4">
+    <div className="flex flex-col h-full max-h-screen py-8">
+      <div className="flex justify-center">
+        <Title className="mb-4 sm:mb-8">
+          Pr
+          <RandomColorButton />
+          jects
+        </Title>
+      </div>
+      <div className="flex-1 min-h-0 w-full max-w-7xl mx-auto px-4">
+        <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 scrollbar-track-transparent pr-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-4">
             {projects.map((project, index) => (
-              <CarouselItem
+              <Card
                 key={index}
-                className="basis-full md:basis-1/2 lg:basis-1/3 pl-4"
+                onClick={() => window.open(project.repoLink, '_blank')}
+                className="relative bg-opacity-60 backdrop-blur-2xl cursor-pointer group transition-all duration-300 hover:scale-[1.02] flex flex-col"
               >
-                <div className="p-1">
-                  <Card
-                    onClick={() => window.open(project.repoLink, '_blank')}
-                    className="relative bg-opacity-60 backdrop-blur-2xl min-h-[180px] h-full cursor-pointer group transition-all duration-300 hover:scale-[1.02]"
-                  >
-                    <div className="w-full h-full absolute inset-0 hidden group-hover:flex justify-center items-center text-xl rounded-xl bg-background/80 backdrop-blur-sm transition-all duration-300">
-                      Visit Github
-                    </div>
-                    <div className="group-hover:blur-sm transition-all duration-300">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-xl sm:text-2xl">
-                          {project.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="text-muted-foreground text-sm sm:text-base">
-                        {project.description}
-                      </CardContent>
-                    </div>
-                  </Card>
+                <div className="w-full h-full absolute inset-0 hidden group-hover:flex justify-center items-center rounded-xl bg-background/80 backdrop-blur-sm transition-all duration-300">
+                  <FaGithub size={60} />
                 </div>
-              </CarouselItem>
+                <div className="group-hover:blur-md transition-all duration-300 flex flex-col flex-1">
+                  <CardHeader className="pb-2 sm:pb-3">
+                    <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                      {project.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-muted-foreground text-xs sm:text-sm lg:text-base flex-1">
+                    {project.description}
+                  </CardContent>
+                  {project.technologies && (
+                    <div className="px-4 sm:px-6 pb-3 sm:pb-4 flex flex-wrap gap-1.5 sm:gap-2 mt-auto">
+                      {project.technologies.map((tech, techIndex) => (
+                        <span
+                          key={techIndex}
+                          className="px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs bg-primary/10 rounded-full"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
             ))}
-          </CarouselContent>
-
-          <div className="flex justify-end items-center gap-1 mt-8">
-            <CarouselPrevious
-              className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
-              variant="outline"
-              size="default"
-            />
-            <CarouselNext
-              className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
-              variant="outline"
-              size="default"
-            />
           </div>
-        </Carousel>
+        </div>
       </div>
     </div>
   );
