@@ -21,7 +21,7 @@ export default function WorkExperience() {
             >
               <CardContent className="flex flex-col items-center justify-center ">
                 <div className="w-full flex flex-col space-y-3 ">
-                  <h2 className="text-2xl font-semibold">
+                  <h2 className="sm:text-2xl text-xl font-semibold">
                     {workExperience.company}
                   </h2>
                   {workExperience.positions.map((position, innerIndex) => {
@@ -29,12 +29,14 @@ export default function WorkExperience() {
                       <div key={innerIndex} className="space-y-2">
                         <div
                           key={innerIndex}
-                          className="text-xl font-semibold flex flex-row w-full  items-stretch justify-between"
+                          className="sm:text-xl text-md font-semibold flex flex-row w-full  items-stretch justify-between"
                         >
                           <h3>{position.name}</h3>
                           <h3>{position.workPeriod}</h3>
                         </div>
-                        <p>{position.description}</p>
+                        <p className="sm:text-md text-sm">
+                          {position.description}
+                        </p>
                         {innerIndex < workExperience.positions.length - 1 && (
                           <hr />
                         )}

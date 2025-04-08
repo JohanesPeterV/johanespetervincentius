@@ -1,18 +1,16 @@
-"use client";
+'use client';
 
-import { useConfig } from "@/hooks/use-config";
-import { useEffect, useRef } from "react";
+import { useConfig } from '@/hooks/use-config';
+import { useEffect, useRef } from 'react';
 
 interface SnapScrollContainerProps {
   children: React.ReactNode[];
   className?: string;
-  heightFillContainer?: boolean;
 }
 
 export default function SnapScrollContainer({
   children,
   className,
-  heightFillContainer,
 }: SnapScrollContainerProps) {
   const [, setConfig] = useConfig();
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -21,7 +19,7 @@ export default function SnapScrollContainer({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const index = Number(entry.target.getAttribute("data-index"));
+          const index = Number(entry.target.getAttribute('data-index'));
           if (entry.isIntersecting) {
             setConfig((prev) => ({ ...prev, scrollSectionIndex: index }));
           }
@@ -30,7 +28,7 @@ export default function SnapScrollContainer({
       {
         root: null,
         threshold: 0.5,
-      }
+      },
     );
 
     sectionRefs.current.forEach((section) => {
@@ -46,9 +44,7 @@ export default function SnapScrollContainer({
 
   return (
     <div
-      className={`${className} ${
-        heightFillContainer ? "h-full" : "h-screen"
-      } w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide`}
+      className={`${className} h-screen w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide`}
     >
       {children.map((child, index) => (
         <div
@@ -57,9 +53,7 @@ export default function SnapScrollContainer({
             sectionRefs.current[index] = el;
           }}
           data-index={index}
-          className={`w-full ${
-            heightFillContainer ? "h-full" : "h-screen"
-          } snap-center flex items-center justify-center`}
+          className={`h-screen snap-center flex items-center justify-center`}
         >
           {child}
         </div>

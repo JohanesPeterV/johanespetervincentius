@@ -1,14 +1,14 @@
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Carousel,
   CarouselApi,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from '@/components/ui/carousel';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 import React from 'react';
 import { projects } from './projects';
 export const Projects = () => {
@@ -53,21 +53,18 @@ export const Projects = () => {
             );
           })}
         </CarouselContent>
-        <div className="pt-6 w-full flex justify-end space-x-2">
-          <Button
-            onClick={() => api?.scrollPrev()}
-            className="bg-secondary border-2 rounded-full p-2"
-            variant="ghost"
-          >
-            <ArrowLeft />
-          </Button>
-          <Button
-            onClick={() => api?.scrollNext()}
-            className="bg-secondary border-2 rounded-full p-2"
-            variant="ghost"
-          >
-            <ArrowRight />
-          </Button>
+
+        <div className="flex justify-end items-center gap-4 mt-8">
+          <CarouselPrevious
+            className="static bg-secondary transition-all"
+            variant="outline"
+            size="default"
+          />
+          <CarouselNext
+            className="static bg-secondary transition-all"
+            variant="outline"
+            size="default"
+          />
         </div>
       </Carousel>
     </div>

@@ -1,19 +1,19 @@
-"use client";
-import Links from "@/components/links";
-import RandomColorButton from "@/components/theme-buttons/random-color-button";
-import { useTheme } from "next-themes";
+'use client';
+import Links from '@/components/links';
+import RandomColorButton from '@/components/theme-buttons/random-color-button';
+import { useTheme } from 'next-themes';
 
 export default function Profile() {
   const { resolvedTheme } = useTheme();
-  const themeMode = (resolvedTheme as "light" | "dark") ?? "dark";
+  const themeMode = (resolvedTheme as 'light' | 'dark') ?? 'dark';
 
   return (
     <div className="flex flex-col justify-center space-y-5">
       <div
         className={`
       text-transparent bg-gradient-to-r 
-      ${themeMode === "dark" && "from-blue-500 via-purple-500 to-pink-500"}
-      ${themeMode === "light" && "from-blue-400 via-purple-400 to-pink-400"}
+      ${themeMode === 'dark' && 'from-blue-500 via-purple-500 to-pink-500'}
+      ${themeMode === 'light' && 'from-blue-400 via-purple-400 to-pink-400'}
       animate-gradient  bg-clip-text
       sm:text-left text-center
       sm:space-y-0 space-y-3
@@ -28,8 +28,9 @@ export default function Profile() {
           Software Engineer
         </h2>
       </div>
-
-      <Links iconSize={40} />
+      <div className="w-full flex sm:justify-start justify-center">
+        <Links iconSize={40} />
+      </div>
     </div>
   );
 }
