@@ -23,12 +23,12 @@ export const Projects = () => {
                 <Card
                   key={index}
                   onClick={() => window.open(project.repoLink, '_blank')}
-                  className="relative bg-opacity-60 backdrop-blur-2xl cursor-pointer group transition-all duration-300 hover:scale-[1.02] flex flex-col"
+                  className="relative bg-opacity-60 backdrop-blur-2xl cursor-pointer group/card transition-all duration-300 hover:scale-[1.02] flex flex-col"
                 >
-                  <div className="w-full h-full absolute inset-0 hidden group-hover:flex justify-center items-center rounded-xl bg-background/80 backdrop-blur-sm transition-all duration-300">
+                  <div className="w-full h-full absolute inset-0 hidden group-hover/card:flex justify-center items-center rounded-xl bg-background/80 backdrop-blur-sm transition-all duration-300">
                     <FaGithub size={60} />
                   </div>
-                  <div className="group-hover:blur-md transition-all duration-300 flex flex-col flex-1">
+                  <div className="group-hover/card:blur-md transition-all duration-300 flex flex-col flex-1">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="text-lg sm:text-xl lg:text-2xl">
                         {project.title}

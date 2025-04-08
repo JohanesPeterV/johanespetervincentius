@@ -1,3 +1,4 @@
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { Html, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { ReactElement, useRef, useState } from 'react';
@@ -50,6 +51,7 @@ type MacModelProps = {
 function MacModel({ children, mouseOffset }: MacModelProps) {
   const { nodes, materials } = useGLTF('/models/mac-transformed.glb');
   const group = useRef<THREE.Group>(null);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   useFrame((state) => {
     if (!group.current) return;
@@ -78,8 +80,8 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
     <group
       ref={group}
       dispose={null}
-      scale={1.2}
-      position={[0, -2, -0.13]}
+      scale={isDesktop ? 1.6 : 1.2}
+      position={isDesktop ? [0, -2.8, 0] : [0, -2, -0.13]}
       rotation={[-Math.PI / 32, 0, 0]}
     >
       <spotLight
@@ -113,7 +115,7 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
           position={[0, 0.0268521, 1.06]}
           transform
           occlude
-          className="bg-background overflow-y-hidden "
+          className="bg-background"
           style={{
             width: '116px',
             height: '72px',
@@ -123,9 +125,9 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
         >
           <div
             style={{
-              transform: 'scale(0.2)',
-              width: 116 * 5 + 'px',
-              height: 72 * 5 + 'px',
+              transform: `scale(${isDesktop ? 0.18 : 0.13})`,
+              width: 116 * (isDesktop ? 5.6 : 7.7) + 'px',
+              height: 72 * (isDesktop ? 5.6 : 7.7) + 'px',
               transformOrigin: 'top left',
             }}
           >

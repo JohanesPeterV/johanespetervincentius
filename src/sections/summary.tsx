@@ -1,40 +1,47 @@
-import Links from '../components/links';
+import MacbookShowcase from '@/components/3d/macbook-showcase';
+import Links from '@/components/links';
 
 export function Summary() {
   return (
-    <div className="min-h-screen grid place-items-center p-8">
-      <div className="w-full max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-6 transition-colors duration-200 hover:border-primary/50">
-            <h3 className="text-lg font-semibold mb-4">Connect</h3>
-            <p className="text-muted-foreground mb-4">
-              Feel free to reach out through any of these platforms:
-            </p>
-            <Links iconSize={24} />
+    <MacbookShowcase>
+      <div className="w-full h-full flex items-center justify-center p-8">
+        <div className="space-y-8 w-full max-w-xl">
+          <div>
+            <h3 className="text-2xl font-medium tracking-tight mb-6 bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent">
+              Connect
+            </h3>
+            <div className="flex justify-center">
+              <Links iconSize={32} className="gap-6" />
+            </div>
           </div>
 
-          <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-6 transition-colors duration-200 hover:border-primary/50">
-            <h3 className="text-lg font-semibold mb-4">Built With</h3>
-            <p className="text-muted-foreground mb-4">
-              This portfolio is crafted using modern web technologies:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1.5 bg-primary/10 rounded-full text-sm">
+          <div className="pt-8 border-t border-primary/10">
+            <h3 className="text-2xl font-medium tracking-tight mb-6 bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent">
+              Built With
+            </h3>
+            <div className="grid grid-cols-3 gap-2">
+              <span className="px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-lg text-sm font-medium text-foreground/80 transition-all hover:scale-105 text-center">
                 Next.js
               </span>
-              <span className="px-3 py-1.5 bg-primary/10 rounded-full text-sm">
+              <span className="px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-lg text-sm font-medium text-foreground/80 transition-all hover:scale-105 text-center">
                 TypeScript
               </span>
-              <span className="px-3 py-1.5 bg-primary/10 rounded-full text-sm">
-                Tailwind CSS
+              <span className="px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-lg text-sm font-medium text-foreground/80 transition-all hover:scale-105 text-center">
+                Tailwind
               </span>
-              <span className="px-3 py-1.5 bg-primary/10 rounded-full text-sm">
+              <span className="px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-lg text-sm font-medium text-foreground/80 transition-all hover:scale-105 text-center">
                 shadcn/ui
+              </span>
+              <span className="px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-lg text-sm font-medium text-foreground/80 transition-all hover:scale-105 text-center">
+                Three.js
+              </span>
+              <span className="px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-lg text-sm font-medium text-foreground/80 transition-all hover:scale-105 text-center">
+                React Three Fiber
               </span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </MacbookShowcase>
   );
 }
