@@ -10,6 +10,12 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Programming',
     contents: [
+      { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
+
+      {
+        name: 'JavaScript',
+        link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+      },
       {
         name: 'C/C++',
         link: 'https://en.wikipedia.org/wiki/C%2B%2B',
@@ -20,11 +26,6 @@ export const TECHNOLOGIES: Technology[] = [
       },
       { name: 'R', link: 'https://www.r-project.org/' },
       { name: 'Java', link: 'https://docs.oracle.com/en/java/' },
-      {
-        name: 'JavaScript',
-        link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-      },
-      { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
       { name: 'Dart', link: 'https://dart.dev/guides' },
       {
         name: 'Kotlin',
@@ -56,7 +57,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Front End',
     contents: [
-      { name: 'HTML, CSS, JS', link: '' },
+      { name: 'Next.js', link: 'https://nextjs.org/' },
       { name: 'Angular', link: 'https://angular.io/docs' },
       { name: 'React', link: 'https://reactjs.org/docs/getting-started.html' },
       {
@@ -72,11 +73,12 @@ export const TECHNOLOGIES: Technology[] = [
         name: 'Blazor',
         link: 'https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor',
       },
-      { name: 'Next.js', link: 'https://nextjs.org/' },
       { name: 'Vue.js', link: 'https://vuejs.org/' },
       { name: 'Nuxt.js', link: 'https://nuxtjs.org/' },
       { name: 'Bootstrap', link: 'https://getbootstrap.com/' },
       { name: 'Tailwind CSS', link: 'https://tailwindcss.com/' },
+      { name: 'Material UI', link: 'https://mui.com/' },
+      { name: 'shadcn/ui', link: 'https://ui.shadcn.com/' },
       {
         name: 'Android',
         link: 'https://developer.android.com/',
