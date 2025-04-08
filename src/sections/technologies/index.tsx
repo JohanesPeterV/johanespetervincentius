@@ -42,15 +42,15 @@ export default function Technologies() {
             ]}
           >
             <CarouselContent className="h-[400px] py-4">
-              {TECHNOLOGIES.map((stack, index) => (
+              {TECHNOLOGIES.map((technology, index) => (
                 <CarouselItem
                   key={index}
                   className="basis-full md:basis-1/2 lg:basis-1/3"
                 >
                   <div className="h-full p-2">
                     <TechnologySection
-                      contents={stack.contents}
-                      title={stack.category}
+                      contents={technology.contents}
+                      title={technology.category}
                     />
                   </div>
                 </CarouselItem>
