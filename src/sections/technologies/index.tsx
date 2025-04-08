@@ -1,75 +1,35 @@
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
-import Autoplay from 'embla-carousel-autoplay';
 import { TECHNOLOGIES } from './technologies';
 import TechnologySection from './technologies-section';
 
 export default function Technologies() {
   return (
-    <div
-      id="technologies"
-      className="flex flex-col items-center justify-center relative py-8 px-4 sm:px-6 lg:px-8"
-    >
-      <Title className="mb-8">
-        Techn
-        <RandomColorButton />
-        logies
-      </Title>
-
-      <div className="w-full max-w-7xl mx-auto">
-        <div className="relative group">
-          <Carousel
-            className="w-full"
-            opts={{
-              align: 'start',
-              loop: true,
-              skipSnaps: false,
-              containScroll: 'trimSnaps',
-            }}
-            plugins={[
-              Autoplay({
-                delay: 4000,
-                stopOnInteraction: true,
-                stopOnMouseEnter: true,
-              }),
-            ]}
-          >
-            <CarouselContent className="h-[400px] py-4">
+    <div className="flex flex-col h-screen">
+      <div className="flex-1 flex flex-col items-center justify-center max-h-screen py-8">
+        <div className="flex justify-center mb-6">
+          <Title>
+            Techn
+            <RandomColorButton />
+            logies
+          </Title>
+        </div>
+        <div className="w-full max-w-7xl mx-auto px-4">
+          <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 scrollbar-track-transparent">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-4">
               {TECHNOLOGIES.map((technology, index) => (
-                <CarouselItem
+                <div
                   key={index}
-                  className="basis-full md:basis-1/2 lg:basis-1/3"
+                  className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-4 transition-colors duration-200 hover:border-primary/50"
                 >
-                  <div className="h-full p-2">
-                    <TechnologySection
-                      contents={technology.contents}
-                      title={technology.category}
-                    />
-                  </div>
-                </CarouselItem>
+                  <TechnologySection
+                    contents={technology.contents}
+                    title={technology.category}
+                  />
+                </div>
               ))}
-            </CarouselContent>
-
-            <div className="flex justify-end items-center gap-1 mt-8">
-              <CarouselPrevious
-                className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
-                variant="outline"
-                size="default"
-              />
-              <CarouselNext
-                className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
-                variant="outline"
-                size="default"
-              />
             </div>
-          </Carousel>
+          </div>
         </div>
       </div>
     </div>

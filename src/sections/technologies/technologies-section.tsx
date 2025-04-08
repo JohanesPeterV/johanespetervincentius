@@ -1,28 +1,42 @@
+import { cn } from '@/lib/utils';
 import { Technology } from './technologies';
+
 export default function TechnologySection(props: {
   title: string;
   contents: Technology['contents'];
 }) {
   return (
-    <div className="h-full flex flex-col">
-      <h2 className="pb-2 transition-all transition-color text-light-text-primary dark:text-dark-text-primary text-center duration-300 text-2xl sm:text-2xl sm:tracking-tight md:text-2xl lg:text-3xl z-30">
-        {props.title}
-      </h2>
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-rounded-full scrollbar-track-transparent scrollbar-thumb-light-text-primary/20 dark:scrollbar-thumb-dark-text-primary/20 hover:scrollbar-thumb-light-text-primary/30 dark:hover:scrollbar-thumb-dark-text-primary/30">
-        <ul className="h-full pr-2">
+    <div className="flex flex-col h-full">
+      <h2 className="text-lg sm:text-xl font-semibold mb-3">{props.title}</h2>
+      <div
+        className="flex-1"
+        role="list"
+        aria-label={`${props.title} technologies`}
+      >
+        <div className="grid grid-cols-2 gap-2">
           {props.contents.map((content, index) => (
-            <li
+            <a
               key={index}
-              className="py-2 w-42 transition-transform transform duration-300 hover:scale-150 z-0"
+              href={content.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'block w-full px-2 py-1.5 rounded-lg',
+                'bg-secondary/50 hover:bg-primary/10',
+                'transition-colors duration-200',
+                'border border-transparent hover:border-primary/20',
+                'focus:outline-none focus:ring-2 focus:ring-primary/50',
+              )}
+              tabIndex={0}
+              role="listitem"
+              aria-label={`Visit ${content.name} documentation`}
             >
-              <a href={content.link}>
-                <div className="text-lg text-light-text-primary dark:text-dark-text-primary w-100 text-center">
-                  {content.name}
-                </div>
-              </a>
-            </li>
+              <div className="text-xs sm:text-sm text-center text-foreground hover:text-primary transition-colors truncate">
+                {content.name}
+              </div>
+            </a>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );

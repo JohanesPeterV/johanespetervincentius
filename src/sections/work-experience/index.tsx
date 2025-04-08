@@ -5,51 +5,56 @@ import { WORK_EXPERIENCES } from './work-experiences';
 
 export default function WorkExperience() {
   return (
-    <div className="flex flex-col items-center justify-center relative space-y-4">
-      <Title>
-        W
-        <RandomColorButton />
-        rk Experience
-      </Title>
-      <div className="space-y-2">
-        {WORK_EXPERIENCES.map((workExperience, index) => (
-          <div key={index} className="p-1 max-w-3xl">
-            <Card
-              className={`bg-opacity-60 backdrop-blur-2xl pt-4 space-y-4 ${
-                index === 0 ? 'border-primary' : ''
-              }`}
-            >
-              <CardContent className="flex flex-col items-center justify-center ">
-                <div className="w-full flex flex-col space-y-3 ">
-                  <h2 className="sm:text-2xl text-xl font-semibold">
-                    {workExperience.company}
-                  </h2>
-                  {workExperience.positions.map((position, innerIndex) => {
-                    return (
-                      <div key={innerIndex} className="space-y-2">
-                        <div
-                          key={innerIndex}
-                          className="sm:text-xl text-md font-semibold flex flex-row w-full  items-stretch justify-between"
-                        >
-                          <h3>{position.name}</h3>
-                          <h3>{position.workPeriod}</h3>
+    <div className="flex flex-col h-screen">
+      <div className="flex-1 flex flex-col items-center justify-center max-h-screen py-8">
+        <div className="flex justify-center mb-6">
+          <Title>
+            W
+            <RandomColorButton />
+            rk Experience
+          </Title>
+        </div>
+        <div className="w-full max-w-3xl mx-auto px-4 overflow-hidden">
+          <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 scrollbar-track-transparent pr-2">
+            <div className="space-y-4">
+              {WORK_EXPERIENCES.map((workExperience, index) => (
+                <Card
+                  key={index}
+                  className={`bg-opacity-60 backdrop-blur-2xl ${
+                    index === 0 ? 'border-primary' : ''
+                  }`}
+                >
+                  <CardContent className="py-4 px-4 sm:px-6">
+                    <div className="space-y-4">
+                      <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">
+                        {workExperience.company}
+                      </h2>
+                      {workExperience.positions.map((position, innerIndex) => (
+                        <div key={innerIndex} className="space-y-2">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                            <h3 className="text-base sm:text-lg font-semibold">
+                              {position.name}
+                            </h3>
+                            <span className="text-sm sm:text-base text-muted-foreground">
+                              {position.workPeriod}
+                            </span>
+                          </div>
+                          <p className="text-sm sm:text-base text-muted-foreground">
+                            {position.description}
+                          </p>
+                          {innerIndex < workExperience.positions.length - 1 && (
+                            <hr className="my-4" />
+                          )}
                         </div>
-                        <p className="sm:text-md text-sm">
-                          {position.description}
-                        </p>
-                        {innerIndex < workExperience.positions.length - 1 && (
-                          <hr />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        ))}
+        </div>
       </div>
-      <div className="space-y-2"></div>
     </div>
   );
 }
