@@ -1,6 +1,7 @@
 'use client';
 import HomeBackground from '@/components/backgrounds/home-background';
 import SnapScrollContainer from '@/components/snap-scroll-container';
+import { Summary } from '@/components/summary';
 import Profile from '@/sections/profile';
 import { Projects } from '@/sections/projects';
 import Technologies from '@/sections/technologies';
@@ -11,10 +12,10 @@ export default function Home() {
     <div>
       <SnapScrollContainer className="relative z-10">
         <Profile />
-
         <WorkExperience />
         <Projects />
         <Technologies />
+        <Summary />
       </SnapScrollContainer>
       <HomeBackground />
     </div>
