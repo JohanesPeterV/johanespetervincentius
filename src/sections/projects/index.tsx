@@ -60,14 +60,17 @@ export const Projects = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <div className="flex justify-center items-center gap-4 mt-8">
+
+          <div className="flex justify-end items-center gap-1 mt-8">
             <CarouselPrevious
-              className="static translate-y-0 opacity-70 hover:opacity-100 transition-opacity h-9 w-9 rounded-full bg-background border-2"
+              className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
               variant="outline"
+              size="default"
             />
             <CarouselNext
-              className="static translate-y-0 opacity-70 hover:opacity-100 transition-opacity h-9 w-9 rounded-full bg-background border-2"
+              className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
               variant="outline"
+              size="default"
             />
           </div>
         </Carousel>

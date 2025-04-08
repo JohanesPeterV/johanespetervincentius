@@ -56,14 +56,15 @@ export default function Technologies() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="flex justify-end items-center gap-4 mt-8">
+
+            <div className="flex justify-end items-center gap-1 mt-8">
               <CarouselPrevious
-                className="static bg-secondary transition-all"
+                className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
                 variant="outline"
                 size="default"
               />
               <CarouselNext
-                className="static bg-secondary transition-all"
+                className="static bg-secondary transition-all rounded-full border-2 w-9 h-9"
                 variant="outline"
                 size="default"
               />
