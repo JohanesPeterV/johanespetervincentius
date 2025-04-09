@@ -12,7 +12,7 @@ export const projects: Project[] = [
     description:
       'A minimalistic helpdesk app featuring a ticketing system with email notifications.',
     technologies: ['Next.js', 'Tailwind', 'Prisma', 'PostgreSQL'],
-    repoLink: 'https://github.com/JohanesPeterV/MyUtangBackend',
+    repoLink: 'https://github.com/JohanesPeterV/simple-helpdesk',
   },
   {
     title: 'MyUtang Backend',

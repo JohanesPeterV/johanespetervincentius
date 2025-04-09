@@ -121,7 +121,6 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
             height: '72px',
             scrollbarWidth: 'none',
           }}
-          scale={1}
         >
           <div
             style={{
@@ -130,6 +129,7 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
               height: 72 * (isDesktop ? 5.6 : 7.7) + 'px',
               transformOrigin: 'top left',
             }}
+            onPointerDown={(e) => e.stopPropagation()}
           >
             {children}
           </div>
