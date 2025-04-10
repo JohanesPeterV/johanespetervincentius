@@ -105,6 +105,6 @@ MIT License - feel free to use this code for your own portfolio!
 
 ## 🔗 Links
 
-- [Live Demo](https://johanespetervincentius.my.id)
+- [Live Demo](https://johanespetervincentius.com)
 - [GitHub Repository](https://github.com/JohanesPeterV/johanespetervincentius)
 - [LinkedIn](https://www.linkedin.com/in/johanes-vincentius-714b311a4)
