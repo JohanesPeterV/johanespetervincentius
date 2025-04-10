@@ -24,10 +24,32 @@ export const viewport = configureViewportSettings();
 
 const configureMetadata = (): Metadata => ({
   title: 'Johanes Peter Vincentius',
-  description: 'Personal portfolio website by Johanes Peter Vincentius',
+  description:
+    'Personal portfolio website by Johanes Peter Vincentius - Software Engineer and Full Stack Developer',
+  keywords: [
+    'software developer',
+    'web developer',
+    'full stack',
+    'react developer',
+    'portfolio',
+  ],
+  authors: [{ name: 'Johanes Peter Vincentius' }],
+  openGraph: {
+    type: 'website',
+    url: 'https://johanespetervincentius.my.id',
+    title: 'Johanes Peter Vincentius - Portfolio',
+    description: 'Software Engineer and Full Stack Developer',
+  },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   manifest: '/manifest.json',
   other: {
