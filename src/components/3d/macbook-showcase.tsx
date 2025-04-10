@@ -27,6 +27,7 @@ export default function MacbookShowcase({ children }: MacbookShowcaseParams) {
       style={{
         zIndex: 20,
       }}
+      gl={{ antialias: true }}
     >
       <pointLight intensity={0} position={[0, 0, -8]} />
       <pointLight intensity={75} position={[0, 2, -4]} />
@@ -115,18 +116,18 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
           position={[0, 0.0268521, 1.06]}
           transform
           occlude
-          className="bg-background"
           style={{
             width: '116px',
             height: '72px',
+            overflow: 'auto',
             scrollbarWidth: 'none',
           }}
         >
           <div
             style={{
-              transform: `scale(${isDesktop ? 0.18 : 0.13})`,
-              width: 116 * (isDesktop ? 5.6 : 7.7) + 'px',
-              height: 72 * (isDesktop ? 5.6 : 7.7) + 'px',
+              transform: `scale(0.15)`,
+              width: 116 + 'px',
+              height: 72 + 'px',
               transformOrigin: 'top left',
             }}
             onPointerDown={(e) => e.stopPropagation()}
