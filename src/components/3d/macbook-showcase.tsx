@@ -29,8 +29,7 @@ export default function MacbookShowcase({ children }: MacbookShowcaseParams) {
       }}
       gl={{ antialias: true }}
     >
-      <pointLight intensity={0} position={[0, 0, -8]} />
-      <pointLight intensity={75} position={[0, 2, -4]} />
+      <pointLight intensity={75} position={[0, 8, -4]} />
       <MacModel mouseOffset={mouseOffset}>{children}</MacModel>
       <OrbitControls
         enablePan={false}
@@ -61,19 +60,19 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
     group.current.position.y = THREE.MathUtils.lerp(
       group.current.position.y,
       (-2 + Math.sin(t * 0.3)) / 3,
-      0.1,
+      0.05,
     );
 
     group.current.rotation.x = THREE.MathUtils.lerp(
       group.current.rotation.x,
       Math.cos(t * 0.3) * 0.05 + 0.2 + mouseOffset.y,
-      0.1,
+      0.05,
     );
 
     group.current.rotation.y = THREE.MathUtils.lerp(
       group.current.rotation.y,
       Math.sin(t * 0.2) * 0.05 + mouseOffset.x,
-      0.1,
+      0.05,
     );
   });
 
@@ -111,6 +110,7 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
         position={[0, 0.1, -1.012]}
         rotation={[-1.925, 0, 0]}
       >
+        <meshStandardMaterial emissive="white" emissiveIntensity={0.2} />
         <Html
           rotation-x={Math.PI / 2}
           position={[0, 0.0268521, 1.06]}
@@ -127,7 +127,7 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
             style={{
               transform: `scale(0.15)`,
               width: 116 + 'px',
-              height: 72 + 'px',
+              height: 76 + 'px',
               transformOrigin: 'top left',
             }}
             onPointerDown={(e) => e.stopPropagation()}
@@ -135,6 +135,7 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
             {children}
           </div>
         </Html>
+        <pointLight intensity={15} position={[0, 2, 0]} />
       </mesh>
     </group>
   );
