@@ -1,16 +1,14 @@
-import { useAtom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { useAtom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
-import { BaseColor } from "@/registry/registry-base-colors";
+import { BaseColor } from '@/registry/registry-base-colors';
 
 type Config = {
-  theme: BaseColor["name"];
-  scrollSectionIndex: number;
+  theme: BaseColor['name'];
 };
 
-const configAtom = atomWithStorage<Config>("config", {
-  theme: "zinc",
-  scrollSectionIndex: 0,
+const configAtom = atomWithStorage<Config>('config', {
+  theme: 'blue',
 });
 
 export function useConfig() {
