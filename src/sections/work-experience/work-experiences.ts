@@ -14,7 +14,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     positions: [
       {
         name: 'Software Engineer',
-        workPeriod: '2023-present',
+        workPeriod: '2023-2024',
         description: `Responsible for database design, software maintenance and full stack software development.`,
       },
     ],
