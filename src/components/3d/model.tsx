@@ -1,7 +1,7 @@
-import { useGLTF } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
-import * as THREE from "three";
+import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
 type ModelProps = {
   path: string;
   position?: THREE.Vector3Like;
@@ -26,7 +26,7 @@ export default function Model({
 
   useEffect(() => {
     scene.position.set(position.x, position.y, position.z);
-    if (typeof scale == "number") {
+    if (typeof scale == 'number') {
       scene.scale.set(scale, scale, scale);
     } else {
       scene.scale.set(scale.x, scale.y, scale.z);
@@ -47,15 +47,15 @@ export default function Model({
     if (!modelRef.current) return;
     modelRef.current.rotateOnAxis(
       new THREE.Vector3(rotateOnAxis.x, rotateOnAxis.y, rotateOnAxis.z),
-      0.01
+      0.01,
     );
     modelRef.current.rotateOnWorldAxis(
       new THREE.Vector3(
         rotateOnWorldAxis.x,
         rotateOnWorldAxis.y,
-        rotateOnWorldAxis.z
+        rotateOnWorldAxis.z,
       ),
-      0.01
+      0.01,
     );
     scene.position.add(acceleration);
   });

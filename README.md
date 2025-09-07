@@ -28,19 +28,16 @@ A modern, interactive portfolio website built with Next.js and React, featuring 
 ## 📱 Sections
 
 1. **Profile**
-
    - Personal introduction
    - Social media links
    - Dynamic theme-aware styling
 
 2. **Work Experience**
-
    - Professional history
    - Role descriptions
    - Timeline presentation
 
 3. **Projects**
-
    - Interactive project cards
    - GitHub repository links
    - Project descriptions
