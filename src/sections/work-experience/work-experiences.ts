@@ -8,7 +8,28 @@ type WorkExperience = {
     description: string;
   }[];
 };
+
 export const WORK_EXPERIENCES: WorkExperience[] = [
+  {
+    company: 'Smilie',
+    positions: [
+      {
+        name: 'Senior Software Engineer',
+        workPeriod: '2025-Present',
+        description: `Senior Full-Stack Engineer. Pragmatic builder of scalable systems on modern JS and cloud stacks (Vercel, Neon, Upstash, AWS), focused on clean architecture and long-term reliability.`,
+      },
+    ],
+  },
+  {
+    company: 'Tablelink',
+    positions: [
+      {
+        name: 'Senior Fullstack Developer',
+        workPeriod: '2025-2025',
+        description: `Built QR-based ordering system for real-time DJ/song requests. Developed live-updating CRUD tables with socket-based concurrency resolution and led migration from GitLab Pro, saving the company ~IDR 72M annually.`,
+      },
+    ],
+  },
   {
     company: 'Farmio',
     positions: [
@@ -25,12 +46,12 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         name: 'Database Administrator',
         workPeriod: '2021-2024',
-        description: `Tasked to maintain application that supports transactional database operations such as score transfer procedure`,
+        description: `Maintained practicum database serving ~20,000 students/semester and ASP.NET web app used by 161 staff.`,
       },
       {
         name: 'Teaching Assistant',
         workPeriod: '2020-2021',
-        description: `Responsible for teaching students in programming-based practicum subjects, also created application for Practicum needs.`,
+        description: `Delivered programming-based classes for 1,700+ students and created internal applications for practicum needs.`,
       },
     ],
   },
