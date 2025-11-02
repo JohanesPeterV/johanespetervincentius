@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  Billboard,
-  OrbitControls,
-  Text,
-  useDetectGPU,
-} from '@react-three/drei';
+import { Billboard, OrbitControls, Text } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
@@ -120,9 +115,6 @@ function Scene({
 }
 
 export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
-  const gpu = useDetectGPU();
-  const isLowPerformanceDevice = gpu.tier < 2;
-
   const filledItems = useMemo(
     () => items.filter((item) => item.trim() !== ''),
     [items],
