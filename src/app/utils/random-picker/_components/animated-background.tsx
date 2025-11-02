@@ -62,9 +62,13 @@ function Scene({
   useEffect(() => {
     const handleContextLost = (event: WebGLContextEvent) => {
       event.preventDefault();
+      console.error('WebGL Context Lost - preventing default');
+      console.log('Canvas state:', gl.domElement);
+      console.log('WebGL info:', gl.getContextAttributes());
     };
 
     const handleContextRestored = () => {
+      console.log('WebGL Context Restored');
       invalidate();
     };
 
@@ -127,7 +131,7 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
   const { positions, speeds } = useMemo(() => {
     const positionsArray: [number, number, number][] = [];
     const speedsArray: number[] = [];
-    const count = Math.min(filledItems.length, 10);
+    const count = filledItems.length;
 
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
@@ -153,16 +157,17 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
       }}
     >
       <Canvas
+        key="random-picker-canvas"
         camera={{ position: [0, 0, 5], fov: 75, near: 0.1, far: 1000 }}
         gl={{
           antialias: false,
-          powerPreference: 'low-power',
+          powerPreference: 'default',
           alpha: false,
           stencil: false,
           depth: true,
           failIfMajorPerformanceCaveat: false,
         }}
-        dpr={isLowPerformanceDevice ? [1, 1] : [1, 1.5]}
+        dpr={[1, 1.5]}
         performance={{ min: 0.5 }}
         frameloop="always"
         style={{

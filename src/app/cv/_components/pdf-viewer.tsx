@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { DocumentProps, PageProps } from 'react-pdf';
+import type { DocumentProps, PageProps, pdfjs as pdfjsType } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 
 let Document: React.ComponentType<DocumentProps>;
 let Page: React.ComponentType<PageProps>;
+let pdfjs: typeof pdfjsType;
 
 interface PDFViewerProps {
   file: string;
