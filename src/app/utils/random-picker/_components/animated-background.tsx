@@ -1,5 +1,11 @@
 'use client';
 
+import { useConfig } from '@/hooks/use-config';
+import { darkenHsl, hslCssToHex } from '@/lib/utils';
+import {
+  baseColors,
+  DEFAULT_BASE_COLOR,
+} from '@/registry/registry-base-colors';
 import { Billboard, OrbitControls, Text } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useTheme } from 'next-themes';
@@ -127,9 +133,33 @@ function Scene({
 
 export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const backgroundColor = isDark ? '#000000' : '#e2e8f0';
+  const [{ theme }] = useConfig();
+
+  const getThemeAdjustedColors = () => {
+    const baseColorCss =
+      baseColors.find(({ name }) => name === theme) ?? DEFAULT_BASE_COLOR;
+
+    const themeMode = resolvedTheme === 'light' ? 'light' : 'dark';
+
+    const baseColor = `#${hslCssToHex(baseColorCss.activeColor[themeMode])
+      .toString(16)
+      .padStart(6, '0')}`;
+
+    const baseBackgroundColor = `#${hslCssToHex(
+      darkenHsl(
+        baseColorCss.cssVars[themeMode].background,
+        themeMode === 'dark' ? 0 : 5,
+      ),
+    )
+      .toString(16)
+      .padStart(6, '0')}`;
+
+    const textColor = themeMode === 'dark' ? '#ffffff' : '#1a1a1a';
+
+    return { themeMode, baseColor, baseBackgroundColor, textColor };
+  };
+
+  const { baseBackgroundColor, textColor } = getThemeAdjustedColors();
 
   const filledItems = useMemo(
     () => items.filter((item) => item.trim() !== ''),
@@ -188,7 +218,7 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
           positions={positions}
           speeds={speeds}
           textColor={textColor}
-          backgroundColor={backgroundColor}
+          backgroundColor={baseBackgroundColor}
         />
       </Canvas>
     </div>
