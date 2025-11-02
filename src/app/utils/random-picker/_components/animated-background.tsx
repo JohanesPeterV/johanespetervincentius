@@ -50,13 +50,19 @@ function Scene({
   positions,
   speeds,
   textColor,
+  backgroundColor,
 }: {
   filledItems: string[];
   positions: [number, number, number][];
   speeds: number[];
   textColor: string;
+  backgroundColor: string;
 }) {
-  const { gl, invalidate } = useThree();
+  const { gl, invalidate, scene } = useThree();
+
+  useEffect(() => {
+    scene.background = new THREE.Color(backgroundColor);
+  }, [scene, backgroundColor]);
 
   useEffect(() => {
     const handleContextLost = (event: WebGLContextEvent) => {
@@ -123,6 +129,7 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const textColor = isDark ? '#ffffff' : '#1a1a1a';
+  const backgroundColor = isDark ? '#000000' : '#e2e8f0';
 
   const filledItems = useMemo(
     () => items.filter((item) => item.trim() !== ''),
@@ -159,7 +166,6 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
     >
       <Canvas
         key="random-picker-canvas"
-        {...(!isDark && { className: 'bg-slate-200' })}
         camera={{ position: [0, 0, 5], fov: 75, near: 0.1, far: 1000 }}
         gl={{
           antialias: false,
@@ -182,6 +188,7 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
           positions={positions}
           speeds={speeds}
           textColor={textColor}
+          backgroundColor={backgroundColor}
         />
       </Canvas>
     </div>
