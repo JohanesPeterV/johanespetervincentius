@@ -7,7 +7,6 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 
 let Document: React.ComponentType<DocumentProps>;
 let Page: React.ComponentType<PageProps>;
-let pdfjs: any;
 
 interface PDFViewerProps {
   file: string;
