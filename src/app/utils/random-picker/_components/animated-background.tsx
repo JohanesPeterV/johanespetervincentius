@@ -2,6 +2,7 @@
 
 import { Billboard, OrbitControls, Text } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 
@@ -9,9 +10,10 @@ interface FloatingTextProps {
   text: string;
   position: [number, number, number];
   speed: number;
+  color: string;
 }
 
-const FloatingText = ({ text, position, speed }: FloatingTextProps) => {
+const FloatingText = ({ text, position, speed, color }: FloatingTextProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const initialY = position[1];
 
@@ -27,7 +29,7 @@ const FloatingText = ({ text, position, speed }: FloatingTextProps) => {
       <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
         <Text
           fontSize={0.42}
-          color="#ffffff"
+          color={color}
           anchorX="center"
           anchorY="middle"
           fillOpacity={0.15}
@@ -47,10 +49,12 @@ function Scene({
   filledItems,
   positions,
   speeds,
+  textColor,
 }: {
   filledItems: string[];
   positions: [number, number, number][];
   speeds: number[];
+  textColor: string;
 }) {
   const { gl, invalidate } = useThree();
 
@@ -100,6 +104,7 @@ function Scene({
           text={item}
           position={positions[index]}
           speed={speeds[index]}
+          color={textColor}
         />
       ))}
 
@@ -115,6 +120,10 @@ function Scene({
 }
 
 export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  const textColor = isDark ? '#ffffff' : '#1a1a1a';
+
   const filledItems = useMemo(
     () => items.filter((item) => item.trim() !== ''),
     [items],
@@ -150,6 +159,7 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
     >
       <Canvas
         key="random-picker-canvas"
+        {...(!isDark && { className: 'bg-slate-200' })}
         camera={{ position: [0, 0, 5], fov: 75, near: 0.1, far: 1000 }}
         gl={{
           antialias: false,
@@ -171,6 +181,7 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
           filledItems={filledItems}
           positions={positions}
           speeds={speeds}
+          textColor={textColor}
         />
       </Canvas>
     </div>
