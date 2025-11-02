@@ -1,11 +1,11 @@
 'use client';
+import Profile from '@/app/_components/profile';
+import { Projects } from '@/app/_components/projects';
+import { Summary } from '@/app/_components/summary';
+import Technologies from '@/app/_components/technologies';
+import WorkExperience from '@/app/_components/work-experience';
 import HomeBackground from '@/components/backgrounds/home-background';
 import SnapScrollContainer from '@/components/snap-scroll-container';
-import Profile from '@/sections/profile';
-import { Projects } from '@/sections/projects';
-import { Summary } from '@/sections/summary';
-import Technologies from '@/sections/technologies';
-import WorkExperience from '@/sections/work-experience';
 
 export default function Home() {
   return (
