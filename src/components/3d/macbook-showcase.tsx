@@ -27,7 +27,12 @@ export default function MacbookShowcase({ children }: MacbookShowcaseParams) {
       style={{
         zIndex: 20,
       }}
-      gl={{ antialias: true }}
+      gl={{
+        antialias: true,
+        powerPreference: 'high-performance',
+        alpha: false,
+      }}
+      dpr={[1, 2]}
     >
       <pointLight intensity={75} position={[0, 8, -4]} />
       <MacModel mouseOffset={mouseOffset}>{children}</MacModel>

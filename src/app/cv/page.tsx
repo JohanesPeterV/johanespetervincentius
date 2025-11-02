@@ -1,15 +1,10 @@
 'use client';
 
+import { PDFViewer } from '@/app/cv/_components/pdf-viewer';
 import MacbookShowcase from '@/components/3d/macbook-showcase';
 import { useEffect, useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
+export const runtime = 'nodejs';
 
 export default function CVPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -36,19 +31,16 @@ export default function CVPage() {
     <div className="h-screen w-screen">
       {!isFullscreen ? (
         <MacbookShowcase>
-          <Document
+          <PDFViewer
             file="/cv.pdf"
             className="cursor-pointer"
             onClick={toggleFullscreen}
-          >
-            <Page
-              canvasBackground="none"
-              pageNumber={1}
-              width={800}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-            />
-          </Document>
+            canvasBackground="none"
+            pageNumber={1}
+            width={800}
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+          />
         </MacbookShowcase>
       ) : (
         <div
@@ -82,18 +74,15 @@ export default function CVPage() {
             className="relative w-full max-w-4xl h-full max-h-[90vh] p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <Document
+            <PDFViewer
               file="/cv.pdf"
               className="h-full flex items-center justify-center"
-            >
-              <Page
-                pageNumber={1}
-                width={800}
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-                className="shadow-2xl"
-              />
-            </Document>
+              pageNumber={1}
+              width={800}
+              renderTextLayer={true}
+              renderAnnotationLayer={true}
+              pageClassName="shadow-2xl"
+            />
           </div>
         </div>
       )}

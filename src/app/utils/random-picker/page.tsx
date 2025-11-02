@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedBackground } from '@/app/utils/random-picker/_components/animated-background';
 import { EditMode } from '@/app/utils/random-picker/_components/edit-mode';
 import { PickMode } from '@/app/utils/random-picker/_components/pick-mode';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
@@ -128,43 +129,46 @@ const RandomPickerContent = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center p-4 sm:p-6">
-      <Card className="w-full max-w-2xl bg-card/50 backdrop-blur-sm border-border/50">
-        <CardHeader className="text-center pb-4 sm:pb-6">
-          <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-            Rand
-            <RandomColorButton className="text-2xl sm:text-3xl lg:text-4xl font-bold" />
-            m Picker
-          </CardTitle>
-          <CardDescription className="text-sm sm:text-base">
-            {isEditing
-              ? 'Add your items to get started'
-              : 'Click to pick a random item'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {isEditing ? (
-            <EditMode
-              items={items}
-              onInputChange={handleInputChange}
-              onRemoveItem={handleRemoveItem}
-              onKeyDown={handleKeyDown}
-              onClearAll={handleClearAll}
-              onDone={handleDoneEditing}
-              hasItems={hasItems}
-            />
-          ) : (
-            <PickMode
-              filledItems={filledItems}
-              pickedItem={pickedItem}
-              isAnimating={isAnimating}
-              onPickOne={handlePickOne}
-              onEditList={handleEditList}
-            />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <AnimatedBackground items={filledItems} />
+      <div className="flex flex-col min-h-screen items-center justify-center p-4 sm:p-6">
+        <Card className="w-full max-w-2xl bg-card/50 backdrop-blur-sm border-border/50">
+          <CardHeader className="text-center pb-4 sm:pb-6">
+            <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+              Rand
+              <RandomColorButton className="text-2xl sm:text-3xl lg:text-4xl font-bold" />
+              m Picker
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base">
+              {isEditing
+                ? 'Add your items to get started'
+                : 'Click to pick a random item'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {isEditing ? (
+              <EditMode
+                items={items}
+                onInputChange={handleInputChange}
+                onRemoveItem={handleRemoveItem}
+                onKeyDown={handleKeyDown}
+                onClearAll={handleClearAll}
+                onDone={handleDoneEditing}
+                hasItems={hasItems}
+              />
+            ) : (
+              <PickMode
+                filledItems={filledItems}
+                pickedItem={pickedItem}
+                isAnimating={isAnimating}
+                onPickOne={handlePickOne}
+                onEditList={handleEditList}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
 
