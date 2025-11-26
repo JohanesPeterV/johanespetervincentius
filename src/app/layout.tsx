@@ -22,23 +22,56 @@ const configureViewportSettings = (): Viewport => ({
 
 export const viewport = configureViewportSettings();
 
+const SITE_URL = 'https://johanespetervincentius.my.id';
+const FULL_NAME = 'Johanes Peter Vincentius';
+
 const configureMetadata = (): Metadata => ({
-  title: 'Johanes Peter Vincentius',
-  description:
-    'Personal portfolio website by Johanes Peter Vincentius - Software Engineer and Full Stack Developer',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${FULL_NAME} - Software Engineer & Full Stack Developer`,
+    template: `%s | ${FULL_NAME}`,
+  },
+  description: `${FULL_NAME} is a Software Engineer and Full Stack Developer specializing in React, Next.js, TypeScript, and modern web technologies. View portfolio, projects, and professional experience.`,
   keywords: [
-    'software developer',
+    'Johanes Peter Vincentius',
+    'Johanes Peter',
+    'Johanes Vincentius',
+    'software engineer',
+    'full stack developer',
     'web developer',
-    'full stack',
     'react developer',
+    'next.js developer',
+    'typescript developer',
+    'frontend developer',
     'portfolio',
   ],
-  authors: [{ name: 'Johanes Peter Vincentius' }],
+  authors: [{ name: FULL_NAME, url: SITE_URL }],
+  creator: FULL_NAME,
+  publisher: FULL_NAME,
+  alternates: {
+    canonical: SITE_URL,
+  },
   openGraph: {
     type: 'website',
-    url: 'https://johanespetervincentius.my.id',
-    title: 'Johanes Peter Vincentius - Portfolio',
-    description: 'Software Engineer and Full Stack Developer',
+    locale: 'en_US',
+    url: SITE_URL,
+    siteName: FULL_NAME,
+    title: `${FULL_NAME} - Software Engineer & Full Stack Developer`,
+    description: `${FULL_NAME} is a Software Engineer and Full Stack Developer. View portfolio, projects, and professional experience.`,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: FULL_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${FULL_NAME} - Software Engineer`,
+    description: `Software Engineer and Full Stack Developer. React, Next.js, TypeScript.`,
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -61,6 +94,32 @@ const configureMetadata = (): Metadata => ({
 
 export const metadata = configureMetadata();
 
+const getJsonLd = () => ({
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: FULL_NAME,
+  alternateName: ['Johanes Peter', 'Johanes Vincentius', 'Peter Vincentius'],
+  url: SITE_URL,
+  image: `${SITE_URL}/og-image.png`,
+  jobTitle: 'Software Engineer',
+  description:
+    'Software Engineer and Full Stack Developer specializing in React, Next.js, and TypeScript',
+  sameAs: [
+    'https://github.com/JohanesPeterV',
+    'https://linkedin.com/in/johanes-vincentius-714b311a4',
+  ],
+  knowsAbout: [
+    'React',
+    'Next.js',
+    'TypeScript',
+    'JavaScript',
+    'Full Stack Development',
+    'Web Development',
+    'Three.js',
+    'TailwindCSS',
+  ],
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -73,6 +132,10 @@ export default function RootLayout({
           rel="preconnect"
           href="https://fonts.googleapis.com"
           crossOrigin="anonymous"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(getJsonLd()) }}
         />
       </head>
       <body
