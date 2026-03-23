@@ -24,9 +24,10 @@ export default function Model({
   const { scene } = useGLTF(path);
   const modelRef = useRef<THREE.Group>(null);
 
+  // REASON: imperative Three.js scene mutations — position/scale/rotation must be set on the scene object
   useEffect(() => {
     scene.position.set(position.x, position.y, position.z);
-    if (typeof scale == 'number') {
+    if (typeof scale === 'number') {
       scene.scale.set(scale, scale, scale);
     } else {
       scene.scale.set(scale.x, scale.y, scale.z);

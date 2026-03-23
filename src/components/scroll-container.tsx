@@ -6,40 +6,56 @@ interface ScrollContainerProps {
   className?: string;
 }
 
+interface ScrollState {
+  showTopIndicator: boolean;
+  showBottomIndicator: boolean;
+  scrollProgress: number;
+  isScrollable: boolean;
+}
+
+const INITIAL_SCROLL_STATE: ScrollState = {
+  showTopIndicator: false,
+  showBottomIndicator: false,
+  scrollProgress: 0,
+  isScrollable: false,
+};
+
 export default function ScrollContainer({
   children,
   className,
 }: ScrollContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showTopIndicator, setShowTopIndicator] = useState(false);
-  const [showBottomIndicator, setShowBottomIndicator] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isScrollable, setIsScrollable] = useState(false);
+  const [scrollState, setScrollState] =
+    useState<ScrollState>(INITIAL_SCROLL_STATE);
 
+  // REASON: DOM measurement + scroll event subscription — requires access to container element
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const checkScrollable = () => {
       const hasOverflow = container.scrollHeight > container.clientHeight;
-      setIsScrollable(hasOverflow);
       if (!hasOverflow) {
-        setShowTopIndicator(false);
-        setShowBottomIndicator(false);
-        setScrollProgress(0);
+        setScrollState(INITIAL_SCROLL_STATE);
+        return;
       }
+      setScrollState((prev) => ({ ...prev, isScrollable: true }));
     };
 
     const handleScroll = () => {
-      if (!isScrollable) return;
-
       const { scrollTop, scrollHeight, clientHeight } = container;
+      const hasOverflow = scrollHeight > clientHeight;
+      if (!hasOverflow) return;
+
       const maxScroll = scrollHeight - clientHeight;
       const progress = Math.min(scrollTop / maxScroll, 1);
-      setScrollProgress(progress);
 
-      setShowTopIndicator(scrollTop > 20);
-      setShowBottomIndicator(scrollHeight - scrollTop - clientHeight > 20);
+      setScrollState({
+        isScrollable: true,
+        scrollProgress: progress,
+        showTopIndicator: scrollTop > 20,
+        showBottomIndicator: scrollHeight - scrollTop - clientHeight > 20,
+      });
     };
 
     const resizeObserver = new ResizeObserver(() => {
@@ -56,24 +72,24 @@ export default function ScrollContainer({
       container.removeEventListener('scroll', handleScroll);
       resizeObserver.disconnect();
     };
-  }, [isScrollable]);
+  }, []);
 
   return (
     <div className="relative group">
-      {isScrollable && (
+      {scrollState.isScrollable && (
         <>
           <div
             className={cn(
               'absolute top-0 left-0 right-0 h-12 z-10 pointer-events-none transition-opacity duration-300',
               'bg-gradient-to-b from-background via-background/80 to-transparent',
-              showTopIndicator ? 'opacity-100' : 'opacity-0',
+              scrollState.showTopIndicator ? 'opacity-100' : 'opacity-0',
             )}
           />
 
           <div className="absolute right-0 top-0 bottom-0 w-1 bg-primary/5">
             <div
               className="w-full bg-gradient-to-b from-primary/10 to-primary/30 transition-all duration-200"
-              style={{ height: `${scrollProgress * 100}%` }}
+              style={{ height: `${scrollState.scrollProgress * 100}%` }}
             />
           </div>
 
@@ -81,7 +97,7 @@ export default function ScrollContainer({
             className={cn(
               'absolute bottom-0 left-0 right-0 h-12 z-10 pointer-events-none transition-opacity duration-300',
               'bg-gradient-to-t from-background via-background/80 to-transparent',
-              showBottomIndicator ? 'opacity-100' : 'opacity-0',
+              scrollState.showBottomIndicator ? 'opacity-100' : 'opacity-0',
             )}
           />
         </>
@@ -91,7 +107,7 @@ export default function ScrollContainer({
         ref={containerRef}
         className={cn(
           'max-h-[60vh] overflow-y-auto scrollbar-thin',
-          isScrollable &&
+          scrollState.isScrollable &&
             'scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 scrollbar-track-transparent hover:pr-6',
           'transition-all duration-300',
           className,

@@ -51,27 +51,31 @@ interface AnimatedBackgroundProps {
   items: string[];
 }
 
+interface SceneProps {
+  filledItems: string[];
+  positions: [number, number, number][];
+  speeds: number[];
+  textColor: string;
+  backgroundColor: string;
+}
+
 function Scene({
   filledItems,
   positions,
   speeds,
   textColor,
   backgroundColor,
-}: {
-  filledItems: string[];
-  positions: [number, number, number][];
-  speeds: number[];
-  textColor: string;
-  backgroundColor: string;
-}) {
+}: SceneProps) {
   const { gl, invalidate, scene } = useThree();
 
+  // REASON: Three.js scene mutation — background color must be set imperatively on the scene object
   useEffect(() => {
     scene.background = new THREE.Color(backgroundColor);
   }, [scene, backgroundColor]);
 
+  // REASON: WebGL context event subscription — must attach DOM event listeners to canvas element
   useEffect(() => {
-    const handleContextLost = (event: WebGLContextEvent) => {
+    const handleContextLost = (event: Event) => {
       event.preventDefault();
       console.error('WebGL Context Lost - preventing default');
       console.log('Canvas state:', gl.domElement);
@@ -84,24 +88,12 @@ function Scene({
     };
 
     const canvas = gl.domElement;
-    canvas.addEventListener(
-      'webglcontextlost',
-      handleContextLost as EventListener,
-    );
-    canvas.addEventListener(
-      'webglcontextrestored',
-      handleContextRestored as EventListener,
-    );
+    canvas.addEventListener('webglcontextlost', handleContextLost);
+    canvas.addEventListener('webglcontextrestored', handleContextRestored);
 
     return () => {
-      canvas.removeEventListener(
-        'webglcontextlost',
-        handleContextLost as EventListener,
-      );
-      canvas.removeEventListener(
-        'webglcontextrestored',
-        handleContextRestored as EventListener,
-      );
+      canvas.removeEventListener('webglcontextlost', handleContextLost);
+      canvas.removeEventListener('webglcontextrestored', handleContextRestored);
     };
   }, [gl, invalidate]);
 
@@ -161,11 +153,13 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
 
   const { baseBackgroundColor, textColor } = getThemeAdjustedColors();
 
+  // REASON: array filtering creates new refs on every render — memoize to stabilize identity
   const filledItems = useMemo(
     () => items.filter((item) => item.trim() !== ''),
     [items],
   );
 
+  // REASON: position calculation with Math.random is expensive and must only rerun when count changes
   const { positions, speeds } = useMemo(() => {
     const positionsArray: [number, number, number][] = [];
     const speedsArray: number[] = [];

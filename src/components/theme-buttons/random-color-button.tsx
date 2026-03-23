@@ -4,6 +4,10 @@ import { baseColors } from '@/registry/registry-base-colors';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
+type ThemePrimaryStyle = React.CSSProperties & {
+  '--theme-primary': string;
+};
+
 export default function RandomColorButton({
   className,
   ...props
@@ -12,9 +16,22 @@ export default function RandomColorButton({
   const [config, setConfig] = useConfig();
   const [mounted, setMounted] = useState(false);
 
+  // REASON: hydration mismatch prevention — theme colors are unknown on server
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const getMountedStyle = (): ThemePrimaryStyle | undefined => {
+    if (!mounted) return undefined;
+
+    return {
+      '--theme-primary': `hsl(${
+        baseColors.find((baseColor) => baseColor.name === config.theme)
+          ?.activeColor[resolvedTheme === 'dark' ? 'dark' : 'light']
+      })`,
+      backgroundColor: 'transparent',
+    };
+  };
 
   return (
     <Button
@@ -35,17 +52,7 @@ export default function RandomColorButton({
         });
       }}
       className={`p-0 m-0 text-2xl sm:text-3xl lg:text-4xl font-extrabold ${className} text-[--theme-primary]`}
-      style={
-        mounted
-          ? ({
-              '--theme-primary': `hsl(${
-                baseColors.find((baseColor) => baseColor.name === config.theme)
-                  ?.activeColor[resolvedTheme === 'dark' ? 'dark' : 'light']
-              })`,
-              backgroundColor: 'transparent',
-            } as React.CSSProperties)
-          : undefined
-      }
+      style={getMountedStyle()}
     >
       o
     </Button>

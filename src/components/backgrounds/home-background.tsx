@@ -37,6 +37,7 @@ export default function HomeBackground() {
     };
   };
 
+  // REASON: DOM side-effect — sets event source on document.body and enables hardware acceleration
   useEffect(setupEventSourceAndHardwareAcceleration, []);
 
   const getThemeAdjustedColors = () => {

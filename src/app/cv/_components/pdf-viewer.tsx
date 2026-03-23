@@ -34,6 +34,7 @@ export function PDFViewer({
 }: PDFViewerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // REASON: dynamic import of react-pdf must run client-side — SSR does not support PDF rendering
   useEffect(() => {
     async function loadPDF() {
       const reactPdf = await import('react-pdf');

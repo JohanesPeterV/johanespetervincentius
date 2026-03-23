@@ -14,36 +14,54 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
+interface PickerState {
+  items: string[];
+  pickedItem: string;
+  isEditing: boolean;
+  isAnimating: boolean;
+  isInitialized: boolean;
+}
+
+const INITIAL_PICKER_STATE: PickerState = {
+  items: [''],
+  pickedItem: '',
+  isEditing: true,
+  isAnimating: false,
+  isInitialized: false,
+};
+
 const RandomPickerContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [items, setItems] = useState<string[]>(['']);
-  const [pickedItem, setPickedItem] = useState<string>('');
-  const [isEditing, setIsEditing] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [state, setState] = useState<PickerState>(INITIAL_PICKER_STATE);
 
-  const filledItems = items.filter((item) => item.trim() !== '');
+  const filledItems = state.items.filter((item) => item.trim() !== '');
   const hasItems = filledItems.length > 0;
 
+  // REASON: URL search params must be read client-side — SSR has no access to query string
   useEffect(() => {
-    if (isInitialized) return;
+    if (state.isInitialized) return;
 
     const itemsParam = searchParams.get('items');
     if (itemsParam) {
       try {
         const decodedItems = JSON.parse(decodeURIComponent(itemsParam));
         if (Array.isArray(decodedItems) && decodedItems.length > 0) {
-          setItems([...decodedItems, '']);
-          setIsEditing(false);
+          setState((prev) => ({
+            ...prev,
+            items: [...decodedItems, ''],
+            isEditing: false,
+            isInitialized: true,
+          }));
+          return;
         }
       } catch (error) {
         console.error('Failed to parse items from URL:', error);
       }
     }
-    setIsInitialized(true);
-  }, [searchParams, isInitialized]);
+    setState((prev) => ({ ...prev, isInitialized: true }));
+  }, [searchParams, state.isInitialized]);
 
   const updateURL = (itemsList: string[]) => {
     const filled = itemsList.filter((item) => item.trim() !== '');
@@ -57,73 +75,83 @@ const RandomPickerContent = () => {
   };
 
   const handleInputChange = (index: number, value: string) => {
-    const newItems = [...items];
+    const newItems = [...state.items];
     newItems[index] = value;
-    setItems(newItems);
+    setState((prev) => ({ ...prev, items: newItems }));
 
     const allFilled = newItems.every((item) => item.trim() !== '');
     if (allFilled) {
-      setTimeout(() => setItems([...newItems, '']), 0);
+      setTimeout(
+        () => setState((prev) => ({ ...prev, items: [...newItems, ''] })),
+        0,
+      );
     }
 
     updateURL(newItems);
   };
 
   const handleRemoveItem = (index: number) => {
-    if (items.length <= 1) return;
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
+    if (state.items.length <= 1) return;
+    const newItems = state.items.filter((_, i) => i !== index);
+    setState((prev) => ({ ...prev, items: newItems }));
     updateURL(newItems);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      setItems([...items, '']);
+      setState((prev) => ({ ...prev, items: [...prev.items, ''] }));
       return;
     }
 
-    if (event.key === 'Backspace' && items[index] === '' && items.length > 1) {
+    if (
+      event.key === 'Backspace' &&
+      state.items[index] === '' &&
+      state.items.length > 1
+    ) {
       event.preventDefault();
       handleRemoveItem(index);
     }
   };
 
   const handleClearAll = () => {
-    setItems(['']);
-    setPickedItem('');
-    setIsEditing(true);
+    setState({
+      ...state,
+      items: [''],
+      pickedItem: '',
+      isEditing: true,
+    });
     router.replace('/utils/random-picker', { scroll: false });
   };
 
   const handleDoneEditing = () => {
     if (!hasItems) return;
-    setIsEditing(false);
-    setPickedItem('');
+    setState((prev) => ({ ...prev, isEditing: false, pickedItem: '' }));
   };
 
   const handleEditList = () => {
-    setIsEditing(true);
-    setPickedItem('');
+    setState((prev) => ({ ...prev, isEditing: true, pickedItem: '' }));
   };
 
   const handlePickOne = () => {
-    if (!hasItems || isAnimating) return;
+    if (!hasItems || state.isAnimating) return;
 
-    setIsAnimating(true);
-    setPickedItem('');
+    setState((prev) => ({ ...prev, isAnimating: true, pickedItem: '' }));
 
     let count = 0;
     const interval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * filledItems.length);
-      setPickedItem(filledItems[randomIndex]);
+      setState((prev) => ({ ...prev, pickedItem: filledItems[randomIndex] }));
       count++;
 
       if (count >= 15) {
         clearInterval(interval);
         const finalIndex = Math.floor(Math.random() * filledItems.length);
-        setPickedItem(filledItems[finalIndex]);
-        setIsAnimating(false);
+        setState((prev) => ({
+          ...prev,
+          pickedItem: filledItems[finalIndex],
+          isAnimating: false,
+        }));
       }
     }, 100);
   };
@@ -140,15 +168,15 @@ const RandomPickerContent = () => {
               m Picker
             </CardTitle>
             <CardDescription className="text-sm sm:text-base">
-              {isEditing
+              {state.isEditing
                 ? 'Add your items to get started'
                 : 'Click to pick a random item'}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            {isEditing ? (
+            {state.isEditing ? (
               <EditMode
-                items={items}
+                items={state.items}
                 onInputChange={handleInputChange}
                 onRemoveItem={handleRemoveItem}
                 onKeyDown={handleKeyDown}
@@ -159,8 +187,8 @@ const RandomPickerContent = () => {
             ) : (
               <PickMode
                 filledItems={filledItems}
-                pickedItem={pickedItem}
-                isAnimating={isAnimating}
+                pickedItem={state.pickedItem}
+                isAnimating={state.isAnimating}
                 onPickOne={handlePickOne}
                 onEditList={handleEditList}
               />

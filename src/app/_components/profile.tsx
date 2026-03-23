@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 
 export default function Profile() {
   const { resolvedTheme } = useTheme();
-  const themeMode = (resolvedTheme as 'light' | 'dark') ?? 'dark';
+  const themeMode = resolvedTheme === 'light' ? 'light' : 'dark';
 
   return (
     <div className="flex flex-col justify-center min-h-screen px-4 sm:px-6">

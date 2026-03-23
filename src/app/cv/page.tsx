@@ -13,6 +13,7 @@ export default function CVPage() {
     setIsFullscreen(!isFullscreen);
   };
 
+  // REASON: global keyboard listener for Escape key — requires window event subscription
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isFullscreen) {
