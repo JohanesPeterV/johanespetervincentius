@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-interface PWAIcon {
+interface PwaIcon {
   src: string;
   sizes: string;
   type: string;
@@ -16,7 +16,7 @@ const getAppColors = () => ({
   theme: '#ffffff',
 });
 
-const getAppIcons = (): PWAIcon[] => [
+const getAppIcons = (): PwaIcon[] => [
   {
     src: '/favicon.ico',
     sizes: '64x64 32x32 24x24 16x16',

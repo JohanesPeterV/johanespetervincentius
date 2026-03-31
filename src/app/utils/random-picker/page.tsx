@@ -41,7 +41,9 @@ const RandomPickerContent = () => {
 
   // REASON: URL search params must be read client-side — SSR has no access to query string
   useEffect(() => {
-    if (state.isInitialized) return;
+    if (state.isInitialized) {
+      return;
+    }
 
     const itemsParam = searchParams.get('items');
     if (itemsParam) {
@@ -91,7 +93,9 @@ const RandomPickerContent = () => {
   };
 
   const handleRemoveItem = (index: number) => {
-    if (state.items.length <= 1) return;
+    if (state.items.length <= 1) {
+      return;
+    }
     const newItems = state.items.filter((_, i) => i !== index);
     setState((prev) => ({ ...prev, items: newItems }));
     updateURL(newItems);
@@ -125,7 +129,9 @@ const RandomPickerContent = () => {
   };
 
   const handleDoneEditing = () => {
-    if (!hasItems) return;
+    if (!hasItems) {
+      return;
+    }
     setState((prev) => ({ ...prev, isEditing: false, pickedItem: '' }));
   };
 
@@ -134,7 +140,9 @@ const RandomPickerContent = () => {
   };
 
   const handlePickOne = () => {
-    if (!hasItems || state.isAnimating) return;
+    if (!hasItems || state.isAnimating) {
+      return;
+    }
 
     setState((prev) => ({ ...prev, isAnimating: true, pickedItem: '' }));
 

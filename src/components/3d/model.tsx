@@ -45,7 +45,9 @@ export default function Model({
   ]);
 
   useFrame(() => {
-    if (!modelRef.current) return;
+    if (!modelRef.current) {
+      return;
+    }
     modelRef.current.rotateOnAxis(
       new THREE.Vector3(rotateOnAxis.x, rotateOnAxis.y, rotateOnAxis.z),
       0.01,

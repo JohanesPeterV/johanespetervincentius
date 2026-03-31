@@ -10,7 +10,7 @@ export function ThemeProvider({
 }: React.ComponentProps<typeof NextThemesProvider>) {
   return (
     <JotaiProvider>
-      <NextThemesProvider {...props}>{children}</NextThemesProvider>Z
+      <NextThemesProvider {...props}>{children}</NextThemesProvider>
     </JotaiProvider>
   );
 }

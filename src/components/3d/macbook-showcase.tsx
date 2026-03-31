@@ -59,7 +59,9 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   useFrame((state) => {
-    if (!group.current) return;
+    if (!group.current) {
+      return;
+    }
     const t = state.clock.getElapsedTime();
 
     group.current.position.y = THREE.MathUtils.lerp(

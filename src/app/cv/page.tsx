@@ -1,6 +1,6 @@
 'use client';
 
-import { PDFViewer } from '@/app/cv/_components/pdf-viewer';
+import { PdfViewer } from '@/app/cv/_components/pdf-viewer';
 import MacbookShowcase from '@/components/3d/macbook-showcase';
 import { useEffect, useState } from 'react';
 
@@ -32,7 +32,7 @@ export default function CVPage() {
     <div className="h-screen w-screen">
       {!isFullscreen ? (
         <MacbookShowcase>
-          <PDFViewer
+          <PdfViewer
             file="/cv.pdf"
             className="cursor-pointer"
             onClick={toggleFullscreen}
@@ -75,7 +75,7 @@ export default function CVPage() {
             className="relative w-full max-w-4xl h-full max-h-[90vh] p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <PDFViewer
+            <PdfViewer
               file="/cv.pdf"
               className="h-full flex items-center justify-center"
               pageNumber={1}

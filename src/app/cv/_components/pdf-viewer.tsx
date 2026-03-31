@@ -9,7 +9,7 @@ let Document: React.ComponentType<DocumentProps>;
 let Page: React.ComponentType<PageProps>;
 let pdfjs: typeof pdfjsType;
 
-interface PDFViewerProps {
+interface PdfViewerProps {
   file: string;
   className?: string;
   onClick?: () => void;
@@ -21,7 +21,7 @@ interface PDFViewerProps {
   pageClassName?: string;
 }
 
-export function PDFViewer({
+export function PdfViewer({
   file,
   className,
   onClick,
@@ -31,7 +31,7 @@ export function PDFViewer({
   renderTextLayer,
   renderAnnotationLayer,
   pageClassName,
-}: PDFViewerProps) {
+}: PdfViewerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   // REASON: dynamic import of react-pdf must run client-side — SSR does not support PDF rendering

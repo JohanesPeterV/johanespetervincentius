@@ -22,7 +22,9 @@ export default function RandomColorButton({
   }, []);
 
   const getMountedStyle = (): ThemePrimaryStyle | undefined => {
-    if (!mounted) return undefined;
+    if (!mounted) {
+      return undefined;
+    }
 
     return {
       '--theme-primary': `hsl(${

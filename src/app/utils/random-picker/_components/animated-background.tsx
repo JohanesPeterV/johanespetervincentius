@@ -24,7 +24,9 @@ const FloatingText = ({ text, position, speed, color }: FloatingTextProps) => {
   const initialY = position[1];
 
   useFrame((state) => {
-    if (!groupRef.current) return;
+    if (!groupRef.current) {
+      return;
+    }
 
     const time = state.clock.getElapsedTime();
     groupRef.current.position.y = initialY + Math.sin(time * speed) * 0.5;
@@ -178,7 +180,9 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
     return { positions: positionsArray, speeds: speedsArray };
   }, [filledItems.length]);
 
-  if (filledItems.length === 0) return null;
+  if (filledItems.length === 0) {
+    return null;
+  }
 
   return (
     <div

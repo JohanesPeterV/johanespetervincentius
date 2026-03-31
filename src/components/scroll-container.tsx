@@ -31,7 +31,9 @@ export default function ScrollContainer({
   // REASON: DOM measurement + scroll event subscription — requires access to container element
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const checkScrollable = () => {
       const hasOverflow = container.scrollHeight > container.clientHeight;
@@ -45,7 +47,9 @@ export default function ScrollContainer({
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       const hasOverflow = scrollHeight > clientHeight;
-      if (!hasOverflow) return;
+      if (!hasOverflow) {
+        return;
+      }
 
       const maxScroll = scrollHeight - clientHeight;
       const progress = Math.min(scrollTop / maxScroll, 1);
