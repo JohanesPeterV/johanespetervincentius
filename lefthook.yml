@@ -1,0 +1,20 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: lint
+      glob: "*.{ts,tsx}"
+      run: npx eslint --no-warn-ignored {staged_files}
+
+    - name: prettier
+      glob: "*.{ts,tsx,json,jsonc,css,scss,md,mdx}"
+      run: npx prettier --check {staged_files}
+
+    - name: check-file-sizes
+      glob: "*.{ts,tsx}"
+      run: bash scripts/check-file-sizes.sh staged
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: typecheck
+      run: npx next build
