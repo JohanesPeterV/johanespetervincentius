@@ -22,7 +22,6 @@ export default function OptimizedImage({
 
   const getContainerStyles = () => {
     return {
-      backgroundColor: '#f0f0f0',
       aspectRatio:
         props.width && props.height
           ? `${props.width}/${props.height}`
@@ -44,7 +43,7 @@ export default function OptimizedImage({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`relative overflow-hidden bg-muted ${className}`}
       style={getContainerStyles()}
     >
       <Image
@@ -64,7 +63,7 @@ export default function OptimizedImage({
       />
 
       {isLoading && (
-        <div className="absolute inset-0 animate-pulse bg-gray-200 dark:bg-gray-800" />
+        <div className="absolute inset-0 animate-pulse bg-muted/80" />
       )}
     </div>
   );

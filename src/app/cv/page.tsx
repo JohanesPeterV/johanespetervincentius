@@ -45,11 +45,11 @@ export default function CVPage() {
         </MacbookShowcase>
       ) : (
         <div
-          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm backdrop-brightness-50"
           onClick={toggleFullscreen}
         >
           <button
-            className="absolute top-6 left-6 bg-white/10 hover:bg-white/20 rounded-full p-2 z-10 transition-all"
+            className="absolute left-6 top-6 z-10 rounded-full border border-border/60 bg-card/80 p-2 text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-secondary"
             onClick={(e) => {
               e.stopPropagation();
               toggleFullscreen();
@@ -62,7 +62,7 @@ export default function CVPage() {
               height="24"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="white"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
