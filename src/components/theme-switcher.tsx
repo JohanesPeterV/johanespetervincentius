@@ -1,27 +1,26 @@
 'use client';
 
 import { useConfig } from '@/hooks/use-config';
-import { baseColors } from '@/registry/registry-base-colors';
+import { getThemeColorValues } from '@/lib/theme-colors';
 import { useTheme } from 'next-themes';
+import { useEffect } from 'react';
 
 export function ThemeSwitcher() {
   const [config] = useConfig();
   const { resolvedTheme } = useTheme();
 
-  if (resolvedTheme !== 'light' && resolvedTheme !== 'dark') {
-    return null;
-  }
+  // REASON: inline render mutation writes CSS variables during render — move documentElement updates to an effect so render stays pure
+  useEffect(() => {
+    if (resolvedTheme !== 'light' && resolvedTheme !== 'dark') {
+      return;
+    }
 
-  const color = baseColors.find((color) => color.name === config.theme)
-    ?.cssVars[resolvedTheme];
+    const { cssVars } = getThemeColorValues(config.theme, resolvedTheme);
 
-  if (!color) {
-    return null;
-  }
-
-  for (const [key, value] of Object.entries(color)) {
-    document.documentElement.style.setProperty(`--${key}`, value);
-  }
+    for (const [key, value] of Object.entries(cssVars)) {
+      document.documentElement.style.setProperty(`--${key}`, value);
+    }
+  }, [config.theme, resolvedTheme]);
 
   return null;
 }

@@ -1,11 +1,7 @@
 'use client';
 
 import { useConfig } from '@/hooks/use-config';
-import { darkenHsl, hslCssToHex } from '@/lib/utils';
-import {
-  baseColors,
-  DEFAULT_BASE_COLOR,
-} from '@/registry/registry-base-colors';
+import { getFluidThemeColors } from '@/lib/theme-colors';
 import { Billboard, OrbitControls, Text } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useTheme } from 'next-themes';
@@ -129,39 +125,12 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
   const { resolvedTheme } = useTheme();
   const [{ theme }] = useConfig();
 
-  const getThemeAdjustedColors = () => {
-    const baseColorCss =
-      baseColors.find(({ name }) => name === theme) ?? DEFAULT_BASE_COLOR;
+  const { backgroundColor: baseBackgroundColor, textColor } =
+    getFluidThemeColors(theme, resolvedTheme);
 
-    const themeMode = resolvedTheme === 'light' ? 'light' : 'dark';
+  const filledItems = items.filter((item) => item.trim() !== '');
 
-    const baseColor = `#${hslCssToHex(baseColorCss.activeColor[themeMode])
-      .toString(16)
-      .padStart(6, '0')}`;
-
-    const baseBackgroundColor = `#${hslCssToHex(
-      darkenHsl(
-        baseColorCss.cssVars[themeMode].background,
-        themeMode === 'dark' ? 0 : 5,
-      ),
-    )
-      .toString(16)
-      .padStart(6, '0')}`;
-
-    const textColor = themeMode === 'dark' ? '#ffffff' : '#1a1a1a';
-
-    return { themeMode, baseColor, baseBackgroundColor, textColor };
-  };
-
-  const { baseBackgroundColor, textColor } = getThemeAdjustedColors();
-
-  // REASON: array filtering creates new refs on every render — memoize to stabilize identity
-  const filledItems = useMemo(
-    () => items.filter((item) => item.trim() !== ''),
-    [items],
-  );
-
-  // REASON: position calculation with Math.random is expensive and must only rerun when count changes
+  // REASON: plain const re-rolls Math.random on every render — keep positions stable while unrelated input changes rerender the scene
   const { positions, speeds } = useMemo(() => {
     const positionsArray: [number, number, number][] = [];
     const speedsArray: number[] = [];

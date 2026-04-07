@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useConfig } from '@/hooks/use-config';
+import { getThemeColorValues } from '@/lib/theme-colors';
 import { baseColors } from '@/registry/registry-base-colors';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -26,12 +27,14 @@ export default function RandomColorButton({
       return undefined;
     }
 
+    if (resolvedTheme !== 'light' && resolvedTheme !== 'dark') {
+      return undefined;
+    }
+
+    const { activeColor } = getThemeColorValues(config.theme, resolvedTheme);
+
     return {
-      '--theme-primary': `hsl(${
-        baseColors.find((baseColor) => baseColor.name === config.theme)
-          ?.activeColor[resolvedTheme === 'dark' ? 'dark' : 'light']
-      })`,
-      backgroundColor: 'transparent',
+      '--theme-primary': `hsl(${activeColor})`,
     };
   };
 

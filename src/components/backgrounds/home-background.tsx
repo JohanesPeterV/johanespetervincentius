@@ -1,9 +1,5 @@
 import { useConfig } from '@/hooks/use-config';
-import { darkenHsl, hslCssToHex } from '@/lib/utils';
-import {
-  baseColors,
-  DEFAULT_BASE_COLOR,
-} from '@/registry/registry-base-colors';
+import { getFluidThemeColors } from '@/lib/theme-colors';
 import { Canvas } from '@react-three/fiber';
 import { Fluid } from '@whatisjery/react-fluid-distortion';
 import { useTheme } from 'next-themes';
@@ -40,34 +36,12 @@ export default function HomeBackground() {
   // REASON: DOM side-effect — sets event source on document.body and enables hardware acceleration
   useEffect(setupEventSourceAndHardwareAcceleration, []);
 
-  const getThemeAdjustedColors = () => {
-    const baseColorCss =
-      baseColors.find(({ name }) => name === theme) ?? DEFAULT_BASE_COLOR;
-
-    const themeMode = resolvedTheme === 'light' ? 'light' : 'dark';
-
-    const baseColor = `#${hslCssToHex(baseColorCss.activeColor[themeMode])
-      .toString(16)
-      .padStart(6, '0')}`;
-
-    const baseBackgroundColor = `#${hslCssToHex(
-      darkenHsl(
-        baseColorCss.cssVars[themeMode].background,
-        themeMode === 'dark' ? 0 : 5,
-      ),
-    )
-      .toString(16)
-      .padStart(6, '0')}`;
-
-    return { themeMode, baseColor, baseBackgroundColor };
-  };
-
-  const { themeMode, baseColor, baseBackgroundColor } =
-    getThemeAdjustedColors();
+  const { backgroundColor: baseBackgroundColor, fluidColor } =
+    getFluidThemeColors(theme, resolvedTheme);
 
   const getFluidSettings = () => ({
     backgroundColor: baseBackgroundColor,
-    fluidColor: baseColor,
+    fluidColor,
     densityDissipation: 0.98,
     blend: 0,
     velocityDissipation: isLowPerformanceDevice ? 0.95 : 0.98,
@@ -90,7 +64,6 @@ export default function HomeBackground() {
           height: '100%',
           pointerEvents: 'auto',
         }}
-        {...(themeMode === 'light' && { className: 'bg-slate-200' })}
         camera={{ fov: 75, near: 0.1, far: 1000, position: [0, 0, 5] }}
         dpr={isLowPerformanceDevice ? 1 : 2}
         performance={{ min: 0.5 }}

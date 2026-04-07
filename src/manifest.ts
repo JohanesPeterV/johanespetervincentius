@@ -1,3 +1,4 @@
+import { DEFAULT_BASE_COLOR } from '@/registry/registry-base-colors';
 import { MetadataRoute } from 'next';
 
 interface PwaIcon {
@@ -6,14 +7,16 @@ interface PwaIcon {
   type: string;
 }
 
+const getCssColor = (value: string) => `hsl(${value})`;
+
 const getAppName = () => 'Johanes Peter Vincentius Portfolio';
 const getShortName = () => 'Johanes Portfolio';
 const getDescription = () =>
   'Interactive portfolio showcasing web development projects and skills';
 
 const getAppColors = () => ({
-  background: '#000000',
-  theme: '#ffffff',
+  background: getCssColor(DEFAULT_BASE_COLOR.cssVars.light.background),
+  theme: getCssColor(DEFAULT_BASE_COLOR.activeColor.light),
 });
 
 const getAppIcons = (): PwaIcon[] => [

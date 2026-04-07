@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/components/theme-provider';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { DEFAULT_BASE_COLOR } from '@/registry/registry-base-colors';
 import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
@@ -10,10 +11,18 @@ const poppins = Poppins({
   variable: '--font-poppins',
 });
 
+const getCssColor = (value: string) => `hsl(${value})`;
+
 const configureViewportSettings = (): Viewport => ({
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
+    {
+      media: '(prefers-color-scheme: light)',
+      color: getCssColor(DEFAULT_BASE_COLOR.activeColor.light),
+    },
+    {
+      media: '(prefers-color-scheme: dark)',
+      color: getCssColor(DEFAULT_BASE_COLOR.activeColor.dark),
+    },
   ],
   width: 'device-width',
   initialScale: 1,
