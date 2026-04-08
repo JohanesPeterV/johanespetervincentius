@@ -6,13 +6,13 @@ import TechnologySection from './technologies-section';
 const Technologies = (): React.JSX.Element => {
   return (
     <SectionShell
-      eyebrow="Primary stack"
-      title="React, Next.js, TypeScript, Node.js, and PostgreSQL."
-      description="Primary depth across product frontend, typed APIs, and relational data."
+      eyebrow="Stack"
+      title="Current tools."
+      description="Mostly React, Next.js, TypeScript, Node.js, and PostgreSQL."
       panelClassName="overflow-hidden sm:px-7 sm:py-6"
     >
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/10 pb-4 text-sm font-medium tracking-tight text-primary/90 sm:text-[15px]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/10 pb-4 text-sm tracking-tight text-primary/80 sm:text-[15px]">
           <span>React</span>
           <span className="text-zinc-600">/</span>
           <span>Next.js</span>
