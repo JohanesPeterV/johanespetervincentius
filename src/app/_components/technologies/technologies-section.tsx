@@ -1,4 +1,3 @@
-import { cn } from '@/lib/utils';
 import { Technology } from './technologies';
 
 type TechnologySectionProps = {
@@ -7,18 +6,20 @@ type TechnologySectionProps = {
   contents: Technology['contents'];
 };
 
-export default function TechnologySection(props: TechnologySectionProps) {
+const TechnologySection = (
+  props: TechnologySectionProps,
+): React.JSX.Element => {
   const primaryContents = props.contents.slice(0, 4);
   const secondaryContents = props.contents.slice(4);
 
   return (
-    <div className="flex h-full flex-col gap-5">
-      <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="text-xl font-medium tracking-tight text-foreground sm:text-[1.35rem]">
+    <div className="grid gap-5 sm:grid-cols-[minmax(0,0.34fr)_minmax(0,0.66fr)] sm:gap-8">
+      <div className="space-y-3 pr-2">
+        <div className="space-y-1.5">
+          <h2 className="text-xl font-medium tracking-tight text-foreground sm:text-[1.4rem]">
             {props.title}
           </h2>
-          <p className="pt-1 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
             {props.contents.length} tools
           </p>
         </div>
@@ -27,26 +28,28 @@ export default function TechnologySection(props: TechnologySectionProps) {
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 sm:pt-0.5">
         <div role="list" aria-label={`${props.title} primary technologies`}>
-          <div className="flex flex-wrap gap-2.5">
-            {primaryContents.map((content) => (
-              <a
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[15px] leading-7 text-foreground sm:text-base">
+            {primaryContents.map((content, index) => (
+              <div
                 key={content.name}
-                href={content.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  'inline-flex items-center rounded-full border px-3 py-1.5 text-sm',
-                  'border-black/8 bg-background/80 text-foreground dark:border-white/10',
-                  'transition-colors duration-200 hover:border-primary/20 hover:text-primary',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/35',
-                )}
+                className="flex items-center gap-3"
                 role="listitem"
-                aria-label={`Visit ${content.name} documentation`}
               >
-                {content.name}
-              </a>
+                <a
+                  href={content.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors duration-200 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/35"
+                  aria-label={`Visit ${content.name} documentation`}
+                >
+                  {content.name}
+                </a>
+                {index < primaryContents.length - 1 && (
+                  <span className="text-muted-foreground/50">/</span>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -56,23 +59,26 @@ export default function TechnologySection(props: TechnologySectionProps) {
             role="list"
             aria-label={`${props.title} supporting technologies`}
           >
-            <div className="flex flex-wrap gap-x-3 gap-y-2">
-              {secondaryContents.map((content) => (
-                <a
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm leading-7 text-muted-foreground sm:text-[15px]">
+              {secondaryContents.map((content, index) => (
+                <div
                   key={content.name}
-                  href={content.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    'inline-flex items-center text-sm text-muted-foreground',
-                    'transition-colors duration-200 hover:text-foreground',
-                    'focus:outline-none focus:ring-2 focus:ring-primary/35 focus:ring-offset-2 focus:ring-offset-transparent',
-                  )}
+                  className="flex items-center gap-3"
                   role="listitem"
-                  aria-label={`Visit ${content.name} documentation`}
                 >
-                  {content.name}
-                </a>
+                  <a
+                    href={content.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors duration-200 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/35"
+                    aria-label={`Visit ${content.name} documentation`}
+                  >
+                    {content.name}
+                  </a>
+                  {index < secondaryContents.length - 1 && (
+                    <span className="text-muted-foreground/40">/</span>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -80,4 +86,6 @@ export default function TechnologySection(props: TechnologySectionProps) {
       </div>
     </div>
   );
-}
+};
+
+export default TechnologySection;

@@ -13,7 +13,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Interface',
     description:
-      'What I usually reach for when the interface needs to feel fast, clear, and considered.',
+      'Most of my recent frontend work has centered here, especially in React and Next.js environments.',
     contents: [
       { name: 'React', link: 'https://reactjs.org/docs/getting-started.html' },
       { name: 'Next.js', link: 'https://nextjs.org/' },
@@ -51,7 +51,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Backend',
     description:
-      'A familiar set for APIs, integrations, and application logic that needs to stay readable over time.',
+      'The backend tools I know best for API design, integrations, and TypeScript-heavy product work.',
     contents: [
       { name: 'Node.js', link: 'https://nodejs.org/en/' },
       { name: 'Nest.js', link: 'https://nestjs.com/' },
@@ -71,7 +71,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Languages',
     description:
-      'Languages I have used across product builds, client work, and internal tools.',
+      'TypeScript is the center of gravity, with the others coming in where the domain or platform needs them.',
     contents: [
       { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
       {
@@ -101,7 +101,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Data',
     description:
-      'The databases I know well enough to choose based on constraints instead of habit.',
+      'Usually PostgreSQL first, then other options depending on the product shape and operational needs.',
     contents: [
       { name: 'PostgreSQL', link: 'https://www.postgresql.org/' },
       { name: 'MongoDB', link: 'https://docs.mongodb.com/' },
@@ -120,7 +120,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Shipping',
     description:
-      'Typical deployment platforms I have used to ship, iterate, and keep maintenance straightforward.',
+      'Where I usually land when a project needs to ship cleanly and stay easy to operate.',
     contents: [
       {
         name: 'Vercel',

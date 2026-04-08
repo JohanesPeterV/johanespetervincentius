@@ -2,36 +2,36 @@ import ScrollContainer from '@/components/scroll-container';
 import { TECHNOLOGIES } from './technologies';
 import TechnologySection from './technologies-section';
 
-export default function Technologies() {
+const Technologies = (): React.JSX.Element => {
   return (
     <section className="flex min-h-screen items-center px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-12">
-        <div className="flex items-center">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:gap-14">
+        <div className="flex items-center lg:pr-6">
           <div className="max-w-md space-y-5 px-1">
             <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-primary/70">
-              Selected stack
+              Core stack
             </p>
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.8rem]">
-              Tools I keep returning to.
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.9rem]">
+              Mostly React, Next.js, TypeScript, Node.js, and PostgreSQL.
             </h2>
             <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-              The mix changes with the product, but these are the technologies I
-              tend to trust when the work needs to feel clear, stable, and well
-              finished.
+              That is where most of my recent work has lived, from product UI to
+              application logic and shipping.
             </p>
             <p className="text-sm leading-7 text-muted-foreground/80 sm:text-[15px]">
-              Less a checklist, more a working set shaped by real projects.
+              The rest of the list reflects tools I can work in when the product
+              or team calls for something different.
             </p>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[28px] border border-white/15 bg-white/45 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur-2xl dark:bg-black/45 sm:p-4">
+        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white/30 px-5 py-4 shadow-lg ring-1 ring-black/5 backdrop-blur-2xl dark:border-white/10 dark:bg-black/30 sm:px-7 sm:py-6">
           <ScrollContainer className="pr-1 sm:pr-2">
-            <div className="grid grid-cols-1 gap-3 pb-1 sm:grid-cols-2">
+            <div className="divide-y divide-black/5 pb-1 dark:divide-white/10">
               {TECHNOLOGIES.map((technology) => (
                 <div
                   key={technology.category}
-                  className="rounded-[24px] border border-black/5 bg-background/55 p-5 backdrop-blur-xl transition-colors duration-200 hover:bg-background/65 dark:border-white/10 sm:p-6"
+                  className="py-6 first:pt-1 last:pb-2 sm:py-7"
                 >
                   <TechnologySection
                     description={technology.description}
@@ -46,4 +46,6 @@ export default function Technologies() {
       </div>
     </section>
   );
-}
+};
+
+export default Technologies;
