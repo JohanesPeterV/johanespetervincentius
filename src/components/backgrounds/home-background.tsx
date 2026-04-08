@@ -20,7 +20,15 @@ type Vector3Tuple = [number, number, number];
 
 type PerformanceTier = 'high' | 'low';
 
-type ParallaxShapeKind = 'icosahedron' | 'sphere' | 'torus';
+type ParallaxShapeKind = 'icosahedron' | 'sphere';
+
+const mixHexColors = (
+  first: string,
+  second: string,
+  amount: number,
+): string => {
+  return `#${new THREE.Color(first).lerp(new THREE.Color(second), amount).getHexString()}`;
+};
 
 type ParallaxShapeProps = {
   color: string;
@@ -39,21 +47,6 @@ type ParallaxFieldProps = {
   fluidColor: string;
   performanceTier: PerformanceTier;
   textColor: string;
-};
-
-const ParallaxGeometry = ({
-  kind,
-  scale,
-}: Pick<ParallaxShapeProps, 'kind' | 'scale'>): ReactElement => {
-  if (kind === 'icosahedron') {
-    return <icosahedronGeometry args={[scale, 1]} />;
-  }
-
-  if (kind === 'sphere') {
-    return <sphereGeometry args={[scale, 48, 48]} />;
-  }
-
-  return <torusGeometry args={[scale, scale * 0.28, 24, 96]} />;
 };
 
 const ParallaxShape = ({
@@ -98,19 +91,23 @@ const ParallaxShape = ({
 
   return (
     <mesh ref={meshRef} position={position}>
-      <ParallaxGeometry kind={kind} scale={scale} />
+      {kind === 'icosahedron' ? (
+        <icosahedronGeometry args={[scale, 1]} />
+      ) : (
+        <sphereGeometry args={[scale, 48, 48]} />
+      )}
       <meshPhysicalMaterial
         color={color}
         transparent
-        opacity={kind === 'torus' ? 0.09 : 0.07}
-        roughness={0.35}
-        metalness={0.04}
-        clearcoat={1}
-        clearcoatRoughness={0.38}
-        transmission={0.02}
-        thickness={0.3}
+        opacity={0.04}
+        roughness={0.78}
+        metalness={0.02}
+        clearcoat={0.45}
+        clearcoatRoughness={0.8}
+        transmission={0}
+        thickness={0.1}
         emissive={color}
-        emissiveIntensity={isLowPerformanceDevice ? 0.05 : 0.14}
+        emissiveIntensity={isLowPerformanceDevice ? 0.02 : 0.06}
         depthWrite={false}
       />
     </mesh>
@@ -143,49 +140,49 @@ const ParallaxField = ({
   return (
     <>
       <color attach="background" args={[backgroundColor]} />
-      <fog attach="fog" args={[backgroundColor, 4.5, 14]} />
-      <ambientLight intensity={isLowPerformanceDevice ? 0.28 : 0.38} />
+      <fog attach="fog" args={[backgroundColor, 3.5, 11.5]} />
+      <ambientLight intensity={isLowPerformanceDevice ? 0.2 : 0.26} />
       <pointLight
         position={[-4, 2, 7]}
-        intensity={isLowPerformanceDevice ? 9 : 15}
+        intensity={isLowPerformanceDevice ? 5 : 8}
         color={fluidColor}
       />
       <pointLight
         position={[5, -3, 4]}
-        intensity={isLowPerformanceDevice ? 5 : 9}
+        intensity={isLowPerformanceDevice ? 3 : 5}
         color={textColor}
       />
       <ParallaxShape
         color={fluidColor}
         kind="icosahedron"
-        parallaxStrength={0.3}
+        parallaxStrength={0.16}
         performanceTier={performanceTier}
-        position={[3.6, 1.8, -7.5]}
-        rotationSpeed={[0.08, 0.12, 0.04]}
-        scale={1.25}
-        scrollDepth={0.08}
+        position={[5.4, 2.6, -8.5]}
+        rotationSpeed={[0.03, 0.05, 0.02]}
+        scale={2.1}
+        scrollDepth={0.04}
         scrollOffsetRef={scrollOffsetRef}
       />
       <ParallaxShape
         color={textColor}
         kind="sphere"
-        parallaxStrength={0.5}
+        parallaxStrength={0.22}
         performanceTier={performanceTier}
-        position={[-4.1, -2.3, -11]}
-        rotationSpeed={[0.04, 0.08, 0.03]}
-        scale={1.7}
-        scrollDepth={0.16}
+        position={[-6.1, -3.2, -12.8]}
+        rotationSpeed={[0.02, 0.04, 0.01]}
+        scale={3.2}
+        scrollDepth={0.08}
         scrollOffsetRef={scrollOffsetRef}
       />
       <ParallaxShape
         color={fluidColor}
-        kind="torus"
-        parallaxStrength={0.75}
+        kind="sphere"
+        parallaxStrength={0.34}
         performanceTier={performanceTier}
-        position={[0.8, 3.4, -14]}
-        rotationSpeed={[0.03, 0.05, 0.06]}
-        scale={2.2}
-        scrollDepth={0.24}
+        position={[0, 5.8, -16.5]}
+        rotationSpeed={[0.01, 0.02, 0.01]}
+        scale={4.4}
+        scrollDepth={0.14}
         scrollOffsetRef={scrollOffsetRef}
       />
     </>
@@ -201,11 +198,27 @@ const HomeBackground = (): ReactElement => {
 
   const performanceTier: PerformanceTier = gpu.tier < 2 ? 'low' : 'high';
   const isLowPerformanceDevice = performanceTier === 'low';
+  const isDarkTheme = resolvedTheme === 'dark';
   const {
     backgroundColor: baseBackgroundColor,
     fluidColor,
     textColor,
   } = getFluidThemeColors(theme, resolvedTheme);
+  const depthBackgroundColor = mixHexColors(
+    baseBackgroundColor,
+    '#050506',
+    isDarkTheme ? 0.22 : 0.08,
+  );
+  const fluidAtmosphereColor = mixHexColors(
+    fluidColor,
+    baseBackgroundColor,
+    0.62,
+  );
+  const quietHighlightColor = mixHexColors(
+    textColor,
+    baseBackgroundColor,
+    0.82,
+  );
 
   // REASON: DOM side-effect — canvas pointer events should listen on the page body and the fixed container opts into hardware acceleration while mounted
   useEffect(() => {
@@ -252,23 +265,28 @@ const HomeBackground = (): ReactElement => {
         performance={{ min: 0.5 }}
       >
         <ParallaxField
-          backgroundColor={baseBackgroundColor}
-          fluidColor={fluidColor}
+          backgroundColor={depthBackgroundColor}
+          fluidColor={fluidAtmosphereColor}
           performanceTier={performanceTier}
-          textColor={textColor}
+          textColor={quietHighlightColor}
         />
         <EffectComposer enabled={!isLowPerformanceDevice}>
           <Fluid
-            backgroundColor={baseBackgroundColor}
-            fluidColor={fluidColor}
-            densityDissipation={0.96}
+            backgroundColor={depthBackgroundColor}
+            fluidColor={fluidAtmosphereColor}
+            densityDissipation={0.94}
             blend={0}
-            velocityDissipation={isLowPerformanceDevice ? 0.9 : 0.94}
-            pressure={isLowPerformanceDevice ? 0.42 : 0.56}
+            velocityDissipation={isLowPerformanceDevice ? 0.88 : 0.92}
+            pressure={isLowPerformanceDevice ? 0.32 : 0.42}
           />
         </EffectComposer>
       </Canvas>
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/40 via-background/55 to-background/80" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `radial-gradient(circle at 18% 16%, ${fluidAtmosphereColor}18 0%, transparent 34%), radial-gradient(circle at 82% 24%, ${quietHighlightColor}12 0%, transparent 30%), radial-gradient(circle at 50% 44%, transparent 0%, ${depthBackgroundColor}2c 46%, ${depthBackgroundColor}c9 100%), linear-gradient(to bottom, ${depthBackgroundColor}2e 0%, ${depthBackgroundColor}85 52%, ${depthBackgroundColor}e0 100%)`,
+        }}
+      />
     </div>
   );
 };
