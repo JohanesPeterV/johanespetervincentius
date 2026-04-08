@@ -16,11 +16,27 @@ export type SparkSpec = {
   variant: 'cross' | 'dot';
 };
 
+export type FloaterTone = 'accent' | 'highlight' | 'shadow';
+
+export type FloatingObjectSpec = {
+  delay: string;
+  duration: string;
+  height: string;
+  left: string;
+  opacity: number;
+  rotate: number;
+  shape: 'diamond' | 'pill' | 'ring';
+  tone: FloaterTone;
+  top: string;
+  width: string;
+};
+
 export const MOTION_LAYERS: MotionLayer[] = [
-  { pointerX: 34, pointerY: 18, scale: 1.02, scrollY: 18 },
-  { pointerX: 52, pointerY: 28, scale: 1.05, scrollY: 28 },
-  { pointerX: 72, pointerY: 36, scale: 1.08, scrollY: 16 },
-  { pointerX: 96, pointerY: 52, scale: 1.12, scrollY: 42 },
+  { pointerX: 18, pointerY: 10, scale: 1.01, scrollY: 10 },
+  { pointerX: 28, pointerY: 16, scale: 1.03, scrollY: 16 },
+  { pointerX: 40, pointerY: 22, scale: 1.05, scrollY: 10 },
+  { pointerX: 44, pointerY: 26, scale: 1.06, scrollY: 16 },
+  { pointerX: 56, pointerY: 32, scale: 1.08, scrollY: 28 },
 ];
 
 export const SPARKS: SparkSpec[] = [
@@ -122,6 +138,69 @@ export const SPARKS: SparkSpec[] = [
   },
 ];
 
+export const FLOATERS: FloatingObjectSpec[] = [
+  {
+    delay: '-2s',
+    duration: '11s',
+    height: '4.5rem',
+    left: '10%',
+    opacity: 0.44,
+    rotate: -16,
+    shape: 'ring',
+    tone: 'highlight',
+    top: '68%',
+    width: '4.5rem',
+  },
+  {
+    delay: '-5s',
+    duration: '14s',
+    height: '1.4rem',
+    left: '24%',
+    opacity: 0.42,
+    rotate: 26,
+    shape: 'diamond',
+    tone: 'accent',
+    top: '58%',
+    width: '1.4rem',
+  },
+  {
+    delay: '-8s',
+    duration: '13s',
+    height: '1.2rem',
+    left: '66%',
+    opacity: 0.36,
+    rotate: 8,
+    shape: 'pill',
+    tone: 'highlight',
+    top: '60%',
+    width: '5.5rem',
+  },
+  {
+    delay: '-3s',
+    duration: '12s',
+    height: '2rem',
+    left: '80%',
+    opacity: 0.34,
+    rotate: -22,
+    shape: 'diamond',
+    tone: 'accent',
+    top: '72%',
+    width: '2rem',
+  },
+  {
+    delay: '-6s',
+    duration: '15s',
+    height: '6rem',
+    left: '88%',
+    opacity: 0.22,
+    rotate: 18,
+    shape: 'ring',
+    tone: 'shadow',
+    top: '46%',
+    width: '6rem',
+  },
+];
+
 export const SparkMark = ({
   color,
   spec,
@@ -173,6 +252,47 @@ export const SparkMark = ({
           width: '100%',
         }}
       />
+    </div>
+  );
+};
+
+export const FloatingObject = ({
+  borderColor,
+  glowColor,
+  spec,
+}: {
+  borderColor: string;
+  glowColor: string;
+  spec: FloatingObjectSpec;
+}): ReactElement => {
+  const borderRadius = spec.shape === 'diamond' ? '0.8rem' : '9999px';
+
+  return (
+    <div
+      className="absolute"
+      style={{
+        height: spec.height,
+        left: spec.left,
+        opacity: spec.opacity,
+        top: spec.top,
+        transform: `rotate(${spec.rotate}deg)`,
+        width: spec.width,
+      }}
+    >
+      <div
+        className="animate-background-float h-full w-full"
+        style={{ animationDelay: spec.delay, animationDuration: spec.duration }}
+      >
+        <div
+          className="h-full w-full border backdrop-blur-sm"
+          style={{
+            backgroundColor: `${glowColor}18`,
+            borderColor,
+            borderRadius,
+            boxShadow: `0 0 32px ${glowColor}22`,
+          }}
+        />
+      </div>
     </div>
   );
 };
