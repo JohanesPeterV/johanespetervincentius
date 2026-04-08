@@ -99,15 +99,15 @@ const ParallaxShape = ({
       <meshPhysicalMaterial
         color={color}
         transparent
-        opacity={0.04}
-        roughness={0.78}
+        opacity={0.06}
+        roughness={0.72}
         metalness={0.02}
         clearcoat={0.45}
         clearcoatRoughness={0.8}
         transmission={0}
         thickness={0.1}
         emissive={color}
-        emissiveIntensity={isLowPerformanceDevice ? 0.02 : 0.06}
+        emissiveIntensity={isLowPerformanceDevice ? 0.03 : 0.1}
         depthWrite={false}
       />
     </mesh>
@@ -140,49 +140,49 @@ const ParallaxField = ({
   return (
     <>
       <color attach="background" args={[backgroundColor]} />
-      <fog attach="fog" args={[backgroundColor, 3.5, 11.5]} />
-      <ambientLight intensity={isLowPerformanceDevice ? 0.2 : 0.26} />
+      <fog attach="fog" args={[backgroundColor, 4.5, 14]} />
+      <ambientLight intensity={isLowPerformanceDevice ? 0.24 : 0.3} />
       <pointLight
         position={[-4, 2, 7]}
-        intensity={isLowPerformanceDevice ? 5 : 8}
+        intensity={isLowPerformanceDevice ? 8 : 12}
         color={fluidColor}
       />
       <pointLight
         position={[5, -3, 4]}
-        intensity={isLowPerformanceDevice ? 3 : 5}
+        intensity={isLowPerformanceDevice ? 5 : 8}
         color={textColor}
       />
       <ParallaxShape
         color={fluidColor}
         kind="icosahedron"
-        parallaxStrength={0.16}
+        parallaxStrength={0.42}
         performanceTier={performanceTier}
-        position={[5.4, 2.6, -8.5]}
-        rotationSpeed={[0.03, 0.05, 0.02]}
+        position={[4.8, 2.2, -6.8]}
+        rotationSpeed={[0.04, 0.06, 0.02]}
         scale={2.1}
-        scrollDepth={0.04}
+        scrollDepth={0.08}
         scrollOffsetRef={scrollOffsetRef}
       />
       <ParallaxShape
         color={textColor}
         kind="sphere"
-        parallaxStrength={0.22}
+        parallaxStrength={0.62}
         performanceTier={performanceTier}
-        position={[-6.1, -3.2, -12.8]}
-        rotationSpeed={[0.02, 0.04, 0.01]}
+        position={[-5.1, -2.8, -9.8]}
+        rotationSpeed={[0.03, 0.05, 0.01]}
         scale={3.2}
-        scrollDepth={0.08}
+        scrollDepth={0.14}
         scrollOffsetRef={scrollOffsetRef}
       />
       <ParallaxShape
         color={fluidColor}
         kind="sphere"
-        parallaxStrength={0.34}
+        parallaxStrength={0.86}
         performanceTier={performanceTier}
-        position={[0, 5.8, -16.5]}
-        rotationSpeed={[0.01, 0.02, 0.01]}
+        position={[0.4, 4.8, -13.2]}
+        rotationSpeed={[0.02, 0.03, 0.01]}
         scale={4.4}
-        scrollDepth={0.14}
+        scrollDepth={0.22}
         scrollOffsetRef={scrollOffsetRef}
       />
     </>
@@ -212,7 +212,7 @@ const HomeBackground = (): ReactElement => {
   const fluidAtmosphereColor = mixHexColors(
     fluidColor,
     baseBackgroundColor,
-    0.62,
+    0.38,
   );
   const quietHighlightColor = mixHexColors(
     textColor,
@@ -274,17 +274,17 @@ const HomeBackground = (): ReactElement => {
           <Fluid
             backgroundColor={depthBackgroundColor}
             fluidColor={fluidAtmosphereColor}
-            densityDissipation={0.94}
+            densityDissipation={0.96}
             blend={0}
-            velocityDissipation={isLowPerformanceDevice ? 0.88 : 0.92}
-            pressure={isLowPerformanceDevice ? 0.32 : 0.42}
+            velocityDissipation={isLowPerformanceDevice ? 0.9 : 0.95}
+            pressure={isLowPerformanceDevice ? 0.46 : 0.62}
           />
         </EffectComposer>
       </Canvas>
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background: `radial-gradient(circle at 18% 16%, ${fluidAtmosphereColor}18 0%, transparent 34%), radial-gradient(circle at 82% 24%, ${quietHighlightColor}12 0%, transparent 30%), radial-gradient(circle at 50% 44%, transparent 0%, ${depthBackgroundColor}2c 46%, ${depthBackgroundColor}c9 100%), linear-gradient(to bottom, ${depthBackgroundColor}2e 0%, ${depthBackgroundColor}85 52%, ${depthBackgroundColor}e0 100%)`,
+          background: `radial-gradient(circle at 18% 16%, ${fluidAtmosphereColor}12 0%, transparent 34%), radial-gradient(circle at 82% 24%, ${quietHighlightColor}0d 0%, transparent 30%), radial-gradient(circle at 50% 44%, transparent 0%, ${depthBackgroundColor}18 42%, ${depthBackgroundColor}9e 100%), linear-gradient(to bottom, ${depthBackgroundColor}14 0%, ${depthBackgroundColor}5c 52%, ${depthBackgroundColor}c7 100%)`,
         }}
       />
     </div>
