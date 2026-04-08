@@ -92,9 +92,50 @@ src/
 
 ## 🎨 Customization
 
-- Theme colors can be adjusted in `tailwind.config.ts`
+- Base color palettes live in `src/registry/registry-base-colors.ts`
+- Runtime theme resolution lives in `src/lib/theme-colors.ts`
+- CSS variables are applied by `src/components/theme-switcher.tsx`
 - Animations can be modified in respective component files
 - Content can be updated in the respective section files
+
+## 🎨 Color System
+
+This project uses semantic color tokens instead of component-level palette picks.
+
+### Source of truth
+
+- `src/registry/registry-base-colors.ts`: base theme definitions and per-theme token values
+- `src/lib/theme-colors.ts`: helpers for resolving the active theme and deriving hex values for non-CSS consumers
+- `src/app/globals.css`: default CSS variable fallback values
+
+### Usage rules
+
+- Use semantic utilities such as `bg-background`, `text-foreground`, `bg-card`, `border-border`, and `text-muted-foreground`
+- Use `primary` for interactive emphasis, active states, and brand-highlighted text
+- Use `secondary` for quiet interactive surfaces and alternate sections
+- Use `muted` and `muted-foreground` for supporting UI, placeholders, and low-emphasis metadata
+- Use `accent` for hover and transient emphasis surfaces, not as a second brand color
+- Use `destructive` only for dangerous actions and error states
+- Avoid hardcoded Tailwind palette classes such as `text-blue-500`, `bg-slate-200`, and `border-white/20` in app code
+- Avoid raw hex, `rgb()`, or `hsl()` in app UI unless a browser API or canvas/WebGL integration requires it
+
+### Gradients and effects
+
+- Build gradients from semantic tokens when possible, for example `from-foreground via-primary to-muted-foreground`
+- For WebGL and metadata colors, resolve from `getThemeColorValues` or `getFluidThemeColors` instead of duplicating registry lookup logic
+- If a component needs a new visual role, prefer extending the semantic token model before adding one-off colors in the component
+
+### Quick examples
+
+```tsx
+<div className="bg-card text-card-foreground border border-border" />
+
+<button className="bg-primary text-primary-foreground hover:bg-primary/90" />
+
+<p className="text-muted-foreground" />
+
+<div className="bg-gradient-to-r from-foreground via-primary to-muted-foreground" />
+```
 
 ## 📄 License
 
