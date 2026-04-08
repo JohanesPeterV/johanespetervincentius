@@ -2,25 +2,28 @@
 
 import { useConfig } from '@/hooks/use-config';
 import { getFluidThemeColors } from '@/lib/theme-colors';
-import { useDetectGPU } from '@react-three/drei';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { EffectComposer } from '@react-three/postprocessing';
-import { Fluid } from '@whatisjery/react-fluid-distortion';
 import { useTheme } from 'next-themes';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type MutableRefObject,
-  type ReactElement,
-} from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 import * as THREE from 'three';
 
-type Vector3Tuple = [number, number, number];
+type PointerState = {
+  x: number;
+  y: number;
+};
 
-type PerformanceTier = 'high' | 'low';
-
-type ParallaxShapeKind = 'icosahedron' | 'sphere';
+type AtmosphereLayer = {
+  blur: number;
+  color: string;
+  height: string;
+  left: string;
+  opacity: number;
+  pointerX: number;
+  pointerY: number;
+  scale: number;
+  scrollY: number;
+  top: string;
+  width: string;
+};
 
 const mixHexColors = (
   first: string,
@@ -30,262 +33,235 @@ const mixHexColors = (
   return `#${new THREE.Color(first).lerp(new THREE.Color(second), amount).getHexString()}`;
 };
 
-type ParallaxShapeProps = {
-  color: string;
-  kind: ParallaxShapeKind;
-  parallaxStrength: number;
-  performanceTier: PerformanceTier;
-  position: Vector3Tuple;
-  rotationSpeed: Vector3Tuple;
-  scale: number;
-  scrollDepth: number;
-  scrollOffsetRef: MutableRefObject<number>;
+const getHexAlpha = (opacity: number): string => {
+  return Math.round(opacity * 255)
+    .toString(16)
+    .padStart(2, '0');
 };
 
-type ParallaxFieldProps = {
-  backgroundColor: string;
-  fluidColor: string;
-  performanceTier: PerformanceTier;
-  textColor: string;
+const getLayerGradient = (color: string, opacity: number): string => {
+  const strong = getHexAlpha(opacity);
+  const medium = getHexAlpha(opacity * 0.58);
+  const soft = getHexAlpha(opacity * 0.22);
+
+  return `radial-gradient(circle at 34% 34%, ${color}${strong} 0%, ${color}${medium} 28%, ${color}${soft} 52%, transparent 76%)`;
 };
 
-const ParallaxShape = ({
-  color,
-  kind,
-  parallaxStrength,
-  performanceTier,
-  position,
-  rotationSpeed,
-  scale,
-  scrollDepth,
-  scrollOffsetRef,
-}: ParallaxShapeProps): ReactElement => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const isLowPerformanceDevice = performanceTier === 'low';
+const applyLayerTransform = (
+  element: HTMLDivElement,
+  layer: AtmosphereLayer,
+  pointer: PointerState,
+  scrollOffset: number,
+): void => {
+  const translateX = pointer.x * layer.pointerX;
+  const translateY = pointer.y * layer.pointerY - scrollOffset * layer.scrollY;
 
-  useFrame((state, delta) => {
-    if (!meshRef.current) {
-      return;
-    }
-
-    const targetX = position[0] + state.pointer.x * parallaxStrength;
-    const targetY =
-      position[1] +
-      state.pointer.y * parallaxStrength * 0.75 -
-      scrollOffsetRef.current * scrollDepth;
-
-    meshRef.current.position.x = THREE.MathUtils.lerp(
-      meshRef.current.position.x,
-      targetX,
-      isLowPerformanceDevice ? 0.02 : 0.05,
-    );
-    meshRef.current.position.y = THREE.MathUtils.lerp(
-      meshRef.current.position.y,
-      targetY,
-      isLowPerformanceDevice ? 0.02 : 0.05,
-    );
-    meshRef.current.rotation.x += delta * rotationSpeed[0];
-    meshRef.current.rotation.y += delta * rotationSpeed[1];
-    meshRef.current.rotation.z += delta * rotationSpeed[2];
-  });
-
-  return (
-    <mesh ref={meshRef} position={position}>
-      {kind === 'icosahedron' ? (
-        <icosahedronGeometry args={[scale, 1]} />
-      ) : (
-        <sphereGeometry args={[scale, 48, 48]} />
-      )}
-      <meshPhysicalMaterial
-        color={color}
-        transparent
-        opacity={0.06}
-        roughness={0.72}
-        metalness={0.02}
-        clearcoat={0.45}
-        clearcoatRoughness={0.8}
-        transmission={0}
-        thickness={0.1}
-        emissive={color}
-        emissiveIntensity={isLowPerformanceDevice ? 0.03 : 0.1}
-        depthWrite={false}
-      />
-    </mesh>
-  );
+  element.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${layer.scale})`;
 };
 
-const ParallaxField = ({
-  backgroundColor,
-  fluidColor,
-  performanceTier,
-  textColor,
-}: ParallaxFieldProps): ReactElement => {
-  const scrollOffsetRef = useRef(0);
-  const isLowPerformanceDevice = performanceTier === 'low';
-
-  // REASON: scroll position lives outside React state and is sampled per-frame to keep parallax smooth without rerendering the canvas tree
-  useEffect(() => {
-    const handleScroll = (): void => {
-      scrollOffsetRef.current = window.scrollY / window.innerHeight;
-    };
-
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  return (
-    <>
-      <color attach="background" args={[backgroundColor]} />
-      <fog attach="fog" args={[backgroundColor, 4.5, 14]} />
-      <ambientLight intensity={isLowPerformanceDevice ? 0.24 : 0.3} />
-      <pointLight
-        position={[-4, 2, 7]}
-        intensity={isLowPerformanceDevice ? 8 : 12}
-        color={fluidColor}
-      />
-      <pointLight
-        position={[5, -3, 4]}
-        intensity={isLowPerformanceDevice ? 5 : 8}
-        color={textColor}
-      />
-      <ParallaxShape
-        color={fluidColor}
-        kind="icosahedron"
-        parallaxStrength={0.42}
-        performanceTier={performanceTier}
-        position={[4.8, 2.2, -6.8]}
-        rotationSpeed={[0.04, 0.06, 0.02]}
-        scale={2.1}
-        scrollDepth={0.08}
-        scrollOffsetRef={scrollOffsetRef}
-      />
-      <ParallaxShape
-        color={textColor}
-        kind="sphere"
-        parallaxStrength={0.62}
-        performanceTier={performanceTier}
-        position={[-5.1, -2.8, -9.8]}
-        rotationSpeed={[0.03, 0.05, 0.01]}
-        scale={3.2}
-        scrollDepth={0.14}
-        scrollOffsetRef={scrollOffsetRef}
-      />
-      <ParallaxShape
-        color={fluidColor}
-        kind="sphere"
-        parallaxStrength={0.86}
-        performanceTier={performanceTier}
-        position={[0.4, 4.8, -13.2]}
-        rotationSpeed={[0.02, 0.03, 0.01]}
-        scale={4.4}
-        scrollDepth={0.22}
-        scrollOffsetRef={scrollOffsetRef}
-      />
-    </>
-  );
+const createAtmosphereLayers = (
+  accentColor: string,
+  accentShadowColor: string,
+  highlightColor: string,
+): AtmosphereLayer[] => {
+  return [
+    {
+      blur: 110,
+      color: accentColor,
+      height: '42rem',
+      left: '-8%',
+      opacity: 0.42,
+      pointerX: 42,
+      pointerY: 28,
+      scale: 1.08,
+      scrollY: 26,
+      top: '-6%',
+      width: '50rem',
+    },
+    {
+      blur: 120,
+      color: highlightColor,
+      height: '34rem',
+      left: '74%',
+      opacity: 0.18,
+      pointerX: 24,
+      pointerY: 18,
+      scale: 1.04,
+      scrollY: 18,
+      top: '10%',
+      width: '34rem',
+    },
+    {
+      blur: 140,
+      color: accentShadowColor,
+      height: '46rem',
+      left: '-16%',
+      opacity: 0.3,
+      pointerX: 64,
+      pointerY: 42,
+      scale: 1.14,
+      scrollY: 42,
+      top: '56%',
+      width: '56rem',
+    },
+    {
+      blur: 100,
+      color: highlightColor,
+      height: '24rem',
+      left: '78%',
+      opacity: 0.12,
+      pointerX: 18,
+      pointerY: 14,
+      scale: 1.02,
+      scrollY: 12,
+      top: '66%',
+      width: '24rem',
+    },
+  ];
 };
 
 const HomeBackground = (): ReactElement => {
   const { resolvedTheme } = useTheme();
   const [{ theme }] = useConfig();
-  const [eventSource, setEventSource] = useState<HTMLElement | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const gpu = useDetectGPU();
-
-  const performanceTier: PerformanceTier = gpu.tier < 2 ? 'low' : 'high';
-  const isLowPerformanceDevice = performanceTier === 'low';
-  const isDarkTheme = resolvedTheme === 'dark';
+  const layerRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const pointerCurrentRef = useRef<PointerState>({ x: 0, y: 0 });
+  const pointerTargetRef = useRef<PointerState>({ x: 0, y: 0 });
+  const scrollCurrentRef = useRef(0);
+  const scrollTargetRef = useRef(0);
   const {
-    backgroundColor: baseBackgroundColor,
+    backgroundColor: themeBackgroundColor,
     fluidColor,
     textColor,
   } = getFluidThemeColors(theme, resolvedTheme);
   const depthBackgroundColor = mixHexColors(
-    baseBackgroundColor,
-    '#050506',
-    isDarkTheme ? 0.22 : 0.08,
+    themeBackgroundColor,
+    '#030409',
+    resolvedTheme === 'dark' ? 0.24 : 0.12,
   );
-  const fluidAtmosphereColor = mixHexColors(
+  const accentColor = mixHexColors(fluidColor, depthBackgroundColor, 0.18);
+  const accentShadowColor = mixHexColors(
     fluidColor,
-    baseBackgroundColor,
-    0.38,
+    depthBackgroundColor,
+    0.44,
   );
-  const quietHighlightColor = mixHexColors(
-    textColor,
-    baseBackgroundColor,
-    0.82,
+  const highlightColor = mixHexColors(textColor, depthBackgroundColor, 0.52);
+  const edgeShadowColor = mixHexColors(depthBackgroundColor, '#000000', 0.34);
+  const baseGradient = `linear-gradient(180deg, ${mixHexColors(depthBackgroundColor, '#070b14', 0.12)} 0%, ${depthBackgroundColor} 58%, ${mixHexColors(depthBackgroundColor, '#000000', 0.2)} 100%)`;
+  const vignetteGradient = `radial-gradient(circle at 50% 42%, transparent 0%, transparent 28%, ${depthBackgroundColor}42 56%, ${depthBackgroundColor}d6 100%)`;
+  const edgeGradient = `linear-gradient(90deg, ${edgeShadowColor}96 0%, transparent 18%, transparent 82%, ${edgeShadowColor}74 100%)`;
+  const layers = createAtmosphereLayers(
+    accentColor,
+    accentShadowColor,
+    highlightColor,
   );
 
-  // REASON: DOM side-effect — canvas pointer events should listen on the page body and the fixed container opts into hardware acceleration while mounted
+  // REASON: pointer and scroll motion update every frame, so refs avoid rerendering the full page while keeping the layered background smooth
   useEffect(() => {
-    setEventSource(document.body);
+    const effectLayers = createAtmosphereLayers(
+      accentColor,
+      accentShadowColor,
+      highlightColor,
+    );
 
-    if (containerRef.current) {
-      containerRef.current.style.willChange = 'transform';
-    }
+    const handlePointerMove = (event: PointerEvent): void => {
+      pointerTargetRef.current = {
+        x: (event.clientX / window.innerWidth - 0.5) * 2,
+        y: (event.clientY / window.innerHeight - 0.5) * 2,
+      };
+    };
 
-    const currentRef = containerRef.current;
+    const handlePointerReset = (): void => {
+      pointerTargetRef.current = { x: 0, y: 0 };
+    };
+
+    const handleScroll = (): void => {
+      scrollTargetRef.current = window.scrollY / window.innerHeight;
+    };
+
+    let frameId = 0;
+
+    const tick = (): void => {
+      pointerCurrentRef.current = {
+        x: THREE.MathUtils.lerp(
+          pointerCurrentRef.current.x,
+          pointerTargetRef.current.x,
+          0.08,
+        ),
+        y: THREE.MathUtils.lerp(
+          pointerCurrentRef.current.y,
+          pointerTargetRef.current.y,
+          0.08,
+        ),
+      };
+      scrollCurrentRef.current = THREE.MathUtils.lerp(
+        scrollCurrentRef.current,
+        scrollTargetRef.current,
+        0.06,
+      );
+
+      effectLayers.forEach((layer, index) => {
+        const element = layerRefs.current[index];
+
+        if (!element) {
+          return;
+        }
+
+        applyLayerTransform(
+          element,
+          layer,
+          pointerCurrentRef.current,
+          scrollCurrentRef.current,
+        );
+      });
+
+      frameId = window.requestAnimationFrame(tick);
+    };
+
+    handleScroll();
+    tick();
+    window.addEventListener('pointermove', handlePointerMove, {
+      passive: true,
+    });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('blur', handlePointerReset);
 
     return () => {
-      if (currentRef) {
-        currentRef.style.willChange = 'auto';
-      }
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('blur', handlePointerReset);
     };
-  }, []);
+  }, [accentColor, accentShadowColor, highlightColor]);
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed inset-0 z-[-10]"
-      style={{
-        transform: 'translateZ(0)',
-        backfaceVisibility: 'hidden',
-      }}
-    >
-      <Canvas
-        eventSource={eventSource || undefined}
-        style={{
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'auto',
-        }}
-        gl={{
-          antialias: !isLowPerformanceDevice,
-          alpha: false,
-          powerPreference: isLowPerformanceDevice
-            ? 'default'
-            : 'high-performance',
-        }}
-        camera={{ fov: 65, near: 0.1, far: 1000, position: [0, 0, 6] }}
-        dpr={isLowPerformanceDevice ? 1 : 2}
-        performance={{ min: 0.5 }}
-      >
-        <ParallaxField
-          backgroundColor={depthBackgroundColor}
-          fluidColor={fluidAtmosphereColor}
-          performanceTier={performanceTier}
-          textColor={quietHighlightColor}
-        />
-        <EffectComposer enabled={!isLowPerformanceDevice}>
-          <Fluid
-            backgroundColor={depthBackgroundColor}
-            fluidColor={fluidAtmosphereColor}
-            densityDissipation={0.96}
-            blend={0}
-            velocityDissipation={isLowPerformanceDevice ? 0.9 : 0.95}
-            pressure={isLowPerformanceDevice ? 0.46 : 0.62}
+    <div className="pointer-events-none fixed inset-0 z-[-10] overflow-hidden">
+      <div className="absolute inset-0" style={{ background: baseGradient }} />
+      {layers.map((layer, index) => {
+        return (
+          <div
+            key={`${layer.top}-${layer.left}-${index}`}
+            ref={(element) => {
+              layerRefs.current[index] = element;
+            }}
+            className="absolute rounded-full mix-blend-screen"
+            style={{
+              background: getLayerGradient(layer.color, layer.opacity),
+              filter: `blur(${layer.blur}px)`,
+              height: layer.height,
+              left: layer.left,
+              top: layer.top,
+              transform: `scale(${layer.scale})`,
+              transformOrigin: 'center',
+              width: layer.width,
+              willChange: 'transform',
+            }}
           />
-        </EffectComposer>
-      </Canvas>
+        );
+      })}
+      <div className="absolute inset-0" style={{ background: edgeGradient }} />
       <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: `radial-gradient(circle at 18% 16%, ${fluidAtmosphereColor}12 0%, transparent 34%), radial-gradient(circle at 82% 24%, ${quietHighlightColor}0d 0%, transparent 30%), radial-gradient(circle at 50% 44%, transparent 0%, ${depthBackgroundColor}18 42%, ${depthBackgroundColor}9e 100%), linear-gradient(to bottom, ${depthBackgroundColor}14 0%, ${depthBackgroundColor}5c 52%, ${depthBackgroundColor}c7 100%)`,
-        }}
+        className="absolute inset-0"
+        style={{ background: vignetteGradient }}
       />
     </div>
   );
