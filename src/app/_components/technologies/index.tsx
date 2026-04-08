@@ -15,12 +15,12 @@ const Technologies = (): React.JSX.Element => {
               Mostly React, Next.js, TypeScript, Node.js, and PostgreSQL.
             </h2>
             <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-              That is where most of my recent work has lived, from product UI to
-              application logic and shipping.
+              That is where I have the most depth across frontend systems, typed
+              APIs, data modeling, and production delivery.
             </p>
             <p className="text-sm leading-7 text-muted-foreground/80 sm:text-[15px]">
-              The rest of the list reflects tools I can work in when the product
-              or team calls for something different.
+              The rest of the list reflects technologies I can work in, but this
+              is the stack I would want to be evaluated on.
             </p>
           </div>
         </div>

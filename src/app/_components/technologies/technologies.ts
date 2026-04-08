@@ -11,9 +11,9 @@ export type Technology = {
 
 export const TECHNOLOGIES: Technology[] = [
   {
-    category: 'Interface',
+    category: 'Frontend',
     description:
-      'Most of my recent frontend work has centered here, especially in React and Next.js environments.',
+      'Primary stack for production React applications, design systems, interaction-heavy UI, and performance work.',
     contents: [
       { name: 'React', link: 'https://reactjs.org/docs/getting-started.html' },
       { name: 'Next.js', link: 'https://nextjs.org/' },
@@ -51,7 +51,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Backend',
     description:
-      'The backend tools I know best for API design, integrations, and TypeScript-heavy product work.',
+      'Default backend layer for typed APIs, integrations, background jobs, and maintainable service boundaries.',
     contents: [
       { name: 'Node.js', link: 'https://nodejs.org/en/' },
       { name: 'Nest.js', link: 'https://nestjs.com/' },
@@ -71,7 +71,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Languages',
     description:
-      'TypeScript is the center of gravity, with the others coming in where the domain or platform needs them.',
+      'TypeScript is the default. The others come in when platform constraints, integrations, or existing systems require them.',
     contents: [
       { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
       {
@@ -99,9 +99,9 @@ export const TECHNOLOGIES: Technology[] = [
     ],
   },
   {
-    category: 'Data',
+    category: 'Databases',
     description:
-      'Usually PostgreSQL first, then other options depending on the product shape and operational needs.',
+      'PostgreSQL is the default choice. The rest are tools I can work with when the data model or operational tradeoffs differ.',
     contents: [
       { name: 'PostgreSQL', link: 'https://www.postgresql.org/' },
       { name: 'MongoDB', link: 'https://docs.mongodb.com/' },
@@ -118,9 +118,9 @@ export const TECHNOLOGIES: Technology[] = [
     ],
   },
   {
-    category: 'Shipping',
+    category: 'Infrastructure',
     description:
-      'Where I usually land when a project needs to ship cleanly and stay easy to operate.',
+      'Typical deployment targets for shipping web products without unnecessary operational overhead.',
     contents: [
       {
         name: 'Vercel',
