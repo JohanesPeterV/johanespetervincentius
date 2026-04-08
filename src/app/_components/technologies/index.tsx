@@ -6,20 +6,24 @@ import TechnologySection from './technologies-section';
 const Technologies = (): React.JSX.Element => {
   return (
     <SectionShell
-      eyebrow="Primary skills"
-      title={
-        <>
-          <span className="text-primary/95">React</span>,{' '}
-          <span className="text-primary/95">Next.js</span>,{' '}
-          <span className="text-primary/95">TypeScript</span>,{' '}
-          <span className="text-primary/95">Node.js</span>, and{' '}
-          <span className="text-primary/95">PostgreSQL</span>.
-        </>
-      }
+      eyebrow="Primary stack"
+      title="React, Next.js, TypeScript, Node.js, and PostgreSQL."
       description="Primary depth across product frontend, typed APIs, and relational data."
       panelClassName="overflow-hidden sm:px-7 sm:py-6"
     >
       <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/10 pb-4 text-sm font-medium tracking-tight text-primary/90 sm:text-[15px]">
+          <span>React</span>
+          <span className="text-zinc-600">/</span>
+          <span>Next.js</span>
+          <span className="text-zinc-600">/</span>
+          <span>TypeScript</span>
+          <span className="text-zinc-600">/</span>
+          <span>Node.js</span>
+          <span className="text-zinc-600">/</span>
+          <span>PostgreSQL</span>
+        </div>
+
         <div className="flex items-center justify-between border-b border-white/10 pb-4 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
           <span>stack.index</span>
           <span>{TECHNOLOGIES.length} groups</span>
