@@ -19,7 +19,7 @@ const STRENGTHS: Strength[] = [
   {
     title: 'AI-native delivery',
     description:
-      'I actively design AI-assisted engineering workflows that increase output for lean teams while keeping code quality and maintainability high.',
+      'I use frontier models as part of a deliberate engineering workflow, increasing output for lean teams without giving up architecture, maintainability, or production standards.',
   },
   {
     title: 'Product and team sense',
@@ -34,11 +34,12 @@ const Summary = (): React.JSX.Element => {
       <div className="space-y-8 w-full max-w-4xl">
         <div>
           <h3 className="text-2xl font-medium tracking-tight mb-4 bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent sm:text-3xl">
-            Why teams hire me
+            How I work
           </h3>
           <p className="text-center text-sm text-muted-foreground sm:text-left sm:text-base">
-            I am at my best in startups that need someone to set direction, ship
-            quickly, and keep the system coherent as complexity grows.
+            I enjoy working on products where engineering, operations, and
+            product decisions are closely connected, and thoughtful technical
+            direction has visible business impact.
           </p>
         </div>
 
