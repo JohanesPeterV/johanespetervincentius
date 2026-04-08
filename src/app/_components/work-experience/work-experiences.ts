@@ -1,6 +1,7 @@
 type WorkExperience = {
   company: string;
   positions: {
+    highlights?: string[];
     name: string;
     workPeriod: string;
     description: string;
@@ -15,7 +16,12 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Lead Software Engineer',
         workPeriod: '2025-Present',
         description:
-          "Own technical direction across Smilie's gifting, rewards, and e-commerce platforms, spanning architecture, database design, vendor integrations, deployment, and production stability. Partner directly with the CEO, build AI-assisted engineering workflows, and keep a lean team shipping through operational complexity.",
+          "Leading the systems behind Smilie's public storefront and internal gifting workflows, from architecture and data design to deployment, integrations, and production stability.",
+        highlights: [
+          'Replaced a legacy WordPress and Airtable setup with a unified Next.js and Prisma CRM, cutting campaign setup time from hours to minutes.',
+          'Shipped the end-to-end ordering flow across cart, checkout, Stripe payments, order tracking, and email confirmations.',
+          'Built AI-assisted catalog tooling that scrapes product data and drafts SEO metadata, reducing manual preparation by ~95%.',
+        ],
       },
     ],
   },
@@ -26,7 +32,12 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Senior Fullstack Developer',
         workPeriod: '2025-2025',
         description:
-          'Built a QR-based ordering system for real-time requests, plus live CRUD tables backed by global sockets and concurrency handling. Introduced code review and shared UI standards, and led a GitLab migration that saved ~IDR 72M annually across 12 developers.',
+          'Built real-time ordering and internal operations tooling for a product team moving quickly.',
+        highlights: [
+          'Created a QR-based ordering flow where a barcode scan opens a live request menu.',
+          'Built live CRUD tables with global sockets and concurrency handling, cutting feature integration time by ~99%.',
+          'Introduced code review and led a GitLab migration that saved ~IDR 72M annually across 12 developers.',
+        ],
       },
     ],
   },
@@ -37,7 +48,12 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Software Engineer',
         workPeriod: '2023-2024',
         description:
-          'Built portal, checkout, and internal platform features across Next.js and Express.js, moving pricing logic server-side for 100% price integrity. Reduced ramp-up time with cleaner Redux and TypeScript structure, removed duplicate pages, standardized i18n across 3 languages, and integrated ChatGPT with WhatsApp to increase order-processing efficiency by ~80%.',
+          "Worked across Farmio's supplier and merchant platform, building portal, checkout, and internal operations features for an early-stage supply chain product.",
+        highlights: [
+          'Built the Agent Portal with secure authentication using Next.js and Express.js.',
+          'Moved pricing logic server-side to guarantee 100% price integrity across platforms.',
+          'Standardized i18n across 3 languages and integrated ChatGPT with WhatsApp, increasing order-processing efficiency by ~80%.',
+        ],
       },
     ],
   },

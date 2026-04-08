@@ -43,6 +43,13 @@ export default function WorkExperience() {
                           <p className="text-sm sm:text-base text-muted-foreground">
                             {position.description}
                           </p>
+                          {position.highlights ? (
+                            <ul className="list-disc pl-5 text-sm sm:text-base text-muted-foreground space-y-1">
+                              {position.highlights.map((highlight) => (
+                                <li key={highlight}>{highlight}</li>
+                              ))}
+                            </ul>
+                          ) : null}
                           {innerIndex < workExperience.positions.length - 1 && (
                             <hr className="my-4" />
                           )}
