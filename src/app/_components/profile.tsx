@@ -39,13 +39,12 @@ const Profile = (): React.JSX.Element => {
           hanes Peter Vincentius
         </h1>
         <h2 className="text-base xs:text-lg sm:text-xl lg:text-2xl tracking-tight">
-          Architecture-first full-stack engineer for startup teams
+          Lead Software Engineer
         </h2>
       </div>
       <p className="mt-6 max-w-3xl text-center text-sm text-foreground/80 sm:text-left sm:text-base lg:text-lg">
-        I turn messy business operations into reliable products, owning
-        architecture, database design, integrations, deployment, and AI-assisted
-        delivery from end to end.
+        Turning messy business operations into reliable products with clean
+        architecture, pragmatic systems thinking, and fast execution.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3 sm:justify-start">
         {PROOF_POINTS.map((proofPoint) => (
