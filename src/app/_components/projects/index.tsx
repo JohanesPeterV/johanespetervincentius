@@ -1,61 +1,77 @@
+import SectionShell from '@/app/_components/section-shell';
 import ScrollContainer from '@/components/scroll-container';
-import RandomColorButton from '@/components/theme-buttons/random-color-button';
-import { Title } from '@/components/title';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FaGithub } from 'react-icons/fa';
 import { projects } from './projects';
 
-export const Projects = () => {
+export const Projects = (): React.JSX.Element => {
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 flex flex-col items-center justify-center max-h-screen py-8">
-        <div className="flex justify-center mb-6">
-          <Title>
-            Pr
-            <RandomColorButton />
-            jects
-          </Title>
+    <SectionShell
+      eyebrow="Selected work"
+      title="Products, not just demos."
+      description="The common thread is operational usefulness. I care more about whether a system helps a team move faster than whether it looks clever in isolation."
+      panelClassName="sm:p-5"
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-4 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+          <span>selected_work</span>
+          <span>{projects.length} projects</span>
         </div>
-        <div className="w-full max-w-7xl mx-auto px-4 overflow-hidden">
-          <ScrollContainer className="pr-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-4">
-              {projects.map((project, index) => (
-                <Card
-                  key={index}
-                  onClick={() => window.open(project.repoLink, '_blank')}
-                  className="relative bg-opacity-60 backdrop-blur-2xl cursor-pointer group/card transition-all duration-300 hover:scale-[1.02] flex flex-col"
-                >
-                  <div className="w-full h-full absolute inset-0 hidden group-hover/card:flex justify-center items-center rounded-xl bg-background/80 backdrop-blur-sm transition-all duration-300">
-                    <FaGithub size={60} />
-                  </div>
-                  <div className="group-hover/card:blur-md transition-all duration-300 flex flex-col flex-1">
-                    <CardHeader className="pb-2 sm:pb-3">
-                      <CardTitle className="text-lg sm:text-xl lg:text-2xl">
-                        {project.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-muted-foreground text-xs sm:text-sm lg:text-base flex-1">
-                      {project.description}
-                    </CardContent>
-                    {project.technologies && (
-                      <div className="px-4 sm:px-6 pb-3 sm:pb-4 flex flex-wrap gap-1.5 sm:gap-2 mt-auto">
-                        {project.technologies.map((tech, techIndex) => (
-                          <span
-                            key={techIndex}
-                            className="px-2 py-1 text-xs bg-primary/10 rounded-full"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </ScrollContainer>
-        </div>
+
+        <ScrollContainer className="pr-2">
+          <div className="grid grid-cols-1 gap-4 pb-1 xl:grid-cols-2">
+            {projects.map((project, index) => (
+              <article
+                key={project.title}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors duration-200 hover:border-primary/40 sm:p-5"
+              >
+                <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.24em] text-zinc-500">
+                  <span>{`project_${String(index + 1).padStart(2, '0')}`}</span>
+                  <span>{project.technologies.length} tech</span>
+                </div>
+
+                <h3 className="mt-4 text-xl font-semibold text-zinc-100 sm:text-2xl">
+                  {project.title}
+                </h3>
+
+                <p className="mt-3 text-sm leading-7 text-zinc-300 sm:text-[15px]">
+                  {project.description}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {project.technologies.map((technology) => (
+                    <span
+                      key={technology}
+                      className="rounded-full border border-white/10 bg-zinc-900/80 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300"
+                    >
+                      {technology}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
+                  {project.link ? (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full border border-white/10 px-3 py-1.5 text-zinc-200 transition-colors duration-200 hover:border-primary/50 hover:text-primary"
+                    >
+                      open
+                    </a>
+                  ) : null}
+                  <a
+                    href={project.repoLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full border border-white/10 px-3 py-1.5 text-zinc-200 transition-colors duration-200 hover:border-primary/50 hover:text-primary"
+                  >
+                    source
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </ScrollContainer>
       </div>
-    </div>
+    </SectionShell>
   );
 };

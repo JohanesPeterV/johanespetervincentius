@@ -1,68 +1,73 @@
+import SectionShell from '@/app/_components/section-shell';
 import ScrollContainer from '@/components/scroll-container';
-import RandomColorButton from '@/components/theme-buttons/random-color-button';
-import { Title } from '@/components/title';
-import { Card, CardContent } from '@/components/ui/card';
 import { WORK_EXPERIENCES } from './work-experiences';
 
-export default function WorkExperience() {
+const WorkExperience = (): React.JSX.Element => {
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 flex flex-col items-center justify-center max-h-screen py-8">
-        <div className="flex justify-center mb-6">
-          <Title>
-            W
-            <RandomColorButton />
-            rk Experience
-          </Title>
+    <SectionShell
+      eyebrow="Career log"
+      title="Shipping through ambiguity."
+      description="Most of my work sits at the intersection of product delivery, messy operations, and systems that need to keep working after launch."
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-4 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
+          <span>experience.log</span>
+          <span>{WORK_EXPERIENCES.length} companies</span>
         </div>
-        <div className="w-full max-w-3xl mx-auto px-4 overflow-hidden">
-          <ScrollContainer className="pr-2">
-            <div className="space-y-4">
-              {WORK_EXPERIENCES.map((workExperience, index) => (
-                <Card
-                  key={index}
-                  className={`bg-opacity-60 backdrop-blur-2xl ${
-                    index === 0 ? 'border-primary' : ''
-                  }`}
-                >
-                  <CardContent className="py-4 px-4 sm:px-6">
-                    <div className="space-y-4">
-                      <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">
-                        {workExperience.company}
-                      </h2>
-                      {workExperience.positions.map((position, innerIndex) => (
-                        <div key={innerIndex} className="space-y-2">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                            <h3 className="text-base sm:text-lg font-semibold">
-                              {position.name}
-                            </h3>
-                            <span className="text-sm sm:text-base text-muted-foreground">
-                              {position.workPeriod}
-                            </span>
-                          </div>
-                          <p className="text-sm sm:text-base text-muted-foreground">
-                            {position.description}
-                          </p>
-                          {position.highlights ? (
-                            <ul className="list-disc pl-5 text-sm sm:text-base text-muted-foreground space-y-1">
-                              {position.highlights.map((highlight) => (
-                                <li key={highlight}>{highlight}</li>
-                              ))}
-                            </ul>
-                          ) : null}
-                          {innerIndex < workExperience.positions.length - 1 && (
-                            <hr className="my-4" />
-                          )}
-                        </div>
-                      ))}
+
+        <ScrollContainer className="pr-2">
+          <div className="space-y-4 pb-1">
+            {WORK_EXPERIENCES.map((workExperience) => (
+              <article
+                key={workExperience.company}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5"
+              >
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary/85">
+                  {workExperience.company}
+                </p>
+
+                <div className="mt-4 space-y-4">
+                  {workExperience.positions.map((position) => (
+                    <div
+                      key={`${workExperience.company}-${position.name}`}
+                      className="space-y-3 border-t border-white/10 pt-4 first:border-t-0 first:pt-0"
+                    >
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <h3 className="text-lg font-semibold text-zinc-100 sm:text-xl">
+                          {position.name}
+                        </h3>
+                        <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-zinc-500">
+                          {position.workPeriod}
+                        </span>
+                      </div>
+
+                      <p className="text-sm leading-7 text-zinc-300 sm:text-[15px]">
+                        {position.description}
+                      </p>
+
+                      {position.highlights ? (
+                        <ul className="space-y-2">
+                          {position.highlights.map((highlight) => (
+                            <li
+                              key={highlight}
+                              className="flex gap-3 text-sm leading-6 text-zinc-400 sm:text-[15px]"
+                            >
+                              <span className="font-mono text-primary">-</span>
+                              <span>{highlight}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </ScrollContainer>
-        </div>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </ScrollContainer>
       </div>
-    </div>
+    </SectionShell>
   );
-}
+};
+
+export default WorkExperience;

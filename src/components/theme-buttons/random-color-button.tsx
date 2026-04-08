@@ -1,3 +1,7 @@
+'use client';
+
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { useConfig } from '@/hooks/use-config';
 import { getThemeColorValues } from '@/lib/theme-colors';
