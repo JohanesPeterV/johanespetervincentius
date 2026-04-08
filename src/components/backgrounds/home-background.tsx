@@ -16,7 +16,8 @@ const HomeBackground = (): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gpu = useDetectGPU();
   const isLowPerformanceDevice = gpu.tier < 2;
-  const { fluidColor } = getFluidThemeColors(theme, resolvedTheme);
+  const { backgroundColor: baseBackgroundColor, fluidColor } =
+    getFluidThemeColors(theme, resolvedTheme);
 
   // REASON: the fluid canvas needs to read pointer events from the page body and the fixed container opts into hardware acceleration while mounted
   useEffect(() => {
@@ -34,6 +35,15 @@ const HomeBackground = (): ReactElement => {
       }
     };
   }, []);
+
+  const getFluidSettings = () => ({
+    backgroundColor: baseBackgroundColor,
+    fluidColor,
+    densityDissipation: 0.98,
+    blend: 0,
+    velocityDissipation: isLowPerformanceDevice ? 0.95 : 0.98,
+    pressure: isLowPerformanceDevice ? 0.7 : 0.8,
+  });
 
   return (
     <div
@@ -56,8 +66,9 @@ const HomeBackground = (): ReactElement => {
         dpr={isLowPerformanceDevice ? 1 : 2}
         performance={{ min: 0.5 }}
       >
-        <EffectComposer enabled={true}>
-          <Fluid showBackground={false} fluidColor={fluidColor} />
+        <pointLight position={[5, 5, 5]} intensity={200} />
+        <EffectComposer enabled={!isLowPerformanceDevice}>
+          <Fluid {...getFluidSettings()} />
         </EffectComposer>
       </Canvas>
     </div>
