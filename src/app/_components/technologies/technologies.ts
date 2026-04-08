@@ -11,9 +11,9 @@ export type Technology = {
 
 export const TECHNOLOGIES: Technology[] = [
   {
-    category: 'Product UI',
+    category: 'Interface',
     description:
-      'Interfaces and frontend systems I use when the product needs polish, motion, and responsive performance.',
+      'What I usually reach for when the interface needs to feel fast, clear, and considered.',
     contents: [
       { name: 'React', link: 'https://reactjs.org/docs/getting-started.html' },
       { name: 'Next.js', link: 'https://nextjs.org/' },
@@ -49,9 +49,9 @@ export const TECHNOLOGIES: Technology[] = [
     ],
   },
   {
-    category: 'Backend Systems',
+    category: 'Backend',
     description:
-      'Services, APIs, and application layers focused on clarity, integration, and long-term maintainability.',
+      'A familiar set for APIs, integrations, and application logic that needs to stay readable over time.',
     contents: [
       { name: 'Node.js', link: 'https://nodejs.org/en/' },
       { name: 'Nest.js', link: 'https://nestjs.com/' },
@@ -71,7 +71,7 @@ export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Languages',
     description:
-      'The languages I use across product work, backend services, data-heavy flows, and cross-platform delivery.',
+      'Languages I have used across product builds, client work, and internal tools.',
     contents: [
       { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
       {
@@ -99,9 +99,9 @@ export const TECHNOLOGIES: Technology[] = [
     ],
   },
   {
-    category: 'Data Layer',
+    category: 'Data',
     description:
-      'Storage choices shaped by product constraints, query patterns, and operational simplicity.',
+      'The databases I know well enough to choose based on constraints instead of habit.',
     contents: [
       { name: 'PostgreSQL', link: 'https://www.postgresql.org/' },
       { name: 'MongoDB', link: 'https://docs.mongodb.com/' },
@@ -118,9 +118,9 @@ export const TECHNOLOGIES: Technology[] = [
     ],
   },
   {
-    category: 'Cloud Delivery',
+    category: 'Shipping',
     description:
-      'Deployment and hosting platforms I have used to ship fast, iterate safely, and keep operations boring.',
+      'Typical deployment platforms I have used to ship, iterate, and keep maintenance straightforward.',
     contents: [
       {
         name: 'Vercel',
