@@ -84,12 +84,12 @@ const ParallaxShape = ({
     meshRef.current.position.x = THREE.MathUtils.lerp(
       meshRef.current.position.x,
       targetX,
-      isLowPerformanceDevice ? 0.035 : 0.08,
+      isLowPerformanceDevice ? 0.02 : 0.05,
     );
     meshRef.current.position.y = THREE.MathUtils.lerp(
       meshRef.current.position.y,
       targetY,
-      isLowPerformanceDevice ? 0.035 : 0.08,
+      isLowPerformanceDevice ? 0.02 : 0.05,
     );
     meshRef.current.rotation.x += delta * rotationSpeed[0];
     meshRef.current.rotation.y += delta * rotationSpeed[1];
@@ -102,15 +102,15 @@ const ParallaxShape = ({
       <meshPhysicalMaterial
         color={color}
         transparent
-        opacity={kind === 'torus' ? 0.14 : 0.12}
-        roughness={0.18}
-        metalness={0.08}
+        opacity={kind === 'torus' ? 0.09 : 0.07}
+        roughness={0.35}
+        metalness={0.04}
         clearcoat={1}
-        clearcoatRoughness={0.2}
-        transmission={0.08}
-        thickness={0.6}
+        clearcoatRoughness={0.38}
+        transmission={0.02}
+        thickness={0.3}
         emissive={color}
-        emissiveIntensity={isLowPerformanceDevice ? 0.12 : 0.3}
+        emissiveIntensity={isLowPerformanceDevice ? 0.05 : 0.14}
         depthWrite={false}
       />
     </mesh>
@@ -143,64 +143,51 @@ const ParallaxField = ({
   return (
     <>
       <color attach="background" args={[backgroundColor]} />
-      <fog attach="fog" args={[backgroundColor, 6, 18]} />
-      <ambientLight intensity={isLowPerformanceDevice ? 0.45 : 0.6} />
+      <fog attach="fog" args={[backgroundColor, 4.5, 14]} />
+      <ambientLight intensity={isLowPerformanceDevice ? 0.28 : 0.38} />
       <pointLight
         position={[-4, 2, 7]}
-        intensity={isLowPerformanceDevice ? 18 : 28}
+        intensity={isLowPerformanceDevice ? 9 : 15}
         color={fluidColor}
       />
       <pointLight
         position={[5, -3, 4]}
-        intensity={isLowPerformanceDevice ? 10 : 18}
+        intensity={isLowPerformanceDevice ? 5 : 9}
         color={textColor}
       />
       <ParallaxShape
         color={fluidColor}
         kind="icosahedron"
-        parallaxStrength={0.7}
+        parallaxStrength={0.3}
         performanceTier={performanceTier}
-        position={[2.8, 1.4, -6]}
-        rotationSpeed={[0.18, 0.24, 0.08]}
+        position={[3.6, 1.8, -7.5]}
+        rotationSpeed={[0.08, 0.12, 0.04]}
         scale={1.25}
-        scrollDepth={0.15}
+        scrollDepth={0.08}
         scrollOffsetRef={scrollOffsetRef}
       />
       <ParallaxShape
         color={textColor}
         kind="sphere"
-        parallaxStrength={1.1}
+        parallaxStrength={0.5}
         performanceTier={performanceTier}
-        position={[-3.2, -1.6, -9.5]}
-        rotationSpeed={[0.08, 0.14, 0.05]}
+        position={[-4.1, -2.3, -11]}
+        rotationSpeed={[0.04, 0.08, 0.03]}
         scale={1.7}
-        scrollDepth={0.3}
+        scrollDepth={0.16}
         scrollOffsetRef={scrollOffsetRef}
       />
       <ParallaxShape
         color={fluidColor}
         kind="torus"
-        parallaxStrength={1.5}
+        parallaxStrength={0.75}
         performanceTier={performanceTier}
-        position={[0.2, 2.7, -12.5]}
-        rotationSpeed={[0.06, 0.1, 0.12]}
+        position={[0.8, 3.4, -14]}
+        rotationSpeed={[0.03, 0.05, 0.06]}
         scale={2.2}
-        scrollDepth={0.5}
+        scrollDepth={0.24}
         scrollOffsetRef={scrollOffsetRef}
       />
-      {!isLowPerformanceDevice ? (
-        <ParallaxShape
-          color={textColor}
-          kind="icosahedron"
-          parallaxStrength={1.8}
-          performanceTier={performanceTier}
-          position={[3.8, -3.4, -15.5]}
-          rotationSpeed={[0.04, 0.08, 0.03]}
-          scale={2.6}
-          scrollDepth={0.65}
-          scrollOffsetRef={scrollOffsetRef}
-        />
-      ) : null}
     </>
   );
 };
@@ -274,13 +261,14 @@ const HomeBackground = (): ReactElement => {
           <Fluid
             backgroundColor={baseBackgroundColor}
             fluidColor={fluidColor}
-            densityDissipation={0.98}
+            densityDissipation={0.96}
             blend={0}
-            velocityDissipation={isLowPerformanceDevice ? 0.95 : 0.98}
-            pressure={isLowPerformanceDevice ? 0.7 : 0.8}
+            velocityDissipation={isLowPerformanceDevice ? 0.9 : 0.94}
+            pressure={isLowPerformanceDevice ? 0.42 : 0.56}
           />
         </EffectComposer>
       </Canvas>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/40 via-background/55 to-background/80" />
     </div>
   );
 };
