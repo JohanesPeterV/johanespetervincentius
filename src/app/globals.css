@@ -92,18 +92,3 @@ body {
   -moz-animation: animatedgradient 8s linear infinite alternate;
   animation: animatedgradient 8s linear infinite alternate;
 }
-
-.animate-background-float {
-  animation: backgroundfloat 12s ease-in-out infinite;
-}
-
-@keyframes backgroundfloat {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
-}
