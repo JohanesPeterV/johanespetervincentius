@@ -56,7 +56,7 @@ export default function RandomColorButton({
           theme: getRandomDifferentColor(),
         });
       }}
-      className={`p-0 m-0 text-2xl sm:text-3xl lg:text-4xl font-extrabold ${className} text-[--theme-primary]`}
+      className={`m-0 h-auto appearance-none rounded-none bg-transparent p-0 text-2xl font-extrabold text-[--theme-primary] shadow-none hover:bg-transparent focus-visible:ring-0 sm:text-3xl lg:text-4xl ${className}`}
       style={getMountedStyle()}
     >
       o
