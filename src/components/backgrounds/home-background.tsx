@@ -48,7 +48,7 @@ const HomeBackground = (): ReactElement => {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[-10] opacity-35 dark:opacity-50"
+      className="fixed inset-0 z-[-10]"
       style={{
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',

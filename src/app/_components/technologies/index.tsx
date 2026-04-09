@@ -1,52 +1,50 @@
-import SectionShell from '@/app/_components/section-shell';
 import ScrollContainer from '@/components/scroll-container';
 import { TECHNOLOGIES } from './technologies';
 import TechnologySection from './technologies-section';
 
 const Technologies = (): React.JSX.Element => {
   return (
-    <SectionShell
-      eyebrow="Stack"
-      title="Current tools."
-      description="Mostly React, Next.js, TypeScript, Node.js, and PostgreSQL."
-      panelClassName="overflow-hidden sm:px-7 sm:py-6"
-    >
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/10 pb-4 text-sm tracking-tight text-primary/80 sm:text-[15px]">
-          <span>React</span>
-          <span className="text-zinc-600">/</span>
-          <span>Next.js</span>
-          <span className="text-zinc-600">/</span>
-          <span>TypeScript</span>
-          <span className="text-zinc-600">/</span>
-          <span>Node.js</span>
-          <span className="text-zinc-600">/</span>
-          <span>PostgreSQL</span>
-        </div>
-
-        <div className="flex items-center justify-between border-b border-white/10 pb-4 font-mono text-[11px] uppercase tracking-[0.26em] text-zinc-500">
-          <span>stack.index</span>
-          <span>{TECHNOLOGIES.length} groups</span>
-        </div>
-
-        <ScrollContainer className="pr-1 sm:pr-2">
-          <div className="divide-y divide-white/10 pb-1">
-            {TECHNOLOGIES.map((technology) => (
-              <div
-                key={technology.category}
-                className="py-6 first:pt-1 last:pb-2 sm:py-7"
-              >
-                <TechnologySection
-                  description={technology.description}
-                  contents={technology.contents}
-                  title={technology.category}
-                />
-              </div>
-            ))}
+    <section className="flex min-h-screen items-center px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:gap-14">
+        <div className="flex items-center lg:pr-6">
+          <div className="max-w-md space-y-5 px-1">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-primary/70">
+              Core stack
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.9rem]">
+              Mostly React, Next.js, TypeScript, Node.js, and PostgreSQL.
+            </h2>
+            <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+              That is where I have the most depth across frontend systems, typed
+              APIs, data modeling, and production delivery.
+            </p>
+            <p className="text-sm leading-7 text-muted-foreground/80 sm:text-[15px]">
+              The rest of the list reflects technologies I can work in, but this
+              is the stack I would want to be evaluated on.
+            </p>
           </div>
-        </ScrollContainer>
+        </div>
+
+        <div className="overflow-hidden rounded-[32px] border border-black/5 bg-white/30 px-5 py-4 shadow-lg ring-1 ring-black/5 backdrop-blur-2xl dark:border-white/10 dark:bg-black/30 sm:px-7 sm:py-6">
+          <ScrollContainer className="pr-1 sm:pr-2">
+            <div className="divide-y divide-black/5 pb-1 dark:divide-white/10">
+              {TECHNOLOGIES.map((technology) => (
+                <div
+                  key={technology.category}
+                  className="py-6 first:pt-1 last:pb-2 sm:py-7"
+                >
+                  <TechnologySection
+                    description={technology.description}
+                    contents={technology.contents}
+                    title={technology.category}
+                  />
+                </div>
+              ))}
+            </div>
+          </ScrollContainer>
+        </div>
       </div>
-    </SectionShell>
+    </section>
   );
 };
 
