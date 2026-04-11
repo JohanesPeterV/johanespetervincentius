@@ -9,18 +9,17 @@ const Technologies = (): React.JSX.Element => {
         <div className="flex items-center lg:pr-6">
           <div className="max-w-md space-y-5 px-1">
             <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-primary/70">
-              Core stack
+              Primary stack
             </p>
             <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-[2.9rem]">
-              Mostly React, Next.js, TypeScript, Node.js, and PostgreSQL.
+              React, Next.js, TypeScript, Node.js, PostgreSQL.
             </h2>
             <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-              That is where I have the most depth across frontend systems, typed
-              APIs, data modeling, and production delivery.
+              Default stack for shipping web products with typed APIs, clear
+              boundaries, and fast iteration.
             </p>
             <p className="text-sm leading-7 text-muted-foreground/80 sm:text-[15px]">
-              The rest of the list reflects technologies I can work in, but this
-              is the stack I would want to be evaluated on.
+              Everything else is supporting range. This is the baseline.
             </p>
           </div>
         </div>
