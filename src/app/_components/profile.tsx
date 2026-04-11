@@ -23,8 +23,11 @@ const Profile = (): React.JSX.Element => {
         </h2>
       </div>
       <p className="mt-6 max-w-3xl text-center text-sm text-foreground/80 sm:text-left sm:text-base lg:text-lg">
-        A problem solver who loves AI, turning messy business operations into
-        reliable products that teams can actually use.
+        Pragmatic software engineer solving messy business problems.
+        <br />
+        Experimenting with AI to build product solutions that help teams scale.
+        <br />
+        Tinkering with components and product ideas in spare time.
       </p>
       <div className="w-full flex justify-center sm:justify-start mt-6 sm:mt-8">
         <Links iconSize={32} />
