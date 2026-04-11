@@ -13,7 +13,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     positions: [
       {
-        name: 'Lead Software Engineer',
+        name: 'Software Engineer',
         workPeriod: '2025-Present',
         description:
           "Leading the systems behind Smilie's public storefront and internal gifting workflows, from architecture and data design to deployment, integrations, and production stability.",
