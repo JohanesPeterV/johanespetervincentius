@@ -5,15 +5,12 @@ type TechnologyItem = {
 
 export type Technology = {
   category: string;
-  description: string;
   contents: TechnologyItem[];
 };
 
 export const TECHNOLOGIES: Technology[] = [
   {
     category: 'Frontend',
-    description:
-      'Primary stack for production React applications, design systems, interaction-heavy UI, and performance work.',
     contents: [
       { name: 'React', link: 'https://reactjs.org/docs/getting-started.html' },
       { name: 'Next.js', link: 'https://nextjs.org/' },
@@ -50,8 +47,6 @@ export const TECHNOLOGIES: Technology[] = [
   },
   {
     category: 'Backend',
-    description:
-      'Default backend layer for typed APIs, integrations, background jobs, and maintainable service boundaries.',
     contents: [
       { name: 'Node.js', link: 'https://nodejs.org/en/' },
       { name: 'Nest.js', link: 'https://nestjs.com/' },
@@ -70,8 +65,6 @@ export const TECHNOLOGIES: Technology[] = [
   },
   {
     category: 'Languages',
-    description:
-      'TypeScript is the default. The others come in when platform constraints, integrations, or existing systems require them.',
     contents: [
       { name: 'TypeScript', link: 'https://www.typescriptlang.org/' },
       {
@@ -100,8 +93,6 @@ export const TECHNOLOGIES: Technology[] = [
   },
   {
     category: 'Databases',
-    description:
-      'PostgreSQL is the default choice. The rest are tools I can work with when the data model or operational tradeoffs differ.',
     contents: [
       { name: 'PostgreSQL', link: 'https://www.postgresql.org/' },
       { name: 'MongoDB', link: 'https://docs.mongodb.com/' },
@@ -119,8 +110,6 @@ export const TECHNOLOGIES: Technology[] = [
   },
   {
     category: 'Infrastructure',
-    description:
-      'Typical deployment targets for shipping web products without unnecessary operational overhead.',
     contents: [
       {
         name: 'Vercel',

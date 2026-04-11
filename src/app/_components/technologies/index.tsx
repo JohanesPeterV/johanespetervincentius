@@ -20,7 +20,6 @@ const Technologies = (): React.JSX.Element => {
                   className="py-6 first:pt-1 last:pb-2 sm:py-7"
                 >
                   <TechnologySection
-                    description={technology.description}
                     contents={technology.contents}
                     title={technology.category}
                   />

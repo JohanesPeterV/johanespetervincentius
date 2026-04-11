@@ -2,7 +2,6 @@ import { Technology } from './technologies';
 
 type TechnologySectionProps = {
   title: string;
-  description: string;
   contents: Technology['contents'];
 };
 
@@ -13,19 +12,11 @@ const TechnologySection = (
   const secondaryContents = props.contents.slice(4);
 
   return (
-    <div className="grid gap-5 sm:grid-cols-[minmax(0,0.34fr)_minmax(0,0.66fr)] sm:gap-8">
-      <div className="space-y-3 pr-2">
-        <div className="space-y-1.5">
-          <h2 className="text-xl font-medium tracking-tight text-foreground sm:text-[1.4rem]">
-            {props.title}
-          </h2>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-            {props.contents.length} tools
-          </p>
-        </div>
-        <p className="max-w-xl text-sm leading-6 text-muted-foreground sm:text-[15px]">
-          {props.description}
-        </p>
+    <div className="grid gap-4 sm:grid-cols-[minmax(0,0.28fr)_minmax(0,0.72fr)] sm:gap-8">
+      <div className="pr-2">
+        <h2 className="text-xl font-medium tracking-tight text-foreground sm:text-[1.4rem]">
+          {props.title}
+        </h2>
       </div>
 
       <div className="space-y-4 sm:pt-0.5">
