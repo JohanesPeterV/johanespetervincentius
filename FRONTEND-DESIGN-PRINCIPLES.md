@@ -44,7 +44,7 @@ Review checklist:
 
 - The fluid-distortion background and Three.js / R3F scenes are decoration; they must never block reading content or interaction.
 - Respect GPU tier detection — heavier effects should degrade gracefully on weaker hardware.
-- Prefer composition and existing GSAP or Framer Motion patterns over bespoke animation machinery.
+- Reuse the repo's existing motion stack — R3F `useFrame`, shader effects (`@funtech-inc/use-shader-fx`, `react-fluid-distortion`), and Embla carousels — instead of hand-rolling or pulling in new animation machinery.
 
 ## Responsive Behaviour
 

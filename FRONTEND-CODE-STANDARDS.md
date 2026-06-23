@@ -48,7 +48,7 @@ Allowed `// REASON:` examples:
 
 - `// REASON: useState only captures initial value - sync when URL changes via back/forward`
 - `// REASON: plain const recalculates 10k-row filter on every keystroke, causing 200ms frame drops`
-- `// REASON: bridge to imperative Three.js / GSAP API that cannot be expressed through React props`
+- `// REASON: bridge to imperative Three.js / R3F useFrame loop that cannot be expressed through React props`
 
 Not allowed:
 
