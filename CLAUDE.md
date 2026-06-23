@@ -1,122 +1,88 @@
-# Portfolio Site - Agent Operating Manual
+# Portfolio Site — Agent Rules
 
-`CLAUDE.md` and `AGENTS.md` must stay identical. If one changes, update the other in the same commit.
+`CLAUDE.md` and `AGENTS.md` must stay identical. If one changes, update the other in the same commit. This file is the canonical ruleset; if any other instruction conflicts with it, follow this file. If a rule can be read loosely or strictly, use the strict reading.
 
-## Rule Priority
+Clearer does not mean weaker. These rules are strict; the levels below only separate invariants, blockers, and defaults so agents execute them without guessing priority.
 
-Read and follow sections in this order:
+## Rule Levels
 
-1. `Execution Contract`
-2. `Commit Protocol`
-3. `Code Gate`
-4. `Anti-Bypass Rules`
-5. Everything else in this file
+- **FATAL**: invariant. If violated, stop and fix before continuing.
+- **BLOCKER**: required prerequisite. Work cannot start or be considered done until the blocker is cleared.
+- **DEFAULT**: normal repo behaviour. Follow it unless a more specific rule says otherwise.
 
-If two instructions conflict, use the stricter reading. If a rule can be interpreted loosely or strictly, use the strict interpretation.
+## Fatal Invariants
 
-## Execution Contract
+### Code Shape
 
-These rules are non-negotiable.
+- **FATAL**: No `any`, `unknown`, `as`, `@ts-ignore`, `@ts-expect-error`, or `as unknown as X` in production code. See `Exemptions`.
+- **FATAL**: No `void` operator and no boolean parameters.
+- **FATAL**: No braceless `if`, `else`, `for`, or `while`, and no nested ternaries.
+- **FATAL**: No comments except `// REASON:` explaining a non-obvious decision.
+- **FATAL**: No CSS files other than `globals.css`.
+- **FATAL**: No `useEffect`, `useMemo`, or `useCallback` unless `FRONTEND-CODE-STANDARDS.md`'s hook exception is met and a `// REASON:` comment sits directly above the hook.
+- **FATAL**: Max `300` LOC per `.tsx` file and max `500` LOC per `.ts` file. Data-only files such as `src/registry/registry-base-colors.ts` are exempt.
+- **FATAL**: Max `3 useState` calls per component or hook.
 
-- If you modify, create, delete, or rename any file, the task is not complete until a commit succeeds.
-- Do not end a task with intended local changes left uncommitted.
-- Do not ask the user for permission to commit after making changes.
-- Commit after each coherent change. One logical unit per commit.
-- Do not bundle unrelated work into one commit.
-- A valid commit should describe one conceptual area in one short sentence.
-- Use a one-line conventional commit subject such as `feat: add project card hover animation` or `fix: prevent theme flash on load`.
-- This file is meant to block bypass behavior. Follow both the letter and the intent.
+### Git and Ownership
 
-Completion test:
+- **FATAL**: If you modify, create, delete, or rename any file, the task is not done until the owned files are committed successfully.
+- **FATAL**: Treat uncommitted work as disposable. Forgetting to commit your own changes means the work is lost.
+- **FATAL**: Never use `git add .`, `git add -A`, or directory-wide staging. Stage exact paths only.
+- **FATAL**: Never skip hooks. Use `--no-verify` only when the user explicitly requests bypassing hooks for the current commit.
+- **FATAL**: Never amend, push, or run destructive Git commands unless the user explicitly asks. Follow `GIT.md`.
 
-- At least one commit covering your changes exists.
-- Any required verification has passed.
-- Your final response includes the commit hash and commit message.
+### Anti-Bypass
+
+- **FATAL**: Fix root cause. Do not suppress errors just to make lint, typecheck, hooks, or build pass.
+- **FATAL**: Do not weaken ESLint, TypeScript, Next.js, lefthook, or build settings unless the user explicitly requested that config change.
+- **FATAL**: Do not broaden types, add fake fallbacks, hide a bad design inside a helper or hook or file, or split files or commits in a misleading way just to satisfy a rule on paper. If a rule is hard to satisfy, redesign the code.
+
+## Required Reading
+
+Read files before editing them. Read only the rulebooks that match the owned change; if multiple rows match, read all matching rulebooks before editing.
+
+| Trigger                                                          | Required before editing         |
+| ---------------------------------------------------------------- | ------------------------------- |
+| Any repo task                                                    | `CLAUDE.md` / `AGENTS.md`       |
+| React components, pages, hooks, styling, or UI composition       | `FRONTEND-CODE-STANDARDS.md`    |
+| Visual hierarchy, Liquid Glass treatment, theme or 3D look       | `FRONTEND-DESIGN-PRINCIPLES.md` |
+| Committing or dirty-worktree handling                            | `GIT.md`                        |
+| Implementation tradeoffs are unclear or no other rulebook covers | `CLEAN-CODE.md`                 |
+
+## Operating Defaults
+
+- **DEFAULT**: Prefer the smallest correct change that fits the existing architecture.
+- **DEFAULT**: Reduce complexity instead of moving it into a helper, hook, or wrapper.
+- **DEFAULT**: Search for an existing helper, hook, utility, or component before creating one; extend a near-fit before duplicating.
+- **DEFAULT**: Fix rule violations in files you touch when they are part of the same concern.
+- **DEFAULT**: Do not generalise before the third real use case.
+- **DEFAULT**: Default to Server Components; add `"use client"` only when required.
+- **DEFAULT**: Use semantic colours such as `bg-primary`, `bg-muted`, and `text-foreground`. Do not hardcode interface colours.
+- **DEFAULT**: Treat abbreviations as words in new or touched names: `PdfViewer`, `HslColor`.
+
+## Verification
+
+- **BLOCKER**: After any executable code change, run `npm run build` and `npm run lint` (zero warnings allowed). Both must pass before committing.
+- **BLOCKER**: Run `npm run check:sizes` when you add or grow `.tsx` or `.ts` files.
+- Do not run project checks for text-only docs or agent-prompt edits; rely on the commit hooks for formatting.
 
 ## Commit Protocol
 
-Follow this sequence every time you change files:
+Follow `GIT.md`. Summary:
 
 1. Run `git status --short`.
-2. Run `wc -l` on every modified `.tsx` and `.ts` file.
-3. If a touched `.tsx` file is over 300 lines or a touched `.ts` file is over 500 lines, split it before committing.
-4. If Git requires staging a new or renamed file, stage only that exact path:
-
-```bash
-git add -- path/to/new-file path/to/renamed-file
-```
-
-5. Commit only the files you changed, listed explicitly:
+2. Run `wc -l` on every modified `.tsx` and `.ts` file; split before committing if a `.tsx` is over 300 lines or a `.ts` is over 500 lines.
+3. Stage only exact new or renamed paths when Git requires it: `git add -- path/to/file`.
+4. Commit only files you changed, listed explicitly:
 
 ```bash
 git commit -m "type: intent" -- path/to/file1 path/to/file2
 ```
 
-6. Re-run `git status --short`.
-7. Include the commit hash and commit message in the final response.
+5. Re-run `git status --short`.
+6. Include the commit hash and commit message in the final response.
 
-Hard Git rules:
-
-- Never use `git add .`, `git add -A`, or directory-wide staging.
-- Never skip hooks.
-- Never use `--no-verify`.
-- Never amend unless the user explicitly asks for an amend.
-- Never push unless the user explicitly asks.
-
-If a commit fails:
-
-- Fix the actual problem.
-- Re-read affected files if time has passed or a hook changed files.
-- Retry until the commit succeeds.
-- Do not claim the task is done before the commit succeeds.
-
-## Code Gate
-
-Apply these rules before writing code.
-
-### Never Do These
-
-- No `any`, `unknown`, `as`, `@ts-ignore`, or `as unknown as X`
-- No `@ts-expect-error` in production code
-- No `void` operator
-- No boolean parameters
-- No braceless `if`, `else`, `for`, or `while`
-- No nested ternaries
-- No comments except `// REASON:`
-- No CSS files other than `globals.css`
-- No broad `git add`
-
-### Required Shape
-
-- Put types at the top of the file
-- Prefer guard clauses and early returns
-- Prefer const arrow functions with explicit types
-- Use `handleX` for event handlers
-- Prefer verb-noun function names such as `fetchUserProfile`
-- Use semantic colors such as `bg-primary`, `bg-muted`, and `text-foreground`
-- Keep to 2 parameters when practical; 4 or more requires an options object
-- Treat abbreviations as words in new or touched names: `PdfViewer`, `HslColor`
-
-### File And State Limits
-
-- Max 300 lines per `.tsx`
-- Max 500 lines per `.ts`
-- Max 3 `useState` calls per component or hook
-- Data-only files such as `src/registry/registry-base-colors.ts` are exempt from file size limits
-
-If you touch a file that already breaks these rules, fix that file as part of your change unless the user explicitly scoped it out.
-
-## Anti-Bypass Rules
-
-These rules exist because agents often try to satisfy the checker instead of solving the problem.
-
-- Fix root cause. Do not suppress errors just to make lint, typecheck, hooks, or build pass.
-- Do not weaken ESLint, TypeScript, Next.js, Husky, or build settings unless the user explicitly requested that config change.
-- Do not broaden types, add fake fallback code, or move logic around only to appear compliant.
-- Do not hide a bad design inside a helper, hook, or new file.
-- Do not split files or commits in a misleading way just to satisfy a rule on paper.
-- Do not reinterpret `one concern` or `one logical unit` so broadly that unrelated work slips through.
-- If the rule is hard to satisfy, redesign the code instead of gaming the rule.
+Completion test: at least one commit covers your changes, any required verification passed, and your final response includes the commit hash and commit message.
 
 ## Repo Context
 
@@ -131,9 +97,11 @@ npm run format:check # Prettier check only
 npm run check:sizes  # File size checks
 ```
 
+Git hooks run through lefthook: pre-commit lints, checks Prettier formatting, and checks file sizes on staged files; pre-push runs a typecheck via `next build`.
+
 ### Architecture
 
-This repo is a Next.js 15 portfolio site using the App Router, TypeScript, TailwindCSS, shadcn/ui, Jotai, `next-themes`, Three.js, React Three Fiber, React Three Drei, and `react-fluid-distortion`.
+Next.js 15 portfolio site using the App Router, TypeScript, TailwindCSS, shadcn/ui, Jotai, `next-themes`, Three.js, React Three Fiber, React Three Drei, and `react-fluid-distortion`.
 
 Key paths:
 
@@ -157,110 +125,18 @@ Path alias: use `@/*` for `src/*` imports.
 
 Theme model:
 
-- Dark and light mode come from `next-themes`
-- Base color themes come from `src/registry/registry-base-colors.ts`
-- Theme choice is persisted with Jotai `atomWithStorage`
+- Dark and light mode come from `next-themes`.
+- Base color themes come from `src/registry/registry-base-colors.ts`.
+- Theme choice is persisted with Jotai `atomWithStorage`.
 
 Background model:
 
-- `home-background.tsx` renders the fluid distortion background
-- GPU tier detection is used to adjust rendering behavior
-- Colors are derived from the active base color
-
-## React And Frontend
-
-- Default to Server Components. Add `"use client"` only when required.
-- Page-specific components belong in `app/.../_components/`.
-- Prefer plain functions for pure computation. Hooks are for React integration only.
-- Do not generalize before the third real use case.
-- Design APIs from the caller side first.
-
-### `useEffect`, `useMemo`, `useCallback`
-
-Do not use these by default.
-
-They are allowed only when all of the following are true:
-
-1. The problem is specific and real.
-2. A simpler alternative was considered.
-3. The simpler alternative failed for a concrete reason.
-4. A `// REASON:` comment is placed directly above the hook.
-
-Allowed `// REASON:` examples:
-
-- `// REASON: useState only captures initial value - sync when URL changes via back/forward`
-- `// REASON: plain const recalculates 10k-row filter on every keystroke, causing 200ms frame drops`
-
-Not allowed:
-
-- `// REASON: memoize for performance`
-- `// REASON: prevents unnecessary re-renders`
-- `// REASON: value depends on state`
-
-If the app is not broken or visibly janky without the hook, do not use the hook.
-
-### No God Hooks Or God Components
-
-Splitting code into a large hook does not make it simpler.
-
-Bad signs:
-
-- 4 or more `useState` calls in one component or hook
-- 5 or more returned state fields and 5 or more handlers from one hook
-- Two unrelated concerns living in the same component or hook
-
-Required response:
-
-- One component or hook owns one concern.
-- Components accept only the props they use.
-- Pure derived computation stays in plain utilities.
-
-## Design Guidance
-
-- Prefer extraction by identity, not by file length.
-- A long file should be long because of markup, not sprawling logic.
-- Search before creating a new helper, hook, utility, or component.
-- Extend an existing near-fit before creating a duplicate.
-- If you find duplication in a file you are already touching, remove it there.
-
-## Liquid Glass Guidance
-
-Use liquid-glass styling for floating surfaces such as dropdowns, dialogs, sheets, popovers, tooltips, and navigation overlays.
-
-Avoid it for main content areas, inline inputs, tables, and static content sections.
-
-Reference pattern:
-
-```ts
-className =
-  'bg-white/70 dark:bg-black/70 backdrop-blur-2xl border border-white/20 shadow-2xl ring-1 ring-black/5';
-```
+- `home-background.tsx` renders the fluid distortion background.
+- GPU tier detection is used to adjust rendering behaviour.
+- Colors are derived from the active base color.
 
 ## Exemptions
 
-- `src/components/ui/` is vendored shadcn code and is exempt from these rules
-- `src/registry/registry-base-colors.ts` is data-only and exempt from file size limits
-- `src/components/3d/macbook-showcase.tsx` may keep `as THREE.Mesh` assertions required by `useGLTF` node typing
-
-## Concurrent Agent Discipline
-
-Other agents may be working in this repo at the same time.
-
-- Commit with explicit file paths.
-- Stage only exact new or renamed paths when required.
-- Do not touch files you did not edit for your task.
-- If `git status` shows unexpected files, leave them alone.
-- If a command fails or time has passed, re-read the file before editing.
-
-Do not run destructive commands such as `git revert`, `git cherry-pick`, `git reset`, `git checkout .`, `git restore .`, `git stash`, or `git clean` without explicit user approval.
-
-## Verification
-
-After every change, run:
-
-```bash
-npm run build
-npm run lint
-```
-
-Both must pass before committing.
+- `src/components/ui/` is vendored shadcn code and is exempt from these rules.
+- `src/registry/registry-base-colors.ts` is data-only and exempt from file size limits.
+- `src/components/3d/macbook-showcase.tsx` may keep `as THREE.Mesh` assertions required by `useGLTF` node typing.
