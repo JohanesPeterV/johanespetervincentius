@@ -1,3 +1,4 @@
+import ContactIcons from '@/app/_components/linktree/contact-icons';
 import LinkButtons from '@/app/_components/linktree/link-buttons';
 import ProfileHeader from '@/app/_components/linktree/profile-header';
 
@@ -7,6 +8,7 @@ export default function Home() {
       <div className="flex w-full max-w-md flex-col items-center gap-8">
         <ProfileHeader />
         <LinkButtons />
+        <ContactIcons />
       </div>
     </main>
   );
