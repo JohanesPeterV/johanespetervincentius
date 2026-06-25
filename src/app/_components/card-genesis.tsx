@@ -150,7 +150,7 @@ export default function CardGenesis({ children }: CardGenesisParams) {
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 h-full w-full"
       />
-      <div className="card-text relative flex flex-col items-center gap-6 p-8">
+      <div className="card-text relative flex flex-col items-center gap-8 p-8">
         {children}
       </div>
     </div>
