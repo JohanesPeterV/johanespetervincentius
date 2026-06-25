@@ -1,7 +1,7 @@
 export const INTRO_SECONDS = 2.6;
 export const CONVERGE_SECONDS = 1.1;
-export const CARD_DELAY = 0.9;
-export const CARD_DURATION = 1.2;
+export const CARD_DELAY = 1.5;
+export const CARD_DURATION = 0.8;
 
 export const easeOutCubic = (value: number): number => {
   return 1 - Math.pow(1 - value, 3);
