@@ -145,7 +145,7 @@ export default function CardGenesis({ children }: CardGenesisParams) {
   }, [fluidColor]);
 
   return (
-    <div className="relative z-10 w-[320px] overflow-hidden rounded-3xl border border-white/10 shadow-2xl ring-1 ring-white/10">
+    <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-white/10 shadow-2xl ring-1 ring-white/10">
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 h-full w-full"
