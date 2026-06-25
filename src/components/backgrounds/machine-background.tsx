@@ -19,7 +19,7 @@ export default function MachineBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-[-10]">
       <Canvas
-        camera={{ fov: 45, near: 0.1, far: 100, position: [0, -0.1, 4.6] }}
+        camera={{ fov: 40, near: 0.1, far: 100, position: [0, 5, 14] }}
         dpr={isLowPerformanceDevice ? 1 : [1, 2]}
         gl={{
           antialias: true,
