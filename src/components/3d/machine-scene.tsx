@@ -1,12 +1,13 @@
-import { getIntroProgress } from '@/lib/intro';
-import { useGLTF } from '@react-three/drei';
+import { getCardScale, getIntroProgress } from '@/lib/intro';
+import { Html, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { ReactNode, useRef } from 'react';
 import * as THREE from 'three';
 import AmbientEmbers from './ambient-embers';
 
 type MachineSceneParams = {
   accentColor: string;
+  children: ReactNode;
 };
 
 const MODEL_PATH = '/models/mac-transformed.glb';
@@ -15,13 +16,18 @@ const REST_SCALE = 0.22;
 const VISIBLE_HALF_HEIGHT = 3.27;
 const MAX_OFFSET_X = 3.4;
 const EDGE_MARGIN = 1;
-const LOOK_TARGET = new THREE.Vector3(0, 0.4, 0);
+const CARD_POSITION = new THREE.Vector3(0, 0.5, 0);
+const LOOK_TARGET = new THREE.Vector3(0, 0.5, 0);
 const INTRO_CAMERA = new THREE.Vector3(0, 3, 15);
-const REST_CAMERA = new THREE.Vector3(0, 1.2, 9);
+const REST_CAMERA = new THREE.Vector3(0, 1, 8);
 
-export default function MachineScene({ accentColor }: MachineSceneParams) {
+export default function MachineScene({
+  accentColor,
+  children,
+}: MachineSceneParams) {
   const { scene } = useGLTF(MODEL_PATH);
   const modelRef = useRef<THREE.Group>(null);
+  const cardRef = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
@@ -29,6 +35,10 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
 
     state.camera.position.lerpVectors(INTRO_CAMERA, REST_CAMERA, intro);
     state.camera.lookAt(LOOK_TARGET);
+
+    if (cardRef.current) {
+      cardRef.current.scale.setScalar(getCardScale(time));
+    }
 
     if (!modelRef.current) {
       return;
@@ -63,6 +73,11 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
       <AmbientEmbers color={accentColor} count={420} />
       <group ref={modelRef} scale={0} position={[0, FLOAT_HEIGHT, 0]}>
         <primitive object={scene} />
+      </group>
+      <group ref={cardRef} position={CARD_POSITION} scale={0}>
+        <Html transform distanceFactor={6} position={[0, 0, 0]}>
+          {children}
+        </Html>
       </group>
     </>
   );

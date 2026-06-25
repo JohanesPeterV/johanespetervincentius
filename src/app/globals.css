@@ -92,24 +92,3 @@ body {
   -moz-animation: animatedgradient 8s linear infinite alternate;
   animation: animatedgradient 8s linear infinite alternate;
 }
-
-@keyframes cardGenesis {
-  0% {
-    opacity: 0;
-    transform: perspective(1200px) rotateX(24deg) scale(0.72) translateY(28px);
-    filter: blur(22px) brightness(1.9);
-  }
-  55% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    transform: none;
-    filter: none;
-  }
-}
-
-.animate-card-genesis {
-  opacity: 0;
-  animation: cardGenesis 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.85s forwards;
-}

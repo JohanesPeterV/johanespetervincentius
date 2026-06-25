@@ -7,8 +7,15 @@ import { useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { useTheme } from 'next-themes';
+import { ReactNode } from 'react';
 
-export default function MachineBackground() {
+type MachineExperienceParams = {
+  children: ReactNode;
+};
+
+export default function MachineExperience({
+  children,
+}: MachineExperienceParams) {
   const { resolvedTheme } = useTheme();
   const [{ theme }] = useConfig();
   const gpu = useDetectGPU();
@@ -17,7 +24,7 @@ export default function MachineBackground() {
   const { fluidColor } = getFluidThemeColors(theme, resolvedTheme);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[-10]">
+    <div className="fixed inset-0">
       <Canvas
         camera={{ fov: 40, near: 0.1, far: 100, position: [0, 3, 15] }}
         dpr={isLowPerformanceDevice ? 1 : [1, 2]}
@@ -28,7 +35,7 @@ export default function MachineBackground() {
         }}
         performance={{ min: 0.5 }}
       >
-        <MachineScene accentColor={fluidColor} />
+        <MachineScene accentColor={fluidColor}>{children}</MachineScene>
         {isLowPerformanceDevice ? null : (
           <EffectComposer>
             <Bloom
