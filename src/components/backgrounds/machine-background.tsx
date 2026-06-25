@@ -8,7 +8,7 @@ import { Canvas } from '@react-three/fiber';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { useTheme } from 'next-themes';
 
-export default function MachineExperience() {
+export default function MachineBackground() {
   const { resolvedTheme } = useTheme();
   const [{ theme }] = useConfig();
   const gpu = useDetectGPU();

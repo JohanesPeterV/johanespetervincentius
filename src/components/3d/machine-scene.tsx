@@ -1,8 +1,8 @@
-import { getIntroProgress } from '@/lib/intro';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
+import AmbientEmbers from './ambient-embers';
 
 type MachineSceneParams = {
   accentColor: string;
@@ -11,12 +11,17 @@ type MachineSceneParams = {
 const MODEL_PATH = '/models/mac-transformed.glb';
 const FLOAT_HEIGHT = 2.3;
 const REST_SCALE = 0.22;
+const INTRO_SECONDS = 2.4;
 const VISIBLE_HALF_HEIGHT = 3.27;
 const MAX_OFFSET_X = 3.4;
 const EDGE_MARGIN = 1;
-const LOOK_TARGET = new THREE.Vector3(0, 0.5, 0);
+const LOOK_TARGET = new THREE.Vector3(0, 0.4, 0);
 const INTRO_CAMERA = new THREE.Vector3(0, 3, 15);
-const REST_CAMERA = new THREE.Vector3(0, 1, 8);
+const REST_CAMERA = new THREE.Vector3(0, 1.2, 9);
+
+const easeOut = (value: number): number => {
+  return 1 - Math.pow(1 - value, 3);
+};
 
 export default function MachineScene({ accentColor }: MachineSceneParams) {
   const { scene } = useGLTF(MODEL_PATH);
@@ -24,7 +29,7 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
 
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
-    const intro = getIntroProgress(time);
+    const intro = easeOut(Math.min(time / INTRO_SECONDS, 1));
 
     state.camera.position.lerpVectors(INTRO_CAMERA, REST_CAMERA, intro);
     state.camera.lookAt(LOOK_TARGET);
@@ -59,6 +64,7 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
       />
       <pointLight position={[-4, 1, -3]} intensity={70} color={accentColor} />
       <pointLight position={[0, 2.5, 5]} intensity={25} color="#ffffff" />
+      <AmbientEmbers color={accentColor} count={420} />
       <group ref={modelRef} scale={0} position={[0, FLOAT_HEIGHT, 0]}>
         <primitive object={scene} />
       </group>
