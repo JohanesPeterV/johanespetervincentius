@@ -5,29 +5,47 @@ import * as THREE from 'three';
 
 type CardParticlesParams = {
   color: string;
-  count: number;
 };
 
 const CARD_WIDTH = 2.4;
 const CARD_HEIGHT = 3;
-const CARD_DEPTH = 0.18;
+const CARD_RADIUS = 0.4;
+const GRID_COLS = 64;
+const GRID_ROWS = 80;
 const SCATTER_RADIUS = 9;
-const ASSEMBLE_SECONDS = 1.5;
-const STAGGER_SECONDS = 0.6;
-const HARDEN_START = 1.5;
-const HARDEN_SECONDS = 0.8;
-const PEAK_OPACITY = 0.9;
+const ASSEMBLE_SECONDS = 1.6;
+const STAGGER_SECONDS = 0.7;
+const PACK_START = 1.2;
+const PACK_SECONDS = 1;
+const SIZE_MIN = 0.012;
+const SIZE_MAX = 0.06;
 
-const createCardTargets = (count: number): Float32Array => {
-  const targets = new Float32Array(count * 3);
+const isInsideRoundedCard = (x: number, y: number): boolean => {
+  const cornerX = Math.abs(x) - (CARD_WIDTH / 2 - CARD_RADIUS);
+  const cornerY = Math.abs(y) - (CARD_HEIGHT / 2 - CARD_RADIUS);
 
-  for (let index = 0; index < count; index++) {
-    targets[index * 3] = (Math.random() - 0.5) * CARD_WIDTH;
-    targets[index * 3 + 1] = (Math.random() - 0.5) * CARD_HEIGHT;
-    targets[index * 3 + 2] = (Math.random() - 0.5) * CARD_DEPTH;
+  if (cornerX <= 0 || cornerY <= 0) {
+    return true;
   }
 
-  return targets;
+  return cornerX * cornerX + cornerY * cornerY <= CARD_RADIUS * CARD_RADIUS;
+};
+
+const buildCardGrid = (): Float32Array => {
+  const points: number[] = [];
+
+  for (let row = 0; row < GRID_ROWS; row++) {
+    for (let col = 0; col < GRID_COLS; col++) {
+      const x = (col / (GRID_COLS - 1) - 0.5) * CARD_WIDTH;
+      const y = (row / (GRID_ROWS - 1) - 0.5) * CARD_HEIGHT;
+
+      if (isInsideRoundedCard(x, y)) {
+        points.push(x, y, 0);
+      }
+    }
+  }
+
+  return new Float32Array(points);
 };
 
 const createScatter = (count: number): Float32Array => {
@@ -46,11 +64,11 @@ const createScatter = (count: number): Float32Array => {
   return scatter;
 };
 
-export default function CardParticles({ color, count }: CardParticlesParams) {
+export default function CardParticles({ color }: CardParticlesParams) {
   const attributeRef = useRef<THREE.BufferAttribute>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
-  const targets = useRef(createCardTargets(count)).current;
-  const scatter = useRef(createScatter(count)).current;
+  const targets = useRef(buildCardGrid()).current;
+  const scatter = useRef(createScatter(targets.length / 3)).current;
   const live = useRef(new Float32Array(scatter)).current;
 
   useFrame((state) => {
@@ -59,6 +77,7 @@ export default function CardParticles({ color, count }: CardParticlesParams) {
     }
 
     const time = state.clock.elapsedTime;
+    const count = targets.length / 3;
 
     for (let index = 0; index < count; index++) {
       const offset = index * 3;
@@ -77,11 +96,10 @@ export default function CardParticles({ color, count }: CardParticlesParams) {
     attributeRef.current.needsUpdate = true;
 
     if (materialRef.current) {
-      const harden = Math.min(
-        Math.max((time - HARDEN_START) / HARDEN_SECONDS, 0),
-        1,
+      const pack = easeOutCubic(
+        Math.min(Math.max((time - PACK_START) / PACK_SECONDS, 0), 1),
       );
-      materialRef.current.opacity = PEAK_OPACITY * (1 - harden);
+      materialRef.current.size = SIZE_MIN + (SIZE_MAX - SIZE_MIN) * pack;
     }
   });
 
@@ -97,12 +115,9 @@ export default function CardParticles({ color, count }: CardParticlesParams) {
       <pointsMaterial
         ref={materialRef}
         color={color}
-        size={0.03}
+        size={SIZE_MIN}
         sizeAttenuation
-        transparent
-        opacity={PEAK_OPACITY}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        depthWrite
       />
     </points>
   );
