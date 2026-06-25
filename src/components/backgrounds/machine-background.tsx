@@ -19,7 +19,7 @@ export default function MachineBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-[-10]">
       <Canvas
-        camera={{ fov: 42, near: 0.1, far: 100, position: [0, 0.25, 3.6] }}
+        camera={{ fov: 45, near: 0.1, far: 100, position: [0, -0.1, 4.6] }}
         dpr={isLowPerformanceDevice ? 1 : [1, 2]}
         gl={{
           antialias: true,
@@ -32,7 +32,7 @@ export default function MachineBackground() {
         {isLowPerformanceDevice ? null : (
           <EffectComposer>
             <Bloom
-              intensity={0.85}
+              intensity={0.7}
               luminanceThreshold={0.2}
               luminanceSmoothing={0.9}
               mipmapBlur

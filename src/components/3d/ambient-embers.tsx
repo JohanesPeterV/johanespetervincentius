@@ -2,7 +2,7 @@ import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
 
-type ScrollEmbersParams = {
+type AmbientEmbersParams = {
   color: string;
   count: number;
 };
@@ -25,7 +25,7 @@ const createEmberPositions = (count: number): Float32Array => {
   return positions;
 };
 
-export default function ScrollEmbers({ color, count }: ScrollEmbersParams) {
+export default function AmbientEmbers({ color, count }: AmbientEmbersParams) {
   const pointsRef = useRef<THREE.Points>(null);
   const positions = useRef(createEmberPositions(count)).current;
 
