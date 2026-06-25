@@ -1,4 +1,4 @@
-import { easeInOutCubic, easeOutCubic } from '@/lib/intro';
+import { easeOutCubic } from '@/lib/intro';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
@@ -10,14 +10,13 @@ type CardParticlesParams = {
 
 const CARD_WIDTH = 2.4;
 const CARD_HEIGHT = 3;
-const CARD_DEPTH = 0.12;
+const CARD_DEPTH = 0.18;
 const SCATTER_RADIUS = 9;
 const ASSEMBLE_SECONDS = 1.5;
 const STAGGER_SECONDS = 0.6;
-const HOLD_SECONDS = 0.45;
-const DISPERSE_SECONDS = 1.6;
-const PEAK_OPACITY = 0.95;
-const REST_OPACITY = 0.22;
+const HARDEN_START = 1.5;
+const HARDEN_SECONDS = 0.8;
+const PEAK_OPACITY = 0.9;
 
 const createCardTargets = (count: number): Float32Array => {
   const targets = new Float32Array(count * 3);
@@ -48,28 +47,18 @@ const createScatter = (count: number): Float32Array => {
 };
 
 export default function CardParticles({ color, count }: CardParticlesParams) {
-  const pointsRef = useRef<THREE.Points>(null);
   const attributeRef = useRef<THREE.BufferAttribute>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
   const targets = useRef(createCardTargets(count)).current;
   const scatter = useRef(createScatter(count)).current;
   const live = useRef(new Float32Array(scatter)).current;
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (!attributeRef.current) {
       return;
     }
 
     const time = state.clock.elapsedTime;
-    const disperse = easeInOutCubic(
-      Math.min(
-        Math.max(
-          (time - ASSEMBLE_SECONDS - HOLD_SECONDS) / DISPERSE_SECONDS,
-          0,
-        ),
-        1,
-      ),
-    );
 
     for (let index = 0; index < count; index++) {
       const offset = index * 3;
@@ -81,25 +70,23 @@ export default function CardParticles({ color, count }: CardParticlesParams) {
       for (let axis = 0; axis < 3; axis++) {
         const from = scatter[offset + axis];
         const to = targets[offset + axis];
-        const formed = from + (to - from) * assemble;
-        live[offset + axis] = formed + (from - formed) * disperse;
+        live[offset + axis] = from + (to - from) * assemble;
       }
     }
 
     attributeRef.current.needsUpdate = true;
 
-    if (pointsRef.current) {
-      pointsRef.current.rotation.y += delta * 0.02;
-    }
-
     if (materialRef.current) {
-      materialRef.current.opacity =
-        PEAK_OPACITY - (PEAK_OPACITY - REST_OPACITY) * disperse;
+      const harden = Math.min(
+        Math.max((time - HARDEN_START) / HARDEN_SECONDS, 0),
+        1,
+      );
+      materialRef.current.opacity = PEAK_OPACITY * (1 - harden);
     }
   });
 
   return (
-    <points ref={pointsRef} position={[0, 0.5, 0]}>
+    <points position={[0, 0.5, 0]}>
       <bufferGeometry>
         <bufferAttribute
           ref={attributeRef}
@@ -110,7 +97,7 @@ export default function CardParticles({ color, count }: CardParticlesParams) {
       <pointsMaterial
         ref={materialRef}
         color={color}
-        size={0.04}
+        size={0.03}
         sizeAttenuation
         transparent
         opacity={PEAK_OPACITY}

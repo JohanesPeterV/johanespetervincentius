@@ -1,4 +1,4 @@
-import { getCardScale, getIntroProgress } from '@/lib/intro';
+import { getIntroProgress } from '@/lib/intro';
 import { Html, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { ReactNode, useRef } from 'react';
@@ -27,7 +27,6 @@ export default function MachineScene({
 }: MachineSceneParams) {
   const { scene } = useGLTF(MODEL_PATH);
   const modelRef = useRef<THREE.Group>(null);
-  const cardRef = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
@@ -35,10 +34,6 @@ export default function MachineScene({
 
     state.camera.position.lerpVectors(INTRO_CAMERA, REST_CAMERA, intro);
     state.camera.lookAt(LOOK_TARGET);
-
-    if (cardRef.current) {
-      cardRef.current.scale.setScalar(getCardScale(time));
-    }
 
     if (!modelRef.current) {
       return;
@@ -70,11 +65,11 @@ export default function MachineScene({
       />
       <pointLight position={[-4, 1, -3]} intensity={70} color={accentColor} />
       <pointLight position={[0, 2.5, 5]} intensity={25} color="#ffffff" />
-      <CardParticles color={accentColor} count={2200} />
+      <CardParticles color={accentColor} count={3500} />
       <group ref={modelRef} scale={0} position={[0, FLOAT_HEIGHT, 0]}>
         <primitive object={scene} />
       </group>
-      <group ref={cardRef} position={CARD_POSITION} scale={0}>
+      <group position={CARD_POSITION}>
         <Html transform distanceFactor={3} position={[0, 0, 0]}>
           {children}
         </Html>
