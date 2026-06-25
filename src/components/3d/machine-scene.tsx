@@ -1,13 +1,11 @@
 import { getIntroProgress } from '@/lib/intro';
-import { Html, useGLTF } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { ReactNode, useRef } from 'react';
+import { useRef } from 'react';
 import * as THREE from 'three';
-import CardParticles from './card-particles';
 
 type MachineSceneParams = {
   accentColor: string;
-  children: ReactNode;
 };
 
 const MODEL_PATH = '/models/mac-transformed.glb';
@@ -16,15 +14,11 @@ const REST_SCALE = 0.22;
 const VISIBLE_HALF_HEIGHT = 3.27;
 const MAX_OFFSET_X = 3.4;
 const EDGE_MARGIN = 1;
-const CARD_POSITION = new THREE.Vector3(0, 0.5, 0);
 const LOOK_TARGET = new THREE.Vector3(0, 0.5, 0);
 const INTRO_CAMERA = new THREE.Vector3(0, 3, 15);
 const REST_CAMERA = new THREE.Vector3(0, 1, 8);
 
-export default function MachineScene({
-  accentColor,
-  children,
-}: MachineSceneParams) {
+export default function MachineScene({ accentColor }: MachineSceneParams) {
   const { scene } = useGLTF(MODEL_PATH);
   const modelRef = useRef<THREE.Group>(null);
 
@@ -65,14 +59,8 @@ export default function MachineScene({
       />
       <pointLight position={[-4, 1, -3]} intensity={70} color={accentColor} />
       <pointLight position={[0, 2.5, 5]} intensity={25} color="#ffffff" />
-      <CardParticles color={accentColor} />
       <group ref={modelRef} scale={0} position={[0, FLOAT_HEIGHT, 0]}>
         <primitive object={scene} />
-      </group>
-      <group position={CARD_POSITION}>
-        <Html transform distanceFactor={3} position={[0, 0, 0]}>
-          {children}
-        </Html>
       </group>
     </>
   );

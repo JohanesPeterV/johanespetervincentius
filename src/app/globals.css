@@ -93,24 +93,6 @@ body {
   animation: animatedgradient 8s linear infinite alternate;
 }
 
-@keyframes cardHarden {
-  0% {
-    opacity: 0;
-    transform: scale(0.94);
-    filter: blur(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: none;
-    filter: none;
-  }
-}
-
-.card-harden {
-  opacity: 0;
-  animation: cardHarden 0.7s ease-out 1.5s forwards;
-}
-
 @keyframes cardText {
   0% {
     opacity: 0;
