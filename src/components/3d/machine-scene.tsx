@@ -75,7 +75,7 @@ export default function MachineScene({
         <primitive object={scene} />
       </group>
       <group ref={cardRef} position={CARD_POSITION} scale={0}>
-        <Html transform distanceFactor={6} position={[0, 0, 0]}>
+        <Html transform distanceFactor={3} position={[0, 0, 0]}>
           {children}
         </Html>
       </group>

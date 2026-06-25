@@ -7,6 +7,14 @@ export const easeOutCubic = (value: number): number => {
   return 1 - Math.pow(1 - value, 3);
 };
 
+export const easeInOutCubic = (value: number): number => {
+  if (value < 0.5) {
+    return 4 * value * value * value;
+  }
+
+  return 1 - Math.pow(-2 * value + 2, 3) / 2;
+};
+
 export const easeOutBack = (value: number): number => {
   const overshoot = 1.70158;
   const scaled = overshoot + 1;
