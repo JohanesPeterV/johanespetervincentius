@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center px-4 py-16">
       <MachineBackground />
-      <div className="animate-card-in relative flex w-full max-w-md flex-col items-center gap-8 rounded-3xl border border-white/10 bg-card/40 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
+      <div className="animate-card-genesis relative flex w-full max-w-md flex-col items-center gap-8 rounded-3xl border border-white/10 bg-card/40 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
         <ProfileHeader />
         <LinkButtons />
         <ContactIcons />
