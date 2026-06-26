@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import AmbientEmbers from './ambient-embers';
+import { ORBIT_CENTER } from './orbit';
 import OrbitSystem from './orbit-system';
 
 type MachineSceneParams = {
@@ -8,11 +9,14 @@ type MachineSceneParams = {
 };
 
 const INTRO_SECONDS = 2.4;
-// REASON: orbit centre on the ground plane; the card overlay sits here so the ring revolves around it
+// REASON: front-on view with the card centred; the camera rests at the orbit centre so the bodies sweep past rather than circle
 const LOOK_TARGET = new THREE.Vector3(0, 0, 0);
-const INTRO_CAMERA = new THREE.Vector3(0, 4, 14);
-// REASON: rest pose looks down from above so the horizontal orbit reads as circling, not a sideways sweep
-const REST_CAMERA = new THREE.Vector3(0, 9, 5);
+const INTRO_CAMERA = new THREE.Vector3(0, 0, 11);
+const REST_CAMERA = new THREE.Vector3(
+  ORBIT_CENTER[0],
+  ORBIT_CENTER[1],
+  ORBIT_CENTER[2],
+);
 
 const easeOut = (value: number): number => {
   return 1 - Math.pow(1 - value, 3);
