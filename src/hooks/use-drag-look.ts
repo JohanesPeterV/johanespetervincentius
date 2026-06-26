@@ -1,4 +1,4 @@
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
@@ -13,24 +13,23 @@ type DragState = {
   y: number;
 };
 
-const SENSITIVITY = 0.0035;
+const SENSITIVITY = 0.0045;
 // REASON: yaw is unclamped for full 360 first-person turning; only pitch is capped just shy of straight up/down to avoid flipping over
 const MAX_PITCH = 1.45;
-const LOOK_DAMP = 6;
+const LOOK_DAMP = 8;
 
 export function useDragLook() {
-  const domElement = useThree((state) => state.gl.domElement);
   const targetRef = useRef<LookAngles>({ yaw: 0, pitch: 0 });
   const currentRef = useRef<LookAngles>({ yaw: 0, pitch: 0 });
   const dragRef = useRef<DragState>({ active: false, x: 0, y: 0 });
 
-  // REASON: bridge drag gestures into the imperative R3F camera loop; the look angle cannot arrive through React props
+  // REASON: bridge drag gestures into the imperative R3F camera loop; listen on window so dragging anywhere on the screen turns the view, not just the strips beside the card
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent): void => {
       dragRef.current.active = true;
       dragRef.current.x = event.clientX;
       dragRef.current.y = event.clientY;
-      domElement.style.cursor = 'grabbing';
+      document.body.style.cursor = 'grabbing';
     };
 
     const handlePointerMove = (event: PointerEvent): void => {
@@ -53,21 +52,19 @@ export function useDragLook() {
 
     const handlePointerUp = (): void => {
       dragRef.current.active = false;
-      domElement.style.cursor = 'grab';
+      document.body.style.cursor = '';
     };
 
-    domElement.style.cursor = 'grab';
-    domElement.style.touchAction = 'none';
-    domElement.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('pointerdown', handlePointerDown);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
 
     return () => {
-      domElement.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [domElement]);
+  }, []);
 
   useFrame((state, delta) => {
     currentRef.current.yaw = THREE.MathUtils.damp(

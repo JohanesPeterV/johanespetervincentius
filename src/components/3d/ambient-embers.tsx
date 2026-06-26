@@ -7,7 +7,7 @@ type AmbientEmbersParams = {
   count: number;
 };
 
-const FIELD_RADIUS = 9;
+const FIELD_RADIUS = 11;
 
 const createEmberPositions = (count: number): Float32Array => {
   const positions = new Float32Array(count * 3);
