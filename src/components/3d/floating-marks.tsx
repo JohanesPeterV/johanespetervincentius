@@ -7,95 +7,114 @@ type MarkBlending = 'normal' | 'additive';
 
 type MarkConfig = {
   url: string;
-  basePosition: readonly [number, number, number];
+  angle: number;
+  height: number;
   size: readonly [number, number];
-  phase: number;
   opacity: number;
   blending: MarkBlending;
 };
 
+const ORBIT_RADIUS = 1.9;
+const ORBIT_SPEED = 0.06;
+const ORBIT_CENTER_Y = 0.4;
+
 const MARKS: readonly MarkConfig[] = [
   {
     url: '/logos/claude.png',
-    basePosition: [-1.3, 1.4, 0.3],
+    angle: 0.4,
+    height: 1.1,
     size: [1, 1],
-    phase: 0,
     opacity: 0.9,
     blending: 'normal',
   },
   {
     url: '/logos/codex.png',
-    basePosition: [-1.25, -1.5, 0.9],
+    angle: 1.9,
+    height: -0.6,
     size: [1.1, 1.1],
-    phase: 1.6,
     opacity: 0.9,
     blending: 'normal',
   },
   {
     url: '/logos/opencode.png',
-    basePosition: [1.2, -1.5, 0.6],
+    angle: 3.5,
+    height: 0.2,
     size: [0.9, 1.05],
-    phase: 3.1,
     opacity: 0.9,
     blending: 'normal',
   },
   {
     url: '/logos/conductor.png',
-    basePosition: [1.45, 0.15, 1.2],
-    size: [1, 1],
-    phase: 4.5,
-    opacity: 0.4,
+    angle: 5,
+    height: 1.3,
+    size: [0.7, 0.7],
+    opacity: 0.22,
     blending: 'additive',
   },
 ];
 
-const FloatingMark = ({
+const OrbitMark = ({
   url,
-  basePosition,
+  angle,
+  height,
   size,
-  phase,
   opacity,
   blending,
 }: MarkConfig) => {
-  const groupRef = useRef<THREE.Group>(null);
   const texture = useTexture(url);
   texture.colorSpace = THREE.SRGBColorSpace;
 
-  useFrame((state) => {
+  const [width, planeHeight] = size;
+  const x = Math.cos(angle) * ORBIT_RADIUS;
+  const z = Math.sin(angle) * ORBIT_RADIUS;
+  const isAdditive = blending === 'additive';
+
+  return (
+    <Billboard position={[x, height, z]}>
+      <mesh>
+        <planeGeometry args={[width, planeHeight]} />
+        <meshBasicMaterial
+          map={texture}
+          transparent
+          opacity={opacity}
+          depthWrite={false}
+          blending={isAdditive ? THREE.AdditiveBlending : THREE.NormalBlending}
+        />
+      </mesh>
+    </Billboard>
+  );
+};
+
+const OrbitField = () => {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state, delta) => {
     if (!groupRef.current) {
       return;
     }
 
-    const time = state.clock.elapsedTime;
     const aspect = state.size.width / Math.max(state.size.height, 1);
-    const spread = THREE.MathUtils.clamp(aspect * 1.1, 0.8, 1.8);
-    const [baseX, baseY, baseZ] = basePosition;
+    const fit = THREE.MathUtils.clamp(aspect * 0.85, 0.55, 1);
 
-    groupRef.current.position.x =
-      baseX * spread + Math.sin(time * 0.3 + phase) * 0.18;
-    groupRef.current.position.y = baseY + Math.sin(time * 0.6 + phase) * 0.16;
-    groupRef.current.position.z = baseZ;
+    groupRef.current.scale.setScalar(fit);
+    groupRef.current.rotation.y += delta * ORBIT_SPEED;
+    groupRef.current.position.y =
+      ORBIT_CENTER_Y + Math.sin(state.clock.elapsedTime * 0.2) * 0.2;
   });
-
-  const [width, height] = size;
-  const isAdditive = blending === 'additive';
 
   return (
     <group ref={groupRef}>
-      <Billboard>
-        <mesh>
-          <planeGeometry args={[width, height]} />
-          <meshBasicMaterial
-            map={texture}
-            transparent
-            opacity={opacity}
-            depthWrite={false}
-            blending={
-              isAdditive ? THREE.AdditiveBlending : THREE.NormalBlending
-            }
-          />
-        </mesh>
-      </Billboard>
+      {MARKS.map((mark) => (
+        <OrbitMark
+          key={mark.url}
+          url={mark.url}
+          angle={mark.angle}
+          height={mark.height}
+          size={mark.size}
+          opacity={mark.opacity}
+          blending={mark.blending}
+        />
+      ))}
     </group>
   );
 };
@@ -103,17 +122,7 @@ const FloatingMark = ({
 export default function FloatingMarks() {
   return (
     <Suspense fallback={null}>
-      {MARKS.map((mark) => (
-        <FloatingMark
-          key={mark.url}
-          url={mark.url}
-          basePosition={mark.basePosition}
-          size={mark.size}
-          phase={mark.phase}
-          opacity={mark.opacity}
-          blending={mark.blending}
-        />
-      ))}
+      <OrbitField />
     </Suspense>
   );
 }
