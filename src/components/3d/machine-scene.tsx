@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
 import AmbientEmbers from './ambient-embers';
+import FloatingMarks from './floating-marks';
 
 type MachineSceneParams = {
   accentColor: string;
@@ -65,6 +66,7 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
       <pointLight position={[-4, 1, -3]} intensity={70} color={accentColor} />
       <pointLight position={[0, 2.5, 5]} intensity={25} color="#ffffff" />
       <AmbientEmbers color={accentColor} count={420} />
+      <FloatingMarks />
       <group ref={modelRef} scale={0} position={[0, FLOAT_HEIGHT, 0]}>
         <primitive object={scene} />
       </group>
