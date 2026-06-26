@@ -2,61 +2,89 @@ import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
 
-type AmbientEmbersParams = {
+type BinaryFieldParams = {
   color: string;
   count: number;
 };
 
-type EmberField = {
+type DigitField = {
   positions: Float32Array;
   sizes: Float32Array;
   brights: Float32Array;
-  embers: Float32Array;
+  glyphs: Float32Array;
   phases: Float32Array;
 };
 
 const FIELD_RADIUS = 11;
-const EMBER_COLOR = '#ff8a4c';
-const EMBER_RATIO = 0.16;
+const WHITE = new THREE.Color('#ffffff');
 
 const VERTEX_SHADER = `
   uniform float uTime;
   uniform float uScale;
-  uniform vec3 uColorStar;
-  uniform vec3 uColorEmber;
+  uniform vec3 uColorDim;
+  uniform vec3 uColorBright;
   attribute float aSize;
   attribute float aBright;
-  attribute float aEmber;
+  attribute float aGlyph;
   attribute float aPhase;
   varying vec3 vColor;
   varying float vBright;
+  varying float vGlyph;
 
   void main() {
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mvPosition;
-    float twinkle = 0.65 + 0.35 * sin(uTime * 1.4 + aPhase);
+    float shift = 0.5 + 0.5 * sin(uTime * 0.8 + aPhase * 3.0);
+    vColor = mix(uColorDim, uColorBright, shift);
+    float twinkle = 0.55 + 0.45 * sin(uTime * 1.6 + aPhase);
     vBright = aBright * twinkle;
-    vColor = mix(uColorStar, uColorEmber, aEmber);
+    vGlyph = aGlyph;
     gl_PointSize = aSize * uScale / -mvPosition.z;
   }
 `;
 
 const FRAGMENT_SHADER = `
+  uniform sampler2D uGlyphMap;
   varying vec3 vColor;
   varying float vBright;
+  varying float vGlyph;
 
   void main() {
-    float dist = distance(gl_PointCoord, vec2(0.5));
-    float alpha = smoothstep(0.5, 0.05, dist);
-    gl_FragColor = vec4(vColor * vBright, alpha);
+    vec2 uv = vec2(gl_PointCoord.x * 0.5 + vGlyph * 0.5, gl_PointCoord.y);
+    float mask = texture2D(uGlyphMap, uv).a;
+    if (mask < 0.15) {
+      discard;
+    }
+    gl_FragColor = vec4(vColor * vBright, mask);
   }
 `;
 
-const createEmberField = (count: number): EmberField => {
+const createGlyphTexture = (): THREE.CanvasTexture => {
+  const cell = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = cell * 2;
+  canvas.height = cell;
+
+  const context = canvas.getContext('2d');
+  if (context) {
+    context.fillStyle = '#ffffff';
+    context.font = `bold ${cell * 0.8}px "Courier New", monospace`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('0', cell * 0.5, cell * 0.52);
+    context.fillText('1', cell * 1.5, cell * 0.52);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.flipY = false;
+  return texture;
+};
+
+const createDigitField = (count: number): DigitField => {
   const positions = new Float32Array(count * 3);
   const sizes = new Float32Array(count);
   const brights = new Float32Array(count);
-  const embers = new Float32Array(count);
+  const glyphs = new Float32Array(count);
   const phases = new Float32Array(count);
 
   for (let index = 0; index < count; index++) {
@@ -68,28 +96,25 @@ const createEmberField = (count: number): EmberField => {
     positions[index * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
     positions[index * 3 + 2] = radius * Math.cos(phi);
 
-    const isEmber = Math.random() < EMBER_RATIO;
-    embers[index] = isEmber ? 0.7 + Math.random() * 0.3 : 0;
-    sizes[index] = isEmber
-      ? 7 + Math.random() * 6
-      : 2 + Math.pow(Math.random(), 2) * 8;
-    brights[index] = isEmber
-      ? 0.85 + Math.random() * 0.35
-      : 0.4 + Math.random() * 0.6;
+    glyphs[index] = Math.random() < 0.5 ? 0 : 1;
+    sizes[index] = 5 + Math.pow(Math.random(), 1.6) * 14;
+    brights[index] = 0.45 + Math.random() * 0.55;
     phases[index] = Math.random() * Math.PI * 2;
   }
 
-  return { positions, sizes, brights, embers, phases };
+  return { positions, sizes, brights, glyphs, phases };
 };
 
-export default function AmbientEmbers({ color, count }: AmbientEmbersParams) {
+export default function BinaryField({ color, count }: BinaryFieldParams) {
   const pointsRef = useRef<THREE.Points>(null);
-  const field = useRef(createEmberField(count)).current;
+  const field = useRef(createDigitField(count)).current;
+  const glyphTexture = useRef(createGlyphTexture()).current;
   const uniforms = useRef({
     uTime: { value: 0 },
-    uScale: { value: 9 },
-    uColorStar: { value: new THREE.Color(color) },
-    uColorEmber: { value: new THREE.Color(EMBER_COLOR) },
+    uScale: { value: 10 },
+    uColorDim: { value: new THREE.Color(color) },
+    uColorBright: { value: new THREE.Color(color) },
+    uGlyphMap: { value: glyphTexture },
   }).current;
 
   useFrame((state, delta) => {
@@ -98,7 +123,8 @@ export default function AmbientEmbers({ color, count }: AmbientEmbersParams) {
     }
 
     uniforms.uTime.value = state.clock.elapsedTime;
-    uniforms.uColorStar.value.set(color);
+    uniforms.uColorDim.value.set(color);
+    uniforms.uColorBright.value.set(color).lerp(WHITE, 0.65);
     pointsRef.current.rotation.y += delta * 0.03;
     pointsRef.current.position.y =
       Math.sin(state.clock.elapsedTime * 0.2) * 0.3;
@@ -116,7 +142,7 @@ export default function AmbientEmbers({ color, count }: AmbientEmbersParams) {
           attach="attributes-aBright"
           args={[field.brights, 1]}
         />
-        <bufferAttribute attach="attributes-aEmber" args={[field.embers, 1]} />
+        <bufferAttribute attach="attributes-aGlyph" args={[field.glyphs, 1]} />
         <bufferAttribute attach="attributes-aPhase" args={[field.phases, 1]} />
       </bufferGeometry>
       <shaderMaterial
