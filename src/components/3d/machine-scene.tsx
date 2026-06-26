@@ -1,5 +1,6 @@
 import { useDragLook } from '@/hooks/use-drag-look';
 import AmbientEmbers from './ambient-embers';
+import { ORBIT_CENTER } from './orbit';
 import OrbitSystem from './orbit-system';
 
 type MachineSceneParams = {
@@ -21,7 +22,9 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
       />
       <pointLight position={[-4, 1, -3]} intensity={70} color={accentColor} />
       <pointLight position={[0, 2.5, 5]} intensity={25} color="#ffffff" />
-      <AmbientEmbers color={accentColor} count={420} />
+      <group position={[ORBIT_CENTER[0], ORBIT_CENTER[1], ORBIT_CENTER[2]]}>
+        <AmbientEmbers color={accentColor} count={420} />
+      </group>
       <OrbitSystem />
     </>
   );

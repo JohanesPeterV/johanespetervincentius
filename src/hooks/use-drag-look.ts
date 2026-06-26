@@ -13,9 +13,9 @@ type DragState = {
   y: number;
 };
 
-const SENSITIVITY = 0.0026;
-const MAX_YAW = 1;
-const MAX_PITCH = 0.6;
+const SENSITIVITY = 0.0035;
+// REASON: yaw is unclamped for full 360 first-person turning; only pitch is capped just shy of straight up/down to avoid flipping over
+const MAX_PITCH = 1.45;
 const LOOK_DAMP = 6;
 
 export function useDragLook() {
@@ -43,11 +43,7 @@ export function useDragLook() {
       dragRef.current.x = event.clientX;
       dragRef.current.y = event.clientY;
 
-      targetRef.current.yaw = THREE.MathUtils.clamp(
-        targetRef.current.yaw - deltaX * SENSITIVITY,
-        -MAX_YAW,
-        MAX_YAW,
-      );
+      targetRef.current.yaw -= deltaX * SENSITIVITY;
       targetRef.current.pitch = THREE.MathUtils.clamp(
         targetRef.current.pitch - deltaY * SENSITIVITY,
         -MAX_PITCH,
