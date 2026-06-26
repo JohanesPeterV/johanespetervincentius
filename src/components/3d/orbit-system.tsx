@@ -18,8 +18,8 @@ type MarkConfig = {
 
 const MODEL_PATH = '/models/mac-transformed.glb';
 const MAC_PHASE = 5.03;
-const MAC_HEIGHT = 0;
-const MAC_RADIUS = 6.2;
+const MAC_HEIGHT = 0.2;
+const MAC_RADIUS = 9.2;
 const MAC_SCALE = 0.22;
 
 // REASON: each body circles the camera at its own phase and radius, so they drift past the centred card one after another
@@ -27,8 +27,8 @@ const MARKS: readonly MarkConfig[] = [
   {
     url: '/logos/claude.png',
     phase: 0,
-    height: 0.7,
-    radius: 6,
+    height: 1,
+    radius: 9,
     size: [0.52, 0.52],
     opacity: 0.9,
     blending: 'normal',
@@ -36,8 +36,8 @@ const MARKS: readonly MarkConfig[] = [
   {
     url: '/logos/codex.png',
     phase: 1.26,
-    height: -0.6,
-    radius: 5.3,
+    height: -0.9,
+    radius: 8.4,
     size: [0.56, 0.56],
     opacity: 0.9,
     blending: 'normal',
@@ -45,8 +45,8 @@ const MARKS: readonly MarkConfig[] = [
   {
     url: '/logos/opencode.png',
     phase: 2.51,
-    height: 0.3,
-    radius: 6.4,
+    height: 0.5,
+    radius: 9.6,
     size: [0.5, 0.59],
     opacity: 0.9,
     blending: 'normal',
@@ -54,8 +54,8 @@ const MARKS: readonly MarkConfig[] = [
   {
     url: '/logos/conductor.png',
     phase: 3.77,
-    height: -0.85,
-    radius: 5.6,
+    height: -1.3,
+    radius: 8.8,
     size: [0.44, 0.44],
     opacity: 0.22,
     blending: 'additive',
