@@ -18,7 +18,7 @@ export default function Home() {
           aria-hidden
           className="pointer-events-none absolute -inset-2 rounded-[2.25rem] bg-primary/10 opacity-50 blur-2xl"
         />
-        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-3xl border border-white/10 bg-black/30 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
+        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-3xl border border-white/15 bg-black/60 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent"
