@@ -13,12 +13,14 @@ const MODEL_PATH = '/models/mac-transformed.glb';
 const FLOAT_HEIGHT = 2.3;
 const REST_SCALE = 0.22;
 const INTRO_SECONDS = 2.4;
-const VISIBLE_HALF_HEIGHT = 3.27;
+const VISIBLE_HALF_HEIGHT = 3.75;
 const MAX_OFFSET_X = 3.4;
 const EDGE_MARGIN = 1;
-const LOOK_TARGET = new THREE.Vector3(0, 0.4, 0);
-const INTRO_CAMERA = new THREE.Vector3(0, 3, 15);
-const REST_CAMERA = new THREE.Vector3(0, 1.2, 9);
+// REASON: orbit centre on the ground plane; the card overlay sits here so marks revolve around it
+const LOOK_TARGET = new THREE.Vector3(0, 0, 0);
+const INTRO_CAMERA = new THREE.Vector3(0, 4, 14);
+// REASON: rest pose looks down from above so the horizontal orbit reads as circling, not a sideways sweep
+const REST_CAMERA = new THREE.Vector3(0, 9, 5);
 
 const easeOut = (value: number): number => {
   return 1 - Math.pow(1 - value, 3);
