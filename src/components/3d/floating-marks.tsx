@@ -3,16 +3,56 @@ import { useFrame } from '@react-three/fiber';
 import { Suspense, useRef } from 'react';
 import * as THREE from 'three';
 
-type FloatingMarkParams = {
+type MarkBlending = 'normal' | 'additive';
+
+type MarkConfig = {
   url: string;
   basePosition: readonly [number, number, number];
+  size: readonly [number, number];
   phase: number;
+  blending: MarkBlending;
 };
 
-const MARK_SIZE = 1.1;
-const MARK_OPACITY = 0.85;
+const MARK_OPACITY = 0.9;
 
-const FloatingMark = ({ url, basePosition, phase }: FloatingMarkParams) => {
+const MARKS: readonly MarkConfig[] = [
+  {
+    url: '/logos/claude.png',
+    basePosition: [-1.3, 1.4, 0.3],
+    size: [1, 1],
+    phase: 0,
+    blending: 'normal',
+  },
+  {
+    url: '/logos/codex.png',
+    basePosition: [-1.25, -1.5, 0.9],
+    size: [1.1, 1.1],
+    phase: 1.6,
+    blending: 'normal',
+  },
+  {
+    url: '/logos/opencode.png',
+    basePosition: [1.2, -1.5, 0.6],
+    size: [0.9, 1.05],
+    phase: 3.1,
+    blending: 'normal',
+  },
+  {
+    url: '/logos/conductor.png',
+    basePosition: [1.45, 0.15, 1.2],
+    size: [1, 1],
+    phase: 4.5,
+    blending: 'additive',
+  },
+];
+
+const FloatingMark = ({
+  url,
+  basePosition,
+  size,
+  phase,
+  blending,
+}: MarkConfig) => {
   const groupRef = useRef<THREE.Group>(null);
   const texture = useTexture(url);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -33,16 +73,23 @@ const FloatingMark = ({ url, basePosition, phase }: FloatingMarkParams) => {
     groupRef.current.position.z = baseZ;
   });
 
+  const [width, height] = size;
+  const isAdditive = blending === 'additive';
+
   return (
     <group ref={groupRef}>
       <Billboard>
         <mesh>
-          <planeGeometry args={[MARK_SIZE, MARK_SIZE]} />
+          <planeGeometry args={[width, height]} />
           <meshBasicMaterial
             map={texture}
             transparent
             opacity={MARK_OPACITY}
             depthWrite={false}
+            toneMapped={!isAdditive}
+            blending={
+              isAdditive ? THREE.AdditiveBlending : THREE.NormalBlending
+            }
           />
         </mesh>
       </Billboard>
@@ -53,16 +100,16 @@ const FloatingMark = ({ url, basePosition, phase }: FloatingMarkParams) => {
 export default function FloatingMarks() {
   return (
     <Suspense fallback={null}>
-      <FloatingMark
-        url="/logos/claude.svg"
-        basePosition={[-1.3, 1.3, 0.4]}
-        phase={0}
-      />
-      <FloatingMark
-        url="/logos/codex.svg"
-        basePosition={[-1.1, -1.6, 0.9]}
-        phase={1.7}
-      />
+      {MARKS.map((mark) => (
+        <FloatingMark
+          key={mark.url}
+          url={mark.url}
+          basePosition={mark.basePosition}
+          size={mark.size}
+          phase={mark.phase}
+          blending={mark.blending}
+        />
+      ))}
     </Suspense>
   );
 }
