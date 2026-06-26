@@ -10,7 +10,7 @@ export default function Home() {
       <div className="animate-card-in relative w-full max-w-md">
         <div
           aria-hidden
-          className="pointer-events-none absolute -inset-4 rounded-[2.25rem] bg-primary/20 opacity-70 blur-3xl"
+          className="pointer-events-none absolute -inset-2 rounded-[2.25rem] bg-primary/10 opacity-50 blur-2xl"
         />
         <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-3xl border border-white/15 bg-card/40 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl backdrop-saturate-150">
           <div
