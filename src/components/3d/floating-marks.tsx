@@ -10,10 +10,9 @@ type MarkConfig = {
   basePosition: readonly [number, number, number];
   size: readonly [number, number];
   phase: number;
+  opacity: number;
   blending: MarkBlending;
 };
-
-const MARK_OPACITY = 0.9;
 
 const MARKS: readonly MarkConfig[] = [
   {
@@ -21,6 +20,7 @@ const MARKS: readonly MarkConfig[] = [
     basePosition: [-1.3, 1.4, 0.3],
     size: [1, 1],
     phase: 0,
+    opacity: 0.9,
     blending: 'normal',
   },
   {
@@ -28,6 +28,7 @@ const MARKS: readonly MarkConfig[] = [
     basePosition: [-1.25, -1.5, 0.9],
     size: [1.1, 1.1],
     phase: 1.6,
+    opacity: 0.9,
     blending: 'normal',
   },
   {
@@ -35,6 +36,7 @@ const MARKS: readonly MarkConfig[] = [
     basePosition: [1.2, -1.5, 0.6],
     size: [0.9, 1.05],
     phase: 3.1,
+    opacity: 0.9,
     blending: 'normal',
   },
   {
@@ -42,6 +44,7 @@ const MARKS: readonly MarkConfig[] = [
     basePosition: [1.45, 0.15, 1.2],
     size: [1, 1],
     phase: 4.5,
+    opacity: 0.4,
     blending: 'additive',
   },
 ];
@@ -51,6 +54,7 @@ const FloatingMark = ({
   basePosition,
   size,
   phase,
+  opacity,
   blending,
 }: MarkConfig) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -84,9 +88,8 @@ const FloatingMark = ({
           <meshBasicMaterial
             map={texture}
             transparent
-            opacity={MARK_OPACITY}
+            opacity={opacity}
             depthWrite={false}
-            toneMapped={!isAdditive}
             blending={
               isAdditive ? THREE.AdditiveBlending : THREE.NormalBlending
             }
@@ -107,6 +110,7 @@ export default function FloatingMarks() {
           basePosition={mark.basePosition}
           size={mark.size}
           phase={mark.phase}
+          opacity={mark.opacity}
           blending={mark.blending}
         />
       ))}
