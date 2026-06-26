@@ -1,5 +1,6 @@
 'use client';
 
+import { ORBIT_CENTER } from '@/components/3d/orbit';
 import MachineScene from '@/components/3d/machine-scene';
 import { useConfig } from '@/hooks/use-config';
 import { getFluidThemeColors } from '@/lib/theme-colors';
@@ -17,9 +18,14 @@ export default function MachineBackground() {
   const { fluidColor } = getFluidThemeColors(theme, resolvedTheme);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[-10]">
+    <div className="fixed inset-0 z-0">
       <Canvas
-        camera={{ fov: 40, near: 0.1, far: 100, position: [0, 3, 15] }}
+        camera={{
+          fov: 40,
+          near: 0.1,
+          far: 100,
+          position: [ORBIT_CENTER[0], ORBIT_CENTER[1], ORBIT_CENTER[2]],
+        }}
         dpr={isLowPerformanceDevice ? 1 : [1, 2]}
         gl={{
           antialias: true,
