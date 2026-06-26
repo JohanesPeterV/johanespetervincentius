@@ -2,6 +2,7 @@ import { useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Suspense, useRef } from 'react';
 import * as THREE from 'three';
+import { getOrbitRadius, ORBIT_SPEED } from './orbit';
 
 type MarkBlending = 'normal' | 'additive';
 
@@ -14,13 +15,7 @@ type MarkConfig = {
   blending: MarkBlending;
 };
 
-// REASON: marks circle the origin on the ground plane; the top-down camera turns this into a ring around the centred card
-const ORBIT_RADIUS = 2.5;
-const ORBIT_SPEED = 0.06;
-// REASON: world half-height the top-down camera frames at the orbit plane; used to shrink the ring on narrow viewports
-const VISIBLE_HALF_HEIGHT = 3.75;
-const EDGE_GAP = 0.5;
-
+// REASON: four of five evenly-spaced slots on the shared ring; the MacBook rides the fifth
 const MARKS: readonly MarkConfig[] = [
   {
     url: '/logos/claude.png',
@@ -32,7 +27,7 @@ const MARKS: readonly MarkConfig[] = [
   },
   {
     url: '/logos/codex.png',
-    angle: 2.17,
+    angle: 1.86,
     height: -0.25,
     size: [0.46, 0.46],
     opacity: 0.9,
@@ -40,7 +35,7 @@ const MARKS: readonly MarkConfig[] = [
   },
   {
     url: '/logos/opencode.png',
-    angle: 3.74,
+    angle: 3.11,
     height: 0.1,
     size: [0.4, 0.473],
     opacity: 0.9,
@@ -48,7 +43,7 @@ const MARKS: readonly MarkConfig[] = [
   },
   {
     url: '/logos/conductor.png',
-    angle: 5.31,
+    angle: 4.37,
     height: -0.15,
     size: [0.34, 0.34],
     opacity: 0.22,
@@ -75,8 +70,7 @@ const OrbitMark = ({
 
     const time = state.clock.elapsedTime;
     const aspect = state.size.width / Math.max(state.size.height, 1);
-    const maxRadius = VISIBLE_HALF_HEIGHT * aspect - EDGE_GAP;
-    const radius = Math.min(ORBIT_RADIUS, maxRadius);
+    const radius = getOrbitRadius(aspect);
     const orbit = time * ORBIT_SPEED + angle;
 
     meshRef.current.position.x = Math.cos(orbit) * radius;
