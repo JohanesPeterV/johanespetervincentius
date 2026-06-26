@@ -27,7 +27,7 @@ const CONTACT_ICONS: ContactIcon[] = [
 
 export default function ContactIcons() {
   return (
-    <div className="flex items-center justify-center gap-8">
+    <div className="flex items-center justify-center gap-5">
       {CONTACT_ICONS.map(({ icon: Icon, label, url }) => {
         const isExternal = url.startsWith('http');
         return (
@@ -37,9 +37,9 @@ export default function ContactIcons() {
             aria-label={label}
             target={isExternal ? '_blank' : undefined}
             rel={isExternal ? 'noopener noreferrer' : undefined}
-            className="text-foreground transition-all hover:scale-110 hover:text-primary"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground shadow-md backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10 hover:text-primary"
           >
-            <Icon className="text-3xl" />
+            <Icon className="text-xl" />
           </a>
         );
       })}

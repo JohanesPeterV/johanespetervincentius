@@ -9,8 +9,12 @@ export default function LinkButtons() {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg transition-all hover:scale-[1.02] hover:bg-white/10 hover:shadow-xl"
+          className="group relative flex items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10 hover:shadow-xl"
         >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          />
           <Icon className="absolute left-5 shrink-0 text-2xl text-primary transition-colors group-hover:text-foreground" />
           <span className="flex flex-col items-center">
             <span className="text-sm font-semibold text-foreground">
