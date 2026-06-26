@@ -9,6 +9,35 @@ type AmbientEmbersParams = {
 
 const FIELD_RADIUS = 11;
 
+const createCircleTexture = (): THREE.CanvasTexture => {
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+
+  const context = canvas.getContext('2d');
+  if (context) {
+    const center = size / 2;
+    const gradient = context.createRadialGradient(
+      center,
+      center,
+      0,
+      center,
+      center,
+      center,
+    );
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.85)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.arc(center, center, center, 0, Math.PI * 2);
+    context.fill();
+  }
+
+  return new THREE.CanvasTexture(canvas);
+};
+
 const createEmberPositions = (count: number): Float32Array => {
   const positions = new Float32Array(count * 3);
 
@@ -28,6 +57,7 @@ const createEmberPositions = (count: number): Float32Array => {
 export default function AmbientEmbers({ color, count }: AmbientEmbersParams) {
   const pointsRef = useRef<THREE.Points>(null);
   const positions = useRef(createEmberPositions(count)).current;
+  const circleTexture = useRef(createCircleTexture()).current;
 
   useFrame((state, delta) => {
     if (!pointsRef.current) {
@@ -48,6 +78,8 @@ export default function AmbientEmbers({ color, count }: AmbientEmbersParams) {
         color={color}
         size={0.045}
         sizeAttenuation
+        map={circleTexture}
+        alphaMap={circleTexture}
         transparent
         opacity={0.7}
         depthWrite={false}
