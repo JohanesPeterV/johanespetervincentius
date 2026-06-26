@@ -1,4 +1,4 @@
-import { OrbitControls } from '@react-three/drei';
+import { useDragLook } from '@/hooks/use-drag-look';
 import AmbientEmbers from './ambient-embers';
 import OrbitSystem from './orbit-system';
 
@@ -7,6 +7,8 @@ type MachineSceneParams = {
 };
 
 export default function MachineScene({ accentColor }: MachineSceneParams) {
+  useDragLook();
+
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -21,18 +23,6 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
       <pointLight position={[0, 2.5, 5]} intensity={25} color="#ffffff" />
       <AmbientEmbers color={accentColor} count={420} />
       <OrbitSystem />
-      <OrbitControls
-        makeDefault
-        enablePan={false}
-        enableZoom={false}
-        enableDamping
-        dampingFactor={0.08}
-        rotateSpeed={0.5}
-        minPolarAngle={Math.PI / 2 - 0.5}
-        maxPolarAngle={Math.PI / 2 + 0.5}
-        minAzimuthAngle={-0.7}
-        maxAzimuthAngle={0.7}
-      />
     </>
   );
 }
