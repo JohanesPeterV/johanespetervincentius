@@ -3,21 +3,19 @@ import { useRef } from 'react';
 import * as THREE from 'three';
 import { ORBIT_CENTER } from '@/components/3d/orbit';
 
-const INTRO_DURATION = 3.6;
-const START_FOV = 54;
+const INTRO_DURATION = 3;
+const START_FOV = 64;
 const REST_FOV = 40;
-const START_ROLL = 0.1;
+const START_ROLL = 0.16;
 const START_POSITION: readonly [number, number, number] = [
-  ORBIT_CENTER[0] + 2,
-  ORBIT_CENTER[1] - 1.5,
-  ORBIT_CENTER[2] + 13,
+  ORBIT_CENTER[0] - 3.5,
+  ORBIT_CENTER[1] + 2.2,
+  ORBIT_CENTER[2] + 18,
 ];
 
-// REASON: ease-in-out keeps the dolly from lunging at the start, so the camera drifts in calmly instead of zooming hard onto the data core
-const easeInOutCubic = (progress: number): number =>
-  progress < 0.5
-    ? 4 * progress * progress * progress
-    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+// REASON: ease-out-quart gives a confident push-in that decelerates smoothly onto the data core, without the hard zoom lunge of an expo curve
+const easeOutQuart = (progress: number): number =>
+  1 - Math.pow(1 - progress, 4);
 
 export function useCameraIntro() {
   const elapsedRef = useRef(0);
@@ -45,7 +43,7 @@ export function useCameraIntro() {
 
     elapsedRef.current += delta;
     const progress = Math.min(elapsedRef.current / INTRO_DURATION, 1);
-    const eased = easeInOutCubic(progress);
+    const eased = easeOutQuart(progress);
     const { camera } = state;
 
     camera.position.set(

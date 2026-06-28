@@ -105,7 +105,7 @@ body {
 }
 
 .animate-card-in {
-  animation: cardIn 1.3s cubic-bezier(0.33, 1, 0.68, 1) 1.3s both;
+  animation: cardIn 1.3s cubic-bezier(0.33, 1, 0.68, 1) 1.5s both;
 }
 
 @keyframes fadeInLate {
@@ -118,7 +118,7 @@ body {
 }
 
 .animate-fade-late {
-  animation: fadeInLate 0.8s ease-out 1.5s both;
+  animation: fadeInLate 0.8s ease-out 1.7s both;
 }
 
 @media (prefers-reduced-motion: reduce) {
