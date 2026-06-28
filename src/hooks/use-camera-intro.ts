@@ -3,19 +3,21 @@ import { useRef } from 'react';
 import * as THREE from 'three';
 import { ORBIT_CENTER } from '@/components/3d/orbit';
 
-const INTRO_DURATION = 2.2;
-const START_FOV = 100;
+const INTRO_DURATION = 3.6;
+const START_FOV = 54;
 const REST_FOV = 40;
-const START_ROLL = 0.35;
+const START_ROLL = 0.1;
 const START_POSITION: readonly [number, number, number] = [
-  ORBIT_CENTER[0] + 5,
-  ORBIT_CENTER[1] - 3,
-  ORBIT_CENTER[2] + 26,
+  ORBIT_CENTER[0] + 2,
+  ORBIT_CENTER[1] - 1.5,
+  ORBIT_CENTER[2] + 13,
 ];
 
-// REASON: expo ease-out front-loads the warp so the camera lunges in fast and settles softly onto the data core
-const easeOutExpo = (progress: number): number =>
-  progress >= 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+// REASON: ease-in-out keeps the dolly from lunging at the start, so the camera drifts in calmly instead of zooming hard onto the data core
+const easeInOutCubic = (progress: number): number =>
+  progress < 0.5
+    ? 4 * progress * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
 export function useCameraIntro() {
   const elapsedRef = useRef(0);
@@ -43,7 +45,7 @@ export function useCameraIntro() {
 
     elapsedRef.current += delta;
     const progress = Math.min(elapsedRef.current / INTRO_DURATION, 1);
-    const eased = easeOutExpo(progress);
+    const eased = easeInOutCubic(progress);
     const { camera } = state;
 
     camera.position.set(

@@ -15,10 +15,15 @@ type MarkConfig = {
 };
 
 const MODEL_PATH = '/models/mac-transformed.glb';
-const MAC_PATH: OrbitPath = { phase: 5.03, radius: 9.2, height: 0.2 };
+const MAC_PATH: OrbitPath = {
+  phase: 5.6,
+  radius: 9,
+  height: 0.2,
+  speed: 0.073,
+};
 const MAC_SCALE = 0.22;
 
-// REASON: each body circles the camera at its own phase and radius, so they drift past the centred card one after another
+// REASON: each body circles the camera on its own lane and speed, so they drift past the centred card in clusters rather than one at a time
 const MARKS: readonly MarkConfig[] = [
   {
     path: AGENT_ORBIT_PATHS[0],
