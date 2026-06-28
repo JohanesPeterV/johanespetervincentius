@@ -1,5 +1,5 @@
+import ExploreSection from '@/app/_components/explore';
 import LinktreeSection from '@/app/_components/linktree';
-import ScrollTestSection from '@/app/_components/scroll-test';
 import MachineBackground from '@/components/backgrounds/machine-background';
 import SnapScrollContainer from '@/components/snap-scroll-container';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
@@ -15,7 +15,7 @@ export default function Home() {
       />
       <SnapScrollContainer className="relative z-10">
         <LinktreeSection />
-        <ScrollTestSection />
+        <ExploreSection />
       </SnapScrollContainer>
     </div>
   );

@@ -1,5 +1,6 @@
 'use client';
 
+import { setScrollTarget } from '@/components/scroll-progress';
 import { useRef } from 'react';
 
 interface SnapScrollContainerProps {
@@ -13,8 +14,18 @@ export default function SnapScrollContainer({
 }: SnapScrollContainerProps) {
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>): void => {
+    const element = event.currentTarget;
+    const scrollable = element.scrollHeight - element.clientHeight;
+    if (scrollable <= 0) {
+      return;
+    }
+    setScrollTarget(element.scrollTop / scrollable);
+  };
+
   return (
     <div
+      onScroll={handleScroll}
       className={`${className} h-screen w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide`}
     >
       {children.map((child, index) => (
