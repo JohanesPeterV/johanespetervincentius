@@ -93,61 +93,139 @@ body {
   animation: animatedgradient 8s linear infinite alternate;
 }
 
-@keyframes cardIn {
-  0% {
-    opacity: 0;
-    transform: translateY(24px) scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.opening-intro {
+  background:
+    radial-gradient(
+      circle at center,
+      hsl(var(--primary) / 0.16),
+      transparent 36%
+    ),
+    hsl(var(--background) / 0.96);
+  animation: openingIntroExit 0.72s cubic-bezier(0.22, 1, 0.36, 1) 2.2s both;
 }
 
-.animate-card-in {
-  animation: cardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
-}
-
-.dynamic-avatar {
-  isolation: isolate;
-  animation: introFloat 4.8s ease-in-out infinite;
-}
-
-.dynamic-avatar::before {
+.opening-intro::before {
   position: absolute;
-  z-index: -1;
-  inset: -0.25rem;
-  border-radius: inherit;
+  inset: -20%;
   background: conic-gradient(
-    from 0deg,
-    hsl(var(--primary) / 0.1),
-    hsl(var(--primary)),
-    hsl(var(--foreground) / 0.55),
-    hsl(var(--primary) / 0.1)
+    from 180deg,
+    transparent,
+    hsl(var(--primary) / 0.26),
+    transparent,
+    hsl(var(--foreground) / 0.18),
+    transparent
   );
   content: '';
-  animation: introSpin 4.5s linear infinite;
+  animation: openingBackdrop 2.2s ease-out both;
 }
 
-.dynamic-avatar::after {
+.opening-intro-grid {
   position: absolute;
-  inset: 0.25rem;
+  inset: -30%;
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.16) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  transform: perspective(620px) rotateX(62deg) scale(1.35);
+  animation: openingGrid 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.opening-intro-rings {
+  position: absolute;
+  width: 18rem;
+  aspect-ratio: 1;
+  border: 1px solid hsl(var(--primary) / 0.36);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 0 1.5rem hsl(var(--primary) / 0.08),
+    0 0 0 4rem hsl(var(--foreground) / 0.04),
+    0 0 4rem hsl(var(--primary) / 0.34);
+  animation: openingRings 1.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.opening-intro-scan {
+  position: absolute;
+  inset: -20% 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 36%,
+    hsl(var(--primary) / 0.14) 45%,
+    hsl(var(--foreground) / 0.66) 50%,
+    hsl(var(--primary) / 0.14) 55%,
+    transparent 64%
+  );
+  mix-blend-mode: screen;
+  transform: translateY(-100%);
+  animation: openingScan 1.35s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+}
+
+.opening-intro-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  text-align: center;
+  animation: openingContent 1.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.opening-intro-mark {
+  position: relative;
+  display: flex;
+  width: 7.5rem;
+  height: 7.5rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--foreground) / 0.82)
+  );
+  color: hsl(var(--primary-foreground));
+  font-size: 4.75rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0 3rem hsl(var(--primary) / 0.48);
+  animation: openingMarkPop 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.opening-intro-mark::before {
+  position: absolute;
+  inset: -0.4rem;
+  border: 1px solid hsl(var(--primary-foreground) / 0.48);
   border-radius: inherit;
-  background: radial-gradient(
-    circle at 30% 20%,
-    hsl(var(--primary-foreground) / 0.75),
-    transparent 34%
+  content: '';
+  animation: openingMarkRing 1.55s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+}
+
+.opening-intro-mark::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 28%,
+    hsl(var(--primary-foreground) / 0.7) 48%,
+    transparent 68%
   );
   content: '';
-  opacity: 0.8;
+  transform: translateX(-120%);
+  animation: openingMarkShine 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
 }
 
-.dynamic-intro-kicker {
-  letter-spacing: 0.16em;
-  animation: introPulse 2.6s ease-in-out infinite;
+.opening-intro-kicker {
+  margin: 0;
+  color: hsl(var(--primary));
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
-.dynamic-intro-title {
+.opening-intro-name {
+  max-width: 20rem;
+  margin: 0;
   background: linear-gradient(
     90deg,
     hsl(var(--foreground)),
@@ -157,71 +235,145 @@ body {
   background-size: 220% 100%;
   background-clip: text;
   color: transparent;
+  font-size: 2.35rem;
+  font-weight: 900;
+  line-height: 1;
   -webkit-background-clip: text;
-  animation: introShimmer 4s ease-in-out infinite;
+  animation: openingNameFlash 1.6s ease-out 0.32s both;
 }
 
-.dynamic-role-window {
-  --intro-role-height: 1.75rem;
-  position: relative;
-  height: var(--intro-role-height);
+.opening-intro-bar {
+  width: min(18rem, 70vw);
+  height: 0.35rem;
   overflow: hidden;
-  mask-image: linear-gradient(
-    to bottom,
+  border-radius: 9999px;
+  background: hsl(var(--foreground) / 0.14);
+}
+
+.opening-intro-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
     transparent,
-    hsl(var(--foreground)) 22%,
-    hsl(var(--foreground)) 78%,
-    transparent
+    hsl(var(--primary)),
+    hsl(var(--foreground))
   );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    hsl(var(--foreground)) 22%,
-    hsl(var(--foreground)) 78%,
-    transparent
-  );
+  transform-origin: left;
+  animation: openingBar 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.54s both;
 }
 
-.dynamic-role-reel {
-  display: flex;
-  flex-direction: column;
-  animation: introRoleReel 7.5s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+.home-card-stage {
+  animation: homeCardReveal 0.95s cubic-bezier(0.16, 1, 0.3, 1) 2.05s both;
 }
 
-.dynamic-role-reel span {
-  display: flex;
-  height: var(--intro-role-height);
-  align-items: center;
-  justify-content: center;
-}
-
-@keyframes introFloat {
-  0%,
+@keyframes openingIntroExit {
   100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-0.35rem) scale(1.03);
-  }
-}
-
-@keyframes introSpin {
-  100% {
-    transform: rotate(360deg);
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(1.04);
   }
 }
 
-@keyframes introPulse {
-  0%,
-  100% {
-    opacity: 0.68;
+@keyframes openingBackdrop {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) rotate(-36deg);
   }
-  50% {
+  100% {
+    opacity: 1;
+    transform: scale(1.08) rotate(18deg);
+  }
+}
+
+@keyframes openingGrid {
+  0% {
+    opacity: 0;
+    transform: perspective(620px) rotateX(62deg) translateY(5rem) scale(1.35);
+  }
+  100% {
+    opacity: 0.7;
+    transform: perspective(620px) rotateX(62deg) translateY(-2rem) scale(1.35);
+  }
+}
+
+@keyframes openingRings {
+  0% {
+    opacity: 0;
+    transform: scale(0.36) rotate(-24deg);
+  }
+  55% {
     opacity: 1;
   }
+  100% {
+    opacity: 0.36;
+    transform: scale(1.38) rotate(18deg);
+  }
 }
 
-@keyframes introShimmer {
+@keyframes openingScan {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  32% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes openingContent {
+  0% {
+    opacity: 0;
+    transform: translateY(1.4rem) scale(0.88);
+  }
+  42% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-0.4rem) scale(1);
+  }
+}
+
+@keyframes openingMarkPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-18deg);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes openingMarkRing {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes openingMarkShine {
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes openingNameFlash {
   0%,
   100% {
     background-position: 0% 50%;
@@ -231,31 +383,55 @@ body {
   }
 }
 
-@keyframes introRoleReel {
-  0%,
-  20% {
-    transform: translateY(0);
+@keyframes openingBar {
+  0% {
+    transform: scaleX(0);
   }
-  30%,
-  50% {
-    transform: translateY(calc(var(--intro-role-height) * -1));
-  }
-  60%,
-  80% {
-    transform: translateY(calc(var(--intro-role-height) * -2));
-  }
-  90%,
   100% {
-    transform: translateY(calc(var(--intro-role-height) * -3));
+    transform: scaleX(1);
+  }
+}
+
+@keyframes homeCardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .opening-intro-mark {
+    width: 6rem;
+    height: 6rem;
+    font-size: 3.8rem;
+  }
+
+  .opening-intro-name {
+    max-width: 17rem;
+    font-size: 1.9rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dynamic-avatar,
-  .dynamic-avatar::before,
-  .dynamic-intro-kicker,
-  .dynamic-intro-title,
-  .dynamic-role-reel {
+  .opening-intro {
+    animation: openingIntroExit 0.01s ease 0.1s both;
+  }
+
+  .opening-intro::before,
+  .opening-intro-grid,
+  .opening-intro-rings,
+  .opening-intro-scan,
+  .opening-intro-content,
+  .opening-intro-mark,
+  .opening-intro-mark::before,
+  .opening-intro-mark::after,
+  .opening-intro-name,
+  .opening-intro-bar span,
+  .home-card-stage {
     animation: none;
   }
 }
