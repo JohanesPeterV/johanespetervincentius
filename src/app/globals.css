@@ -107,3 +107,155 @@ body {
 .animate-card-in {
   animation: cardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
+
+.dynamic-avatar {
+  isolation: isolate;
+  animation: introFloat 4.8s ease-in-out infinite;
+}
+
+.dynamic-avatar::before {
+  position: absolute;
+  z-index: -1;
+  inset: -0.25rem;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    hsl(var(--primary) / 0.1),
+    hsl(var(--primary)),
+    hsl(var(--foreground) / 0.55),
+    hsl(var(--primary) / 0.1)
+  );
+  content: '';
+  animation: introSpin 4.5s linear infinite;
+}
+
+.dynamic-avatar::after {
+  position: absolute;
+  inset: 0.25rem;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 30% 20%,
+    hsl(var(--primary-foreground) / 0.75),
+    transparent 34%
+  );
+  content: '';
+  opacity: 0.8;
+}
+
+.dynamic-intro-kicker {
+  letter-spacing: 0.16em;
+  animation: introPulse 2.6s ease-in-out infinite;
+}
+
+.dynamic-intro-title {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--foreground)),
+    hsl(var(--primary)),
+    hsl(var(--foreground))
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  color: transparent;
+  -webkit-background-clip: text;
+  animation: introShimmer 4s ease-in-out infinite;
+}
+
+.dynamic-role-window {
+  --intro-role-height: 1.75rem;
+  position: relative;
+  height: var(--intro-role-height);
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    hsl(var(--foreground)) 22%,
+    hsl(var(--foreground)) 78%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    hsl(var(--foreground)) 22%,
+    hsl(var(--foreground)) 78%,
+    transparent
+  );
+}
+
+.dynamic-role-reel {
+  display: flex;
+  flex-direction: column;
+  animation: introRoleReel 7.5s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+}
+
+.dynamic-role-reel span {
+  display: flex;
+  height: var(--intro-role-height);
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes introFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-0.35rem) scale(1.03);
+  }
+}
+
+@keyframes introSpin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes introPulse {
+  0%,
+  100% {
+    opacity: 0.68;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes introShimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes introRoleReel {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  30%,
+  50% {
+    transform: translateY(calc(var(--intro-role-height) * -1));
+  }
+  60%,
+  80% {
+    transform: translateY(calc(var(--intro-role-height) * -2));
+  }
+  90%,
+  100% {
+    transform: translateY(calc(var(--intro-role-height) * -3));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dynamic-avatar,
+  .dynamic-avatar::before,
+  .dynamic-intro-kicker,
+  .dynamic-intro-title,
+  .dynamic-role-reel {
+    animation: none;
+  }
+}
