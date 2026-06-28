@@ -1,6 +1,5 @@
 'use client';
 
-import { setScrollTarget } from '@/components/scroll-progress';
 import { useRef } from 'react';
 
 interface SnapScrollContainerProps {
@@ -20,7 +19,10 @@ export default function SnapScrollContainer({
     if (scrollable <= 0) {
       return;
     }
-    setScrollTarget(element.scrollTop / scrollable);
+    const progress = Math.min(1, Math.max(0, element.scrollTop / scrollable));
+    const root = document.documentElement;
+    root.style.setProperty('--wipe', String(progress));
+    root.style.setProperty('--wipe-edge', String(Math.sin(progress * Math.PI)));
   };
 
   return (

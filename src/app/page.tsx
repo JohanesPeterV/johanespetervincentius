@@ -1,6 +1,7 @@
 import ExploreSection from '@/app/_components/explore';
 import LinktreeSection from '@/app/_components/linktree';
 import MachineBackground from '@/components/backgrounds/machine-background';
+import WorldTwoBackground from '@/components/backgrounds/world-two-background';
 import SnapScrollContainer from '@/components/snap-scroll-container';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 
@@ -8,6 +9,13 @@ export default function Home() {
   return (
     <div className="relative min-h-screen w-full">
       <MachineBackground />
+      <WorldTwoBackground />
+      <div
+        aria-hidden
+        className="world-wipe-divider pointer-events-none fixed inset-x-0 z-[6] h-24 -translate-y-1/2 backdrop-blur-xl"
+      >
+        <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/80 shadow-[0_0_24px_8px_rgba(255,255,255,0.45)]" />
+      </div>
       <RandomColorButton
         aria-label="Shuffle theme colour"
         title="Shuffle theme colour"

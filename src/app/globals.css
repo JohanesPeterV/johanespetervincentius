@@ -127,3 +127,12 @@ body {
     animation: none;
   }
 }
+
+.world-two-wipe {
+  clip-path: inset(calc((1 - var(--wipe, 0)) * 100%) 0 0 0);
+}
+
+.world-wipe-divider {
+  bottom: calc(var(--wipe, 0) * 100%);
+  opacity: var(--wipe-edge, 0);
+}
