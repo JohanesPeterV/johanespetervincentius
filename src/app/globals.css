@@ -96,7 +96,7 @@ body {
 @keyframes cardIn {
   0% {
     opacity: 0;
-    transform: translateY(24px) scale(0.96);
+    transform: translateY(40px) scale(0.9);
   }
   100% {
     opacity: 1;
@@ -105,5 +105,25 @@ body {
 }
 
 .animate-card-in {
-  animation: cardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  animation: cardIn 1.1s cubic-bezier(0.22, 1, 0.36, 1) 1s both;
+}
+
+@keyframes fadeInLate {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-late {
+  animation: fadeInLate 0.7s ease-out 1.1s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-in,
+  .animate-fade-late {
+    animation: none;
+  }
 }

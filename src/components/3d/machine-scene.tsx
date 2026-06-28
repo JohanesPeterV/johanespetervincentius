@@ -1,3 +1,4 @@
+import { useCameraIntro } from '@/hooks/use-camera-intro';
 import { useDragLook } from '@/hooks/use-drag-look';
 import BinaryField from './binary-field';
 import CommStreams from './comm-streams';
@@ -10,6 +11,7 @@ type MachineSceneParams = {
 
 export default function MachineScene({ accentColor }: MachineSceneParams) {
   useDragLook();
+  useCameraIntro();
 
   return (
     <>
