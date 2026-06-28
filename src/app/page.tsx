@@ -6,30 +6,14 @@ import RandomColorButton from '@/components/theme-buttons/random-color-button';
 
 export default function Home() {
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-16">
+    <main className="relative flex min-h-screen w-full items-center justify-center px-4 py-16">
       <MachineBackground />
-      <div
-        aria-hidden
-        className="opening-intro pointer-events-none fixed inset-0 z-30 flex items-center justify-center overflow-hidden"
-      >
-        <div className="opening-intro-grid" />
-        <div className="opening-intro-rings" />
-        <div className="opening-intro-scan" />
-        <div className="opening-intro-content">
-          <div className="opening-intro-mark">J</div>
-          <p className="opening-intro-kicker">Initialising portfolio</p>
-          <p className="opening-intro-name">Johanes Peter Vincentius</p>
-          <div className="opening-intro-bar">
-            <span />
-          </div>
-        </div>
-      </div>
       <RandomColorButton
         aria-label="Shuffle theme colour"
         title="Shuffle theme colour"
         className="fixed right-5 top-5 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-2xl leading-none shadow-lg ring-1 ring-white/10 backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10 sm:text-2xl lg:text-2xl"
       />
-      <div className="home-card-stage relative z-10 w-full max-w-md">
+      <div className="animate-card-in relative z-10 w-full max-w-md">
         <div
           aria-hidden
           className="pointer-events-none absolute -inset-2 rounded-[2.25rem] bg-primary/10 opacity-50 blur-2xl"
