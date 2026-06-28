@@ -16,7 +16,7 @@ type Packet = {
   pathIndex: number;
   progress: number;
   speed: number;
-  direction: number;
+  flow: number;
   glow: number;
 };
 
@@ -74,13 +74,13 @@ const createPacketField = (paths: readonly OrbitPath[]): PacketField => {
     for (let slot = 0; slot < PACKETS_PER_PATH; slot++) {
       const index = pathIndex * PACKETS_PER_PATH + slot;
       const size = 16 + Math.random() * 26;
-      const direction = slot % 2 === 0 ? 1 : -1;
+      const flow = slot % 2 === 0 ? 1 : -1;
 
       packets.push({
         pathIndex,
         progress: Math.random(),
         speed: 0.12 + Math.random() * 0.2,
-        direction,
+        flow,
         glow: 0.45 + Math.random() * 0.55,
       });
       sizes[index] = size;
@@ -110,20 +110,13 @@ export default function CommStreams({ color }: CommStreamsParams) {
     uniforms.uColorBright.value.set(color).lerp(WHITE, 0.6);
 
     const { packets, positions, brights } = field;
-    let laneIndex = -1;
-    let bodyX = 0;
-    let bodyY = 0;
-    let bodyZ = 0;
+    const bodyPositions = AGENT_ORBIT_PATHS.map((path) =>
+      getOrbitPosition(path, time),
+    );
 
     for (let i = 0; i < packets.length; i++) {
       const packet = packets[i];
-      if (packet.pathIndex !== laneIndex) {
-        laneIndex = packet.pathIndex;
-        const [x, y, z] = getOrbitPosition(AGENT_ORBIT_PATHS[laneIndex], time);
-        bodyX = x;
-        bodyY = y;
-        bodyZ = z;
-      }
+      const [bodyX, bodyY, bodyZ] = bodyPositions[packet.pathIndex];
 
       packet.progress += packet.speed * delta;
       if (packet.progress > 1) {
@@ -131,7 +124,7 @@ export default function CommStreams({ color }: CommStreamsParams) {
       }
 
       let frac = packet.progress;
-      if (packet.direction < 0) {
+      if (packet.flow < 0) {
         frac = 1 - packet.progress;
       }
 
@@ -140,7 +133,8 @@ export default function CommStreams({ color }: CommStreamsParams) {
       positions[i * 3 + 2] = ORBIT_CENTER[2] + (bodyZ - ORBIT_CENTER[2]) * frac;
 
       const fade = Math.sin(packet.progress * Math.PI);
-      const twinkle = 0.65 + 0.35 * Math.sin(time * 3 + packet.glow * 6.28);
+      const twinkle =
+        0.65 + 0.35 * Math.sin(time * 3 + packet.glow * Math.PI * 2);
       brights[i] = packet.glow * fade * twinkle;
     }
 
