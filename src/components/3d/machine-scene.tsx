@@ -1,5 +1,6 @@
 import { useDragLook } from '@/hooks/use-drag-look';
 import BinaryField from './binary-field';
+import CommStreams from './comm-streams';
 import { ORBIT_CENTER } from './orbit';
 import OrbitSystem from './orbit-system';
 
@@ -25,6 +26,7 @@ export default function MachineScene({ accentColor }: MachineSceneParams) {
       <group position={[ORBIT_CENTER[0], ORBIT_CENTER[1], ORBIT_CENTER[2]]}>
         <BinaryField color={accentColor} count={6000} />
       </group>
+      <CommStreams color={accentColor} />
       <OrbitSystem />
     </>
   );

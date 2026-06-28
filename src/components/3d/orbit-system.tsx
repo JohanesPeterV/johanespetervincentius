@@ -2,75 +2,55 @@ import { useGLTF, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Suspense, useRef } from 'react';
 import * as THREE from 'three';
-import { ORBIT_CENTER, ORBIT_SPEED } from './orbit';
+import { AGENT_ORBIT_PATHS, getOrbitPosition, type OrbitPath } from './orbit';
 
 type MarkBlending = 'normal' | 'additive';
 
 type MarkConfig = {
+  path: OrbitPath;
   url: string;
-  phase: number;
-  height: number;
-  radius: number;
   size: readonly [number, number];
   opacity: number;
   blending: MarkBlending;
 };
 
 const MODEL_PATH = '/models/mac-transformed.glb';
-const MAC_PHASE = 5.03;
-const MAC_HEIGHT = 0.2;
-const MAC_RADIUS = 9.2;
+const MAC_PATH: OrbitPath = { phase: 5.03, radius: 9.2, height: 0.2 };
 const MAC_SCALE = 0.22;
 
 // REASON: each body circles the camera at its own phase and radius, so they drift past the centred card one after another
 const MARKS: readonly MarkConfig[] = [
   {
+    path: AGENT_ORBIT_PATHS[0],
     url: '/logos/claude.png',
-    phase: 0,
-    height: 1,
-    radius: 9,
     size: [0.52, 0.52],
     opacity: 0.9,
     blending: 'normal',
   },
   {
+    path: AGENT_ORBIT_PATHS[1],
     url: '/logos/codex.png',
-    phase: 1.26,
-    height: -0.9,
-    radius: 8.4,
     size: [0.56, 0.56],
     opacity: 0.9,
     blending: 'normal',
   },
   {
+    path: AGENT_ORBIT_PATHS[2],
     url: '/logos/opencode.png',
-    phase: 2.51,
-    height: 0.5,
-    radius: 9.6,
     size: [0.5, 0.59],
     opacity: 0.9,
     blending: 'normal',
   },
   {
+    path: AGENT_ORBIT_PATHS[3],
     url: '/logos/conductor.png',
-    phase: 3.77,
-    height: -1.3,
-    radius: 8.8,
     size: [0.44, 0.44],
     opacity: 0.22,
     blending: 'additive',
   },
 ];
 
-const PassingMark = ({
-  url,
-  phase,
-  height,
-  radius,
-  size,
-  opacity,
-  blending,
-}: MarkConfig) => {
+const PassingMark = ({ path, url, size, opacity, blending }: MarkConfig) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const texture = useTexture(url);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -80,11 +60,8 @@ const PassingMark = ({
       return;
     }
 
-    const angle = phase + state.clock.elapsedTime * ORBIT_SPEED;
     meshRef.current.position.set(
-      ORBIT_CENTER[0] + Math.sin(angle) * radius,
-      ORBIT_CENTER[1] + height,
-      ORBIT_CENTER[2] - Math.cos(angle) * radius,
+      ...getOrbitPosition(path, state.clock.elapsedTime),
     );
   });
 
@@ -116,12 +93,7 @@ const PassingMac = () => {
     }
 
     const time = state.clock.elapsedTime;
-    const angle = MAC_PHASE + time * ORBIT_SPEED;
-    groupRef.current.position.set(
-      ORBIT_CENTER[0] + Math.sin(angle) * MAC_RADIUS,
-      ORBIT_CENTER[1] + MAC_HEIGHT,
-      ORBIT_CENTER[2] - Math.cos(angle) * MAC_RADIUS,
-    );
+    groupRef.current.position.set(...getOrbitPosition(MAC_PATH, time));
     groupRef.current.rotation.y = time * 0.2;
     groupRef.current.rotation.x = -0.1 + Math.sin(time * 0.4) * 0.05;
     groupRef.current.rotation.z = Math.sin(time * 0.35) * 0.05;
@@ -140,10 +112,8 @@ export default function OrbitSystem() {
       {MARKS.map((mark) => (
         <PassingMark
           key={mark.url}
+          path={mark.path}
           url={mark.url}
-          phase={mark.phase}
-          height={mark.height}
-          radius={mark.radius}
           size={mark.size}
           opacity={mark.opacity}
           blending={mark.blending}
