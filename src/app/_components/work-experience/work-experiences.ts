@@ -12,19 +12,19 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     positions: [
       {
-        name: 'Senior Software Engineer',
+        name: 'Lead Software Engineer',
         workPeriod: '2025-Present',
-        description: `Senior Full-Stack Engineer. Pragmatic builder of scalable systems on modern JS and cloud stacks (Vercel, Neon, Upstash, AWS), focused on clean architecture and long-term reliability.`,
+        description: `Own technical direction end-to-end — architecture, database design, deployment, and reliability — across multi-product systems for corporate gifting, digital rewards, and e-commerce. Drive vendor integrations, partner with the Founder on platform strategy, and build AI-assisted workflows that let a lean team ship like a larger one.`,
       },
     ],
   },
   {
-    company: 'Tablelink',
+    company: 'TableLink',
     positions: [
       {
-        name: 'Senior Fullstack Developer',
-        workPeriod: '2025-2025',
-        description: `Built QR-based ordering system for real-time DJ/song requests. Developed live-updating CRUD tables with socket-based concurrency resolution and led migration from GitLab Pro, saving the company ~IDR 72M annually.`,
+        name: 'Full-stack Developer',
+        workPeriod: '2025',
+        description: `Delivered core venue SaaS workflows — QR ordering, dynamic menus, and real-time guest operations — and standardized frontend architecture across Next.js/Vite apps with reusable components and Storybook. Built shared real-time data infrastructure for synchronized live updates while cutting technical debt across a microservices stack.`,
       },
     ],
   },
@@ -34,7 +34,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         name: 'Software Engineer',
         workPeriod: '2023-2024',
-        description: `Responsible for database design, software maintenance and full stack software development.`,
+        description: `Shipped one of the team's first LLM-in-production features — a GPT-3.5 + WhatsApp integration that turned free-form chats into structured orders. Built the Agent Portal end-to-end from auth to UI, moved checkout pricing server-side to guarantee price integrity, and standardized i18n across three locales.`,
       },
     ],
   },
@@ -42,14 +42,9 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Software Lab Center, Binus',
     positions: [
       {
-        name: 'Database Administrator',
-        workPeriod: '2021-2024',
-        description: `Maintained practicum database serving ~20,000 students/semester and ASP.NET web app used by 161 staff.`,
-      },
-      {
-        name: 'Teaching Assistant',
-        workPeriod: '2020-2021',
-        description: `Delivered programming-based classes for 1,700+ students and created internal applications for practicum needs.`,
+        name: 'Database Administrator & Teaching Assistant',
+        workPeriod: '2020-2024',
+        description: `Maintained the practicum database serving ~20,000 students per semester and an ASP.NET app used by 161 staff, and built full-stack tools with Next.js and Nest.js for practicum operations. Earlier, taught programming-based classes to 1,700+ students and shipped Vue.js/ASP.NET features for an internal app with 5,293 users.`,
       },
     ],
   },
