@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { cn } from '@/lib/utils';
 
 interface SnapScrollContainerProps {
   children: React.ReactNode[];
@@ -11,8 +11,6 @@ export default function SnapScrollContainer({
   children,
   className,
 }: SnapScrollContainerProps) {
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   const handleScroll = (event: React.UIEvent<HTMLDivElement>): void => {
     const element = event.currentTarget;
     const scrollable = element.scrollHeight - element.clientHeight;
@@ -30,16 +28,13 @@ export default function SnapScrollContainer({
   return (
     <div
       onScroll={handleScroll}
-      className={`${className} h-screen w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide`}
+      className={cn('h-screen w-full overflow-y-auto', className)}
     >
       {children.map((child, index) => (
         <div
           key={index}
-          ref={(el) => {
-            sectionRefs.current[index] = el;
-          }}
           data-index={index}
-          className={`h-screen snap-center flex items-center justify-center`}
+          className="flex min-h-screen items-center justify-center"
         >
           {child}
         </div>
