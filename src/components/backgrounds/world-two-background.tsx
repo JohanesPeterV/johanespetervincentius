@@ -2,10 +2,14 @@
 
 import WorldTwo from '@/components/3d/world-two';
 import { useConfig } from '@/hooks/use-config';
-import { useWorldTwoActive, useWorldTwoTransitioning } from '@/hooks/use-wipe';
+import {
+  getWipeValue,
+  useWorldTwoActive,
+  useWorldTwoTransitioning,
+} from '@/hooks/use-wipe';
 import { getFluidThemeColors } from '@/lib/theme-colors';
 import { Environment } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import {
   Bloom,
   EffectComposer,
@@ -13,9 +17,49 @@ import {
   Vignette,
 } from '@react-three/postprocessing';
 import { useTheme } from 'next-themes';
-import { BlendFunction } from 'postprocessing';
+import { BlendFunction, ChromaticAberrationEffect } from 'postprocessing';
+import { useRef } from 'react';
+import { Vector2 } from 'three';
 
 const SKY_COLOR = '#9aa3b0';
+const MAX_SEAM_ABERRATION = 0.0024;
+
+function SeamEffects() {
+  const aberrationRef = useRef<ChromaticAberrationEffect | null>(null);
+  if (!aberrationRef.current) {
+    // REASON: own the effect instance directly so its offset uniform can be mutated each frame; the drei <ChromaticAberration> wrapper JSON.stringifies its props (including a populated ref) every render and throws on the circular effect graph
+    aberrationRef.current = new ChromaticAberrationEffect({
+      offset: new Vector2(),
+      radialModulation: false,
+      modulationOffset: 0,
+    });
+  }
+
+  // REASON: drive the chromatic-aberration offset each frame from the scroll wipe so the seam shimmers hardest mid-transition and settles clean on arrival — imperative per-frame uniform mutation that React props cannot express
+  useFrame(() => {
+    const effect = aberrationRef.current;
+    if (!effect) {
+      return;
+    }
+    const energy = 1 - Math.abs(2 * getWipeValue() - 1);
+    const strength = energy * energy * MAX_SEAM_ABERRATION;
+    effect.offset.set(strength, strength * 0.6);
+  });
+
+  return (
+    <EffectComposer>
+      <Bloom
+        intensity={0.5}
+        luminanceThreshold={0.3}
+        luminanceSmoothing={0.9}
+        mipmapBlur
+      />
+      <primitive object={aberrationRef.current} dispose={null} />
+      <Noise opacity={0.035} blendFunction={BlendFunction.OVERLAY} />
+      <Vignette offset={0.25} darkness={0.75} />
+    </EffectComposer>
+  );
+}
 
 export default function WorldTwoBackground() {
   const { resolvedTheme } = useTheme();
@@ -87,16 +131,7 @@ export default function WorldTwoBackground() {
             />
             <Environment preset="city" />
             <WorldTwo color={fluidColor} />
-            <EffectComposer>
-              <Bloom
-                intensity={0.5}
-                luminanceThreshold={0.3}
-                luminanceSmoothing={0.9}
-                mipmapBlur
-              />
-              <Noise opacity={0.035} blendFunction={BlendFunction.OVERLAY} />
-              <Vignette offset={0.25} darkness={0.75} />
-            </EffectComposer>
+            <SeamEffects />
           </Canvas>
         </div>
       </div>
