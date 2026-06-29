@@ -1,5 +1,3 @@
-import WorkExperience from '.';
-
 type WorkExperience = {
   company: string;
   positions: {

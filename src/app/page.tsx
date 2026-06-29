@@ -1,3 +1,4 @@
+import ExperienceSection from '@/app/_components/experience';
 import ExploreSection from '@/app/_components/explore';
 import LinktreeSection from '@/app/_components/linktree';
 import MachineBackground from '@/components/backgrounds/machine-background';
@@ -17,6 +18,7 @@ export default function Home() {
       />
       <SnapScrollContainer className="relative z-10">
         <LinktreeSection />
+        <ExperienceSection />
         <ExploreSection />
       </SnapScrollContainer>
     </div>
