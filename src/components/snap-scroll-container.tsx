@@ -20,9 +20,11 @@ export default function SnapScrollContainer({
       return;
     }
     const progress = Math.min(1, Math.max(0, element.scrollTop / scrollable));
+    const fog = Math.sin(progress * Math.PI);
+    const world2 = Math.min(1, Math.max(0, (progress - 0.4) / 0.45));
     const root = document.documentElement;
-    root.style.setProperty('--wipe', String(progress));
-    root.style.setProperty('--wipe-edge', String(Math.sin(progress * Math.PI)));
+    root.style.setProperty('--fog', String(fog));
+    root.style.setProperty('--world2', String(world2));
   };
 
   return (
