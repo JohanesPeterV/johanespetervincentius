@@ -10,10 +10,10 @@ export type OrbitPath = {
 
 // REASON: irregular phases, radii, and per-lane speeds keep the lanes drifting in and out of view together instead of filing past the card one at a time
 export const AGENT_ORBIT_PATHS: readonly OrbitPath[] = [
-  { phase: 0.3, radius: 9.4, height: 1.1, speed: 0.085 },
-  { phase: 1.1, radius: 7.6, height: -1.2, speed: 0.128 },
-  { phase: 3.2, radius: 10.6, height: 0.5, speed: 0.062 },
-  { phase: 4.9, radius: 8.5, height: -0.7, speed: 0.104 },
+  { phase: 0.3, radius: 13.2, height: 1.1, speed: 0.085 },
+  { phase: 1.1, radius: 10.6, height: -1.2, speed: 0.128 },
+  { phase: 3.2, radius: 14.8, height: 0.5, speed: 0.062 },
+  { phase: 4.9, radius: 11.8, height: -0.7, speed: 0.104 },
 ];
 
 export const getOrbitPosition = (

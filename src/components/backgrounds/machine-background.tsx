@@ -38,9 +38,9 @@ export default function MachineBackground() {
         {isLowPerformanceDevice ? null : (
           <EffectComposer>
             <Bloom
-              intensity={0.7}
-              luminanceThreshold={0.2}
-              luminanceSmoothing={0.9}
+              intensity={0.5}
+              luminanceThreshold={0.8}
+              luminanceSmoothing={0.2}
               mipmapBlur
             />
           </EffectComposer>
