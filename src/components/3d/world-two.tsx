@@ -1,6 +1,7 @@
-import { useGLTF } from '@react-three/drei';
+import { MeshTransmissionMaterial } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { Suspense, useRef } from 'react';
+import { useRef } from 'react';
+import { createNoise3D } from 'simplex-noise';
 import * as THREE from 'three';
 
 type WorldTwoParams = {
@@ -9,11 +10,7 @@ type WorldTwoParams = {
 
 const MOTE_COUNT = 600;
 const MOTE_SPREAD = 16;
-const TERRAIN_PATH = '/models/snowy_terain.glb';
-const TERRAIN_SCALE = 3;
-const TERRAIN_TILT = 0.85;
-const TERRAIN_REST_Y = -0.4;
-const TERRAIN_REST_Z = 0;
+const SHARD_DETAIL = 6;
 
 const createMotes = (): Float32Array => {
   const positions = new Float32Array(MOTE_COUNT * 3);
@@ -25,29 +22,60 @@ const createMotes = (): Float32Array => {
   return positions;
 };
 
-const SnowyTerrain = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  const { scene } = useGLTF(TERRAIN_PATH);
+// REASON: displace an icosahedron along its radius with two noise octaves so the silhouette reads as a fractured, eroded stone rather than a primitive
+const buildShardGeometry = (): THREE.BufferGeometry => {
+  const geometry = new THREE.IcosahedronGeometry(1.5, SHARD_DETAIL);
+  const position = geometry.getAttribute('position');
+  if (!(position instanceof THREE.BufferAttribute)) {
+    return geometry;
+  }
+
+  const noise3d = createNoise3D();
+  const vertex = new THREE.Vector3();
+  for (let index = 0; index < position.count; index++) {
+    vertex.fromBufferAttribute(position, index);
+    const base = noise3d(vertex.x * 0.9, vertex.y * 0.9, vertex.z * 0.9);
+    const detail =
+      noise3d(vertex.x * 2.6, vertex.y * 2.6, vertex.z * 2.6) * 0.35;
+    vertex.multiplyScalar(1 + base * 0.26 + detail);
+    position.setXYZ(index, vertex.x, vertex.y, vertex.z);
+  }
+
+  position.needsUpdate = true;
+  geometry.computeVertexNormals();
+  return geometry;
+};
+
+const Shard = ({ color }: WorldTwoParams) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const geometry = useRef(buildShardGeometry()).current;
 
   useFrame((state) => {
-    const group = groupRef.current;
-    if (!group) {
+    const mesh = meshRef.current;
+    if (!mesh) {
       return;
     }
     const time = state.clock.elapsedTime;
-    group.rotation.y = Math.sin(time * 0.09) * 0.28;
-    group.rotation.x = TERRAIN_TILT + Math.sin(time * 0.22) * 0.04;
-    group.position.y = TERRAIN_REST_Y + Math.sin(time * 0.35) * 0.08;
+    mesh.rotation.y = time * 0.18;
+    mesh.rotation.x = Math.sin(time * 0.3) * 0.22;
   });
 
   return (
-    <group
-      ref={groupRef}
-      scale={TERRAIN_SCALE}
-      position={[0, TERRAIN_REST_Y, TERRAIN_REST_Z]}
-    >
-      <primitive object={scene} />
-    </group>
+    <mesh ref={meshRef} geometry={geometry}>
+      <MeshTransmissionMaterial
+        color={color}
+        transmission={1}
+        thickness={1.6}
+        roughness={0.16}
+        ior={1.45}
+        chromaticAberration={0.55}
+        distortion={0.45}
+        distortionScale={0.4}
+        temporalDistortion={0.18}
+        samples={6}
+        resolution={512}
+      />
+    </mesh>
   );
 };
 
@@ -56,9 +84,7 @@ export default function WorldTwo({ color }: WorldTwoParams) {
 
   return (
     <>
-      <Suspense fallback={null}>
-        <SnowyTerrain />
-      </Suspense>
+      <Shard color={color} />
       <points>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[motes, 3]} />
@@ -75,5 +101,3 @@ export default function WorldTwo({ color }: WorldTwoParams) {
     </>
   );
 }
-
-useGLTF.preload(TERRAIN_PATH);
