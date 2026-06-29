@@ -18,7 +18,7 @@ export default function MachineBackground() {
   const { fluidColor } = getFluidThemeColors(theme, resolvedTheme);
 
   return (
-    <div className="world-one-haze fixed inset-0 z-0">
+    <div className="fixed inset-0 z-0">
       <Canvas
         camera={{
           fov: 40,

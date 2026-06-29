@@ -128,18 +128,24 @@ body {
   }
 }
 
-.world-one-haze {
-  filter: blur(calc(var(--fog, 0) * 7px));
+.world-crumble-layer {
+  filter: url(#world-crumble);
 }
 
-.world-two-fade {
-  opacity: var(--world2, 0);
+.world-two-wipe {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent calc((1 - var(--wipe, 0)) * 104% - 4%),
+    black calc((1 - var(--wipe, 0)) * 104%)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent calc((1 - var(--wipe, 0)) * 104% - 4%),
+    black calc((1 - var(--wipe, 0)) * 104%)
+  );
 }
 
-.world-fog {
-  opacity: var(--fog, 0);
-}
-
-.world-fog-billow {
-  filter: url(#fog-warp);
+.world-wipe-fog {
+  top: calc((1 - var(--wipe, 0)) * 104% - 2%);
+  opacity: var(--wipe-edge, 0);
 }
