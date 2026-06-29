@@ -24,7 +24,7 @@ export default function WorldTwoBackground() {
   const isActive = useWorldTwoActive();
 
   return (
-    <div className="world-two-wipe fixed inset-0 z-[5]">
+    <div data-active={isActive} className="world-two-wipe fixed inset-0 z-[5]">
       <Canvas
         frameloop={isActive ? 'always' : 'never'}
         dpr={[1, 1.5]}
