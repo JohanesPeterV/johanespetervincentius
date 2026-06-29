@@ -10,10 +10,10 @@ type WorldTwoParams = {
 const MOTE_COUNT = 600;
 const MOTE_SPREAD = 16;
 const TERRAIN_PATH = '/models/snowy_terain.glb';
-const TERRAIN_SCALE = 2.5;
-const TERRAIN_TILT = 0.95;
-const TERRAIN_REST_Y = -2;
-const TERRAIN_REST_Z = -1;
+const TERRAIN_SCALE = 3;
+const TERRAIN_TILT = 0.85;
+const TERRAIN_REST_Y = -0.4;
+const TERRAIN_REST_Z = 0;
 
 const createMotes = (): Float32Array => {
   const positions = new Float32Array(MOTE_COUNT * 3);
