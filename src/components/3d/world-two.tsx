@@ -10,8 +10,10 @@ type WorldTwoParams = {
 const MOTE_COUNT = 600;
 const MOTE_SPREAD = 16;
 const TERRAIN_PATH = '/models/snowy_terain.glb';
-const TERRAIN_SCALE = 3;
-const TERRAIN_TILT = 0.85;
+const TERRAIN_SCALE = 2.5;
+const TERRAIN_TILT = 0.95;
+const TERRAIN_REST_Y = -2;
+const TERRAIN_REST_Z = -1;
 
 const createMotes = (): Float32Array => {
   const positions = new Float32Array(MOTE_COUNT * 3);
@@ -33,13 +35,17 @@ const SnowyTerrain = () => {
       return;
     }
     const time = state.clock.elapsedTime;
-    group.rotation.y = time * 0.12;
-    group.rotation.x = TERRAIN_TILT + Math.sin(time * 0.25) * 0.05;
-    group.position.y = -0.4 + Math.sin(time * 0.4) * 0.12;
+    group.rotation.y = Math.sin(time * 0.09) * 0.28;
+    group.rotation.x = TERRAIN_TILT + Math.sin(time * 0.22) * 0.04;
+    group.position.y = TERRAIN_REST_Y + Math.sin(time * 0.35) * 0.08;
   });
 
   return (
-    <group ref={groupRef} scale={TERRAIN_SCALE}>
+    <group
+      ref={groupRef}
+      scale={TERRAIN_SCALE}
+      position={[0, TERRAIN_REST_Y, TERRAIN_REST_Z]}
+    >
       <primitive object={scene} />
     </group>
   );
