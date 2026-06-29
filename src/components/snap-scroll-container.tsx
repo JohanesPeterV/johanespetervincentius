@@ -20,7 +20,6 @@ export default function SnapScrollContainer({
     const progress = Math.min(1, Math.max(0, element.scrollTop / scrollable));
     const root = document.documentElement;
     root.style.setProperty('--wipe', String(progress));
-    root.style.setProperty('--wipe-edge', String(Math.sin(progress * Math.PI)));
   };
 
   return (
