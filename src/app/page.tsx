@@ -10,10 +10,6 @@ export default function Home() {
     <div className="relative min-h-screen w-full">
       <MachineBackground />
       <WorldTwoBackground />
-      <div
-        aria-hidden
-        className="world-wipe-divider pointer-events-none fixed inset-x-0 z-[6] h-40 -translate-y-1/2 bg-gradient-to-t from-transparent via-white/20 to-transparent backdrop-blur-md"
-      />
       <RandomColorButton
         aria-label="Shuffle theme colour"
         title="Shuffle theme colour"
