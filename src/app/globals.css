@@ -129,10 +129,19 @@ body {
 }
 
 .world-two-wipe {
-  clip-path: inset(calc((1 - var(--wipe, 0)) * 100%) 0 0 0);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent calc((1 - var(--wipe, 0)) * 118% - 18%),
+    black calc((1 - var(--wipe, 0)) * 118%)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent calc((1 - var(--wipe, 0)) * 118% - 18%),
+    black calc((1 - var(--wipe, 0)) * 118%)
+  );
 }
 
 .world-wipe-divider {
-  bottom: calc(var(--wipe, 0) * 100%);
+  top: calc((1 - var(--wipe, 0)) * 118% - 9%);
   opacity: var(--wipe-edge, 0);
 }

@@ -12,10 +12,8 @@ export default function Home() {
       <WorldTwoBackground />
       <div
         aria-hidden
-        className="world-wipe-divider pointer-events-none fixed inset-x-0 z-[6] h-24 -translate-y-1/2 backdrop-blur-xl"
-      >
-        <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/80 shadow-[0_0_24px_8px_rgba(255,255,255,0.45)]" />
-      </div>
+        className="world-wipe-divider pointer-events-none fixed inset-x-0 z-[6] h-40 -translate-y-1/2 bg-gradient-to-t from-transparent via-white/20 to-transparent backdrop-blur-md"
+      />
       <RandomColorButton
         aria-label="Shuffle theme colour"
         title="Shuffle theme colour"
