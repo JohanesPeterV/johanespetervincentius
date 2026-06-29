@@ -25,6 +25,13 @@ export function useWorldTwoTransitioning() {
   return useAtomValue(worldTwoTransitioningAtom);
 }
 
+const liveWipe = { current: 0 };
+
+// REASON: the world-two R3F useFrame loop reads the wipe every frame; this imperative channel avoids a per-frame React re-render (atom) and a per-frame getComputedStyle layout read (CSS var) while the canvas runs frameloop="always"
+export function getWipeValue(): number {
+  return liveWipe.current;
+}
+
 const WIPE_SMOOTHING_SECONDS = 0.12;
 const WIPE_SETTLE_EPSILON = 0.0005;
 const MAX_FRAME_SECONDS = 0.05;
@@ -39,6 +46,7 @@ export function useInertialWipe(): (event: UIEvent<HTMLDivElement>) => void {
 
   const applyWipe = (value: number): void => {
     document.documentElement.style.setProperty('--wipe', String(value));
+    liveWipe.current = value;
     setWipeProgress(value);
   };
 

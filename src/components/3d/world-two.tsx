@@ -1,3 +1,4 @@
+import { getWipeValue } from '@/hooks/use-wipe';
 import { MeshTransmissionMaterial } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
@@ -11,6 +12,8 @@ type WorldTwoParams = {
 const MOTE_COUNT = 600;
 const MOTE_SPREAD = 16;
 const SHARD_DETAIL = 6;
+const DOLLY_BACK_Z = -2.4;
+const DOLLY_ARRIVAL_END = 0.7;
 
 const createMotes = (): Float32Array => {
   const positions = new Float32Array(MOTE_COUNT * 3);
@@ -81,9 +84,21 @@ const Shard = ({ color }: WorldTwoParams) => {
 
 export default function WorldTwo({ color }: WorldTwoParams) {
   const motes = useRef(createMotes()).current;
+  const dollyRef = useRef<THREE.Group>(null);
+
+  // REASON: bridge the scroll wipe into the R3F render loop so world two rushes forward from depth as the seam reveals it (the igloo arrival dolly); this is imperative per-frame motion that cannot be expressed through props
+  useFrame(() => {
+    const group = dollyRef.current;
+    if (!group) {
+      return;
+    }
+    const arrival = Math.min(1, getWipeValue() / DOLLY_ARRIVAL_END);
+    const eased = arrival * arrival * (3 - 2 * arrival);
+    group.position.z = THREE.MathUtils.lerp(DOLLY_BACK_Z, 0, eased);
+  });
 
   return (
-    <>
+    <group ref={dollyRef} position={[0, 0, DOLLY_BACK_Z]}>
       <Shard color={color} />
       <points>
         <bufferGeometry>
@@ -98,6 +113,6 @@ export default function WorldTwo({ color }: WorldTwoParams) {
           depthWrite={false}
         />
       </points>
-    </>
+    </group>
   );
 }
