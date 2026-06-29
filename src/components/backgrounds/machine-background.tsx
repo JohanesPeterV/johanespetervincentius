@@ -21,12 +21,12 @@ export default function MachineBackground() {
     <div className="fixed inset-0 z-0">
       <Canvas
         camera={{
-          fov: 40,
+          fov: 38,
           near: 0.1,
           far: 100,
           position: [ORBIT_CENTER[0], ORBIT_CENTER[1], ORBIT_CENTER[2]],
         }}
-        dpr={isLowPerformanceDevice ? 1 : [1, 2]}
+        dpr={isLowPerformanceDevice ? 1 : [1, 1.5]}
         gl={{
           antialias: true,
           alpha: true,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useSetWipeProgress } from '@/hooks/use-wipe';
 import { cn } from '@/lib/utils';
 
 interface SnapScrollContainerProps {
@@ -11,6 +12,8 @@ export default function SnapScrollContainer({
   children,
   className,
 }: SnapScrollContainerProps) {
+  const setWipeProgress = useSetWipeProgress();
+
   const handleScroll = (event: React.UIEvent<HTMLDivElement>): void => {
     const element = event.currentTarget;
     const scrollable = element.scrollHeight - element.clientHeight;
@@ -20,6 +23,7 @@ export default function SnapScrollContainer({
     const progress = Math.min(1, Math.max(0, element.scrollTop / scrollable));
     const root = document.documentElement;
     root.style.setProperty('--wipe', String(progress));
+    setWipeProgress(progress);
   };
 
   return (

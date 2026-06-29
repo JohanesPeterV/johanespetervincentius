@@ -127,7 +127,7 @@ export default function BinaryField({ color, count }: BinaryFieldParams) {
     uniforms.uColorBright.value.set(color).lerp(WHITE, 0.4);
     pointsRef.current.rotation.y += delta * 0.03;
     pointsRef.current.position.y =
-      Math.sin(state.clock.elapsedTime * 0.2) * 0.3;
+      Math.sin(state.clock.elapsedTime * 0.2) * 0.15;
   });
 
   return (

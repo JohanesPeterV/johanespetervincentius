@@ -2,6 +2,7 @@
 
 import WorldTwo from '@/components/3d/world-two';
 import { useConfig } from '@/hooks/use-config';
+import { useWorldTwoActive } from '@/hooks/use-wipe';
 import { getFluidThemeColors } from '@/lib/theme-colors';
 import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
@@ -20,10 +21,13 @@ export default function WorldTwoBackground() {
   const { resolvedTheme } = useTheme();
   const [{ theme }] = useConfig();
   const { fluidColor } = getFluidThemeColors(theme, resolvedTheme);
+  const isActive = useWorldTwoActive();
 
   return (
     <div className="world-two-wipe fixed inset-0 z-[5]">
       <Canvas
+        frameloop={isActive ? 'always' : 'never'}
+        dpr={[1, 1.5]}
         camera={{ fov: 42, near: 0.1, far: 100, position: [0, 0, 6] }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
       >

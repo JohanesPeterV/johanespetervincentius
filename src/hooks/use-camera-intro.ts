@@ -3,14 +3,14 @@ import { useRef } from 'react';
 import * as THREE from 'three';
 import { ORBIT_CENTER } from '@/components/3d/orbit';
 
-const INTRO_DURATION = 3;
-const START_FOV = 56;
-const REST_FOV = 40;
-const START_ROLL = 0.05;
+const INTRO_DURATION = 2.4;
+const START_FOV = 46;
+const REST_FOV = 38;
+const START_ROLL = 0.025;
 const START_POSITION: readonly [number, number, number] = [
-  ORBIT_CENTER[0] - 1.2,
-  ORBIT_CENTER[1] + 0.8,
-  ORBIT_CENTER[2] + 7,
+  ORBIT_CENTER[0] - 0.7,
+  ORBIT_CENTER[1] + 0.45,
+  ORBIT_CENTER[2] + 3.5,
 ];
 
 // REASON: ease-out-quart gives a confident push-in that decelerates smoothly onto the data core, without the hard zoom lunge of an expo curve
