@@ -36,7 +36,7 @@ const VERTEX_SHADER = `
     gl_Position = projectionMatrix * mvPosition;
     float shift = 0.5 + 0.5 * sin(uTime * 0.8 + aPhase * 3.0);
     vColor = mix(uColorDim, uColorBright, shift);
-    float twinkle = 0.55 + 0.45 * sin(uTime * 1.6 + aPhase);
+    float twinkle = 0.72 + 0.28 * sin(uTime * 1.0 + aPhase);
     vBright = aBright * twinkle;
     vGlyph = aGlyph;
     gl_PointSize = aSize * uScale / -mvPosition.z;
@@ -98,7 +98,7 @@ const createDigitField = (count: number): DigitField => {
 
     glyphs[index] = Math.random() < 0.5 ? 0 : 1;
     sizes[index] = 5 + Math.pow(Math.random(), 1.6) * 14;
-    brights[index] = 0.45 + Math.random() * 0.55;
+    brights[index] = 0.35 + Math.random() * 0.4;
     phases[index] = Math.random() * Math.PI * 2;
   }
 
@@ -124,7 +124,7 @@ export default function BinaryField({ color, count }: BinaryFieldParams) {
 
     uniforms.uTime.value = state.clock.elapsedTime;
     uniforms.uColorDim.value.set(color);
-    uniforms.uColorBright.value.set(color).lerp(WHITE, 0.65);
+    uniforms.uColorBright.value.set(color).lerp(WHITE, 0.4);
     pointsRef.current.rotation.y += delta * 0.03;
     pointsRef.current.position.y =
       Math.sin(state.clock.elapsedTime * 0.2) * 0.3;

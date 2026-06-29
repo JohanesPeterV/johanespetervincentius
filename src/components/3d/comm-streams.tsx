@@ -107,7 +107,7 @@ export default function CommStreams({ color }: CommStreamsParams) {
 
     const time = state.clock.elapsedTime;
     uniforms.uColorDim.value.set(color);
-    uniforms.uColorBright.value.set(color).lerp(WHITE, 0.6);
+    uniforms.uColorBright.value.set(color).lerp(WHITE, 0.4);
 
     const { packets, positions, brights } = field;
     const bodyPositions = AGENT_ORBIT_PATHS.map((path) =>
@@ -134,7 +134,7 @@ export default function CommStreams({ color }: CommStreamsParams) {
 
       const fade = Math.sin(packet.progress * Math.PI);
       const twinkle =
-        0.65 + 0.35 * Math.sin(time * 3 + packet.glow * Math.PI * 2);
+        0.74 + 0.26 * Math.sin(time * 1.8 + packet.glow * Math.PI * 2);
       brights[i] = packet.glow * fade * twinkle;
     }
 
