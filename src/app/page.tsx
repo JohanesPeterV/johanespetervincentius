@@ -2,7 +2,6 @@ import ExperienceSection from '@/app/_components/experience';
 import ExploreSection from '@/app/_components/explore';
 import LinktreeSection from '@/app/_components/linktree';
 import MachineBackground from '@/components/backgrounds/machine-background';
-import WorldTwoBackground from '@/components/backgrounds/world-two-background';
 import SnapScrollContainer from '@/components/snap-scroll-container';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 
@@ -10,7 +9,6 @@ export default function Home() {
   return (
     <div className="relative min-h-screen w-full">
       <MachineBackground />
-      <WorldTwoBackground />
       <RandomColorButton
         aria-label="Shuffle theme colour"
         title="Shuffle theme colour"
