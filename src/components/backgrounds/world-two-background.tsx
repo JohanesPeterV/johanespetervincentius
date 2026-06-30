@@ -18,11 +18,32 @@ import {
 } from '@react-three/postprocessing';
 import { useTheme } from 'next-themes';
 import { BlendFunction, ChromaticAberrationEffect } from 'postprocessing';
-import { useRef } from 'react';
+import { useRef, type RefObject } from 'react';
 import { Vector2 } from 'three';
 
 const SKY_COLOR = '#9aa3b0';
 const MAX_SEAM_ABERRATION = 0.0024;
+const FROST_PEAK_SCALE = 50;
+const TRANSITION_BAND_END = 0.92;
+
+type FrostSeamProps = {
+  mapRef: RefObject<SVGFEDisplacementMapElement | null>;
+};
+
+function FrostSeam({ mapRef }: FrostSeamProps) {
+  // REASON: peak the fog displacement at the seam crossing and ease it to zero at the band edges by driving the SVG feDisplacementMap scale each frame from the live wipe; an SVG filter attribute cannot read a CSS variable and SMIL cannot bind to scroll, and reusing the canvas frame loop avoids a second always-on requestAnimationFrame
+  useFrame(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+    const progress = Math.min(1, getWipeValue() / TRANSITION_BAND_END);
+    const bandEnergy = 1 - Math.abs(2 * progress - 1);
+    map.scale.baseVal = bandEnergy * FROST_PEAK_SCALE;
+  });
+
+  return null;
+}
 
 function SeamEffects() {
   const aberrationRef = useRef<ChromaticAberrationEffect | null>(null);
@@ -67,6 +88,7 @@ export default function WorldTwoBackground() {
   const { fluidColor } = getFluidThemeColors(theme, resolvedTheme);
   const isActive = useWorldTwoActive();
   const isTransitioning = useWorldTwoTransitioning();
+  const frostMapRef = useRef<SVGFEDisplacementMapElement | null>(null);
 
   return (
     <>
@@ -97,6 +119,7 @@ export default function WorldTwoBackground() {
               />
             </feTurbulence>
             <feDisplacementMap
+              ref={frostMapRef}
               in="SourceGraphic"
               in2="noise"
               scale={42}
@@ -131,6 +154,7 @@ export default function WorldTwoBackground() {
             />
             <Environment preset="city" />
             <WorldTwo color={fluidColor} />
+            <FrostSeam mapRef={frostMapRef} />
             <SeamEffects />
           </Canvas>
         </div>
