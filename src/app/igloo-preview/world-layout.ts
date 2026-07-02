@@ -120,6 +120,42 @@ export const buildShaftBlocks = (): BlockTransform[] => {
   return blocks;
 };
 
+const CRYSTAL_SHARD_COUNT = 26;
+
+export const buildCrystalShards = (): BlockTransform[] => {
+  const random = createSeededRandom(43);
+  const blocks: BlockTransform[] = [];
+  for (let index = 0; index < CRYSTAL_SHARD_COUNT; index++) {
+    const y = -16 - random() * 42;
+    const angle = random() * Math.PI * 2;
+    const radius = 6.5 + random() * 4;
+    const height = 1.6 + random() * 2.6;
+    blocks.push({
+      position: [Math.sin(angle) * radius, y, Math.cos(angle) * radius + 16],
+      rotation: [
+        (random() - 0.5) * 0.9,
+        random() * Math.PI,
+        (random() - 0.5) * 0.9,
+      ],
+      scale: [height * 0.34, height, height * 0.34],
+      shade: 0.92 + random() * 0.08,
+    });
+  }
+  blocks.push({
+    position: [3.4, -27, 12.6],
+    rotation: [0.15, 0.6, -0.2],
+    scale: [1.3, 3.6, 1.3],
+    shade: 1,
+  });
+  blocks.push({
+    position: [-3.8, -41, 13.2],
+    rotation: [-0.12, 1.9, 0.24],
+    scale: [1.5, 4.2, 1.5],
+    shade: 1,
+  });
+  return blocks;
+};
+
 export const buildSnowPositions = (): Float32Array => {
   const random = createSeededRandom(31);
   const positions = new Float32Array((SKY_SNOW_COUNT + SHAFT_SNOW_COUNT) * 3);

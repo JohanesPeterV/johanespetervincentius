@@ -1,6 +1,6 @@
 'use client';
 
-import { useDetectGPU } from '@react-three/drei';
+import { Environment, Lightformer, useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useRef } from 'react';
 
@@ -18,6 +18,7 @@ import {
   SnowDrift,
   SnowTerrain,
 } from './dive-world';
+import IceCrystals from './ice-crystals';
 
 export default function DiveScene() {
   const targetRef = useRef(DIVE_START);
@@ -80,6 +81,32 @@ export default function DiveScene() {
           <IglooShelter />
           <ShaftDebris />
           <SnowDrift />
+          <IceCrystals gpuTier={gpu.tier} />
+          <Environment resolution={64} frames={1}>
+            <Lightformer
+              form="rect"
+              intensity={2.4}
+              color="#eaf4ff"
+              position={[0, 30, 0]}
+              rotation-x={-Math.PI / 2}
+              scale={40}
+            />
+            <Lightformer
+              form="rect"
+              intensity={0.9}
+              color="#b9d4ea"
+              position={[-18, 4, -12]}
+              scale={12}
+            />
+            <Lightformer
+              form="rect"
+              intensity={0.7}
+              color="#8fb4d4"
+              position={[16, -6, 10]}
+              rotation-y={Math.PI}
+              scale={10}
+            />
+          </Environment>
         </Suspense>
         <CameraRig
           targetRef={targetRef}

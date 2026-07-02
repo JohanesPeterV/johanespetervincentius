@@ -18,7 +18,7 @@ const IGLOO_BLOCKS = buildIglooBlocks();
 const SHAFT_BLOCKS = buildShaftBlocks();
 const SNOW_POSITIONS = buildSnowPositions();
 
-const applyBlockInstances = (
+export const applyBlockInstances = (
   mesh: InstancedMesh | null,
   blocks: BlockTransform[],
   baseColor: string,
