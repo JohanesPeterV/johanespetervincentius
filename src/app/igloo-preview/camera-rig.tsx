@@ -4,8 +4,10 @@ import { useFrame } from '@react-three/fiber';
 import {
   Bloom,
   ChromaticAberration,
+  DepthOfField,
   EffectComposer,
   Noise,
+  SMAA,
   Vignette,
 } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
@@ -137,7 +139,9 @@ export default function CameraRig({
         intensity={0}
         color="#e9f3fc"
       />
-      <EffectComposer enabled={gpuTier >= 2}>
+      <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
+        <SMAA />
+        <DepthOfField focusDistance={0.03} focalLength={0.08} bokehScale={2} />
         <Bloom intensity={0.35} luminanceThreshold={0.85} mipmapBlur />
         <ChromaticAberration
           ref={aberrationRef}
