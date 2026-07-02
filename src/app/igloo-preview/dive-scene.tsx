@@ -19,6 +19,7 @@ import {
   SnowTerrain,
 } from './dive-world';
 import IceCrystals from './ice-crystals';
+import SnowGpu from './snow-gpu';
 
 export default function DiveScene() {
   const targetRef = useRef(DIVE_START);
@@ -80,7 +81,7 @@ export default function DiveScene() {
           <SnowTerrain />
           <IglooShelter />
           <ShaftDebris />
-          <SnowDrift />
+          {gpu.tier < 2 ? <SnowDrift /> : <SnowGpu />}
           <IceCrystals gpuTier={gpu.tier} />
           <Environment resolution={64} frames={1}>
             <Lightformer

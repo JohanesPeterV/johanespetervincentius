@@ -13,7 +13,7 @@ const SHAFT_BLOCK_COUNT = 130;
 const SKY_SNOW_COUNT = 550;
 const SHAFT_SNOW_COUNT = 450;
 
-const createSeededRandom = (seed: number): (() => number) => {
+export const createSeededRandom = (seed: number): (() => number) => {
   let state = seed;
   return () => {
     state = (state + 0x6d2b79f5) | 0;
