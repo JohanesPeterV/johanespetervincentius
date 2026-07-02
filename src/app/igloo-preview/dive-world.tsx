@@ -12,7 +12,7 @@ import {
   buildSnowPositions,
 } from './world-layout';
 
-const TERRAIN_URL = '/models/snowy_terain.glb';
+const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
 const IGLOO_BLOCKS = buildIglooBlocks();
 const SHAFT_BLOCKS = buildShaftBlocks();
