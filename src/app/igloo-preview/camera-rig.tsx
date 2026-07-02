@@ -19,12 +19,12 @@ import {
   DIVE_START,
   DescentFrame,
   aberrationStrength,
+  clampProgress,
   depthMeters,
   railProximity,
   rushFov,
   sampleDescent,
   sectionMotion,
-  wrapProgress,
 } from './descent';
 
 export type OverlayNodes = {
@@ -88,11 +88,9 @@ export default function CameraRig({
     const step = (targetRef.current - currentRef.current) * DIVE_EASE;
     currentRef.current += step;
     if (Math.abs(targetRef.current - currentRef.current) < 0.0004) {
-      const settled = wrapProgress(currentRef.current);
-      currentRef.current = settled;
-      targetRef.current = settled;
+      currentRef.current = targetRef.current;
     }
-    const progress = wrapProgress(currentRef.current);
+    const progress = clampProgress(currentRef.current);
     const frame = sampleDescent(progress);
     camera.position.set(
       frame.position[0],

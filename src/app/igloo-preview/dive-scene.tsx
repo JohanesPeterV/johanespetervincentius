@@ -10,6 +10,7 @@ import {
   DIVE_START,
   TOUCH_SENSITIVITY,
   WHEEL_SENSITIVITY,
+  clampProgress,
 } from './descent';
 import {
   IglooShelter,
@@ -30,7 +31,9 @@ export default function DiveScene() {
   const gpu = useDetectGPU();
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
-    targetRef.current += event.deltaY * WHEEL_SENSITIVITY;
+    targetRef.current = clampProgress(
+      targetRef.current + event.deltaY * WHEEL_SENSITIVITY,
+    );
   };
 
   const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>): void => {
@@ -45,8 +48,10 @@ export default function DiveScene() {
     if (!touch) {
       return;
     }
-    targetRef.current +=
-      (lastTouchRef.current - touch.clientY) * TOUCH_SENSITIVITY;
+    targetRef.current = clampProgress(
+      targetRef.current +
+        (lastTouchRef.current - touch.clientY) * TOUCH_SENSITIVITY,
+    );
     lastTouchRef.current = touch.clientY;
   };
 
@@ -139,7 +144,7 @@ export default function DiveScene() {
         ))}
       </div>
       <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.65rem] tracking-[0.3em] text-white/50">
-        wheel / drag · loops both ways
+        wheel / drag to descend
       </div>
     </div>
   );

@@ -215,24 +215,18 @@ const lerpTriple = (
   ];
 };
 
-export const wrapProgress = (value: number): number => {
-  return ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
-};
-
-export const wrapDelta = (progress: number, center: number): number => {
-  let delta = progress - center;
-  delta -= DIVE_LENGTH * Math.round(delta / DIVE_LENGTH);
-  return delta;
+export const clampProgress = (value: number): number => {
+  return Math.min(DIVE_LENGTH, Math.max(0, value));
 };
 
 export const sampleDescent = (progress: number): DescentFrame => {
-  const wrapped = wrapProgress(progress);
+  const clamped = clampProgress(progress);
   let start = DESCENT_KEYS[0];
   let end = DESCENT_KEYS[DESCENT_KEYS.length - 1];
   for (let index = 0; index < DESCENT_KEYS.length - 1; index++) {
     if (
-      wrapped >= DESCENT_KEYS[index].at &&
-      wrapped <= DESCENT_KEYS[index + 1].at
+      clamped >= DESCENT_KEYS[index].at &&
+      clamped <= DESCENT_KEYS[index + 1].at
     ) {
       start = DESCENT_KEYS[index];
       end = DESCENT_KEYS[index + 1];
@@ -240,7 +234,7 @@ export const sampleDescent = (progress: number): DescentFrame => {
     }
   }
   const span = Math.max(0.0001, end.at - start.at);
-  const t = smoothstep(0, 1, (wrapped - start.at) / span);
+  const t = smoothstep(0, 1, (clamped - start.at) / span);
   return {
     position: lerpTriple(start.position, end.position, t),
     look: lerpTriple(start.look, end.look, t),
@@ -255,7 +249,7 @@ export const sectionMotion = (
   progress: number,
   center: number,
 ): SectionMotion => {
-  const delta = wrapDelta(progress, center);
+  const delta = progress - center;
   const distance = Math.abs(delta);
   return {
     opacity: 1 - smoothstep(0.22, 0.52, distance),
@@ -265,7 +259,7 @@ export const sectionMotion = (
 };
 
 export const railProximity = (progress: number, center: number): number => {
-  return 1 - Math.min(1, Math.abs(wrapDelta(progress, center)) / 0.6);
+  return 1 - Math.min(1, Math.abs(progress - center) / 0.6);
 };
 
 export const aberrationStrength = (velocity: number): number => {
