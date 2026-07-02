@@ -65,6 +65,12 @@ void main() {
   float agitation = 0.6 + uRush * 3.0;
   particle.x += sin(sway) * uDelta * agitation;
   particle.z += cos(sway * 0.8) * uDelta * agitation;
+  vec3 fromCamera = particle - vec3(0.0, uCameraY, 16.0);
+  float cameraDistance = length(fromCamera);
+  if (cameraDistance < 7.0) {
+    particle +=
+      normalize(fromCamera + vec3(0.0001)) * (7.0 - cameraDistance) * 0.3;
+  }
   if (particle.y < uCameraY - 45.0) {
     particle.y += 90.0;
   }

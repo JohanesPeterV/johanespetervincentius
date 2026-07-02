@@ -3,17 +3,34 @@
 import { useFrame } from '@react-three/fiber';
 import {
   Bloom,
+  BrightnessContrast,
   ChromaticAberration,
   DepthOfField,
   EffectComposer,
+  GodRays,
+  HueSaturation,
   Noise,
   SMAA,
   Vignette,
+  wrapEffect,
 } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import type { ChromaticAberrationEffect } from 'postprocessing';
 import { RefObject, useRef } from 'react';
-import { Color, FogExp2, PerspectiveCamera, PointLight, Vector2 } from 'three';
+import {
+  Color,
+  FogExp2,
+  Mesh,
+  MeshBasicMaterial,
+  PerspectiveCamera,
+  PointLight,
+  SphereGeometry,
+  Vector2,
+} from 'three';
+
+import { DiveTransitionEffect } from './dive-transition-effect';
+
+const DiveTransition = wrapEffect(DiveTransitionEffect);
 
 import {
   DIVE_EASE,
@@ -27,6 +44,7 @@ import {
   rushFov,
   sampleDescent,
   sectionMotion,
+  transitionStrength,
 } from './descent';
 
 export type OverlayNodes = {
@@ -43,6 +61,21 @@ type CameraRigParams = {
 };
 
 const ABERRATION_OFFSET = new Vector2(0.0011, 0.0006);
+
+type SunMesh = Mesh<SphereGeometry, MeshBasicMaterial>;
+
+const buildSunMesh = (): SunMesh => {
+  const sun = new Mesh(
+    new SphereGeometry(2.4, 24, 24),
+    new MeshBasicMaterial({
+      color: '#f2f8ff',
+      transparent: true,
+      opacity: 0,
+    }),
+  );
+  sun.position.set(0, -74, 16);
+  return sun;
+};
 
 const applyOverlay = (
   nodes: OverlayNodes,
@@ -85,8 +118,14 @@ export default function CameraRig({
   const currentRef = useRef(DIVE_START);
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
+  const transitionRef = useRef<DiveTransitionEffect | null>(null);
+  const sunRef = useRef<SunMesh | null>(null);
+  if (sunRef.current === null) {
+    sunRef.current = buildSunMesh();
+  }
+  const sunMesh = sunRef.current;
 
-  useFrame(({ camera, scene }) => {
+  useFrame(({ camera, scene, clock }) => {
     const step = (targetRef.current - currentRef.current) * DIVE_EASE;
     currentRef.current += step;
     if (Math.abs(targetRef.current - currentRef.current) < 0.0004) {
@@ -124,9 +163,16 @@ export default function CameraRig({
       const strength = aberrationStrength(step);
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
+    if (transitionRef.current) {
+      transitionRef.current.setDriveState(
+        transitionStrength(step),
+        clock.elapsedTime,
+      );
+    }
     if (glowRef.current) {
       glowRef.current.intensity = frame.glow * 260;
     }
+    sunMesh.material.opacity = frame.glow * 0.9;
     applyOverlay(overlayRef.current, progress, frame);
   });
 
@@ -139,16 +185,33 @@ export default function CameraRig({
         intensity={0}
         color="#e9f3fc"
       />
+      <primitive object={sunMesh} />
       <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
         <SMAA />
-        <DepthOfField focusDistance={0.03} focalLength={0.08} bokehScale={2} />
+        <DepthOfField
+          worldFocusDistance={14}
+          worldFocusRange={26}
+          bokehScale={1.4}
+        />
         <Bloom intensity={0.35} luminanceThreshold={0.85} mipmapBlur />
+        <GodRays
+          sun={sunMesh}
+          samples={36}
+          density={0.85}
+          decay={0.92}
+          weight={0.25}
+          exposure={0.18}
+          clampMax={0.8}
+        />
         <ChromaticAberration
           ref={aberrationRef}
           offset={ABERRATION_OFFSET}
           radialModulation
           modulationOffset={0.4}
         />
+        <DiveTransition ref={transitionRef} />
+        <HueSaturation saturation={-0.1} />
+        <BrightnessContrast contrast={0.08} />
         <Noise opacity={0.22} blendFunction={BlendFunction.OVERLAY} />
         <Vignette offset={0.25} darkness={0.5} />
       </EffectComposer>

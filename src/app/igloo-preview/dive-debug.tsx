@@ -30,6 +30,14 @@ export default function DiveDebugPanel() {
         DIVE_TUNING.snowSize = value;
       },
     },
+    transitionScale: {
+      value: DIVE_TUNING.transitionScale,
+      min: 0,
+      max: 3,
+      onChange: (value: number) => {
+        DIVE_TUNING.transitionScale = value;
+      },
+    },
   });
   return <Leva titleBar={{ title: 'dive tuning' }} />;
 }

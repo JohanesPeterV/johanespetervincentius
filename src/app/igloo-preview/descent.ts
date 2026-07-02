@@ -61,7 +61,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     tag: '// 05',
     title: "Let's\nTalk",
     subtitle: 'say hello',
-    center: 4.6,
+    center: 4.82,
   },
 ];
 
@@ -171,7 +171,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#9fb0bf',
     fogDensity: 0.075,
     glow: 1,
-    veil: 0.85,
+    veil: 0.4,
   },
   {
     at: 5,
@@ -180,7 +180,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#c6ccd4',
     fogDensity: 0.09,
     glow: 1,
-    veil: 1,
+    veil: 0.62,
   },
 ];
 
@@ -266,12 +266,18 @@ export type DiveTuning = {
   aberrationScale: number;
   fovRush: number;
   snowSize: number;
+  transitionScale: number;
 };
 
 export const DIVE_TUNING: DiveTuning = {
   aberrationScale: 1,
   fovRush: 1,
   snowSize: 3,
+  transitionScale: 1,
+};
+
+export const transitionStrength = (velocity: number): number => {
+  return Math.min(1, Math.abs(velocity) * 16) * DIVE_TUNING.transitionScale;
 };
 
 export const aberrationStrength = (velocity: number): number => {
