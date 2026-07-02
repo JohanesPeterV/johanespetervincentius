@@ -262,12 +262,25 @@ export const railProximity = (progress: number, center: number): number => {
   return 1 - Math.min(1, Math.abs(progress - center) / 0.6);
 };
 
+export type DiveTuning = {
+  aberrationScale: number;
+  fovRush: number;
+  snowSize: number;
+};
+
+export const DIVE_TUNING: DiveTuning = {
+  aberrationScale: 1,
+  fovRush: 1,
+  snowSize: 3,
+};
+
 export const aberrationStrength = (velocity: number): number => {
-  return Math.min(0.007, 0.0011 + Math.abs(velocity) * 0.055);
+  const base = Math.min(0.007, 0.0011 + Math.abs(velocity) * 0.055);
+  return base * DIVE_TUNING.aberrationScale;
 };
 
 export const rushFov = (velocity: number): number => {
-  return 58 + Math.min(20, Math.abs(velocity) * 520);
+  return 58 + Math.min(20, Math.abs(velocity) * 520) * DIVE_TUNING.fovRush;
 };
 
 export const depthMeters = (cameraY: number): number => {

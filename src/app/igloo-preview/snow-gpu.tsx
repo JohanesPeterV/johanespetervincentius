@@ -3,6 +3,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 
+import { DIVE_TUNING } from './descent';
 import {
   SnowSimulation,
   createSnowSimulation,
@@ -26,6 +27,7 @@ export default function SnowGpu() {
       delta: Math.min(delta, 0.05),
       cameraY: camera.position.y,
       rush: Math.min(1, Math.abs(camera.position.y - previousY) * 2.5),
+      size: DIVE_TUNING.snowSize,
     });
   });
 

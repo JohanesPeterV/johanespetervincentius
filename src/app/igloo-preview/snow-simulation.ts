@@ -34,6 +34,7 @@ export type SnowFrameInput = {
   delta: number;
   cameraY: number;
   rush: number;
+  size: number;
 };
 
 export const SNOW_TEXTURE_SIZE = 128;
@@ -221,6 +222,7 @@ export const stepSnowSimulation = (
   simulation.simMaterial.uniforms.uDelta.value = input.delta;
   simulation.simMaterial.uniforms.uCameraY.value = input.cameraY;
   simulation.simMaterial.uniforms.uRush.value = input.rush;
+  simulation.drawMaterial.uniforms.uSize.value = input.size;
   const previousTarget = input.gl.getRenderTarget();
   input.gl.setRenderTarget(simulation.targets[writeIndex]);
   input.gl.render(simulation.simScene, simulation.simCamera);
