@@ -1,5 +1,5 @@
-import DiveTransition from './dive-transition';
+import DiveScene from './dive-scene';
 
 export default function IglooPreviewPage() {
-  return <DiveTransition />;
+  return <DiveScene />;
 }
