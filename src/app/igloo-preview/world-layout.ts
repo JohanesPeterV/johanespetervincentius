@@ -122,7 +122,7 @@ export const buildShaftBlocks = (): BlockTransform[] => {
   return blocks;
 };
 
-const CRYSTAL_SHARD_COUNT = 26;
+const CRYSTAL_SHARD_COUNT = 18;
 
 export const buildCrystalShards = (): BlockTransform[] => {
   const random = createSeededRandom(43);
@@ -130,7 +130,7 @@ export const buildCrystalShards = (): BlockTransform[] => {
   for (let index = 0; index < CRYSTAL_SHARD_COUNT; index++) {
     const y = -16 - random() * 42;
     const angle = random() * Math.PI * 2;
-    const radius = 8.5 + random() * 4;
+    const radius = 9 + random() * 4;
     const height = 1.6 + random() * 2.6;
     blocks.push({
       position: [Math.sin(angle) * radius, y, Math.cos(angle) * radius + 16],
@@ -144,13 +144,13 @@ export const buildCrystalShards = (): BlockTransform[] => {
     });
   }
   blocks.push({
-    position: [8, -12, 9.5],
+    position: [11.5, -9, 6],
     rotation: [0.15, 0.6, -0.2],
     scale: [1.3, 3.6, 1.3],
     shade: 1,
   });
   blocks.push({
-    position: [-8.4, -16, 10.5],
+    position: [-11.8, -12, 6.5],
     rotation: [-0.12, 1.9, 0.24],
     scale: [1.5, 4.2, 1.5],
     shade: 1,
@@ -161,7 +161,7 @@ export const buildCrystalShards = (): BlockTransform[] => {
 export const buildSectionRocks = (): BlockTransform[] => {
   const random = createSeededRandom(61);
   return SECTION_ROCKS.map((rock) => {
-    const bulk = 4.7 + random() * 1;
+    const bulk = 4 + random() * 0.7;
     return {
       position: [rock.x, 0, rock.z],
       rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],

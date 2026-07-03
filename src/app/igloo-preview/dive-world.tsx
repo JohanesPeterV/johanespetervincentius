@@ -25,7 +25,7 @@ const IGLOO_BLOCKS = buildIglooBlocks();
 const SHAFT_BLOCKS = buildShaftBlocks();
 const SECTION_ROCK_BLOCKS = buildSectionRocks();
 const SNOW_POSITIONS = buildSnowPositions();
-const ROCK_BASE_COLOR = '#aec6dd';
+const ROCK_BASE_COLOR = '#c2d6e8';
 const rockHelper = new Object3D();
 rockHelper.rotation.order = 'YXZ';
 
@@ -182,8 +182,8 @@ export const SectionRocks = ({ progressRef }: SectionRocksParams) => {
         flatShading
         roughness={0.82}
         metalness={0.06}
-        emissive="#2c3e4f"
-        emissiveIntensity={0.3}
+        emissive="#5f7c96"
+        emissiveIntensity={0.32}
       />
     </instancedMesh>
   );

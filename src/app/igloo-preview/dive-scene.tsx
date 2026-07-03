@@ -139,10 +139,10 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
           color="#ffffff"
         />
         <pointLight
-          position={[0, -24, 13]}
-          intensity={95}
-          distance={42}
-          color="#dcecff"
+          position={[0, -21, 13]}
+          intensity={230}
+          distance={46}
+          color="#e6f1ff"
         />
         <Suspense fallback={null}>
           <SnowTerrain />

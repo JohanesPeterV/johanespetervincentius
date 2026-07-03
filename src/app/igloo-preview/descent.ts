@@ -239,9 +239,9 @@ export type SectionRock = {
 };
 
 export const SECTION_ROCKS: SectionRock[] = [
-  { center: 2.85, x: 2.4, z: 9 },
-  { center: 3.45, x: -2.6, z: 9.5 },
-  { center: 4.05, x: 2.2, z: 9 },
+  { center: 2.85, x: 2.5, z: 9 },
+  { center: 3.45, x: -2.7, z: 9.5 },
+  { center: 4.05, x: 2.4, z: 9 },
 ];
 
 export const PARKED_EYE_Y = -26;
