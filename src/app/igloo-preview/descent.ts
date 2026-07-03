@@ -172,16 +172,16 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     at: 2.3,
     position: [0, -3, 16],
     look: [0, -13, 14],
-    fog: '#6c7885',
+    fog: '#5d6d80',
     fogDensity: 0.085,
     glow: 0.05,
-    veil: 0.7,
+    veil: 0.25,
   },
   {
     at: 2.6,
     position: [0, -9, 16],
     look: [0, -19, 15],
-    fog: '#46525f',
+    fog: '#2b4157',
     fogDensity: 0.052,
     glow: 0.15,
     veil: 0,
@@ -190,7 +190,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     at: 3.4,
     position: [0, -26, 16],
     look: [0, -37, 15.5],
-    fog: '#39434e',
+    fog: '#1e3049',
     fogDensity: 0.05,
     glow: 0.4,
     veil: 0,
@@ -199,7 +199,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     at: 4.3,
     position: [0, -47, 16],
     look: [0, -59, 15.7],
-    fog: '#4e5c6a',
+    fog: '#2f4a66',
     fogDensity: 0.052,
     glow: 0.85,
     veil: 0,
@@ -208,7 +208,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     at: 4.8,
     position: [0, -60, 16],
     look: [0, -72, 16],
-    fog: '#9fb0bf',
+    fog: '#9cc0dd',
     fogDensity: 0.075,
     glow: 1,
     veil: 0.4,
@@ -217,12 +217,19 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     at: 5,
     position: [0, -66, 16],
     look: [0, -78, 16],
-    fog: '#c6ccd4',
+    fog: '#c9dcec',
     fogDensity: 0.09,
     glow: 1,
     veil: 0.62,
   },
 ];
+
+const SEAM_CENTER = 2.3;
+const SEAM_SPAN = 0.55;
+
+export const seamBoost = (progress: number): number => {
+  return 1 - Math.min(1, Math.abs(progress - SEAM_CENTER) / SEAM_SPAN);
+};
 
 const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
   at: raw.at,

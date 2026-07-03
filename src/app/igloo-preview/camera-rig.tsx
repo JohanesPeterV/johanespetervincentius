@@ -43,6 +43,7 @@ import {
   railProximity,
   rushFov,
   sampleDescent,
+  seamBoost,
   sectionMotion,
   transitionStrength,
 } from './descent';
@@ -190,7 +191,10 @@ export default function CameraRig({
       const strength = aberrationStrength(step);
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
-    const rush = transitionStrength(step);
+    const rush = Math.min(
+      1,
+      transitionStrength(step) * (1 + seamBoost(progress) * 1.5),
+    );
     if (transitionRef.current) {
       transitionRef.current.setDriveState(rush, clock.elapsedTime);
     }

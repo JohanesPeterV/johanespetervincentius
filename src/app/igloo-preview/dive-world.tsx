@@ -90,7 +90,7 @@ export const ShaftDebris = () => (
   <instancedMesh
     args={[undefined, undefined, SHAFT_BLOCKS.length]}
     ref={(mesh) => {
-      applyBlockInstances(mesh, SHAFT_BLOCKS, '#6e7d8c');
+      applyBlockInstances(mesh, SHAFT_BLOCKS, '#5f7591');
     }}
   >
     <boxGeometry />

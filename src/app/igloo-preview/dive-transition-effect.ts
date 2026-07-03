@@ -5,37 +5,55 @@ const FRAGMENT = `
 uniform float uIntensity;
 uniform float uTime;
 
-float diveHash(vec2 point) {
+float diveGlitchHash(vec2 point) {
   return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
-float diveValueNoise(vec2 point) {
-  vec2 cell = floor(point);
-  vec2 fraction = fract(point);
-  vec2 smoothed = fraction * fraction * (3.0 - 2.0 * fraction);
-  float a = diveHash(cell);
-  float b = diveHash(cell + vec2(1.0, 0.0));
-  float c = diveHash(cell + vec2(0.0, 1.0));
-  float d = diveHash(cell + vec2(1.0, 1.0));
-  return mix(mix(a, b, smoothed.x), mix(c, d, smoothed.x), smoothed.y);
-}
-
 void mainUv(inout vec2 uv) {
-  float row = floor(uv.y * 28.0);
-  float frame = floor(uTime * 14.0);
-  float jitter = diveHash(vec2(row, frame)) - 0.5;
-  float gate = step(0.72, diveHash(vec2(frame, row * 0.37)));
-  uv.x += jitter * gate * uIntensity * 0.12;
+  if (uIntensity < 0.004) {
+    return;
+  }
+  float frame = floor(uTime * 12.0);
+  vec2 coarseCell = floor(uv * vec2(9.0, 14.0));
+  float coarseGate = step(1.0 - uIntensity * 0.45, diveGlitchHash(coarseCell + frame));
+  vec2 coarseShift = vec2(
+    diveGlitchHash(coarseCell * 1.7 + frame) - 0.5,
+    (diveGlitchHash(coarseCell * 2.3 + frame) - 0.5) * 0.35
+  );
+  vec2 fineCell = floor(uv * vec2(42.0, 64.0));
+  float fineGate = step(1.0 - uIntensity * 0.3, diveGlitchHash(fineCell + frame * 1.31));
+  float fineShift = diveGlitchHash(fineCell * 3.1 + frame) - 0.5;
+  uv += coarseShift * coarseGate * uIntensity * 0.14;
+  uv.x += fineShift * fineGate * uIntensity * 0.06;
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-  float edge = smoothstep(0.32, 0.86, distance(uv, vec2(0.5)));
-  float crystals = diveValueNoise(uv * 26.0 + vec2(0.0, uTime * 0.4));
-  crystals += diveValueNoise(uv * 90.0) * 0.35;
-  float grow = smoothstep(0.45, 1.1, crystals + edge * 0.55);
-  float frostMask = clamp(edge * uIntensity * grow * 1.6, 0.0, 0.85);
-  vec3 frostColor = vec3(0.87, 0.93, 1.0);
-  outputColor = vec4(mix(inputColor.rgb, frostColor, frostMask), inputColor.a);
+  if (uIntensity < 0.004) {
+    outputColor = inputColor;
+    return;
+  }
+  vec2 fromCenter = uv - vec2(0.5);
+  float radial = smoothstep(0.08, 0.62, length(fromCenter));
+  vec2 streakDirection = normalize(fromCenter + vec2(0.0001));
+  float reach = uIntensity * radial * 0.22;
+  vec3 streaked = inputColor.rgb;
+  float weightTotal = 1.0;
+  for (int tap = 1; tap <= 7; tap++) {
+    float along = float(tap) / 7.0;
+    float weight = 1.0 - along * 0.65;
+    streaked += texture2D(inputBuffer, uv + streakDirection * along * reach).rgb * weight;
+    weightTotal += weight;
+  }
+  streaked /= weightTotal;
+  vec2 split = streakDirection * uIntensity * (0.004 + radial * 0.018);
+  vec3 fringed = vec3(
+    texture2D(inputBuffer, uv + split).r,
+    streaked.g,
+    texture2D(inputBuffer, uv - split).b
+  );
+  vec3 torn = mix(streaked, fringed, 0.65);
+  float blend = clamp(uIntensity * (0.3 + radial * 0.9), 0.0, 1.0);
+  outputColor = vec4(mix(inputColor.rgb, torn, blend), inputColor.a);
 }
 `;
 
