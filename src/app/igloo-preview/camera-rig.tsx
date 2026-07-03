@@ -5,7 +5,6 @@ import {
   Bloom,
   BrightnessContrast,
   ChromaticAberration,
-  DepthOfField,
   EffectComposer,
   GodRays,
   HueSaturation,
@@ -41,6 +40,7 @@ import {
   clampProgress,
   depthMeters,
   railProximity,
+  landmarkDip,
   rushFov,
   sampleDescent,
   seamBoost,
@@ -95,17 +95,19 @@ const applyOverlay = (
   progress: number,
   frame: DescentFrame,
 ): void => {
+  const dip = landmarkDip(progress);
   DIVE_SECTIONS.forEach((section, index) => {
     const element = nodes.sections[index];
     if (!element) {
       return;
     }
     const motion = sectionMotion(progress, section.center);
-    element.style.opacity = String(motion.opacity);
+    const opacity = motion.opacity * (1 - dip * 0.85);
+    element.style.opacity = String(opacity);
     element.style.transform = `translateY(${motion.shift}px)`;
-    element.style.filter = `blur(${motion.blur}px)`;
-    element.style.visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
-    element.dataset.visible = motion.opacity > 0.4 ? 'true' : 'false';
+    element.style.filter = `blur(${motion.blur + dip * 4}px)`;
+    element.style.visibility = opacity < 0.05 ? 'hidden' : 'visible';
+    element.dataset.visible = opacity > 0.4 ? 'true' : 'false';
   });
   DIVE_SECTIONS.forEach((section, index) => {
     const notch = nodes.rail[index];
@@ -118,6 +120,11 @@ const applyOverlay = (
   });
   if (nodes.veil) {
     nodes.veil.style.opacity = String(frame.veil);
+    nodes.veil.style.backgroundColor = `rgb(${Math.round(
+      frame.veilColor[0] * 255,
+    )}, ${Math.round(frame.veilColor[1] * 255)}, ${Math.round(
+      frame.veilColor[2] * 255,
+    )})`;
   }
   if (nodes.depth) {
     const meters = String(depthMeters(frame.position[1])).padStart(4, '0');
@@ -133,6 +140,7 @@ export default function CameraRig({
   stageRef,
 }: CameraRigParams) {
   const currentRef = useRef(0);
+  const rushRef = useRef(0);
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
@@ -191,10 +199,12 @@ export default function CameraRig({
       const strength = aberrationStrength(step);
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
-    const rush = Math.min(
+    const impulse = Math.min(
       1,
       transitionStrength(step) * (1 + seamBoost(progress) * 1.5),
     );
+    rushRef.current = Math.max(impulse, rushRef.current * 0.92);
+    const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
     if (transitionRef.current) {
       transitionRef.current.setDriveState(rush, clock.elapsedTime);
     }
@@ -218,11 +228,6 @@ export default function CameraRig({
       <primitive object={sunMesh} />
       <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
         <SMAA />
-        <DepthOfField
-          worldFocusDistance={14}
-          worldFocusRange={26}
-          bokehScale={1.4}
-        />
         <Bloom intensity={0.35} luminanceThreshold={0.85} mipmapBlur />
         <GodRays
           sun={sunMesh}

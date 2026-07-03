@@ -3,11 +3,12 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import { Color, Group, InstancedMesh, Object3D } from 'three';
+import { BackSide, Color, Group, InstancedMesh, Object3D } from 'three';
 
 import {
   BlockTransform,
   buildIglooBlocks,
+  buildLandmarkBoulders,
   buildShaftBlocks,
   buildSnowPositions,
 } from './world-layout';
@@ -16,6 +17,7 @@ const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
 const IGLOO_BLOCKS = buildIglooBlocks();
 const SHAFT_BLOCKS = buildShaftBlocks();
+const LANDMARK_BOULDERS = buildLandmarkBoulders();
 const SNOW_POSITIONS = buildSnowPositions();
 
 export const applyBlockInstances = (
@@ -95,6 +97,31 @@ export const ShaftDebris = () => (
   >
     <boxGeometry />
     <meshStandardMaterial roughness={0.9} metalness={0.06} />
+  </instancedMesh>
+);
+
+export const IceShaft = () => (
+  <mesh position={[0, -40, 16]}>
+    <cylinderGeometry args={[12.5, 14, 78, 16, 8, true]} />
+    <meshStandardMaterial
+      color="#3d5269"
+      roughness={0.92}
+      metalness={0.05}
+      flatShading
+      side={BackSide}
+    />
+  </mesh>
+);
+
+export const LandmarkBoulders = () => (
+  <instancedMesh
+    args={[undefined, undefined, LANDMARK_BOULDERS.length]}
+    ref={(mesh) => {
+      applyBlockInstances(mesh, LANDMARK_BOULDERS, '#93a9c0');
+    }}
+  >
+    <icosahedronGeometry args={[1, 1]} />
+    <meshStandardMaterial flatShading roughness={0.95} metalness={0.05} />
   </instancedMesh>
 );
 

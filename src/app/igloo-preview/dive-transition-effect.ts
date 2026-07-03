@@ -10,32 +10,34 @@ float diveGlitchHash(vec2 point) {
 }
 
 void mainUv(inout vec2 uv) {
-  if (uIntensity < 0.004) {
+  if (uIntensity < 0.01) {
     return;
   }
+  float amount = pow(uIntensity, 0.6);
   float frame = floor(uTime * 12.0);
   vec2 coarseCell = floor(uv * vec2(9.0, 14.0));
-  float coarseGate = step(1.0 - uIntensity * 0.45, diveGlitchHash(coarseCell + frame));
+  float coarseGate = step(1.0 - amount * 0.55, diveGlitchHash(coarseCell + frame));
   vec2 coarseShift = vec2(
     diveGlitchHash(coarseCell * 1.7 + frame) - 0.5,
     (diveGlitchHash(coarseCell * 2.3 + frame) - 0.5) * 0.35
   );
   vec2 fineCell = floor(uv * vec2(42.0, 64.0));
-  float fineGate = step(1.0 - uIntensity * 0.3, diveGlitchHash(fineCell + frame * 1.31));
+  float fineGate = step(1.0 - amount * 0.4, diveGlitchHash(fineCell + frame * 1.31));
   float fineShift = diveGlitchHash(fineCell * 3.1 + frame) - 0.5;
-  uv += coarseShift * coarseGate * uIntensity * 0.14;
-  uv.x += fineShift * fineGate * uIntensity * 0.06;
+  uv += coarseShift * coarseGate * amount * 0.16;
+  uv.x += fineShift * fineGate * amount * 0.07;
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-  if (uIntensity < 0.004) {
+  if (uIntensity < 0.01) {
     outputColor = inputColor;
     return;
   }
+  float amount = pow(uIntensity, 0.6);
   vec2 fromCenter = uv - vec2(0.5);
   float radial = smoothstep(0.08, 0.62, length(fromCenter));
   vec2 streakDirection = normalize(fromCenter + vec2(0.0001));
-  float reach = uIntensity * radial * 0.22;
+  float reach = amount * radial * 0.3;
   vec3 streaked = inputColor.rgb;
   float weightTotal = 1.0;
   for (int tap = 1; tap <= 7; tap++) {
@@ -45,14 +47,14 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     weightTotal += weight;
   }
   streaked /= weightTotal;
-  vec2 split = streakDirection * uIntensity * (0.004 + radial * 0.018);
+  vec2 split = streakDirection * amount * (0.005 + radial * 0.022);
   vec3 fringed = vec3(
     texture2D(inputBuffer, uv + split).r,
     streaked.g,
     texture2D(inputBuffer, uv - split).b
   );
   vec3 torn = mix(streaked, fringed, 0.65);
-  float blend = clamp(uIntensity * (0.3 + radial * 0.9), 0.0, 1.0);
+  float blend = clamp(amount * (0.45 + radial * 0.95), 0.0, 1.0);
   outputColor = vec4(mix(inputColor.rgb, torn, blend), inputColor.a);
 }
 `;

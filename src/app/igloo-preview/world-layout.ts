@@ -1,3 +1,5 @@
+import { DIVE_LANDMARKS } from './descent';
+
 export type BlockTransform = {
   position: [number, number, number];
   rotation: [number, number, number];
@@ -154,6 +156,23 @@ export const buildCrystalShards = (): BlockTransform[] => {
     shade: 1,
   });
   return blocks;
+};
+
+export const buildLandmarkBoulders = (): BlockTransform[] => {
+  const random = createSeededRandom(61);
+  return DIVE_LANDMARKS.map((landmark) => {
+    const bulk = 3.6 + random() * 1.8;
+    return {
+      position: landmark.position,
+      rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],
+      scale: [
+        bulk,
+        bulk * (0.8 + random() * 0.5),
+        bulk * (0.85 + random() * 0.3),
+      ],
+      shade: 0.85 + random() * 0.15,
+    };
+  });
 };
 
 export const buildSnowPositions = (): Float32Array => {

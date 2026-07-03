@@ -19,6 +19,7 @@ export type DescentFrame = {
   fogDensity: number;
   glow: number;
   veil: number;
+  veilColor: [number, number, number];
 };
 
 export type SectionMotion = {
@@ -35,6 +36,7 @@ type RawDescentKey = {
   fogDensity: number;
   glow: number;
   veil: number;
+  veilColor: string;
 };
 
 type DescentKey = DescentFrame & { at: number };
@@ -131,6 +133,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fogDensity: 0.05,
     glow: 0,
     veil: 1,
+    veilColor: '#e9edf2',
   },
   {
     at: 0.3,
@@ -140,6 +143,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fogDensity: 0.042,
     glow: 0,
     veil: 0,
+    veilColor: '#e9edf2',
   },
   {
     at: 1,
@@ -149,6 +153,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fogDensity: 0.03,
     glow: 0,
     veil: 0,
+    veilColor: '#e9edf2',
   },
   {
     at: 1.7,
@@ -158,51 +163,67 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fogDensity: 0.032,
     glow: 0,
     veil: 0,
+    veilColor: '#dfe5ec',
   },
   {
     at: 2.05,
     position: [0, 0.8, 16],
     look: [0, -2, 6],
-    fog: '#9fa9b4',
-    fogDensity: 0.04,
+    fog: '#8c99a7',
+    fogDensity: 0.045,
     glow: 0,
-    veil: 0,
+    veil: 0.1,
+    veilColor: '#141f2c',
+  },
+  {
+    at: 2.18,
+    position: [0, -1, 16],
+    look: [0, -8, 10],
+    fog: '#5c6d80',
+    fogDensity: 0.05,
+    glow: 0,
+    veil: 0.7,
+    veilColor: '#141f2c',
   },
   {
     at: 2.3,
     position: [0, -3, 16],
     look: [0, -13, 14],
-    fog: '#5d6d80',
-    fogDensity: 0.085,
+    fog: '#3f5065',
+    fogDensity: 0.05,
     glow: 0.05,
-    veil: 0.25,
+    veil: 0.35,
+    veilColor: '#141f2c',
   },
   {
     at: 2.6,
     position: [0, -9, 16],
     look: [0, -19, 15],
     fog: '#2b4157',
-    fogDensity: 0.052,
+    fogDensity: 0.045,
     glow: 0.15,
     veil: 0,
+    veilColor: '#141f2c',
   },
   {
     at: 3.4,
     position: [0, -26, 16],
     look: [0, -37, 15.5],
     fog: '#1e3049',
-    fogDensity: 0.05,
+    fogDensity: 0.042,
     glow: 0.4,
     veil: 0,
+    veilColor: '#141f2c',
   },
   {
     at: 4.3,
     position: [0, -47, 16],
     look: [0, -59, 15.7],
     fog: '#2f4a66',
-    fogDensity: 0.052,
+    fogDensity: 0.045,
     glow: 0.85,
     veil: 0,
+    veilColor: '#141f2c',
   },
   {
     at: 4.8,
@@ -212,6 +233,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fogDensity: 0.075,
     glow: 1,
     veil: 0.4,
+    veilColor: '#eaf2f9',
   },
   {
     at: 5,
@@ -221,6 +243,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fogDensity: 0.09,
     glow: 1,
     veil: 0.62,
+    veilColor: '#eaf2f9',
   },
 ];
 
@@ -231,6 +254,31 @@ export const seamBoost = (progress: number): number => {
   return 1 - Math.min(1, Math.abs(progress - SEAM_CENTER) / SEAM_SPAN);
 };
 
+export type DiveLandmark = {
+  at: number;
+  position: [number, number, number];
+};
+
+export const DIVE_LANDMARKS: DiveLandmark[] = [
+  { at: 2.45, position: [2.4, -7, 14.6] },
+  { at: 3.15, position: [-2.6, -23, 17.2] },
+  { at: 3.75, position: [2.2, -34, 14.9] },
+  { at: 4.44, position: [-2.3, -50.5, 17] },
+];
+
+const LANDMARK_SPAN = 0.3;
+
+export const landmarkDip = (progress: number): number => {
+  let dip = 0;
+  for (const landmark of DIVE_LANDMARKS) {
+    dip = Math.max(
+      dip,
+      1 - Math.min(1, Math.abs(progress - landmark.at) / LANDMARK_SPAN),
+    );
+  }
+  return dip;
+};
+
 const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
   at: raw.at,
   position: raw.position,
@@ -239,6 +287,7 @@ const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
   fogDensity: raw.fogDensity,
   glow: raw.glow,
   veil: raw.veil,
+  veilColor: hexToRgb(raw.veilColor),
 }));
 
 const smoothstep = (edge0: number, edge1: number, value: number): number => {
@@ -289,6 +338,7 @@ export const sampleDescent = (progress: number): DescentFrame => {
     fogDensity: lerp(start.fogDensity, end.fogDensity, t),
     glow: lerp(start.glow, end.glow, t),
     veil: lerp(start.veil, end.veil, t),
+    veilColor: lerpTriple(start.veilColor, end.veilColor, t),
   };
 };
 
@@ -324,7 +374,7 @@ export const DIVE_TUNING: DiveTuning = {
 };
 
 export const transitionStrength = (velocity: number): number => {
-  return Math.min(1, Math.abs(velocity) * 16) * DIVE_TUNING.transitionScale;
+  return Math.min(1, Math.abs(velocity) * 34) * DIVE_TUNING.transitionScale;
 };
 
 export const aberrationStrength = (velocity: number): number => {

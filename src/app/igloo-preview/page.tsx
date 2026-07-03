@@ -12,9 +12,13 @@ export default async function IglooPreviewPage({
   searchParams,
 }: IglooPreviewPageParams) {
   const params = await searchParams;
+  const parsedTier =
+    typeof params.tier === 'string'
+      ? Number.parseInt(params.tier, 10)
+      : Number.NaN;
   return (
     <>
-      <DiveScene />
+      <DiveScene tierOverride={Number.isNaN(parsedTier) ? null : parsedTier} />
       {'debug' in params ? <DiveDebugPanel /> : null}
     </>
   );

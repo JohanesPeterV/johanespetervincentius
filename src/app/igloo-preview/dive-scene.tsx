@@ -14,13 +14,19 @@ import {
 import DiveLoader from './dive-loader';
 import DiveOverlay from './dive-overlay';
 import {
+  IceShaft,
   IglooShelter,
+  LandmarkBoulders,
   ShaftDebris,
   SnowDrift,
   SnowTerrain,
 } from './dive-world';
 import IceCrystals from './ice-crystals';
 import SnowGpu from './snow-gpu';
+
+type DiveSceneParams = {
+  tierOverride: number | null;
+};
 
 type LoadedSignalParams = {
   stageRef: RefObject<DiveStage>;
@@ -41,7 +47,7 @@ const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
   return null;
 };
 
-export default function DiveScene() {
+export default function DiveScene({ tierOverride }: DiveSceneParams) {
   const targetRef = useRef(DIVE_START);
   const lastTouchRef = useRef(0);
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
@@ -54,6 +60,7 @@ export default function DiveScene() {
     depth: null,
   });
   const gpu = useDetectGPU();
+  const tier = tierOverride ?? gpu.tier;
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
     targetRef.current = clampProgress(
@@ -119,7 +126,7 @@ export default function DiveScene() {
     >
       <Canvas
         camera={{ fov: 58, near: 0.2, far: 240, position: [0, 34, 54] }}
-        dpr={gpu.tier < 2 ? 1 : 1.75}
+        dpr={tier < 2 ? 1 : 1.75}
         performance={{ min: 0.5 }}
       >
         <color attach="background" args={['#c2c8d0']} />
@@ -133,9 +140,11 @@ export default function DiveScene() {
         <Suspense fallback={null}>
           <SnowTerrain />
           <IglooShelter />
+          <IceShaft />
           <ShaftDebris />
-          {gpu.tier < 2 ? <SnowDrift /> : <SnowGpu />}
-          <IceCrystals gpuTier={gpu.tier} />
+          <LandmarkBoulders />
+          {tier < 2 ? <SnowDrift /> : <SnowGpu />}
+          <IceCrystals gpuTier={tier} />
           <Environment resolution={64} frames={1}>
             <Lightformer
               form="rect"
@@ -167,7 +176,7 @@ export default function DiveScene() {
           targetRef={targetRef}
           pointerRef={pointerRef}
           overlayRef={overlayRef}
-          gpuTier={gpu.tier}
+          gpuTier={tier}
           stageRef={stageRef}
         />
       </Canvas>
