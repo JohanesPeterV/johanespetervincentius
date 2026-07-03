@@ -1,4 +1,4 @@
-import { DIVE_LANDMARKS } from './descent';
+import { SECTION_ROCKS } from './descent';
 
 export type BlockTransform = {
   position: [number, number, number];
@@ -130,7 +130,7 @@ export const buildCrystalShards = (): BlockTransform[] => {
   for (let index = 0; index < CRYSTAL_SHARD_COUNT; index++) {
     const y = -16 - random() * 42;
     const angle = random() * Math.PI * 2;
-    const radius = 6.5 + random() * 4;
+    const radius = 8.5 + random() * 4;
     const height = 1.6 + random() * 2.6;
     blocks.push({
       position: [Math.sin(angle) * radius, y, Math.cos(angle) * radius + 16],
@@ -144,13 +144,13 @@ export const buildCrystalShards = (): BlockTransform[] => {
     });
   }
   blocks.push({
-    position: [3.4, -27, 12.6],
+    position: [8, -12, 9.5],
     rotation: [0.15, 0.6, -0.2],
     scale: [1.3, 3.6, 1.3],
     shade: 1,
   });
   blocks.push({
-    position: [-3.8, -41, 13.2],
+    position: [-8.4, -16, 10.5],
     rotation: [-0.12, 1.9, 0.24],
     scale: [1.5, 4.2, 1.5],
     shade: 1,
@@ -158,19 +158,19 @@ export const buildCrystalShards = (): BlockTransform[] => {
   return blocks;
 };
 
-export const buildLandmarkBoulders = (): BlockTransform[] => {
+export const buildSectionRocks = (): BlockTransform[] => {
   const random = createSeededRandom(61);
-  return DIVE_LANDMARKS.map((landmark) => {
-    const bulk = 3.6 + random() * 1.8;
+  return SECTION_ROCKS.map((rock) => {
+    const bulk = 4.7 + random() * 1;
     return {
-      position: landmark.position,
+      position: [rock.x, 0, rock.z],
       rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],
       scale: [
         bulk,
-        bulk * (0.8 + random() * 0.5),
+        bulk * (0.82 + random() * 0.4),
         bulk * (0.85 + random() * 0.3),
       ],
-      shade: 0.85 + random() * 0.15,
+      shade: 0.9 + random() * 0.1,
     };
   });
 };

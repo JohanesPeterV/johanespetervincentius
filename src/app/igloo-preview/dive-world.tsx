@@ -2,13 +2,19 @@
 
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { RefObject, useRef } from 'react';
 import { BackSide, Color, Group, InstancedMesh, Object3D } from 'three';
 
 import {
+  PARKED_EYE_Y,
+  ROCK_RISE_RATE,
+  ROCK_SPIN_RATE,
+  SECTION_ROCKS,
+} from './descent';
+import {
   BlockTransform,
   buildIglooBlocks,
-  buildLandmarkBoulders,
+  buildSectionRocks,
   buildShaftBlocks,
   buildSnowPositions,
 } from './world-layout';
@@ -17,8 +23,11 @@ const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
 const IGLOO_BLOCKS = buildIglooBlocks();
 const SHAFT_BLOCKS = buildShaftBlocks();
-const LANDMARK_BOULDERS = buildLandmarkBoulders();
+const SECTION_ROCK_BLOCKS = buildSectionRocks();
 const SNOW_POSITIONS = buildSnowPositions();
+const ROCK_BASE_COLOR = '#aec6dd';
+const rockHelper = new Object3D();
+rockHelper.rotation.order = 'YXZ';
 
 export const applyBlockInstances = (
   mesh: InstancedMesh | null,
@@ -113,17 +122,72 @@ export const IceShaft = () => (
   </mesh>
 );
 
-export const LandmarkBoulders = () => (
-  <instancedMesh
-    args={[undefined, undefined, LANDMARK_BOULDERS.length]}
-    ref={(mesh) => {
-      applyBlockInstances(mesh, LANDMARK_BOULDERS, '#93a9c0');
-    }}
-  >
-    <icosahedronGeometry args={[1, 1]} />
-    <meshStandardMaterial flatShading roughness={0.95} metalness={0.05} />
-  </instancedMesh>
-);
+const applyRockColors = (mesh: InstancedMesh | null): void => {
+  if (!mesh) {
+    return;
+  }
+  const tint = new Color();
+  const base = new Color(ROCK_BASE_COLOR);
+  SECTION_ROCK_BLOCKS.forEach((block, index) => {
+    tint.copy(base).multiplyScalar(block.shade);
+    mesh.setColorAt(index, tint);
+  });
+  if (mesh.instanceColor) {
+    mesh.instanceColor.needsUpdate = true;
+  }
+};
+
+type SectionRocksParams = {
+  progressRef: RefObject<number>;
+};
+
+export const SectionRocks = ({ progressRef }: SectionRocksParams) => {
+  const meshRef = useRef<InstancedMesh | null>(null);
+  useFrame((state) => {
+    const mesh = meshRef.current;
+    if (!mesh) {
+      return;
+    }
+    const progress = progressRef.current;
+    const idle = state.clock.elapsedTime * 0.25;
+    SECTION_ROCKS.forEach((rock, index) => {
+      const block = SECTION_ROCK_BLOCKS[index];
+      const travel = progress - rock.center;
+      rockHelper.position.set(
+        rock.x,
+        PARKED_EYE_Y + travel * ROCK_RISE_RATE,
+        rock.z,
+      );
+      rockHelper.rotation.set(
+        block.rotation[0],
+        block.rotation[1] + travel * ROCK_SPIN_RATE + idle,
+        block.rotation[2],
+      );
+      rockHelper.scale.set(block.scale[0], block.scale[1], block.scale[2]);
+      rockHelper.updateMatrix();
+      mesh.setMatrixAt(index, rockHelper.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+  });
+  return (
+    <instancedMesh
+      ref={(mesh) => {
+        meshRef.current = mesh;
+        applyRockColors(mesh);
+      }}
+      args={[undefined, undefined, SECTION_ROCKS.length]}
+    >
+      <icosahedronGeometry args={[1, 1]} />
+      <meshStandardMaterial
+        flatShading
+        roughness={0.82}
+        metalness={0.06}
+        emissive="#2c3e4f"
+        emissiveIntensity={0.3}
+      />
+    </instancedMesh>
+  );
+};
 
 export const SnowDrift = () => {
   const groupRef = useRef<Group>(null);

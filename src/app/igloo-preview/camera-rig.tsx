@@ -40,7 +40,6 @@ import {
   clampProgress,
   depthMeters,
   railProximity,
-  landmarkDip,
   rushFov,
   sampleDescent,
   seamBoost,
@@ -65,6 +64,7 @@ export type DiveStage = 'loading' | 'live';
 
 type CameraRigParams = {
   targetRef: RefObject<number>;
+  progressRef: RefObject<number>;
   pointerRef: RefObject<PointerState>;
   overlayRef: RefObject<OverlayNodes>;
   gpuTier: number;
@@ -95,19 +95,17 @@ const applyOverlay = (
   progress: number,
   frame: DescentFrame,
 ): void => {
-  const dip = landmarkDip(progress);
   DIVE_SECTIONS.forEach((section, index) => {
     const element = nodes.sections[index];
     if (!element) {
       return;
     }
     const motion = sectionMotion(progress, section.center);
-    const opacity = motion.opacity * (1 - dip * 0.85);
-    element.style.opacity = String(opacity);
+    element.style.opacity = String(motion.opacity);
     element.style.transform = `translateY(${motion.shift}px)`;
-    element.style.filter = `blur(${motion.blur + dip * 4}px)`;
-    element.style.visibility = opacity < 0.05 ? 'hidden' : 'visible';
-    element.dataset.visible = opacity > 0.4 ? 'true' : 'false';
+    element.style.filter = `blur(${motion.blur}px)`;
+    element.style.visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
+    element.dataset.visible = motion.opacity > 0.4 ? 'true' : 'false';
   });
   DIVE_SECTIONS.forEach((section, index) => {
     const notch = nodes.rail[index];
@@ -127,13 +125,14 @@ const applyOverlay = (
     )})`;
   }
   if (nodes.depth) {
-    const meters = String(depthMeters(frame.position[1])).padStart(4, '0');
+    const meters = String(depthMeters(progress)).padStart(4, '0');
     nodes.depth.textContent = `${meters}M`;
   }
 };
 
 export default function CameraRig({
   targetRef,
+  progressRef,
   pointerRef,
   overlayRef,
   gpuTier,
@@ -161,6 +160,7 @@ export default function CameraRig({
       currentRef.current = targetRef.current;
     }
     const progress = clampProgress(currentRef.current);
+    progressRef.current = progress;
     const frame = sampleDescent(progress);
     const parallax = parallaxRef.current;
     parallax.x += (pointerRef.current.x - parallax.x) * PARALLAX_EASE;

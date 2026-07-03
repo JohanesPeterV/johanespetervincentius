@@ -16,7 +16,7 @@ import DiveOverlay from './dive-overlay';
 import {
   IceShaft,
   IglooShelter,
-  LandmarkBoulders,
+  SectionRocks,
   ShaftDebris,
   SnowDrift,
   SnowTerrain,
@@ -49,6 +49,7 @@ const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
 
 export default function DiveScene({ tierOverride }: DiveSceneParams) {
   const targetRef = useRef(DIVE_START);
+  const progressRef = useRef(DIVE_START);
   const lastTouchRef = useRef(0);
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const stageRef = useRef<DiveStage>('loading');
@@ -137,12 +138,18 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
           intensity={1.15}
           color="#ffffff"
         />
+        <pointLight
+          position={[0, -24, 13]}
+          intensity={95}
+          distance={42}
+          color="#dcecff"
+        />
         <Suspense fallback={null}>
           <SnowTerrain />
           <IglooShelter />
           <IceShaft />
           <ShaftDebris />
-          <LandmarkBoulders />
+          <SectionRocks progressRef={progressRef} />
           {tier < 2 ? <SnowDrift /> : <SnowGpu />}
           <IceCrystals gpuTier={tier} />
           <Environment resolution={64} frames={1}>
@@ -174,6 +181,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
         </Suspense>
         <CameraRig
           targetRef={targetRef}
+          progressRef={progressRef}
           pointerRef={pointerRef}
           overlayRef={overlayRef}
           gpuTier={tier}

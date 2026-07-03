@@ -113,8 +113,6 @@ export const DIVE_EASE = 0.075;
 export const WHEEL_SENSITIVITY = 1 / 850;
 export const TOUCH_SENSITIVITY = 1 / 600;
 
-const SURFACE_HEIGHT = 2;
-
 const hexToRgb = (hex: string): [number, number, number] => {
   const value = parseInt(hex.slice(1), 16);
   return [
@@ -196,54 +194,34 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#141f2c',
   },
   {
+    at: 2.45,
+    position: [0, -15, 16],
+    look: [0, -22, 9],
+    fog: '#33465c',
+    fogDensity: 0.048,
+    glow: 0.1,
+    veil: 0.1,
+    veilColor: '#141f2c',
+  },
+  {
     at: 2.6,
-    position: [0, -9, 16],
-    look: [0, -19, 15],
-    fog: '#2b4157',
-    fogDensity: 0.045,
+    position: [0, -26, 16],
+    look: [0, -26, 4],
+    fog: '#1e3049',
+    fogDensity: 0.042,
     glow: 0.15,
     veil: 0,
     veilColor: '#141f2c',
   },
   {
-    at: 3.4,
-    position: [0, -26, 16],
-    look: [0, -37, 15.5],
-    fog: '#1e3049',
-    fogDensity: 0.042,
-    glow: 0.4,
-    veil: 0,
-    veilColor: '#141f2c',
-  },
-  {
-    at: 4.3,
-    position: [0, -47, 16],
-    look: [0, -59, 15.7],
-    fog: '#2f4a66',
-    fogDensity: 0.045,
-    glow: 0.85,
-    veil: 0,
-    veilColor: '#141f2c',
-  },
-  {
-    at: 4.8,
-    position: [0, -60, 16],
-    look: [0, -72, 16],
-    fog: '#9cc0dd',
-    fogDensity: 0.075,
-    glow: 1,
-    veil: 0.4,
-    veilColor: '#eaf2f9',
-  },
-  {
     at: 5,
-    position: [0, -66, 16],
-    look: [0, -78, 16],
-    fog: '#c9dcec',
-    fogDensity: 0.09,
-    glow: 1,
-    veil: 0.62,
-    veilColor: '#eaf2f9',
+    position: [0, -26, 16],
+    look: [0, -26, 4],
+    fog: '#24425f',
+    fogDensity: 0.05,
+    glow: 0.1,
+    veil: 0,
+    veilColor: '#141f2c',
   },
 ];
 
@@ -254,30 +232,21 @@ export const seamBoost = (progress: number): number => {
   return 1 - Math.min(1, Math.abs(progress - SEAM_CENTER) / SEAM_SPAN);
 };
 
-export type DiveLandmark = {
-  at: number;
-  position: [number, number, number];
+export type SectionRock = {
+  center: number;
+  x: number;
+  z: number;
 };
 
-export const DIVE_LANDMARKS: DiveLandmark[] = [
-  { at: 2.45, position: [2.4, -7, 14.6] },
-  { at: 3.15, position: [-2.6, -23, 17.2] },
-  { at: 3.75, position: [2.2, -34, 14.9] },
-  { at: 4.44, position: [-2.3, -50.5, 17] },
+export const SECTION_ROCKS: SectionRock[] = [
+  { center: 2.85, x: 2.4, z: 9 },
+  { center: 3.45, x: -2.6, z: 9.5 },
+  { center: 4.05, x: 2.2, z: 9 },
 ];
 
-const LANDMARK_SPAN = 0.3;
-
-export const landmarkDip = (progress: number): number => {
-  let dip = 0;
-  for (const landmark of DIVE_LANDMARKS) {
-    dip = Math.max(
-      dip,
-      1 - Math.min(1, Math.abs(progress - landmark.at) / LANDMARK_SPAN),
-    );
-  }
-  return dip;
-};
+export const PARKED_EYE_Y = -26;
+export const ROCK_RISE_RATE = 24;
+export const ROCK_SPIN_RATE = 2.5;
 
 const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
   at: raw.at,
@@ -386,6 +355,6 @@ export const rushFov = (velocity: number): number => {
   return 58 + Math.min(20, Math.abs(velocity) * 520) * DIVE_TUNING.fovRush;
 };
 
-export const depthMeters = (cameraY: number): number => {
-  return Math.max(0, Math.round((SURFACE_HEIGHT - cameraY) * 2.4));
+export const depthMeters = (progress: number): number => {
+  return Math.max(0, Math.round(progress * 32));
 };
