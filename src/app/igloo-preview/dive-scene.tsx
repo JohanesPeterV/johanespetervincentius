@@ -2,16 +2,17 @@
 
 import { Environment, Lightformer, useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import { Suspense, useEffect, useRef } from 'react';
+import { RefObject, Suspense, useEffect, useRef } from 'react';
 
-import CameraRig, { OverlayNodes } from './camera-rig';
+import CameraRig, { DiveStage, OverlayNodes, PointerState } from './camera-rig';
 import {
-  DIVE_SECTIONS,
   DIVE_START,
   TOUCH_SENSITIVITY,
   WHEEL_SENSITIVITY,
   clampProgress,
 } from './descent';
+import DiveLoader from './dive-loader';
+import DiveOverlay from './dive-overlay';
 import {
   IglooShelter,
   ShaftDebris,
@@ -21,9 +22,31 @@ import {
 import IceCrystals from './ice-crystals';
 import SnowGpu from './snow-gpu';
 
+type LoadedSignalParams = {
+  stageRef: RefObject<DiveStage>;
+  loaderRef: RefObject<HTMLDivElement | null>;
+};
+
+const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
+  // REASON: Suspense resolution is only observable from a mounted child - mark
+  // the dive live and fade the loader once the terrain GLB is actually ready
+  useEffect(() => {
+    stageRef.current = 'live';
+    const loader = loaderRef.current;
+    if (loader) {
+      loader.style.opacity = '0';
+      loader.style.pointerEvents = 'none';
+    }
+  }, [stageRef, loaderRef]);
+  return null;
+};
+
 export default function DiveScene() {
   const targetRef = useRef(DIVE_START);
   const lastTouchRef = useRef(0);
+  const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
+  const stageRef = useRef<DiveStage>('loading');
+  const loaderRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<OverlayNodes>({
     sections: [],
     rail: [],
@@ -43,6 +66,18 @@ export default function DiveScene() {
     if (touch) {
       lastTouchRef.current = touch.clientY;
     }
+  };
+
+  const handlePointerMove = (
+    event: React.PointerEvent<HTMLDivElement>,
+  ): void => {
+    if (event.pointerType !== 'mouse') {
+      return;
+    }
+    pointerRef.current = {
+      x: (event.clientX / window.innerWidth) * 2 - 1,
+      y: (event.clientY / window.innerHeight) * 2 - 1,
+    };
   };
 
   // REASON: arrow-key navigation needs window-level key events - the
@@ -79,6 +114,7 @@ export default function DiveScene() {
       onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
+      onPointerMove={handlePointerMove}
       className="fixed inset-0 overflow-hidden bg-[#c2c8d0] font-mono text-white"
     >
       <Canvas
@@ -125,94 +161,18 @@ export default function DiveScene() {
               scale={10}
             />
           </Environment>
+          <LoadedSignal stageRef={stageRef} loaderRef={loaderRef} />
         </Suspense>
         <CameraRig
           targetRef={targetRef}
+          pointerRef={pointerRef}
           overlayRef={overlayRef}
           gpuTier={gpu.tier}
+          stageRef={stageRef}
         />
       </Canvas>
-      <div
-        ref={(element) => {
-          overlayRef.current.veil = element;
-        }}
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[#e9edf2] opacity-0"
-      />
-      <div className="pointer-events-none absolute inset-0">
-        {DIVE_SECTIONS.map((section, index) => (
-          <div
-            key={section.tag}
-            ref={(element) => {
-              overlayRef.current.sections[index] = element;
-            }}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-5 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]"
-          >
-            <span className="text-xs tracking-[0.4em] text-white/60">
-              {section.tag}
-            </span>
-            <h2 className="whitespace-pre-line text-center font-sans text-5xl font-semibold leading-[1.05] sm:text-7xl">
-              {section.title}
-            </h2>
-            <span className="text-xs tracking-[0.3em] text-white/50">
-              {section.subtitle}
-            </span>
-            {section.details ? (
-              <ul className="space-y-1.5 text-center text-[0.68rem] tracking-[0.2em] text-white/65">
-                {section.details.map((detail) => (
-                  <li key={detail}>{detail}</li>
-                ))}
-              </ul>
-            ) : null}
-            {section.links ? (
-              <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 text-[0.7rem] tracking-[0.22em]">
-                {section.links.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="pointer-events-auto text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
-                  >
-                    {link.label} ↗
-                  </a>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        ))}
-      </div>
-      <div className="pointer-events-none absolute left-8 top-8 text-[0.65rem] leading-relaxed tracking-[0.2em] text-white/70 [text-shadow:0_1px_10px_rgba(30,40,52,0.5)]">
-        <div className="font-sans text-2xl font-bold tracking-[0.08em] text-white">
-          JOHANES
-        </div>
-        <div className="mt-2">{'// Portfolio © 2026'}</div>
-        <div>All Rights Reserved.</div>
-      </div>
-      <div className="pointer-events-none absolute bottom-8 left-8 text-[0.7rem] tracking-[0.3em] text-white/70 [text-shadow:0_1px_10px_rgba(30,40,52,0.5)]">
-        DEPTH{' '}
-        <span
-          ref={(element) => {
-            overlayRef.current.depth = element;
-          }}
-        >
-          0000M
-        </span>
-      </div>
-      <div className="pointer-events-none absolute right-6 top-1/2 flex -translate-y-1/2 flex-col items-end gap-3">
-        {DIVE_SECTIONS.map((section, index) => (
-          <div
-            key={section.tag}
-            ref={(element) => {
-              overlayRef.current.rail[index] = element;
-            }}
-            className="h-px w-6 origin-right bg-white opacity-20"
-          />
-        ))}
-      </div>
-      <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.65rem] tracking-[0.3em] text-white/50">
-        wheel / arrows / drag to descend
-      </div>
+      <DiveOverlay overlayRef={overlayRef} />
+      <DiveLoader loaderRef={loaderRef} />
     </div>
   );
 }

@@ -34,8 +34,8 @@ const DiveTransition = wrapEffect(DiveTransitionEffect);
 
 import {
   DIVE_EASE,
+  DIVE_LENGTH,
   DIVE_SECTIONS,
-  DIVE_START,
   DescentFrame,
   aberrationStrength,
   clampProgress,
@@ -46,6 +46,7 @@ import {
   sectionMotion,
   transitionStrength,
 } from './descent';
+import { setWindDrive } from './wind-audio';
 
 export type OverlayNodes = {
   sections: (HTMLDivElement | null)[];
@@ -54,11 +55,22 @@ export type OverlayNodes = {
   depth: HTMLSpanElement | null;
 };
 
+export type PointerState = {
+  x: number;
+  y: number;
+};
+
+export type DiveStage = 'loading' | 'live';
+
 type CameraRigParams = {
   targetRef: RefObject<number>;
+  pointerRef: RefObject<PointerState>;
   overlayRef: RefObject<OverlayNodes>;
   gpuTier: number;
+  stageRef: RefObject<DiveStage>;
 };
+
+const PARALLAX_EASE = 0.045;
 
 const ABERRATION_OFFSET = new Vector2(0.0011, 0.0006);
 
@@ -92,6 +104,7 @@ const applyOverlay = (
     element.style.transform = `translateY(${motion.shift}px)`;
     element.style.filter = `blur(${motion.blur}px)`;
     element.style.visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
+    element.dataset.visible = motion.opacity > 0.4 ? 'true' : 'false';
   });
   DIVE_SECTIONS.forEach((section, index) => {
     const notch = nodes.rail[index];
@@ -113,10 +126,13 @@ const applyOverlay = (
 
 export default function CameraRig({
   targetRef,
+  pointerRef,
   overlayRef,
   gpuTier,
+  stageRef,
 }: CameraRigParams) {
-  const currentRef = useRef(DIVE_START);
+  const currentRef = useRef(0);
+  const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
   const transitionRef = useRef<DiveTransitionEffect | null>(null);
@@ -127,19 +143,29 @@ export default function CameraRig({
   const sunMesh = sunRef.current;
 
   useFrame(({ camera, scene, clock }) => {
-    const step = (targetRef.current - currentRef.current) * DIVE_EASE;
+    const live = stageRef.current === 'live';
+    const step = live
+      ? (targetRef.current - currentRef.current) * DIVE_EASE
+      : 0;
     currentRef.current += step;
-    if (Math.abs(targetRef.current - currentRef.current) < 0.0004) {
+    if (live && Math.abs(targetRef.current - currentRef.current) < 0.0004) {
       currentRef.current = targetRef.current;
     }
     const progress = clampProgress(currentRef.current);
     const frame = sampleDescent(progress);
+    const parallax = parallaxRef.current;
+    parallax.x += (pointerRef.current.x - parallax.x) * PARALLAX_EASE;
+    parallax.y += (pointerRef.current.y - parallax.y) * PARALLAX_EASE;
     camera.position.set(
-      frame.position[0],
-      frame.position[1],
+      frame.position[0] + parallax.x * 0.7,
+      frame.position[1] - parallax.y * 0.35,
       frame.position[2],
     );
-    camera.lookAt(frame.look[0], frame.look[1], frame.look[2]);
+    camera.lookAt(
+      frame.look[0] + parallax.x * 2.2,
+      frame.look[1] - parallax.y * 1.4,
+      frame.look[2],
+    );
     camera.rotateZ(Math.max(-0.05, Math.min(0.05, -step * 0.6)));
     if (camera instanceof PerspectiveCamera) {
       camera.fov = rushFov(step);
@@ -164,12 +190,11 @@ export default function CameraRig({
       const strength = aberrationStrength(step);
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
+    const rush = transitionStrength(step);
     if (transitionRef.current) {
-      transitionRef.current.setDriveState(
-        transitionStrength(step),
-        clock.elapsedTime,
-      );
+      transitionRef.current.setDriveState(rush, clock.elapsedTime);
     }
+    setWindDrive(progress / DIVE_LENGTH, rush);
     if (glowRef.current) {
       glowRef.current.intensity = frame.glow * 260;
     }
