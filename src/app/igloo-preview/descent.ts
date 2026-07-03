@@ -1,8 +1,15 @@
+export type DiveSectionLink = {
+  label: string;
+  href: string;
+};
+
 export type DiveSection = {
   tag: string;
   title: string;
   subtitle: string;
   center: number;
+  details?: string[];
+  links?: DiveSectionLink[];
 };
 
 export type DescentFrame = {
@@ -44,24 +51,57 @@ export const DIVE_SECTIONS: DiveSection[] = [
     title: 'Work\nExperience',
     subtitle: '2020 — present',
     center: 2.85,
+    details: [
+      'Smilie — Lead Software Engineer · 2025—now',
+      'TableLink — Full-stack Developer · 2025',
+      'Farmio — Software Engineer · 2023—2024',
+      'Software Lab Center, Binus · 2020—2024',
+    ],
   },
   {
     tag: '// 03',
     title: 'Selected\nProjects',
     subtitle: 'a few things built',
     center: 3.45,
+    links: [
+      {
+        label: 'Simple Helpdesk',
+        href: 'https://github.com/JohanesPeterV/simple-helpdesk',
+      },
+      {
+        label: 'MyUtang Backend',
+        href: 'https://github.com/JohanesPeterV/MyUtangBackend',
+      },
+      {
+        label: 'This Portfolio',
+        href: 'https://github.com/JohanesPeterV/johanespetervincentius',
+      },
+    ],
   },
   {
     tag: '// 04',
     title: 'Tech\nStack',
     subtitle: 'tools of the trade',
     center: 4.05,
+    details: [
+      'Next.js · React · Three.js',
+      'Nest.js · GraphQL · PostgreSQL',
+      'Kotlin · Flutter · ASP.NET',
+    ],
   },
   {
     tag: '// 05',
     title: "Let's\nTalk",
     subtitle: 'say hello',
     center: 4.82,
+    links: [
+      { label: 'Email', href: 'mailto:johanespeter.jp@gmail.com' },
+      {
+        label: 'LinkedIn',
+        href: 'https://www.linkedin.com/in/johanes-vincentius-714b311a4',
+      },
+      { label: 'GitHub', href: 'https://github.com/JohanesPeterV' },
+    ],
   },
 ];
 

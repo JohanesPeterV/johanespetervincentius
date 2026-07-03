@@ -91,6 +91,7 @@ const applyOverlay = (
     element.style.opacity = String(motion.opacity);
     element.style.transform = `translateY(${motion.shift}px)`;
     element.style.filter = `blur(${motion.blur}px)`;
+    element.style.visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
   });
   DIVE_SECTIONS.forEach((section, index) => {
     const notch = nodes.rail[index];

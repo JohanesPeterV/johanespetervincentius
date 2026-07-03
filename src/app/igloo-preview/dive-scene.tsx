@@ -2,7 +2,7 @@
 
 import { Environment, Lightformer, useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import { Suspense, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 
 import CameraRig, { OverlayNodes } from './camera-rig';
 import {
@@ -44,6 +44,23 @@ export default function DiveScene() {
       lastTouchRef.current = touch.clientY;
     }
   };
+
+  // REASON: arrow-key navigation needs window-level key events - the
+  // full-screen div is never focused, so an onKeyDown prop would not fire
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'ArrowDown') {
+        targetRef.current = clampProgress(targetRef.current + 0.5);
+      }
+      if (event.key === 'ArrowUp') {
+        targetRef.current = clampProgress(targetRef.current - 0.5);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>): void => {
     const touch = event.touches[0];
@@ -140,6 +157,28 @@ export default function DiveScene() {
             <span className="text-xs tracking-[0.3em] text-white/50">
               {section.subtitle}
             </span>
+            {section.details ? (
+              <ul className="space-y-1.5 text-center text-[0.68rem] tracking-[0.2em] text-white/65">
+                {section.details.map((detail) => (
+                  <li key={detail}>{detail}</li>
+                ))}
+              </ul>
+            ) : null}
+            {section.links ? (
+              <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 text-[0.7rem] tracking-[0.22em]">
+                {section.links.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="pointer-events-auto text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
+                  >
+                    {link.label} ↗
+                  </a>
+                ))}
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
@@ -172,7 +211,7 @@ export default function DiveScene() {
         ))}
       </div>
       <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.65rem] tracking-[0.3em] text-white/50">
-        wheel / drag to descend
+        wheel / arrows / drag to descend
       </div>
     </div>
   );
