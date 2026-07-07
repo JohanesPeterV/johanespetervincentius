@@ -140,6 +140,7 @@ export default function CameraRig({
 }: CameraRigParams) {
   const currentRef = useRef(0);
   const rushRef = useRef(0);
+  const overlayProgressRef = useRef(Number.NaN);
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
@@ -177,8 +178,11 @@ export default function CameraRig({
     );
     camera.rotateZ(Math.max(-0.05, Math.min(0.05, -step * 0.6)));
     if (camera instanceof PerspectiveCamera) {
-      camera.fov = rushFov(step);
-      camera.updateProjectionMatrix();
+      const nextFov = rushFov(step);
+      if (nextFov !== camera.fov) {
+        camera.fov = nextFov;
+        camera.updateProjectionMatrix();
+      }
     }
     if (scene.fog instanceof FogExp2) {
       scene.fog.color.setRGB(
@@ -213,7 +217,10 @@ export default function CameraRig({
       glowRef.current.intensity = frame.glow * 260;
     }
     sunMesh.material.opacity = frame.glow * 0.9;
-    applyOverlay(overlayRef.current, progress, frame);
+    if (progress !== overlayProgressRef.current) {
+      overlayProgressRef.current = progress;
+      applyOverlay(overlayRef.current, progress, frame);
+    }
   });
 
   return (

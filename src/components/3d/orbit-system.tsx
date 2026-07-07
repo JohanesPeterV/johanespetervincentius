@@ -2,7 +2,7 @@ import { useGLTF, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Suspense, useRef } from 'react';
 import * as THREE from 'three';
-import { AGENT_ORBIT_PATHS, getOrbitPosition, type OrbitPath } from './orbit';
+import { AGENT_ORBIT_PATHS, writeOrbitPosition, type OrbitPath } from './orbit';
 
 // REASON: conductor's mark ships on an opaque dark plate, so it is keyed to alpha by luminance; the others already carry their own transparency
 type MarkPlate = 'alpha' | 'keyed';
@@ -66,9 +66,7 @@ const PassingMark = ({ path, url, size, opacity, plate }: MarkConfig) => {
       return;
     }
 
-    meshRef.current.position.set(
-      ...getOrbitPosition(path, state.clock.elapsedTime),
-    );
+    writeOrbitPosition(path, state.clock.elapsedTime, meshRef.current.position);
   });
 
   const [width, planeHeight] = size;
@@ -100,7 +98,7 @@ const PassingMac = () => {
     }
 
     const time = state.clock.elapsedTime;
-    groupRef.current.position.set(...getOrbitPosition(MAC_PATH, time));
+    writeOrbitPosition(MAC_PATH, time, groupRef.current.position);
     groupRef.current.rotation.y = time * 0.2;
     groupRef.current.rotation.x = -0.1 + Math.sin(time * 0.4) * 0.05;
     groupRef.current.rotation.z = Math.sin(time * 0.35) * 0.05;

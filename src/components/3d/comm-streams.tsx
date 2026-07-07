@@ -3,8 +3,8 @@ import { useRef } from 'react';
 import * as THREE from 'three';
 import {
   AGENT_ORBIT_PATHS,
-  getOrbitPosition,
   ORBIT_CENTER,
+  writeOrbitPosition,
   type OrbitPath,
 } from './orbit';
 
@@ -98,6 +98,9 @@ export default function CommStreams({ color }: CommStreamsParams) {
     uColorDim: { value: new THREE.Color(color) },
     uColorBright: { value: new THREE.Color(color) },
   }).current;
+  const bodyPositions = useRef(
+    AGENT_ORBIT_PATHS.map(() => new THREE.Vector3()),
+  ).current;
 
   useFrame((state, delta) => {
     const points = pointsRef.current;
@@ -110,13 +113,13 @@ export default function CommStreams({ color }: CommStreamsParams) {
     uniforms.uColorBright.value.set(color).lerp(WHITE, 0.4);
 
     const { packets, positions, brights } = field;
-    const bodyPositions = AGENT_ORBIT_PATHS.map((path) =>
-      getOrbitPosition(path, time),
-    );
+    for (let p = 0; p < AGENT_ORBIT_PATHS.length; p++) {
+      writeOrbitPosition(AGENT_ORBIT_PATHS[p], time, bodyPositions[p]);
+    }
 
     for (let i = 0; i < packets.length; i++) {
       const packet = packets[i];
-      const [bodyX, bodyY, bodyZ] = bodyPositions[packet.pathIndex];
+      const body = bodyPositions[packet.pathIndex];
 
       packet.progress += packet.speed * delta;
       if (packet.progress > 1) {
@@ -128,9 +131,11 @@ export default function CommStreams({ color }: CommStreamsParams) {
         frac = 1 - packet.progress;
       }
 
-      positions[i * 3] = ORBIT_CENTER[0] + (bodyX - ORBIT_CENTER[0]) * frac;
-      positions[i * 3 + 1] = ORBIT_CENTER[1] + (bodyY - ORBIT_CENTER[1]) * frac;
-      positions[i * 3 + 2] = ORBIT_CENTER[2] + (bodyZ - ORBIT_CENTER[2]) * frac;
+      positions[i * 3] = ORBIT_CENTER[0] + (body.x - ORBIT_CENTER[0]) * frac;
+      positions[i * 3 + 1] =
+        ORBIT_CENTER[1] + (body.y - ORBIT_CENTER[1]) * frac;
+      positions[i * 3 + 2] =
+        ORBIT_CENTER[2] + (body.z - ORBIT_CENTER[2]) * frac;
 
       const fade = Math.sin(packet.progress * Math.PI);
       const twinkle =
