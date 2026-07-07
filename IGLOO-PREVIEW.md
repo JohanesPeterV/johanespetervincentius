@@ -9,6 +9,39 @@ Its whole reason to exist: stop the back-and-forth. The concept below has been m
 same way many times and wasted many tokens. If you catch yourself building something that
 contradicts the **Mental Model** or the **Banned Misreads**, stop — you have the concept wrong.
 
+**If you were handed only this file:** the reference site is **igloo.inc**. Open it first (§0),
+then build or iterate on the `/igloo-preview` page following the concept in this doc. That is
+the whole job — nothing here requires any context beyond this file plus the live reference.
+
+---
+
+## 0. The Reference Site — open it first
+
+**URL: https://igloo.inc** — actually open it and scroll through it before you write any code.
+You (the AI) can browse it; do so. Absorb how it feels; do not read its source to copy it.
+
+What it is: **igloo.inc**, Awwwards **Site of the Year 2024** (built by studio Abeto with
+Bureaux). It is a near-100% WebGL scroll experience — an icy, crystalline world where
+**scrolling drives a choreographed 3D journey** through distinct scenes joined by signature
+glitch/aberration transitions. It is widely treated as a **craft benchmark**: the kind of site
+that makes people's jaw drop. That craft bar is why we reference it.
+
+What we **borrow** from it:
+
+- The **mood** and the **level of craft** — playful yet stunning, obsessively polished (§5).
+- The **core idea** that scrolling drives a choreographed 3D world with world-to-world
+  transitions (§6, §7).
+
+What we do **NOT** take:
+
+- Its content, layout, copy, fonts, or assets. This is a portfolio, not a clone.
+- Its exact camera behaviour. **igloo.inc is not our spec — §1 is.** On igloo.inc the camera
+  moves through scenes; **our** concept is deliberately different: scroll down → the world
+  **rises up** past a **near-fixed** camera. When igloo's behaviour and §1 disagree, §1 wins.
+
+Bottom line: use igloo.inc to calibrate the **feeling and the quality bar**, then greybox
+**our** concept (§1–§7). Reference for mood, never a target to reproduce.
+
 ---
 
 ## 1. The Mental Model (the one non-negotiable)
