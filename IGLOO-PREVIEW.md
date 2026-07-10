@@ -166,6 +166,11 @@ Approximate current mapping (see `descent.ts` keyframes):
 - **~2.6 – 4.35** → W2–W4, crystal world; the peripheral field and crystals keep climbing
   (`worldBRise`) while three `NarrativeStones` follow one deliberate vertical path. Each content
   panel projects from its own stone and crossfades without blur, FOV rush, or aberration.
+  The peripheral field lives in **two side curtains** (`sampleFieldSlot` in `world-layout.ts`):
+  a bounded azimuth band left and right of the view axis, sized by distance. The central view
+  column belongs to the narrative stones alone — nothing peripheral may cross or crowd it, and
+  the stone rise rate spaces stones farther apart than the camera's visible height so only the
+  active stone is ever in frame.
 - **~4.35 – 4.8** → W6, the finale flash (`FINALE_CENTER = 4.58`): a bright veil
   (`#dfeefb` → `#eaf4fd`, the counter-image of the dark seam veil) bursts up and hides the
   one great camera launch; behind it the sun mesh sweeps overhead (`finaleSunLift`).

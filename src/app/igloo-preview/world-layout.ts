@@ -9,8 +9,33 @@ const DOME_RADIUS = 3.4;
 const DOME_ROWS = 6;
 const ENTRANCE_HALF_ANGLE = 0.46;
 const TUNNEL_RADIUS = 1.35;
-const RISING_STONE_COUNT = 130;
+const RISING_STONE_COUNT = 48;
 const AMBIENT_SNOW_COUNT = 1000;
+const CAMERA_DISTANCE_Z = 16;
+const FIELD_MIN_AZIMUTH = 0.42;
+const FIELD_MAX_AZIMUTH = 0.72;
+const FIELD_MIN_DISTANCE = 8;
+const FIELD_DISTANCE_SPREAD = 14;
+
+type FieldSlot = {
+  x: number;
+  z: number;
+  distance: number;
+};
+
+// REASON: the peripheral field must frame the narrative stones, never cross
+// them - slots live in two side curtains outside the central view column,
+// sized by distance so nothing looms into the lens
+const sampleFieldSlot = (random: () => number, side: 1 | -1): FieldSlot => {
+  const azimuth =
+    FIELD_MIN_AZIMUTH + random() * (FIELD_MAX_AZIMUTH - FIELD_MIN_AZIMUTH);
+  const distance = FIELD_MIN_DISTANCE + random() * FIELD_DISTANCE_SPREAD;
+  return {
+    x: Math.sin(azimuth) * distance * side,
+    z: CAMERA_DISTANCE_Z - Math.cos(azimuth) * distance,
+    distance,
+  };
+};
 
 export const createSeededRandom = (seed: number): (() => number) => {
   let state = seed;
@@ -105,13 +130,11 @@ export const buildRisingStones = (): BlockTransform[] => {
   const random = createSeededRandom(19);
   const blocks: BlockTransform[] = [];
   for (let index = 0; index < RISING_STONE_COUNT; index++) {
-    const depth = random();
-    const y = -4 - depth * 68;
-    const angle = random() * Math.PI * 2;
-    const radius = 9 + random() * 8;
-    const size = 1.1 + random() * 1.9 + depth * 1.6;
+    const slot = sampleFieldSlot(random, index % 2 === 0 ? 1 : -1);
+    const y = -4 - ((index + random()) / RISING_STONE_COUNT) * 68;
+    const size = slot.distance * (0.1 + random() * 0.08);
     blocks.push({
-      position: [Math.sin(angle) * radius, y, Math.cos(angle) * radius + 16],
+      position: [slot.x, y, slot.z],
       rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],
       scale: [size, size * (0.5 + random() * 0.8), size],
       shade: 0.5 + random() * 0.4,
@@ -120,18 +143,17 @@ export const buildRisingStones = (): BlockTransform[] => {
   return blocks;
 };
 
-const CRYSTAL_SHARD_COUNT = 18;
+const CRYSTAL_SHARD_COUNT = 8;
 
 export const buildCrystalShards = (): BlockTransform[] => {
   const random = createSeededRandom(43);
   const blocks: BlockTransform[] = [];
   for (let index = 0; index < CRYSTAL_SHARD_COUNT; index++) {
-    const y = -16 - random() * 42;
-    const angle = random() * Math.PI * 2;
-    const radius = 9 + random() * 4;
-    const height = 1.6 + random() * 2.6;
+    const slot = sampleFieldSlot(random, index % 2 === 0 ? 1 : -1);
+    const y = -16 - ((index + random()) / CRYSTAL_SHARD_COUNT) * 42;
+    const height = slot.distance * (0.14 + random() * 0.1);
     blocks.push({
-      position: [Math.sin(angle) * radius, y, Math.cos(angle) * radius + 16],
+      position: [slot.x, y, slot.z],
       rotation: [
         (random() - 0.5) * 0.9,
         random() * Math.PI,

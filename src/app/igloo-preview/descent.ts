@@ -310,7 +310,10 @@ export const NARRATIVE_STONES: NarrativeStone[] = [
 ];
 
 const NARRATIVE_STONE_CENTER_Y = 2.8;
-const NARRATIVE_STONE_RISE_RATE = 9;
+// REASON: stone sections sit 0.6 progress apart and the camera sees ~9 world
+// units vertically - a rate of 17 spaces stones ~10 units apart so only the
+// active stone is ever in frame
+const NARRATIVE_STONE_RISE_RATE = 17;
 
 export const narrativeStoneY = (progress: number, center: number): number => {
   return (
@@ -427,12 +430,12 @@ export const sectionMotion = (
 ): SectionMotion => {
   if (section.placement === 'stone') {
     const fadeIn = smoothstep(
-      section.center - 0.34,
-      section.center - 0.22,
+      section.center - 0.26,
+      section.center - 0.16,
       progress,
     );
     const fadeOut =
-      1 - smoothstep(section.center + 0.22, section.center + 0.34, progress);
+      1 - smoothstep(section.center + 0.16, section.center + 0.26, progress);
     return { opacity: fadeIn * fadeOut, shift: 0, blur: 0 };
   }
   const delta = progress - section.center;
