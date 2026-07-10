@@ -11,9 +11,8 @@ const DOME_RADIUS = 3.4;
 const DOME_ROWS = 6;
 const ENTRANCE_HALF_ANGLE = 0.46;
 const TUNNEL_RADIUS = 1.35;
-const SHAFT_BLOCK_COUNT = 130;
-const SKY_SNOW_COUNT = 550;
-const SHAFT_SNOW_COUNT = 450;
+const RISING_STONE_COUNT = 130;
+const AMBIENT_SNOW_COUNT = 1000;
 
 export const createSeededRandom = (seed: number): (() => number) => {
   let state = seed;
@@ -104,14 +103,15 @@ export const buildIglooBlocks = (): BlockTransform[] => {
   return [...buildDomeRows(random), ...buildEntranceTunnel(random)];
 };
 
-export const buildShaftBlocks = (): BlockTransform[] => {
+export const buildRisingStones = (): BlockTransform[] => {
   const random = createSeededRandom(19);
   const blocks: BlockTransform[] = [];
-  for (let index = 0; index < SHAFT_BLOCK_COUNT; index++) {
-    const y = -3 - random() * 68;
+  for (let index = 0; index < RISING_STONE_COUNT; index++) {
+    const depth = random();
+    const y = -4 - depth * 68;
     const angle = random() * Math.PI * 2;
     const radius = 9 + random() * 8;
-    const size = 1.2 + random() * 2.2;
+    const size = 1.1 + random() * 1.9 + depth * 1.6;
     blocks.push({
       position: [Math.sin(angle) * radius, y, Math.cos(angle) * radius + 16],
       rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],
@@ -177,22 +177,11 @@ export const buildSectionRocks = (): BlockTransform[] => {
 
 export const buildSnowPositions = (): Float32Array => {
   const random = createSeededRandom(31);
-  const positions = new Float32Array((SKY_SNOW_COUNT + SHAFT_SNOW_COUNT) * 3);
-  for (let index = 0; index < SKY_SNOW_COUNT; index++) {
+  const positions = new Float32Array(AMBIENT_SNOW_COUNT * 3);
+  for (let index = 0; index < AMBIENT_SNOW_COUNT; index++) {
     positions[index * 3] = (random() - 0.5) * 95;
-    positions[index * 3 + 1] = random() * 30;
-    positions[index * 3 + 2] = (random() - 0.5) * 95;
-  }
-  for (
-    let index = SKY_SNOW_COUNT;
-    index < SKY_SNOW_COUNT + SHAFT_SNOW_COUNT;
-    index++
-  ) {
-    const angle = random() * Math.PI * 2;
-    const radius = random() * 11;
-    positions[index * 3] = Math.sin(angle) * radius;
-    positions[index * 3 + 1] = -70 + random() * 70;
-    positions[index * 3 + 2] = Math.cos(angle) * radius + 16;
+    positions[index * 3 + 1] = -10 + random() * 40;
+    positions[index * 3 + 2] = 16 + (random() - 0.5) * 95;
   }
   return positions;
 };

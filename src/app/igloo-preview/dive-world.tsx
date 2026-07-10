@@ -2,8 +2,8 @@
 
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { RefObject, useRef } from 'react';
-import { BackSide, Color, Group, InstancedMesh, Object3D } from 'three';
+import { ReactNode, RefObject, useRef } from 'react';
+import { Color, Group, InstancedMesh, Object3D } from 'three';
 
 import {
   PARKED_EYE_Y,
@@ -14,15 +14,15 @@ import {
 import {
   BlockTransform,
   buildIglooBlocks,
+  buildRisingStones,
   buildSectionRocks,
-  buildShaftBlocks,
   buildSnowPositions,
 } from './world-layout';
 
 const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
 const IGLOO_BLOCKS = buildIglooBlocks();
-const SHAFT_BLOCKS = buildShaftBlocks();
+const RISING_STONE_BLOCKS = buildRisingStones();
 const SECTION_ROCK_BLOCKS = buildSectionRocks();
 const SNOW_POSITIONS = buildSnowPositions();
 const ROCK_BASE_COLOR = '#c2d6e8';
@@ -97,11 +97,11 @@ export const IglooShelter = () => (
   </group>
 );
 
-export const ShaftDebris = () => (
+export const RisingStones = () => (
   <instancedMesh
-    args={[undefined, undefined, SHAFT_BLOCKS.length]}
+    args={[undefined, undefined, RISING_STONE_BLOCKS.length]}
     ref={(mesh) => {
-      applyBlockInstances(mesh, SHAFT_BLOCKS, '#5f7591');
+      applyBlockInstances(mesh, RISING_STONE_BLOCKS, '#5f7591');
     }}
   >
     <boxGeometry />
@@ -109,18 +109,25 @@ export const ShaftDebris = () => (
   </instancedMesh>
 );
 
-export const IceShaft = () => (
-  <mesh position={[0, -40, 16]}>
-    <cylinderGeometry args={[12.5, 14, 78, 16, 8, true]} />
-    <meshStandardMaterial
-      color="#3d5269"
-      roughness={0.92}
-      metalness={0.05}
-      flatShading
-      side={BackSide}
-    />
-  </mesh>
-);
+type RisingWorldParams = {
+  progressRef: RefObject<number>;
+  rise: (progress: number) => number;
+  children: ReactNode;
+};
+
+export const RisingWorld = ({
+  progressRef,
+  rise,
+  children,
+}: RisingWorldParams) => {
+  const groupRef = useRef<Group>(null);
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.position.y = rise(progressRef.current);
+    }
+  });
+  return <group ref={groupRef}>{children}</group>;
+};
 
 const applyRockColors = (mesh: InstancedMesh | null): void => {
   if (!mesh) {

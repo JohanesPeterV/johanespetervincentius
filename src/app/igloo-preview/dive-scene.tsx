@@ -10,14 +10,16 @@ import {
   TOUCH_SENSITIVITY,
   WHEEL_SENSITIVITY,
   clampProgress,
+  worldARise,
+  worldBRise,
 } from './descent';
 import DiveLoader from './dive-loader';
 import DiveOverlay from './dive-overlay';
 import {
-  IceShaft,
   IglooShelter,
+  RisingStones,
+  RisingWorld,
   SectionRocks,
-  ShaftDebris,
   SnowDrift,
   SnowTerrain,
 } from './dive-world';
@@ -126,7 +128,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
       className="fixed inset-0 overflow-hidden bg-[#c2c8d0] font-mono text-white"
     >
       <Canvas
-        camera={{ fov: 58, near: 0.2, far: 240, position: [0, 34, 54] }}
+        camera={{ fov: 58, near: 0.2, far: 240, position: [0, 6.6, 16] }}
         dpr={tier < 2 ? 1 : 1.75}
         performance={{ min: 0.5 }}
       >
@@ -139,19 +141,22 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
           color="#ffffff"
         />
         <pointLight
-          position={[0, -21, 13]}
-          intensity={230}
-          distance={46}
+          position={[0, -10, 10]}
+          intensity={210}
+          distance={40}
           color="#e6f1ff"
         />
         <Suspense fallback={null}>
-          <SnowTerrain />
-          <IglooShelter />
-          <IceShaft />
-          <ShaftDebris />
+          <RisingWorld progressRef={progressRef} rise={worldARise}>
+            <SnowTerrain />
+            <IglooShelter />
+          </RisingWorld>
+          <RisingWorld progressRef={progressRef} rise={worldBRise}>
+            <RisingStones />
+            <IceCrystals gpuTier={tier} />
+          </RisingWorld>
           <SectionRocks progressRef={progressRef} />
           {tier < 2 ? <SnowDrift /> : <SnowGpu />}
-          <IceCrystals gpuTier={tier} />
           <Environment resolution={64} frames={1}>
             <Lightformer
               form="rect"

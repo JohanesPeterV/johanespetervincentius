@@ -153,15 +153,21 @@ It **does not loop** and must stay clamped. Scroll drives progress; progress dri
 Approximate current mapping (see `descent.ts` keyframes):
 
 - **~0 – 2.0** → W1, natural-ice surface + hero reveal (hero headline centered near `0.95`).
+  During the reveal the camera settles from `y≈6.6` to its parked spot `y≈3.5` while
+  `worldARise` lifts World A into place.
 - **~2.05 – 2.6** → **T**, the seam (`SEAM_CENTER = 2.3`); palette flips, veil/glitch peak.
-- **~2.6 – 4.2** → W2–W4, crystal world; `SECTION_ROCKS` rise past the parked camera
-  (`ROCK_RISE_RATE`, `ROCK_SPIN_RATE`).
-- **~4.2 – 5** → W5/W6 tail.
+  `worldARise` sweeps World A up and out of frame; `worldBRise` starts lifting World B in
+  from below.
+- **~2.6 – 4.55** → W2–W4, crystal world; the rising-stone field and crystals keep climbing
+  (`worldBRise`) and `SECTION_ROCKS` rise past the parked camera (`ROCK_RISE_RATE`,
+  `ROCK_SPIN_RATE`).
+- **~4.55 – 5** → W6, the single resolve move: the parked camera finally lifts and tilts up
+  as the glow swells.
 
 Key files (`src/app/igloo-preview/`):
 
 - `descent.ts` — the scroll→scene mapping: keyframes, seam, section rocks, clamp. **The spine.**
-- `world-layout.ts` — placeholder geometry (dome blocks, shaft, crystals, section rocks, snow).
+- `world-layout.ts` — placeholder geometry (dome blocks, rising stones, crystals, section rocks, snow).
 - `dive-scene.tsx` / `dive-world.tsx` — R3F scene assembly.
 - `camera-rig.tsx` — camera behaviour.
 - `dive-transition-effect.ts` — the seam shred/glitch effect.
@@ -170,10 +176,10 @@ Key files (`src/app/igloo-preview/`):
 - `dive-overlay.tsx` / `dive-loader.tsx` — headlines, preloader.
 - `wind-audio.ts` — ambient wind.
 
-**Known drift to fix over time:** `descent.ts` currently flies the camera from `y≈36` down to
-`y≈-26` before parking. That is a lot of camera travel and pulls the experience toward "flying
-through a scene" (§2). The intended end-state is a **near-fixed camera with the world rising
-past it** (§1). Trend toward parking the camera earlier and letting objects do the moving.
+**Camera contract:** the camera is parked at `y≈3.5, z=16` for the whole run, apart from a
+small settle during the W1 reveal and the single W6 resolve move at the tail. Scroll never
+translates the camera through the world; it drives `worldARise` / `worldBRise` in
+`descent.ts`, which lift the two world groups past the lens. Keep it that way.
 
 **Composer invariant (do not break):** the postprocessing composer subtree must never
 re-render. Pass a stable `sun` prop to GodRays and never feed `wrapEffect` a value that
