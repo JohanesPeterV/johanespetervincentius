@@ -38,13 +38,14 @@ import {
   DescentFrame,
   aberrationStrength,
   clampProgress,
+  createDescentFrame,
   depthMeters,
   railProximity,
   rushFov,
-  sampleDescent,
   seamBoost,
   sectionMotion,
   transitionStrength,
+  writeDescentFrame,
 } from './descent';
 import { setWindDrive } from './wind-audio';
 
@@ -86,7 +87,7 @@ const buildSunMesh = (): SunMesh => {
       opacity: 0,
     }),
   );
-  sun.position.set(0, -74, 16);
+  sun.position.set(0, -7, -6);
   return sun;
 };
 
@@ -150,6 +151,11 @@ export default function CameraRig({
     sunRef.current = buildSunMesh();
   }
   const sunMesh = sunRef.current;
+  const frameRef = useRef<DescentFrame | null>(null);
+  if (frameRef.current === null) {
+    frameRef.current = createDescentFrame();
+  }
+  const descentFrame = frameRef.current;
 
   useFrame(({ camera, scene, clock }) => {
     const live = stageRef.current === 'live';
@@ -162,7 +168,7 @@ export default function CameraRig({
     }
     const progress = clampProgress(currentRef.current);
     progressRef.current = progress;
-    const frame = sampleDescent(progress);
+    const frame = writeDescentFrame(descentFrame, progress);
     const parallax = parallaxRef.current;
     parallax.x += (pointerRef.current.x - parallax.x) * PARALLAX_EASE;
     parallax.y += (pointerRef.current.y - parallax.y) * PARALLAX_EASE;
@@ -227,8 +233,8 @@ export default function CameraRig({
     <>
       <pointLight
         ref={glowRef}
-        position={[0, -66, 16]}
-        distance={55}
+        position={[0, -9, 4]}
+        distance={42}
         intensity={0}
         color="#e9f3fc"
       />

@@ -75,13 +75,9 @@ function Scene({
   useEffect(() => {
     const handleContextLost = (event: Event) => {
       event.preventDefault();
-      console.error('WebGL Context Lost - preventing default');
-      console.log('Canvas state:', gl.domElement);
-      console.log('WebGL info:', gl.getContextAttributes());
     };
 
     const handleContextRestored = () => {
-      console.log('WebGL Context Restored');
       invalidate();
     };
 

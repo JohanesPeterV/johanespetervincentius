@@ -125,8 +125,8 @@ const hexToRgb = (hex: string): [number, number, number] => {
 const RAW_DESCENT_KEYS: RawDescentKey[] = [
   {
     at: 0,
-    position: [0, 36, 16],
-    look: [0, 20, -30],
+    position: [0, 6.6, 16],
+    look: [0, 3.4, -2],
     fog: '#c6ccd4',
     fogDensity: 0.05,
     glow: 0,
@@ -135,8 +135,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 0.3,
-    position: [0, 24, 16],
-    look: [0, 12, -25],
+    position: [0, 5.1, 16],
+    look: [0, 3, -1],
     fog: '#c2c8d0',
     fogDensity: 0.042,
     glow: 0,
@@ -144,7 +144,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#e9edf2',
   },
   {
-    at: 1,
+    at: 0.65,
     position: [0, 3.8, 16],
     look: [0, 2.6, 0],
     fog: '#b9c0c9',
@@ -155,8 +155,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 1.7,
-    position: [0, 2.4, 16],
-    look: [0, 1.6, 0],
+    position: [0, 3.8, 16],
+    look: [0, 2.6, 0],
     fog: '#b3bac4',
     fogDensity: 0.032,
     glow: 0,
@@ -165,8 +165,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 2.05,
-    position: [0, 0.8, 16],
-    look: [0, -2, 6],
+    position: [0, 3.7, 16],
+    look: [0, 2.5, 0],
     fog: '#8c99a7',
     fogDensity: 0.045,
     glow: 0,
@@ -175,8 +175,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 2.18,
-    position: [0, -1, 16],
-    look: [0, -8, 10],
+    position: [0, 3.6, 16],
+    look: [0, 2.45, 0],
     fog: '#5c6d80',
     fogDensity: 0.05,
     glow: 0,
@@ -185,8 +185,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 2.3,
-    position: [0, -3, 16],
-    look: [0, -13, 14],
+    position: [0, 3.55, 16],
+    look: [0, 2.4, 0],
     fog: '#3f5065',
     fogDensity: 0.05,
     glow: 0.05,
@@ -195,8 +195,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 2.45,
-    position: [0, -15, 16],
-    look: [0, -22, 9],
+    position: [0, 3.5, 16],
+    look: [0, 2.4, 0],
     fog: '#33465c',
     fogDensity: 0.048,
     glow: 0.1,
@@ -205,8 +205,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 2.6,
-    position: [0, -26, 16],
-    look: [0, -26, 4],
+    position: [0, 3.5, 16],
+    look: [0, 2.4, 0],
     fog: '#1e3049',
     fogDensity: 0.042,
     glow: 0.15,
@@ -214,12 +214,22 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#141f2c',
   },
   {
-    at: 5,
-    position: [0, -26, 16],
-    look: [0, -26, 4],
+    at: 4.55,
+    position: [0, 3.5, 16],
+    look: [0, 2.4, 0],
     fog: '#24425f',
     fogDensity: 0.05,
-    glow: 0.1,
+    glow: 0.12,
+    veil: 0,
+    veilColor: '#141f2c',
+  },
+  {
+    at: 5,
+    position: [0, 10.5, 21],
+    look: [0, 14, -10],
+    fog: '#2e5273',
+    fogDensity: 0.038,
+    glow: 0.26,
     veil: 0,
     veilColor: '#141f2c',
   },
@@ -244,7 +254,7 @@ export const SECTION_ROCKS: SectionRock[] = [
   { center: 4.05, x: 2.4, z: 9 },
 ];
 
-export const PARKED_EYE_Y = -26;
+export const PARKED_EYE_Y = 2.4;
 export const ROCK_RISE_RATE = 24;
 export const ROCK_SPIN_RATE = 2.5;
 
@@ -268,23 +278,57 @@ const lerp = (from: number, to: number, t: number): number => {
   return from + (to - from) * t;
 };
 
-const lerpTriple = (
+const writeTriple = (
+  target: [number, number, number],
   from: [number, number, number],
   to: [number, number, number],
   t: number,
-): [number, number, number] => {
-  return [
-    lerp(from[0], to[0], t),
-    lerp(from[1], to[1], t),
-    lerp(from[2], to[2], t),
-  ];
+): void => {
+  target[0] = lerp(from[0], to[0], t);
+  target[1] = lerp(from[1], to[1], t);
+  target[2] = lerp(from[2], to[2], t);
 };
+
+export const createDescentFrame = (): DescentFrame => ({
+  position: [0, 0, 0],
+  look: [0, 0, 0],
+  fogColor: [0, 0, 0],
+  fogDensity: 0,
+  glow: 0,
+  veil: 0,
+  veilColor: [0, 0, 0],
+});
 
 export const clampProgress = (value: number): number => {
   return Math.min(DIVE_LENGTH, Math.max(0, value));
 };
 
-export const sampleDescent = (progress: number): DescentFrame => {
+const WORLD_A_SETTLE_DROP = 3.2;
+const WORLD_A_EXIT_START = 1.55;
+const WORLD_A_EXIT_END = 2.6;
+const WORLD_A_EXIT_LIFT = 46;
+const WORLD_B_ENTER_AT = 2.05;
+const WORLD_B_RISE_RATE = 26;
+
+export const worldARise = (progress: number): number => {
+  const settle = WORLD_A_SETTLE_DROP * (1 - smoothstep(0, 0.65, progress));
+  const exit =
+    smoothstep(WORLD_A_EXIT_START, WORLD_A_EXIT_END, progress) *
+    WORLD_A_EXIT_LIFT;
+  return exit - settle;
+};
+
+export const worldBRise = (progress: number): number => {
+  return Math.max(0, progress - WORLD_B_ENTER_AT) * WORLD_B_RISE_RATE;
+};
+
+// REASON: runs every frame from the camera rig - writing into a caller-owned
+// frame keeps descent sampling allocation-free instead of churning five tuples
+// per frame
+export const writeDescentFrame = (
+  target: DescentFrame,
+  progress: number,
+): DescentFrame => {
   const clamped = clampProgress(progress);
   let start = DESCENT_KEYS[0];
   let end = DESCENT_KEYS[DESCENT_KEYS.length - 1];
@@ -300,15 +344,14 @@ export const sampleDescent = (progress: number): DescentFrame => {
   }
   const span = Math.max(0.0001, end.at - start.at);
   const t = smoothstep(0, 1, (clamped - start.at) / span);
-  return {
-    position: lerpTriple(start.position, end.position, t),
-    look: lerpTriple(start.look, end.look, t),
-    fogColor: lerpTriple(start.fogColor, end.fogColor, t),
-    fogDensity: lerp(start.fogDensity, end.fogDensity, t),
-    glow: lerp(start.glow, end.glow, t),
-    veil: lerp(start.veil, end.veil, t),
-    veilColor: lerpTriple(start.veilColor, end.veilColor, t),
-  };
+  writeTriple(target.position, start.position, end.position, t);
+  writeTriple(target.look, start.look, end.look, t);
+  writeTriple(target.fogColor, start.fogColor, end.fogColor, t);
+  writeTriple(target.veilColor, start.veilColor, end.veilColor, t);
+  target.fogDensity = lerp(start.fogDensity, end.fogDensity, t);
+  target.glow = lerp(start.glow, end.glow, t);
+  target.veil = lerp(start.veil, end.veil, t);
+  return target;
 };
 
 export const sectionMotion = (
