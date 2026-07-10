@@ -88,6 +88,7 @@ const buildSunMesh = (): SunMesh => {
       color: '#f2f8ff',
       transparent: true,
       opacity: 0,
+      depthWrite: false,
     }),
   );
   sun.position.set(0, -7, -6);
@@ -218,7 +219,7 @@ export default function CameraRig({
     const sunLift = finaleSunLift(progress);
     sunMesh.position.set(0, -7 + sunLift * 31, -6 - sunLift * 16);
     sunMesh.scale.setScalar(1 + sunLift * 1.6);
-    sunMesh.material.opacity = Math.min(1, frame.glow * 0.9 + sunLift * 0.45);
+    sunMesh.material.opacity = Math.min(1, sunLift * (0.45 + frame.glow * 1.4));
     NARRATIVE_STONES.forEach((stone, index) => {
       const projection = STONE_PROJECTIONS[index];
       projection

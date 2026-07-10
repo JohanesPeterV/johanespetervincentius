@@ -16,7 +16,7 @@ export default function DiveLoader({ loaderRef }: DiveLoaderParams) {
       className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-[#d3dae1] font-mono text-[#333e4a] opacity-100 transition-opacity duration-1000 ease-out"
     >
       <span className="text-xs tracking-[0.4em] text-[#333e4a]/60">
-        {'// PREPARING THE DIVE'}
+        {'// AWAKENING THE WORLD'}
       </span>
       <div className="font-sans text-4xl font-bold tracking-[0.08em]">
         JOHANES

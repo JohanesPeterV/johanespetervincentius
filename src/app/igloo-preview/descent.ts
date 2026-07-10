@@ -56,7 +56,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
   {
     tag: '// 01',
     title: 'Johanes Peter\nVincentius',
-    subtitle: 'scroll to dive',
+    subtitle: 'scroll to make the world rise',
     center: 0.95,
     placement: 'center',
   },
@@ -478,6 +478,6 @@ export const rushFov = (velocity: number): number => {
   return 58 + Math.min(20, Math.abs(velocity) * 520) * DIVE_TUNING.fovRush;
 };
 
-export const depthMeters = (progress: number): number => {
+export const riseMeters = (progress: number): number => {
   return Math.max(0, Math.round(progress * 32));
 };

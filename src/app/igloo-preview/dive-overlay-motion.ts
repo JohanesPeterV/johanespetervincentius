@@ -3,8 +3,8 @@ import type { Vector2 } from 'three';
 import {
   DIVE_SECTIONS,
   DescentFrame,
-  depthMeters,
   railProximity,
+  riseMeters,
   sectionMotion,
 } from './descent';
 
@@ -12,7 +12,7 @@ export type OverlayNodes = {
   sections: (HTMLDivElement | null)[];
   rail: (HTMLDivElement | null)[];
   veil: HTMLDivElement | null;
-  depth: HTMLSpanElement | null;
+  rise: HTMLSpanElement | null;
 };
 
 export type OverlayFrame = {
@@ -79,11 +79,11 @@ export const applyOverlay = (
       frame.descent.veilColor[2] * 255,
     )})`;
   }
-  if (nodes.depth) {
-    const meters = String(depthMeters(frame.progress)).padStart(4, '0');
-    const depth = `${meters}M`;
-    if (nodes.depth.textContent !== depth) {
-      nodes.depth.textContent = depth;
+  if (nodes.rise) {
+    const meters = String(riseMeters(frame.progress)).padStart(4, '0');
+    const rise = `${meters}M`;
+    if (nodes.rise.textContent !== rise) {
+      nodes.rise.textContent = rise;
     }
   }
 };

@@ -72,7 +72,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
             }}
             className={
               section.placement === 'stone'
-                ? 'group absolute left-0 top-0 flex w-[min(24rem,48vw)] flex-col items-start gap-4 text-left opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]'
+                ? "group absolute left-0 top-0 flex w-[min(24rem,48vw)] flex-col items-start gap-4 text-left opacity-0 before:absolute before:right-full before:top-1/2 before:h-px before:w-16 before:-translate-y-1/2 before:bg-white/35 before:content-[''] [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]"
                 : 'group absolute inset-0 flex flex-col items-center justify-center gap-5 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]'
             }
           >
@@ -124,10 +124,10 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
         <div>All Rights Reserved.</div>
       </div>
       <div className="pointer-events-none absolute bottom-8 left-8 text-[0.7rem] tracking-[0.3em] text-white/70 [text-shadow:0_1px_10px_rgba(30,40,52,0.5)]">
-        DEPTH{' '}
+        RISE{' '}
         <span
           ref={(element) => {
-            overlayRef.current.depth = element;
+            overlayRef.current.rise = element;
           }}
         >
           0000M
@@ -145,11 +145,13 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
         ))}
       </div>
       <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.65rem] tracking-[0.3em] text-white/50">
-        wheel / arrows / drag to descend
+        wheel / arrows / drag to lift the world
       </div>
       <button
         type="button"
         onClick={handleToggleSound}
+        aria-pressed={sound === 'on'}
+        aria-label={`Turn ambient wind ${sound === 'on' ? 'off' : 'on'}`}
         className="absolute bottom-8 right-8 flex items-center gap-2 text-[0.7rem] tracking-[0.3em] text-white/70 transition-colors hover:text-white [text-shadow:0_1px_10px_rgba(30,40,52,0.5)]"
       >
         <span className="flex h-3 items-end gap-[2px]">

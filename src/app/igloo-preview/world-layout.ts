@@ -9,13 +9,13 @@ const DOME_RADIUS = 3.4;
 const DOME_ROWS = 6;
 const ENTRANCE_HALF_ANGLE = 0.46;
 const TUNNEL_RADIUS = 1.35;
-const RISING_STONE_COUNT = 48;
+const RISING_STONE_COUNT = 30;
 const AMBIENT_SNOW_COUNT = 1000;
 const CAMERA_DISTANCE_Z = 16;
-const FIELD_MIN_AZIMUTH = 0.42;
-const FIELD_MAX_AZIMUTH = 0.72;
-const FIELD_MIN_DISTANCE = 8;
-const FIELD_DISTANCE_SPREAD = 14;
+const FIELD_MIN_AZIMUTH = 0.55;
+const FIELD_MAX_AZIMUTH = 0.78;
+const FIELD_MIN_DISTANCE = 10.5;
+const FIELD_DISTANCE_SPREAD = 13.5;
 
 type FieldSlot = {
   x: number;
@@ -132,7 +132,7 @@ export const buildRisingStones = (): BlockTransform[] => {
   for (let index = 0; index < RISING_STONE_COUNT; index++) {
     const slot = sampleFieldSlot(random, index % 2 === 0 ? 1 : -1);
     const y = -4 - ((index + random()) / RISING_STONE_COUNT) * 68;
-    const size = slot.distance * (0.1 + random() * 0.08);
+    const size = slot.distance * (0.045 + random() * 0.03);
     blocks.push({
       position: [slot.x, y, slot.z],
       rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],

@@ -36,6 +36,11 @@ type LoadedSignalParams = {
   loaderRef: RefObject<HTMLDivElement | null>;
 };
 
+type PointerDrag = {
+  id: number | null;
+  y: number;
+};
+
 const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
   // REASON: Suspense resolution is only observable from a mounted child - mark
   // the dive live and fade the loader once the terrain GLB is actually ready
@@ -53,7 +58,7 @@ const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
 export default function DiveScene({ tierOverride }: DiveSceneParams) {
   const targetRef = useRef(DIVE_START);
   const progressRef = useRef(DIVE_START);
-  const lastTouchRef = useRef(0);
+  const dragRef = useRef<PointerDrag>({ id: null, y: 0 });
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const stageRef = useRef<DiveStage>('loading');
   const loaderRef = useRef<HTMLDivElement | null>(null);
@@ -61,7 +66,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
     sections: [],
     rail: [],
     veil: null,
-    depth: null,
+    rise: null,
   });
   const gpu = useDetectGPU();
   const tier = tierOverride ?? gpu.tier;
@@ -72,23 +77,53 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
     );
   };
 
-  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>): void => {
-    const touch = event.touches[0];
-    if (touch) {
-      lastTouchRef.current = touch.clientY;
+  const handlePointerDown = (
+    event: React.PointerEvent<HTMLDivElement>,
+  ): void => {
+    if (event.button !== 0) {
+      return;
     }
+    if (
+      event.target instanceof HTMLElement &&
+      event.target.closest('a, button')
+    ) {
+      return;
+    }
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = { id: event.pointerId, y: event.clientY };
   };
 
   const handlePointerMove = (
     event: React.PointerEvent<HTMLDivElement>,
   ): void => {
     if (event.pointerType !== 'mouse') {
+      pointerRef.current = { x: 0, y: 0 };
+    } else {
+      pointerRef.current = {
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: (event.clientY / window.innerHeight) * 2 - 1,
+      };
+    }
+    if (dragRef.current.id !== event.pointerId) {
       return;
     }
-    pointerRef.current = {
-      x: (event.clientX / window.innerWidth) * 2 - 1,
-      y: (event.clientY / window.innerHeight) * 2 - 1,
-    };
+    targetRef.current = clampProgress(
+      targetRef.current +
+        (dragRef.current.y - event.clientY) * TOUCH_SENSITIVITY,
+    );
+    dragRef.current.y = event.clientY;
+  };
+
+  const handlePointerEnd = (
+    event: React.PointerEvent<HTMLDivElement>,
+  ): void => {
+    if (dragRef.current.id !== event.pointerId) {
+      return;
+    }
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    dragRef.current.id = null;
   };
 
   // REASON: arrow-key navigation needs window-level key events - the
@@ -108,25 +143,14 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
     };
   }, []);
 
-  const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>): void => {
-    const touch = event.touches[0];
-    if (!touch) {
-      return;
-    }
-    targetRef.current = clampProgress(
-      targetRef.current +
-        (lastTouchRef.current - touch.clientY) * TOUCH_SENSITIVITY,
-    );
-    lastTouchRef.current = touch.clientY;
-  };
-
   return (
     <div
       onWheel={handleWheel}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
+      onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
-      className="fixed inset-0 overflow-hidden bg-[#c2c8d0] font-mono text-white"
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+      className="fixed inset-0 touch-none cursor-grab overflow-hidden bg-[#c2c8d0] font-mono text-white active:cursor-grabbing"
     >
       <Canvas
         camera={{ fov: 58, near: 0.2, far: 240, position: [0, 6.6, 16] }}

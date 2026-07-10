@@ -95,8 +95,8 @@ export const RisingStones = () => (
       applyBlockInstances(mesh, RISING_STONE_BLOCKS, '#5f7591');
     }}
   >
-    <boxGeometry />
-    <meshStandardMaterial roughness={0.9} metalness={0.06} />
+    <dodecahedronGeometry args={[1, 0]} />
+    <meshStandardMaterial color="#7890a7" roughness={0.86} metalness={0.04} />
   </instancedMesh>
 );
 
@@ -155,14 +155,16 @@ export const NarrativeStones = ({ progressRef }: NarrativeStonesParams) => {
     <instancedMesh
       ref={meshRef}
       args={[undefined, undefined, NARRATIVE_STONES.length]}
+      frustumCulled={false}
     >
       <icosahedronGeometry args={[1, 1]} />
       <meshStandardMaterial
         flatShading
-        roughness={0.82}
-        metalness={0.06}
-        emissive="#5f7c96"
-        emissiveIntensity={0.32}
+        color="#d6e6f2"
+        roughness={0.62}
+        metalness={0.08}
+        emissive="#6f94b2"
+        emissiveIntensity={0.58}
       />
     </instancedMesh>
   );
