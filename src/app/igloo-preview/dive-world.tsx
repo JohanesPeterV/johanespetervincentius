@@ -3,7 +3,15 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { ReactNode, RefObject, useRef } from 'react';
-import { Color, Group, InstancedMesh, Object3D } from 'three';
+import {
+  Color,
+  DynamicDrawUsage,
+  Group,
+  InstancedMesh,
+  MeshBasicMaterial,
+  Object3D,
+} from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 import { NARRATIVE_STONES, narrativeStoneY } from './descent';
 import {
@@ -16,9 +24,12 @@ import {
 const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
 const IGLOO_BLOCKS = buildIglooBlocks();
+const IGLOO_BLOCK_GEOMETRY = new RoundedBoxGeometry(1, 1, 1, 3, 0.12);
 const RISING_STONE_BLOCKS = buildRisingStones();
 const SNOW_POSITIONS = buildSnowPositions();
 const narrativeStoneHelper = new Object3D();
+const iglooBlockHelper = new Object3D();
+iglooBlockHelper.rotation.order = 'YXZ';
 
 export const applyBlockInstances = (
   mesh: InstancedMesh | null,
@@ -64,29 +75,115 @@ export const SnowTerrain = () => {
 
 useGLTF.preload(TERRAIN_URL);
 
-export const IglooShelter = () => (
-  <group position={[0, 1.2, 0]} scale={1.2}>
-    <instancedMesh
-      args={[undefined, undefined, IGLOO_BLOCKS.length]}
-      ref={(mesh) => {
-        applyBlockInstances(mesh, IGLOO_BLOCKS, '#b7c0c9');
-      }}
-    >
-      <boxGeometry />
-      <meshStandardMaterial roughness={0.9} metalness={0.04} />
-    </instancedMesh>
-    <mesh position={[0, 0.5, 0]}>
-      <sphereGeometry args={[1.55, 24, 16]} />
-      <meshBasicMaterial color="#f4f8fd" />
-    </mesh>
-    <pointLight
-      position={[0, 0.8, 0]}
-      intensity={30}
-      distance={16}
-      color="#eef5fd"
-    />
-  </group>
-);
+const iglooBreakup = (progress: number): number => {
+  const t = Math.min(1, Math.max(0, (progress - 1.08) / 0.72));
+  return t * t * (3 - 2 * t);
+};
+
+const applyIglooBreakup = (
+  mesh: InstancedMesh | null,
+  progress: number,
+): void => {
+  if (!mesh) {
+    return;
+  }
+  const breakup = iglooBreakup(progress);
+  IGLOO_BLOCKS.forEach((block, index) => {
+    const variation = ((index * 17) % 19) / 18;
+    const spread = 1 + breakup * (0.04 + variation * 0.05);
+    const lift =
+      breakup *
+      (0.12 + variation * 0.72 + Math.max(0, block.position[1]) * 0.06);
+    iglooBlockHelper.position.set(
+      block.position[0] * spread,
+      block.position[1] + lift,
+      block.position[2] * spread,
+    );
+    iglooBlockHelper.rotation.set(
+      block.rotation[0] + breakup * (variation - 0.5) * 0.12,
+      block.rotation[1] + breakup * (variation - 0.5) * 0.2,
+      block.rotation[2] + breakup * (variation - 0.5) * 0.1,
+    );
+    iglooBlockHelper.scale.set(
+      block.scale[0] * 0.94,
+      block.scale[1] * 0.94,
+      block.scale[2] * 0.94,
+    );
+    iglooBlockHelper.updateMatrix();
+    mesh.setMatrixAt(index, iglooBlockHelper.matrix);
+  });
+  mesh.instanceMatrix.needsUpdate = true;
+};
+
+type IglooShelterParams = {
+  progressRef: RefObject<number>;
+};
+
+export const IglooShelter = ({ progressRef }: IglooShelterParams) => {
+  const meshRef = useRef<InstancedMesh>(null);
+  const domeGlowRef = useRef<MeshBasicMaterial>(null);
+  const entranceRef = useRef<MeshBasicMaterial>(null);
+  const previousProgressRef = useRef(Number.NaN);
+  useFrame(() => {
+    const progress = progressRef.current;
+    if (Math.abs(previousProgressRef.current - progress) < 0.0001) {
+      return;
+    }
+    previousProgressRef.current = progress;
+    const domeFade = Math.min(1, Math.max(0, (progress - 0.98) / 0.16));
+    const entranceFade = Math.min(1, Math.max(0, (progress - 1.08) / 0.28));
+    if (domeGlowRef.current) {
+      domeGlowRef.current.opacity = 0.88 * (1 - domeFade);
+    }
+    if (entranceRef.current) {
+      entranceRef.current.opacity = 1 - entranceFade;
+    }
+    applyIglooBreakup(meshRef.current, progress);
+  });
+  return (
+    <group position={[0, 1.2, 0]} scale={1.2}>
+      <mesh position={[0, 0.08, 0]}>
+        <sphereGeometry args={[3.03, 36, 20, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshBasicMaterial
+          ref={domeGlowRef}
+          color="#edf6ff"
+          transparent
+          opacity={0.88}
+          toneMapped={false}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh position={[0, 1.12, 4.62]}>
+        <circleGeometry args={[0.78, 32]} />
+        <meshBasicMaterial
+          ref={entranceRef}
+          color="#34404d"
+          transparent
+          opacity={1}
+        />
+      </mesh>
+      <instancedMesh
+        args={[undefined, undefined, IGLOO_BLOCKS.length]}
+        ref={(mesh) => {
+          meshRef.current = mesh;
+          if (mesh) {
+            mesh.instanceMatrix.setUsage(DynamicDrawUsage);
+          }
+          applyBlockInstances(mesh, IGLOO_BLOCKS, '#8d98a4');
+        }}
+      >
+        <primitive attach="geometry" object={IGLOO_BLOCK_GEOMETRY} />
+        <meshStandardMaterial roughness={0.86} metalness={0.04} />
+      </instancedMesh>
+      <pointLight
+        position={[0, 1.2, 0]}
+        intensity={46}
+        distance={17}
+        color="#eef5fd"
+      />
+    </group>
+  );
+};
 
 export const RisingStones = () => (
   <instancedMesh

@@ -181,7 +181,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
         <Suspense fallback={null}>
           <RisingWorld progressRef={progressRef} rise={worldARise}>
             <SnowTerrain />
-            <IglooShelter />
+            <IglooShelter progressRef={progressRef} />
           </RisingWorld>
           <RisingWorld progressRef={progressRef} rise={worldBRise}>
             <RisingStones />

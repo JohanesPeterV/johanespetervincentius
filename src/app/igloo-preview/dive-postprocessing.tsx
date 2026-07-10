@@ -38,7 +38,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
   return (
     <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
       <SMAA />
-      <Bloom intensity={0.35} luminanceThreshold={0.85} mipmapBlur />
+      <Bloom intensity={0.68} luminanceThreshold={0.72} mipmapBlur />
       <GodRays
         sun={sun}
         samples={36}
@@ -55,10 +55,10 @@ const DivePostprocessing = memo(function DivePostprocessing({
         modulationOffset={0.4}
       />
       <DiveTransition ref={transitionRef} />
-      <HueSaturation saturation={-0.1} />
-      <BrightnessContrast contrast={0.08} />
-      <Noise opacity={0.22} blendFunction={BlendFunction.OVERLAY} />
-      <Vignette offset={0.25} darkness={0.5} />
+      <HueSaturation saturation={-0.22} />
+      <BrightnessContrast brightness={-0.035} contrast={0.16} />
+      <Noise opacity={0.28} blendFunction={BlendFunction.OVERLAY} />
+      <Vignette offset={0.22} darkness={0.58} />
     </EffectComposer>
   );
 });
