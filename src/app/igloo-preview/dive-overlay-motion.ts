@@ -29,14 +29,11 @@ const positionStoneSection = (
   stone: Vector2,
 ): void => {
   const horizontalGap = Math.min(140, Math.max(72, frame.width * 0.1));
-  const maxLeft = frame.width - element.offsetWidth - 24;
-  const maxTop = frame.height - element.offsetHeight - 24;
-  const left = Math.max(24, Math.min(maxLeft, stone.x + horizontalGap));
-  const top = Math.max(
+  const left = Math.max(
     24,
-    Math.min(maxTop, stone.y - element.offsetHeight / 2),
+    Math.min(frame.width - 24, stone.x + horizontalGap),
   );
-  element.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+  element.style.transform = `translate3d(${left}px, ${stone.y}px, 0) translateY(-50%)`;
 };
 
 export const applyOverlay = (
@@ -50,12 +47,18 @@ export const applyOverlay = (
     }
     const motion = sectionMotion(frame.progress, section);
     element.style.opacity = String(motion.opacity);
-    element.style.filter = `blur(${motion.blur}px)`;
-    element.style.visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
-    element.dataset.visible = motion.opacity > 0.4 ? 'true' : 'false';
+    const visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
+    if (element.style.visibility !== visibility) {
+      element.style.visibility = visibility;
+    }
+    const visible = motion.opacity > 0.4 ? 'true' : 'false';
+    if (element.dataset.visible !== visible) {
+      element.dataset.visible = visible;
+    }
     if (section.placement === 'stone') {
       positionStoneSection(element, frame, frame.stones[section.stoneIndex]);
     } else {
+      element.style.filter = `blur(${motion.blur}px)`;
       element.style.transform = `translateY(${motion.shift}px)`;
     }
   });
@@ -78,6 +81,9 @@ export const applyOverlay = (
   }
   if (nodes.depth) {
     const meters = String(depthMeters(frame.progress)).padStart(4, '0');
-    nodes.depth.textContent = `${meters}M`;
+    const depth = `${meters}M`;
+    if (nodes.depth.textContent !== depth) {
+      nodes.depth.textContent = depth;
+    }
   }
 };

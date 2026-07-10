@@ -19,6 +19,7 @@ import { RefObject, useRef } from 'react';
 import {
   Color,
   FogExp2,
+  MathUtils,
   Mesh,
   MeshBasicMaterial,
   PerspectiveCamera,
@@ -34,7 +35,7 @@ import { DiveTransitionEffect } from './dive-transition-effect';
 const DiveTransition = wrapEffect(DiveTransitionEffect);
 
 import {
-  DIVE_EASE,
+  DIVE_DAMPING,
   DIVE_LENGTH,
   DescentFrame,
   NARRATIVE_STONES,
@@ -69,7 +70,10 @@ type CameraRigParams = {
   stageRef: RefObject<DiveStage>;
 };
 
-const PARALLAX_EASE = 0.045;
+const BASELINE_FPS = 60;
+const MAX_FRAME_DELTA = 0.05;
+const PARALLAX_DAMPING = 2.76;
+const RUSH_DECAY = 5;
 
 const ABERRATION_OFFSET = new Vector2(0.0011, 0.0006);
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
@@ -117,12 +121,20 @@ export default function CameraRig({
   }
   const descentFrame = frameRef.current;
 
-  useFrame(({ camera, scene, clock, size }) => {
+  useFrame(({ camera, scene, clock, size }, delta) => {
+    const frameDelta = Math.min(delta, MAX_FRAME_DELTA);
     const live = stageRef.current === 'live';
-    const step = live
-      ? (targetRef.current - currentRef.current) * DIVE_EASE
-      : 0;
-    currentRef.current += step;
+    const previousProgress = currentRef.current;
+    if (live) {
+      currentRef.current = MathUtils.damp(
+        previousProgress,
+        targetRef.current,
+        DIVE_DAMPING,
+        frameDelta,
+      );
+    }
+    const step = currentRef.current - previousProgress;
+    const driveStep = frameDelta > 0 ? step / (frameDelta * BASELINE_FPS) : 0;
     if (live && Math.abs(targetRef.current - currentRef.current) < 0.0004) {
       currentRef.current = targetRef.current;
     }
@@ -130,8 +142,18 @@ export default function CameraRig({
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
     const parallax = parallaxRef.current;
-    parallax.x += (pointerRef.current.x - parallax.x) * PARALLAX_EASE;
-    parallax.y += (pointerRef.current.y - parallax.y) * PARALLAX_EASE;
+    parallax.x = MathUtils.damp(
+      parallax.x,
+      pointerRef.current.x,
+      PARALLAX_DAMPING,
+      frameDelta,
+    );
+    parallax.y = MathUtils.damp(
+      parallax.y,
+      pointerRef.current.y,
+      PARALLAX_DAMPING,
+      frameDelta,
+    );
     camera.position.set(
       frame.position[0] + parallax.x * 0.7,
       frame.position[1] - parallax.y * 0.35,
@@ -147,10 +169,10 @@ export default function CameraRig({
       seamBoost(progress) + finaleBoost(progress),
     );
     camera.rotateZ(
-      Math.max(-0.05, Math.min(0.05, -step * 0.6)) * transitionZone,
+      Math.max(-0.05, Math.min(0.05, -driveStep * 0.6)) * transitionZone,
     );
     if (camera instanceof PerspectiveCamera) {
-      const nextFov = rushFov(step * transitionZone);
+      const nextFov = rushFov(driveStep * transitionZone);
       if (nextFov !== camera.fov) {
         camera.fov = nextFov;
         camera.updateProjectionMatrix();
@@ -174,14 +196,17 @@ export default function CameraRig({
       );
     }
     if (aberrationRef.current) {
-      const strength = aberrationStrength(step) * transitionZone;
+      const strength = aberrationStrength(driveStep) * transitionZone;
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
     const impulse = Math.min(
       1,
-      transitionStrength(step) * transitionZone * 2.5,
+      transitionStrength(driveStep) * transitionZone * 2.5,
     );
-    rushRef.current = Math.max(impulse, rushRef.current * 0.92);
+    rushRef.current = Math.max(
+      impulse,
+      rushRef.current * Math.exp(-RUSH_DECAY * frameDelta),
+    );
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
     if (transitionRef.current) {
       transitionRef.current.setDriveState(rush, clock.elapsedTime);

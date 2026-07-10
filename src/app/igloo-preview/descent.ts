@@ -128,7 +128,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
 
 export const DIVE_LENGTH = 5;
 export const DIVE_START = 0.95;
-export const DIVE_EASE = 0.075;
+export const DIVE_DAMPING = 4.68;
 export const WHEEL_SENSITIVITY = 1 / 850;
 export const TOUCH_SENSITIVITY = 1 / 600;
 
