@@ -23,6 +23,7 @@ import {
   MeshBasicMaterial,
   PerspectiveCamera,
   PointLight,
+  SRGBColorSpace,
   SphereGeometry,
   Vector2,
 } from 'three';
@@ -40,6 +41,8 @@ import {
   clampProgress,
   createDescentFrame,
   depthMeters,
+  finaleBoost,
+  finaleSunLift,
   railProximity,
   rushFov,
   seamBoost,
@@ -195,6 +198,7 @@ export default function CameraRig({
         frame.fogColor[0],
         frame.fogColor[1],
         frame.fogColor[2],
+        SRGBColorSpace,
       );
       scene.fog.density = frame.fogDensity;
     }
@@ -203,6 +207,7 @@ export default function CameraRig({
         frame.fogColor[0],
         frame.fogColor[1],
         frame.fogColor[2],
+        SRGBColorSpace,
       );
     }
     if (aberrationRef.current) {
@@ -211,7 +216,9 @@ export default function CameraRig({
     }
     const impulse = Math.min(
       1,
-      transitionStrength(step) * (1 + seamBoost(progress) * 1.5),
+      transitionStrength(step) *
+        (seamBoost(progress) + finaleBoost(progress)) *
+        2.5,
     );
     rushRef.current = Math.max(impulse, rushRef.current * 0.92);
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
@@ -222,7 +229,10 @@ export default function CameraRig({
     if (glowRef.current) {
       glowRef.current.intensity = frame.glow * 260;
     }
-    sunMesh.material.opacity = frame.glow * 0.9;
+    const sunLift = finaleSunLift(progress);
+    sunMesh.position.set(0, -7 + sunLift * 31, -6 - sunLift * 16);
+    sunMesh.scale.setScalar(1 + sunLift * 1.6);
+    sunMesh.material.opacity = Math.min(1, frame.glow * 0.9 + sunLift * 0.45);
     if (progress !== overlayProgressRef.current) {
       overlayProgressRef.current = progress;
       applyOverlay(overlayRef.current, progress, frame);

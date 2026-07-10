@@ -125,15 +125,18 @@ The experience is a sequence of **beats**. Six today; the structure should make 
 add, remove, or reorder a beat. Each beat is a stretch of scroll progress (§8 explains the
 `0–5` scale). Treat the ranges as approximate choreography, not hard law.
 
-| Beat   | Name              | What happens                                                                | Protected? |
-| ------ | ----------------- | --------------------------------------------------------------------------- | ---------- |
-| **W1** | **First reveal**  | Preloader dissolves; the natural-ice world snaps into being. First breath.  | 🛡️ **YES** |
-| **T**  | **The seam**      | World A shreds/glitches open into World B; palette flips natural → crystal. | 🛡️ **YES** |
-| **W2** | Rising stones     | Crystal-world stones/shapes rise past the near-fixed camera.                |            |
-| **W3** | Rising stones     | More shapes rise — build rhythm and scale.                                  |            |
-| **W4** | Rising stones     | The rise continues; sense of weight and craft.                              |            |
-| **W5** | _(open)_          | Not yet defined. Leave a clean seam to slot a beat here.                    |            |
-| **W6** | Camera transition | A single great camera move that resolves the sequence.                      |            |
+| Beat   | Name             | What happens                                                                                                    | Protected? |
+| ------ | ---------------- | --------------------------------------------------------------------------------------------------------------- | ---------- |
+| **W1** | **First reveal** | Preloader dissolves; the natural-ice world snaps into being. First breath.                                      | 🛡️ **YES** |
+| **T**  | **The seam**     | World A shreds/glitches open into World B; palette flips natural → crystal.                                     | 🛡️ **YES** |
+| **W2** | Rising stones    | Crystal-world stones/shapes rise past the near-fixed camera.                                                    |            |
+| **W3** | Rising stones    | More shapes rise — build rhythm and scale.                                                                      |            |
+| **W4** | Rising stones    | The rise continues; sense of weight and craft.                                                                  |            |
+| **W5** | _(open)_         | Not yet defined. Leave a clean seam to slot a beat here.                                                        |            |
+| **W6** | The finale flash | A bright counter-seam: a white-ice flash hides the one great camera launch; it clears looking up into sun glow. |            |
+
+Transitions are **only** at T and W6. W2–W4 is one continuous world — scrolling through it
+must stay clean; the shred/glitch never fires there.
 
 **🛡️ Protected moments** = the two we defend at all costs and never regress:
 
@@ -158,11 +161,18 @@ Approximate current mapping (see `descent.ts` keyframes):
 - **~2.05 – 2.6** → **T**, the seam (`SEAM_CENTER = 2.3`); palette flips, veil/glitch peak.
   `worldARise` sweeps World A up and out of frame; `worldBRise` starts lifting World B in
   from below.
-- **~2.6 – 4.55** → W2–W4, crystal world; the rising-stone field and crystals keep climbing
+- **~2.6 – 4.35** → W2–W4, crystal world; the rising-stone field and crystals keep climbing
   (`worldBRise`) and `SECTION_ROCKS` rise past the parked camera (`ROCK_RISE_RATE`,
-  `ROCK_SPIN_RATE`).
-- **~4.55 – 5** → W6, the single resolve move: the parked camera finally lifts and tilts up
-  as the glow swells.
+  `ROCK_SPIN_RATE`). No transition effects fire in this stretch.
+- **~4.35 – 4.8** → W6, the finale flash (`FINALE_CENTER = 4.58`): a bright veil
+  (`#dfeefb` → `#eaf4fd`, the counter-image of the dark seam veil) bursts up and hides the
+  one great camera launch; behind it the sun mesh sweeps overhead (`finaleSunLift`).
+- **~4.8 – 5** → the flash clears; the camera settles looking up into the sun's god-ray glow
+  with dark stones silhouetted against the sky, and the last section lands.
+
+The shred/glitch impulse is velocity-driven but **zone-gated**: it is multiplied by
+`seamBoost + finaleBoost`, so it only ever fires around T (`SEAM_CENTER = 2.3`) and W6
+(`FINALE_CENTER = 4.58`). Everywhere else, scroll is clean.
 
 Key files (`src/app/igloo-preview/`):
 
@@ -177,9 +187,15 @@ Key files (`src/app/igloo-preview/`):
 - `wind-audio.ts` — ambient wind.
 
 **Camera contract:** the camera is parked at `y≈3.5, z=16` for the whole run, apart from a
-small settle during the W1 reveal and the single W6 resolve move at the tail. Scroll never
-translates the camera through the world; it drives `worldARise` / `worldBRise` in
-`descent.ts`, which lift the two world groups past the lens. Keep it that way.
+small settle during the W1 reveal and the single W6 launch at the tail (which happens behind
+the finale flash, `~4.5 – 4.8`). Scroll never translates the camera through the world; it
+drives `worldARise` / `worldBRise` in `descent.ts`, which lift the two world groups past the
+lens. Keep it that way.
+
+**Color-space contract:** the keyframe hex colors in `descent.ts` are sRGB. On the DOM veil
+they are written as CSS `rgb()` directly; on the WebGL side (`scene.fog` / `scene.background`)
+they must be written with `setRGB(..., SRGBColorSpace)` — plain `setRGB` reads the fractions
+as linear and washes every authored color several stops lighter.
 
 **Composer invariant (do not break):** the postprocessing composer subtree must never
 re-render. Pass a stable `sun` prop to GodRays and never feed `wrapEffect` a value that

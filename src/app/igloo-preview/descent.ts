@@ -214,32 +214,68 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#141f2c',
   },
   {
-    at: 4.55,
+    at: 4.35,
     position: [0, 3.5, 16],
     look: [0, 2.4, 0],
     fog: '#24425f',
     fogDensity: 0.05,
     glow: 0.12,
     veil: 0,
-    veilColor: '#141f2c',
+    veilColor: '#dfeefb',
+  },
+  {
+    at: 4.52,
+    position: [0, 3.65, 16],
+    look: [0, 2.7, 0],
+    fog: '#48688a',
+    fogDensity: 0.05,
+    glow: 0.2,
+    veil: 0.6,
+    veilColor: '#dfeefb',
+  },
+  {
+    at: 4.64,
+    position: [0, 7.6, 18.6],
+    look: [0, 8.5, -5],
+    fog: '#7fa3c2',
+    fogDensity: 0.044,
+    glow: 0.3,
+    veil: 0.97,
+    veilColor: '#eaf4fd',
+  },
+  {
+    at: 4.8,
+    position: [0, 10.6, 21],
+    look: [0, 14, -10],
+    fog: '#33597e',
+    fogDensity: 0.038,
+    glow: 0.34,
+    veil: 0.14,
+    veilColor: '#eaf4fd',
   },
   {
     at: 5,
-    position: [0, 10.5, 21],
-    look: [0, 14, -10],
-    fog: '#2e5273',
-    fogDensity: 0.038,
-    glow: 0.26,
+    position: [0, 11.5, 21],
+    look: [0, 15.5, -10],
+    fog: '#3a5f83',
+    fogDensity: 0.034,
+    glow: 0.4,
     veil: 0,
-    veilColor: '#141f2c',
+    veilColor: '#eaf4fd',
   },
 ];
 
 const SEAM_CENTER = 2.3;
 const SEAM_SPAN = 0.55;
+const FINALE_CENTER = 4.58;
+const FINALE_SPAN = 0.4;
 
 export const seamBoost = (progress: number): number => {
   return 1 - Math.min(1, Math.abs(progress - SEAM_CENTER) / SEAM_SPAN);
+};
+
+export const finaleBoost = (progress: number): number => {
+  return 1 - Math.min(1, Math.abs(progress - FINALE_CENTER) / FINALE_SPAN);
 };
 
 export type SectionRock = {
@@ -320,6 +356,13 @@ export const worldARise = (progress: number): number => {
 
 export const worldBRise = (progress: number): number => {
   return Math.max(0, progress - WORLD_B_ENTER_AT) * WORLD_B_RISE_RATE;
+};
+
+const FINALE_SUN_START = 4.45;
+const FINALE_SUN_END = 4.85;
+
+export const finaleSunLift = (progress: number): number => {
+  return smoothstep(FINALE_SUN_START, FINALE_SUN_END, progress);
 };
 
 // REASON: runs every frame from the camera rig - writing into a caller-owned
