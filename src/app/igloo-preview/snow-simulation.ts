@@ -20,6 +20,7 @@ import { createSeededRandom } from './world-layout';
 export type SnowSimulation = {
   simScene: Scene;
   simCamera: OrthographicCamera;
+  simGeometry: PlaneGeometry;
   simMaterial: ShaderMaterial;
   drawMaterial: ShaderMaterial;
   initialTexture: DataTexture;
@@ -187,7 +188,8 @@ export const createSnowSimulation = (): SnowSimulation => {
     depthWrite: false,
   });
   const simScene = new Scene();
-  simScene.add(new Mesh(new PlaneGeometry(2, 2), simMaterial));
+  const simGeometry = new PlaneGeometry(2, 2);
+  simScene.add(new Mesh(simGeometry, simMaterial));
   const simCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
   const drawMaterial = new ShaderMaterial({
     uniforms: {
@@ -204,6 +206,7 @@ export const createSnowSimulation = (): SnowSimulation => {
   return {
     simScene,
     simCamera,
+    simGeometry,
     simMaterial,
     drawMaterial,
     initialTexture,
@@ -211,6 +214,17 @@ export const createSnowSimulation = (): SnowSimulation => {
     points,
     frame: 0,
   };
+};
+
+export const disposeSnowSimulation = (simulation: SnowSimulation): void => {
+  simulation.simGeometry.dispose();
+  simulation.simMaterial.dispose();
+  simulation.drawMaterial.dispose();
+  simulation.initialTexture.dispose();
+  simulation.points.geometry.dispose();
+  simulation.targets.forEach((target) => {
+    target.dispose();
+  });
 };
 
 export const stepSnowSimulation = (

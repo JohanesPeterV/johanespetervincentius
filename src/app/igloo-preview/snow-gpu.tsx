@@ -1,24 +1,41 @@
 'use client';
 
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { Points } from 'three';
 
 import { DIVE_TUNING } from './descent';
 import {
   SnowSimulation,
   createSnowSimulation,
+  disposeSnowSimulation,
   stepSnowSimulation,
 } from './snow-simulation';
 
 export default function SnowGpu() {
   const simulationRef = useRef<SnowSimulation | null>(null);
   const previousCameraYRef = useRef<number | null>(null);
-  if (simulationRef.current === null) {
-    simulationRef.current = createSnowSimulation();
-  }
-  const simulation = simulationRef.current;
+  const [points, setPoints] = useState<Points | null>(null);
+
+  // REASON: the primitive-backed simulation owns render targets, textures,
+  // geometry, and materials that R3F cannot dispose automatically
+  useEffect(() => {
+    const simulation = createSnowSimulation();
+    simulationRef.current = simulation;
+    setPoints(simulation.points);
+    return () => {
+      if (simulationRef.current === simulation) {
+        simulationRef.current = null;
+      }
+      disposeSnowSimulation(simulation);
+    };
+  }, []);
 
   useFrame(({ gl, camera, clock }, delta) => {
+    const simulation = simulationRef.current;
+    if (!simulation) {
+      return;
+    }
     const previousY = previousCameraYRef.current ?? camera.position.y;
     previousCameraYRef.current = camera.position.y;
     stepSnowSimulation(simulation, {
@@ -31,5 +48,5 @@ export default function SnowGpu() {
     });
   });
 
-  return <primitive object={simulation.points} />;
+  return points ? <primitive object={points} /> : null;
 }

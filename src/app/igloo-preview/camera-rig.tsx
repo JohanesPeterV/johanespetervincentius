@@ -1,21 +1,8 @@
 'use client';
 
 import { useFrame } from '@react-three/fiber';
-import {
-  Bloom,
-  BrightnessContrast,
-  ChromaticAberration,
-  EffectComposer,
-  GodRays,
-  HueSaturation,
-  Noise,
-  SMAA,
-  Vignette,
-  wrapEffect,
-} from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
 import type { ChromaticAberrationEffect } from 'postprocessing';
-import { RefObject, useRef } from 'react';
+import { RefObject, useRef, useState } from 'react';
 import {
   Color,
   FogExp2,
@@ -29,10 +16,6 @@ import {
   Vector2,
   Vector3,
 } from 'three';
-
-import { DiveTransitionEffect } from './dive-transition-effect';
-
-const DiveTransition = wrapEffect(DiveTransitionEffect);
 
 import {
   DIVE_DAMPING,
@@ -52,6 +35,8 @@ import {
 } from './descent';
 import { applyOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
+import DivePostprocessing from './dive-postprocessing';
+import { DiveTransitionEffect } from './dive-transition-effect';
 import { setWindDrive } from './wind-audio';
 
 export type PointerState = {
@@ -75,25 +60,10 @@ const MAX_FRAME_DELTA = 0.05;
 const PARALLAX_DAMPING = 2.76;
 const RUSH_DECAY = 5;
 
-const ABERRATION_OFFSET = new Vector2(0.0011, 0.0006);
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
 
 type SunMesh = Mesh<SphereGeometry, MeshBasicMaterial>;
-
-const buildSunMesh = (): SunMesh => {
-  const sun = new Mesh(
-    new SphereGeometry(2.4, 24, 24),
-    new MeshBasicMaterial({
-      color: '#f2f8ff',
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-    }),
-  );
-  sun.position.set(0, -7, -6);
-  return sun;
-};
 
 export default function CameraRig({
   targetRef,
@@ -111,11 +81,7 @@ export default function CameraRig({
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
   const transitionRef = useRef<DiveTransitionEffect | null>(null);
-  const sunRef = useRef<SunMesh | null>(null);
-  if (sunRef.current === null) {
-    sunRef.current = buildSunMesh();
-  }
-  const sunMesh = sunRef.current;
+  const [sunMesh, setSunMesh] = useState<SunMesh | null>(null);
   const frameRef = useRef<DescentFrame | null>(null);
   if (frameRef.current === null) {
     frameRef.current = createDescentFrame();
@@ -216,10 +182,15 @@ export default function CameraRig({
     if (glowRef.current) {
       glowRef.current.intensity = frame.glow * 260;
     }
-    const sunLift = finaleSunLift(progress);
-    sunMesh.position.set(0, -7 + sunLift * 31, -6 - sunLift * 16);
-    sunMesh.scale.setScalar(1 + sunLift * 1.6);
-    sunMesh.material.opacity = Math.min(1, sunLift * (0.45 + frame.glow * 1.4));
+    if (sunMesh) {
+      const sunLift = finaleSunLift(progress);
+      sunMesh.position.set(0, -7 + sunLift * 31, -6 - sunLift * 16);
+      sunMesh.scale.setScalar(1 + sunLift * 1.6);
+      sunMesh.material.opacity = Math.min(
+        1,
+        sunLift * (0.45 + frame.glow * 1.4),
+      );
+    }
     NARRATIVE_STONES.forEach((stone, index) => {
       const projection = STONE_PROJECTIONS[index];
       projection
@@ -255,31 +226,23 @@ export default function CameraRig({
         intensity={0}
         color="#e9f3fc"
       />
-      <primitive object={sunMesh} />
-      <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
-        <SMAA />
-        <Bloom intensity={0.35} luminanceThreshold={0.85} mipmapBlur />
-        <GodRays
+      <mesh ref={setSunMesh} position={[0, -7, -6]}>
+        <sphereGeometry args={[2.4, 24, 24]} />
+        <meshBasicMaterial
+          color="#f2f8ff"
+          transparent
+          opacity={0}
+          depthWrite={false}
+        />
+      </mesh>
+      {sunMesh ? (
+        <DivePostprocessing
+          aberrationRef={aberrationRef}
+          gpuTier={gpuTier}
           sun={sunMesh}
-          samples={36}
-          density={0.85}
-          decay={0.92}
-          weight={0.25}
-          exposure={0.18}
-          clampMax={0.8}
+          transitionRef={transitionRef}
         />
-        <ChromaticAberration
-          ref={aberrationRef}
-          offset={ABERRATION_OFFSET}
-          radialModulation
-          modulationOffset={0.4}
-        />
-        <DiveTransition ref={transitionRef} />
-        <HueSaturation saturation={-0.1} />
-        <BrightnessContrast contrast={0.08} />
-        <Noise opacity={0.22} blendFunction={BlendFunction.OVERLAY} />
-        <Vignette offset={0.25} darkness={0.5} />
-      </EffectComposer>
+      ) : null}
     </>
   );
 }

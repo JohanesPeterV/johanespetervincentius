@@ -19,6 +19,8 @@ type CenterDiveSection = DiveSectionBase & {
 type StoneDiveSection = DiveSectionBase & {
   placement: 'stone';
   stoneIndex: number;
+  x: number;
+  z: number;
 };
 
 export type DiveSection = CenterDiveSection | StoneDiveSection;
@@ -67,6 +69,8 @@ export const DIVE_SECTIONS: DiveSection[] = [
     center: 2.85,
     placement: 'stone',
     stoneIndex: 0,
+    x: -1.65,
+    z: 8,
     details: [
       'Smilie — Lead Software Engineer · 2025—now',
       'TableLink — Full-stack Developer · 2025',
@@ -81,6 +85,8 @@ export const DIVE_SECTIONS: DiveSection[] = [
     center: 3.45,
     placement: 'stone',
     stoneIndex: 1,
+    x: -1.45,
+    z: 8.4,
     links: [
       {
         label: 'Simple Helpdesk',
@@ -103,6 +109,8 @@ export const DIVE_SECTIONS: DiveSection[] = [
     center: 4.05,
     placement: 'stone',
     stoneIndex: 2,
+    x: -1.6,
+    z: 8.1,
     details: [
       'Next.js · React · Three.js',
       'Nest.js · GraphQL · PostgreSQL',
@@ -303,11 +311,14 @@ export type NarrativeStone = {
   z: number;
 };
 
-export const NARRATIVE_STONES: NarrativeStone[] = [
-  { center: 2.85, x: -1.65, z: 8 },
-  { center: 3.45, x: -1.45, z: 8.4 },
-  { center: 4.05, x: -1.6, z: 8.1 },
-];
+export const NARRATIVE_STONES: NarrativeStone[] = DIVE_SECTIONS.flatMap(
+  (section) => {
+    if (section.placement === 'center') {
+      return [];
+    }
+    return [{ center: section.center, x: section.x, z: section.z }];
+  },
+);
 
 const NARRATIVE_STONE_CENTER_Y = 2.8;
 // REASON: stone sections sit 0.6 progress apart and the camera sees ~9 world

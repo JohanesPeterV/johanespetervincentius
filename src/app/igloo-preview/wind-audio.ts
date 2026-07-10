@@ -73,3 +73,13 @@ export const setWindDrive = (depth: number, rush: number): void => {
   const frequency = 320 + depth * 420 + rush * 1500;
   engine.filter.frequency.setTargetAtTime(frequency, now, 0.2);
 };
+
+export const disposeWindAudio = (): void => {
+  if (engine === null) {
+    return;
+  }
+  engine.master.disconnect();
+  engine.filter.disconnect();
+  engine.context.close();
+  engine = null;
+};

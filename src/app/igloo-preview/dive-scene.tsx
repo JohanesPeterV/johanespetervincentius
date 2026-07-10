@@ -26,6 +26,7 @@ import {
 import type { OverlayNodes } from './dive-overlay-motion';
 import IceCrystals from './ice-crystals';
 import SnowGpu from './snow-gpu';
+import { disposeWindAudio } from './wind-audio';
 
 type DiveSceneParams = {
   tierOverride: number | null;
@@ -141,6 +142,12 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
+  }, []);
+
+  // REASON: the route owns a module-level Web Audio graph that would otherwise
+  // keep playing after navigation
+  useEffect(() => {
+    return disposeWindAudio;
   }, []);
 
   return (
