@@ -26,6 +26,7 @@ import {
   SRGBColorSpace,
   SphereGeometry,
   Vector2,
+  Vector3,
 } from 'three';
 
 import { DiveTransitionEffect } from './dive-transition-effect';
@@ -35,29 +36,22 @@ const DiveTransition = wrapEffect(DiveTransitionEffect);
 import {
   DIVE_EASE,
   DIVE_LENGTH,
-  DIVE_SECTIONS,
   DescentFrame,
+  NARRATIVE_STONES,
   aberrationStrength,
   clampProgress,
   createDescentFrame,
-  depthMeters,
   finaleBoost,
   finaleSunLift,
-  railProximity,
+  narrativeStoneY,
   rushFov,
   seamBoost,
-  sectionMotion,
   transitionStrength,
   writeDescentFrame,
 } from './descent';
+import { applyOverlay } from './dive-overlay-motion';
+import type { OverlayNodes } from './dive-overlay-motion';
 import { setWindDrive } from './wind-audio';
-
-export type OverlayNodes = {
-  sections: (HTMLDivElement | null)[];
-  rail: (HTMLDivElement | null)[];
-  veil: HTMLDivElement | null;
-  depth: HTMLSpanElement | null;
-};
 
 export type PointerState = {
   x: number;
@@ -78,6 +72,8 @@ type CameraRigParams = {
 const PARALLAX_EASE = 0.045;
 
 const ABERRATION_OFFSET = new Vector2(0.0011, 0.0006);
+const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
+const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
 
 type SunMesh = Mesh<SphereGeometry, MeshBasicMaterial>;
 
@@ -94,46 +90,6 @@ const buildSunMesh = (): SunMesh => {
   return sun;
 };
 
-const applyOverlay = (
-  nodes: OverlayNodes,
-  progress: number,
-  frame: DescentFrame,
-): void => {
-  DIVE_SECTIONS.forEach((section, index) => {
-    const element = nodes.sections[index];
-    if (!element) {
-      return;
-    }
-    const motion = sectionMotion(progress, section.center);
-    element.style.opacity = String(motion.opacity);
-    element.style.transform = `translateY(${motion.shift}px)`;
-    element.style.filter = `blur(${motion.blur}px)`;
-    element.style.visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
-    element.dataset.visible = motion.opacity > 0.4 ? 'true' : 'false';
-  });
-  DIVE_SECTIONS.forEach((section, index) => {
-    const notch = nodes.rail[index];
-    if (!notch) {
-      return;
-    }
-    const proximity = railProximity(progress, section.center);
-    notch.style.opacity = String(0.2 + proximity * 0.8);
-    notch.style.transform = `scaleX(${1 + proximity * 1.6})`;
-  });
-  if (nodes.veil) {
-    nodes.veil.style.opacity = String(frame.veil);
-    nodes.veil.style.backgroundColor = `rgb(${Math.round(
-      frame.veilColor[0] * 255,
-    )}, ${Math.round(frame.veilColor[1] * 255)}, ${Math.round(
-      frame.veilColor[2] * 255,
-    )})`;
-  }
-  if (nodes.depth) {
-    const meters = String(depthMeters(progress)).padStart(4, '0');
-    nodes.depth.textContent = `${meters}M`;
-  }
-};
-
 export default function CameraRig({
   targetRef,
   progressRef,
@@ -145,6 +101,7 @@ export default function CameraRig({
   const currentRef = useRef(0);
   const rushRef = useRef(0);
   const overlayProgressRef = useRef(Number.NaN);
+  const overlaySizeRef = useRef(new Vector2());
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
@@ -160,7 +117,7 @@ export default function CameraRig({
   }
   const descentFrame = frameRef.current;
 
-  useFrame(({ camera, scene, clock }) => {
+  useFrame(({ camera, scene, clock, size }) => {
     const live = stageRef.current === 'live';
     const step = live
       ? (targetRef.current - currentRef.current) * DIVE_EASE
@@ -185,9 +142,15 @@ export default function CameraRig({
       frame.look[1] - parallax.y * 1.4,
       frame.look[2],
     );
-    camera.rotateZ(Math.max(-0.05, Math.min(0.05, -step * 0.6)));
+    const transitionZone = Math.min(
+      1,
+      seamBoost(progress) + finaleBoost(progress),
+    );
+    camera.rotateZ(
+      Math.max(-0.05, Math.min(0.05, -step * 0.6)) * transitionZone,
+    );
     if (camera instanceof PerspectiveCamera) {
-      const nextFov = rushFov(step);
+      const nextFov = rushFov(step * transitionZone);
       if (nextFov !== camera.fov) {
         camera.fov = nextFov;
         camera.updateProjectionMatrix();
@@ -211,14 +174,12 @@ export default function CameraRig({
       );
     }
     if (aberrationRef.current) {
-      const strength = aberrationStrength(step);
+      const strength = aberrationStrength(step) * transitionZone;
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
     const impulse = Math.min(
       1,
-      transitionStrength(step) *
-        (seamBoost(progress) + finaleBoost(progress)) *
-        2.5,
+      transitionStrength(step) * transitionZone * 2.5,
     );
     rushRef.current = Math.max(impulse, rushRef.current * 0.92);
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
@@ -233,9 +194,29 @@ export default function CameraRig({
     sunMesh.position.set(0, -7 + sunLift * 31, -6 - sunLift * 16);
     sunMesh.scale.setScalar(1 + sunLift * 1.6);
     sunMesh.material.opacity = Math.min(1, frame.glow * 0.9 + sunLift * 0.45);
-    if (progress !== overlayProgressRef.current) {
+    NARRATIVE_STONES.forEach((stone, index) => {
+      const projection = STONE_PROJECTIONS[index];
+      projection
+        .set(stone.x, narrativeStoneY(progress, stone.center), stone.z)
+        .project(camera);
+      STONE_SCREENS[index].set(
+        ((projection.x + 1) * size.width) / 2,
+        ((1 - projection.y) * size.height) / 2,
+      );
+    });
+    const sizeChanged =
+      size.width !== overlaySizeRef.current.x ||
+      size.height !== overlaySizeRef.current.y;
+    if (progress !== overlayProgressRef.current || sizeChanged) {
       overlayProgressRef.current = progress;
-      applyOverlay(overlayRef.current, progress, frame);
+      overlaySizeRef.current.set(size.width, size.height);
+      applyOverlay(overlayRef.current, {
+        descent: frame,
+        height: size.height,
+        progress,
+        stones: STONE_SCREENS,
+        width: size.width,
+      });
     }
   });
 

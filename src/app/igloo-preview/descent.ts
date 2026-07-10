@@ -3,7 +3,7 @@ export type DiveSectionLink = {
   href: string;
 };
 
-export type DiveSection = {
+type DiveSectionBase = {
   tag: string;
   title: string;
   subtitle: string;
@@ -11,6 +11,17 @@ export type DiveSection = {
   details?: string[];
   links?: DiveSectionLink[];
 };
+
+type CenterDiveSection = DiveSectionBase & {
+  placement: 'center';
+};
+
+type StoneDiveSection = DiveSectionBase & {
+  placement: 'stone';
+  stoneIndex: number;
+};
+
+export type DiveSection = CenterDiveSection | StoneDiveSection;
 
 export type DescentFrame = {
   position: [number, number, number];
@@ -47,12 +58,15 @@ export const DIVE_SECTIONS: DiveSection[] = [
     title: 'Johanes Peter\nVincentius',
     subtitle: 'scroll to dive',
     center: 0.95,
+    placement: 'center',
   },
   {
     tag: '// 02',
     title: 'Work\nExperience',
     subtitle: '2020 — present',
     center: 2.85,
+    placement: 'stone',
+    stoneIndex: 0,
     details: [
       'Smilie — Lead Software Engineer · 2025—now',
       'TableLink — Full-stack Developer · 2025',
@@ -65,6 +79,8 @@ export const DIVE_SECTIONS: DiveSection[] = [
     title: 'Selected\nProjects',
     subtitle: 'a few things built',
     center: 3.45,
+    placement: 'stone',
+    stoneIndex: 1,
     links: [
       {
         label: 'Simple Helpdesk',
@@ -85,6 +101,8 @@ export const DIVE_SECTIONS: DiveSection[] = [
     title: 'Tech\nStack',
     subtitle: 'tools of the trade',
     center: 4.05,
+    placement: 'stone',
+    stoneIndex: 2,
     details: [
       'Next.js · React · Three.js',
       'Nest.js · GraphQL · PostgreSQL',
@@ -96,6 +114,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     title: "Let's\nTalk",
     subtitle: 'say hello',
     center: 4.82,
+    placement: 'center',
     links: [
       { label: 'Email', href: 'mailto:johanespeter.jp@gmail.com' },
       {
@@ -278,21 +297,26 @@ export const finaleBoost = (progress: number): number => {
   return 1 - Math.min(1, Math.abs(progress - FINALE_CENTER) / FINALE_SPAN);
 };
 
-export type SectionRock = {
+export type NarrativeStone = {
   center: number;
   x: number;
   z: number;
 };
 
-export const SECTION_ROCKS: SectionRock[] = [
-  { center: 2.85, x: 2.5, z: 9 },
-  { center: 3.45, x: -2.7, z: 9.5 },
-  { center: 4.05, x: 2.4, z: 9 },
+export const NARRATIVE_STONES: NarrativeStone[] = [
+  { center: 2.85, x: -1.65, z: 8 },
+  { center: 3.45, x: -1.45, z: 8.4 },
+  { center: 4.05, x: -1.6, z: 8.1 },
 ];
 
-export const PARKED_EYE_Y = 2.4;
-export const ROCK_RISE_RATE = 24;
-export const ROCK_SPIN_RATE = 2.5;
+const NARRATIVE_STONE_CENTER_Y = 2.8;
+const NARRATIVE_STONE_RISE_RATE = 9;
+
+export const narrativeStoneY = (progress: number, center: number): number => {
+  return (
+    NARRATIVE_STONE_CENTER_Y + (progress - center) * NARRATIVE_STONE_RISE_RATE
+  );
+};
 
 const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
   at: raw.at,
@@ -399,9 +423,19 @@ export const writeDescentFrame = (
 
 export const sectionMotion = (
   progress: number,
-  center: number,
+  section: DiveSection,
 ): SectionMotion => {
-  const delta = progress - center;
+  if (section.placement === 'stone') {
+    const fadeIn = smoothstep(
+      section.center - 0.34,
+      section.center - 0.22,
+      progress,
+    );
+    const fadeOut =
+      1 - smoothstep(section.center + 0.22, section.center + 0.34, progress);
+    return { opacity: fadeIn * fadeOut, shift: 0, blur: 0 };
+  }
+  const delta = progress - section.center;
   const distance = Math.abs(delta);
   return {
     opacity: 1 - smoothstep(0.22, 0.52, distance),

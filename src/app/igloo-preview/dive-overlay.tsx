@@ -2,8 +2,8 @@
 
 import { RefObject, useState } from 'react';
 
-import { OverlayNodes } from './camera-rig';
 import { DIVE_SECTIONS } from './descent';
+import type { OverlayNodes } from './dive-overlay-motion';
 import { toggleWindAudio } from './wind-audio';
 
 type DiveOverlayParams = {
@@ -70,26 +70,36 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
             ref={(element) => {
               overlayRef.current.sections[index] = element;
             }}
-            className="group absolute inset-0 flex flex-col items-center justify-center gap-5 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]"
+            className={
+              section.placement === 'stone'
+                ? 'group absolute left-0 top-0 flex w-[min(24rem,48vw)] flex-col items-start gap-4 text-left opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]'
+                : 'group absolute inset-0 flex flex-col items-center justify-center gap-5 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]'
+            }
           >
             <span className="text-xs tracking-[0.4em] text-white/60">
               {section.tag}
             </span>
-            <h2 className="text-center font-sans text-5xl font-semibold leading-[1.05] sm:text-7xl">
+            <h2
+              className={
+                section.placement === 'stone'
+                  ? 'font-sans text-3xl font-semibold leading-[1.05] sm:text-5xl'
+                  : 'text-center font-sans text-5xl font-semibold leading-[1.05] sm:text-7xl'
+              }
+            >
               <HeadlineLines title={section.title} />
             </h2>
             <span className="text-xs tracking-[0.3em] text-white/50">
               {section.subtitle}
             </span>
             {section.details ? (
-              <ul className="space-y-1.5 text-center text-[0.68rem] tracking-[0.2em] text-white/65">
+              <ul className="space-y-1.5 text-[0.68rem] tracking-[0.2em] text-white/65">
                 {section.details.map((detail) => (
                   <li key={detail}>{detail}</li>
                 ))}
               </ul>
             ) : null}
             {section.links ? (
-              <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2 text-[0.7rem] tracking-[0.22em]">
+              <div className="flex flex-wrap items-center gap-x-7 gap-y-2 text-[0.7rem] tracking-[0.22em]">
                 {section.links.map((link) => (
                   <a
                     key={link.href}

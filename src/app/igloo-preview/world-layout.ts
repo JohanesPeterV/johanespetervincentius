@@ -1,5 +1,3 @@
-import { SECTION_ROCKS } from './descent';
-
 export type BlockTransform = {
   position: [number, number, number];
   rotation: [number, number, number];
@@ -156,23 +154,6 @@ export const buildCrystalShards = (): BlockTransform[] => {
     shade: 1,
   });
   return blocks;
-};
-
-export const buildSectionRocks = (): BlockTransform[] => {
-  const random = createSeededRandom(61);
-  return SECTION_ROCKS.map((rock) => {
-    const bulk = 4 + random() * 0.7;
-    return {
-      position: [rock.x, 0, rock.z],
-      rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],
-      scale: [
-        bulk,
-        bulk * (0.82 + random() * 0.4),
-        bulk * (0.85 + random() * 0.3),
-      ],
-      shade: 0.9 + random() * 0.1,
-    };
-  });
 };
 
 export const buildSnowPositions = (): Float32Array => {

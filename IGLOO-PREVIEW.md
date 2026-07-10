@@ -87,12 +87,13 @@ drop a primitive in the right place with the right motion and move on.
 
 ---
 
-## 4. Content Comes Later
+## 4. Content Follows The Object
 
-This will eventually be a portfolio (about, work, projects, contact). **Ignore that for now.**
-The first and only current goal is: **make the 3D concept and its transitions read correctly.**
-Once the 3D beats feel right, content chips in on top. Do not let content requirements shape
-the 3D concept today.
+The temporary portfolio copy exists to prove the choreography, not to drive it. W2–W4 use
+three intentional stones: one for Work Experience, one for Selected Projects, and one for Tech
+Stack. Each stone rises on the same clean vertical path, becomes the single dominant object for
+its section, and carries its copy beside it. The copy must never become an independent centered
+slideshow, and the three stones must never read as randomly scattered meshes.
 
 ---
 
@@ -129,9 +130,9 @@ add, remove, or reorder a beat. Each beat is a stretch of scroll progress (§8 e
 | ------ | ---------------- | --------------------------------------------------------------------------------------------------------------- | ---------- |
 | **W1** | **First reveal** | Preloader dissolves; the natural-ice world snaps into being. First breath.                                      | 🛡️ **YES** |
 | **T**  | **The seam**     | World A shreds/glitches open into World B; palette flips natural → crystal.                                     | 🛡️ **YES** |
-| **W2** | Rising stones    | Crystal-world stones/shapes rise past the near-fixed camera.                                                    |            |
-| **W3** | Rising stones    | More shapes rise — build rhythm and scale.                                                                      |            |
-| **W4** | Rising stones    | The rise continues; sense of weight and craft.                                                                  |            |
+| **W2** | First stone      | The Work Experience stone rises into view with its copy attached beside it.                                     |            |
+| **W3** | Second stone     | The Projects stone follows on the same path with its own attached copy.                                         |            |
+| **W4** | Third stone      | The Tech Stack stone continues the sequence with its own attached copy.                                         |            |
 | **W5** | _(open)_         | Not yet defined. Leave a clean seam to slot a beat here.                                                        |            |
 | **W6** | The finale flash | A bright counter-seam: a white-ice flash hides the one great camera launch; it clears looking up into sun glow. |            |
 
@@ -143,8 +144,9 @@ must stay clean; the shred/glitch never fires there.
 1. **W1 — the first reveal.**
 2. **T — the seam transition** between the two worlds.
 
-Everything W2–W4 is fundamentally "**stones going up**." W6 is a "**great camera transition**"
-(the one place a deliberate camera move is the point). W5 is intentionally open.
+Everything W2–W4 is fundamentally "**one active stone going up at a time, three stones total**."
+W6 is a "**great camera transition**" (the one place a deliberate camera move is the point).
+W5 is intentionally open.
 
 ---
 
@@ -161,9 +163,9 @@ Approximate current mapping (see `descent.ts` keyframes):
 - **~2.05 – 2.6** → **T**, the seam (`SEAM_CENTER = 2.3`); palette flips, veil/glitch peak.
   `worldARise` sweeps World A up and out of frame; `worldBRise` starts lifting World B in
   from below.
-- **~2.6 – 4.35** → W2–W4, crystal world; the rising-stone field and crystals keep climbing
-  (`worldBRise`) and `SECTION_ROCKS` rise past the parked camera (`ROCK_RISE_RATE`,
-  `ROCK_SPIN_RATE`). No transition effects fire in this stretch.
+- **~2.6 – 4.35** → W2–W4, crystal world; the peripheral field and crystals keep climbing
+  (`worldBRise`) while three `NarrativeStones` follow one deliberate vertical path. Each content
+  panel projects from its own stone and crossfades without blur, FOV rush, or aberration.
 - **~4.35 – 4.8** → W6, the finale flash (`FINALE_CENTER = 4.58`): a bright veil
   (`#dfeefb` → `#eaf4fd`, the counter-image of the dark seam veil) bursts up and hides the
   one great camera launch; behind it the sun mesh sweeps overhead (`finaleSunLift`).
@@ -176,14 +178,15 @@ The shred/glitch impulse is velocity-driven but **zone-gated**: it is multiplied
 
 Key files (`src/app/igloo-preview/`):
 
-- `descent.ts` — the scroll→scene mapping: keyframes, seam, section rocks, clamp. **The spine.**
-- `world-layout.ts` — placeholder geometry (dome blocks, rising stones, crystals, section rocks, snow).
+- `descent.ts` — the scroll→scene mapping: keyframes, seam, narrative stones, clamp. **The spine.**
+- `world-layout.ts` — placeholder geometry (dome blocks, peripheral stones, crystals, snow).
 - `dive-scene.tsx` / `dive-world.tsx` — R3F scene assembly.
 - `camera-rig.tsx` — camera behaviour.
 - `dive-transition-effect.ts` — the seam shred/glitch effect.
 - `snow-gpu.tsx` / `snow-simulation.ts` — GPGPU snow.
 - `ice-crystals.tsx` — transmission crystal material.
-- `dive-overlay.tsx` / `dive-loader.tsx` — headlines, preloader.
+- `dive-overlay.tsx` / `dive-overlay-motion.ts` — headlines and hero-stone attachment.
+- `dive-loader.tsx` — preloader.
 - `wind-audio.ts` — ambient wind.
 
 **Camera contract:** the camera is parked at `y≈3.5, z=16` for the whole run, apart from a
@@ -211,6 +214,7 @@ Before claiming a preview change is done, confirm **all** of these:
 - [ ] No forward travel, no plunge-into-a-place, no destination was introduced.
 - [ ] You placed **primitives**, not sourced/generated art (unless the user handed you assets).
 - [ ] You did **not** add portfolio content to drive the 3D (unless explicitly asked).
+- [ ] W2–W4 use three intentional stones, and each content panel stays attached to its stone.
 - [ ] The two protected moments (W1 reveal, T seam) still land and were not regressed.
 - [ ] Progress stays **clamped `0–5`** and does not loop.
 - [ ] The composer subtree does not re-render.

@@ -4,7 +4,7 @@ import { Environment, Lightformer, useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { RefObject, Suspense, useEffect, useRef } from 'react';
 
-import CameraRig, { DiveStage, OverlayNodes, PointerState } from './camera-rig';
+import CameraRig, { DiveStage, PointerState } from './camera-rig';
 import {
   DIVE_START,
   TOUCH_SENSITIVITY,
@@ -17,12 +17,13 @@ import DiveLoader from './dive-loader';
 import DiveOverlay from './dive-overlay';
 import {
   IglooShelter,
+  NarrativeStones,
   RisingStones,
   RisingWorld,
-  SectionRocks,
   SnowDrift,
   SnowTerrain,
 } from './dive-world';
+import type { OverlayNodes } from './dive-overlay-motion';
 import IceCrystals from './ice-crystals';
 import SnowGpu from './snow-gpu';
 
@@ -155,7 +156,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
             <RisingStones />
             <IceCrystals gpuTier={tier} />
           </RisingWorld>
-          <SectionRocks progressRef={progressRef} />
+          <NarrativeStones progressRef={progressRef} />
           {tier < 2 ? <SnowDrift /> : <SnowGpu />}
           <Environment resolution={64} frames={1}>
             <Lightformer
