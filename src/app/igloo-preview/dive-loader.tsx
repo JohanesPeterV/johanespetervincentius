@@ -13,23 +13,19 @@ export default function DiveLoader({ loaderRef }: DiveLoaderParams) {
   return (
     <div
       ref={loaderRef}
-      className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-[#d3dae1] font-mono text-[#333e4a] opacity-100 transition-opacity duration-1000 ease-out"
+      className="absolute inset-0 z-20 flex items-center justify-center bg-[#adb4be] font-mono text-[#29313a] opacity-100 transition-opacity duration-1000 ease-out"
     >
-      <span className="text-xs tracking-[0.4em] text-[#333e4a]/60">
-        {'// AWAKENING THE WORLD'}
-      </span>
-      <div className="font-sans text-4xl font-bold tracking-[0.08em]">
-        JOHANES
-      </div>
-      <div className="h-px w-44 bg-[#333e4a]/20">
-        <div
-          className="h-full bg-[#333e4a] transition-[width] duration-300 ease-out"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-      <div className="absolute bottom-8 right-8 font-sans text-6xl font-semibold text-[#333e4a]/80">
-        {percent}
-        <span className="text-2xl">%</span>
+      <div className="flex w-56 flex-col gap-3 text-[0.62rem] tracking-[0.28em]">
+        <div className="flex items-center justify-between">
+          <span>{'// FORMING ICE'}</span>
+          <span>{String(percent).padStart(3, '0')}%</span>
+        </div>
+        <div className="h-px bg-[#29313a]/20">
+          <div
+            className="h-full bg-[#29313a] transition-[width] duration-300 ease-out"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
       </div>
     </div>
   );

@@ -72,34 +72,34 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
             }}
             className={
               section.placement === 'stone'
-                ? "group absolute left-0 top-0 flex w-[min(24rem,48vw)] flex-col items-start gap-4 text-left opacity-0 before:absolute before:right-full before:top-1/2 before:h-px before:w-16 before:-translate-y-1/2 before:bg-white/35 before:content-[''] [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]"
-                : 'group absolute inset-0 flex flex-col items-center justify-center gap-5 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]'
+                ? "group absolute left-0 top-0 flex w-[min(22rem,46vw)] flex-col items-start gap-3 text-left opacity-0 before:absolute before:right-full before:top-1/2 before:h-px before:w-12 before:-translate-y-1/2 before:bg-white/30 before:content-['']"
+                : 'group absolute inset-0 flex flex-col items-center justify-center gap-4 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]'
             }
           >
-            <span className="text-xs tracking-[0.4em] text-white/60">
+            <span className="text-[0.6rem] tracking-[0.4em] text-white/55">
               {section.tag}
             </span>
             <h2
               className={
                 section.placement === 'stone'
-                  ? 'font-sans text-3xl font-semibold leading-[1.05] sm:text-5xl'
-                  : 'text-center font-sans text-5xl font-semibold leading-[1.05] sm:text-7xl'
+                  ? 'font-sans text-3xl font-medium leading-[1.02] sm:text-5xl'
+                  : 'text-center font-sans text-4xl font-medium leading-[1.02] sm:text-5xl'
               }
             >
               <HeadlineLines title={section.title} />
             </h2>
-            <span className="text-xs tracking-[0.3em] text-white/50">
+            <span className="text-[0.6rem] tracking-[0.28em] text-white/45">
               {section.subtitle}
             </span>
             {section.details ? (
-              <ul className="space-y-1.5 text-[0.68rem] tracking-[0.2em] text-white/65">
+              <ul className="space-y-1.5 text-[0.62rem] leading-relaxed tracking-[0.16em] text-white/62">
                 {section.details.map((detail) => (
                   <li key={detail}>{detail}</li>
                 ))}
               </ul>
             ) : null}
             {section.links ? (
-              <div className="flex flex-wrap items-center gap-x-7 gap-y-2 text-[0.7rem] tracking-[0.22em]">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.64rem] tracking-[0.18em]">
                 {section.links.map((link) => (
                   <a
                     key={link.href}
@@ -116,14 +116,14 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute left-8 top-8 text-[0.65rem] leading-relaxed tracking-[0.2em] text-white/70 [text-shadow:0_1px_10px_rgba(30,40,52,0.5)]">
-        <div className="font-sans text-2xl font-bold tracking-[0.08em] text-white">
+      <div className="pointer-events-none absolute left-6 top-6 mix-blend-difference text-[0.58rem] leading-relaxed tracking-[0.18em] text-white/65 sm:left-10 sm:top-9">
+        <div className="font-sans text-xl font-semibold tracking-[0.12em] text-white sm:text-2xl">
           JOHANES
         </div>
         <div className="mt-2">{'// Portfolio © 2026'}</div>
         <div>All Rights Reserved.</div>
       </div>
-      <div className="pointer-events-none absolute bottom-8 left-8 text-[0.7rem] tracking-[0.3em] text-white/70 [text-shadow:0_1px_10px_rgba(30,40,52,0.5)]">
+      <div className="pointer-events-none absolute bottom-6 left-6 mix-blend-difference text-[0.6rem] tracking-[0.26em] text-white/65 sm:bottom-8 sm:left-10">
         RISE{' '}
         <span
           ref={(element) => {
@@ -133,7 +133,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
           0000M
         </span>
       </div>
-      <div className="pointer-events-none absolute right-6 top-1/2 flex -translate-y-1/2 flex-col items-end gap-3">
+      <div className="pointer-events-none absolute right-5 top-1/2 flex -translate-y-1/2 flex-col items-end gap-3 mix-blend-difference sm:right-9">
         {DIVE_SECTIONS.map((section, index) => (
           <div
             key={section.tag}
@@ -144,7 +144,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
           />
         ))}
       </div>
-      <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.65rem] tracking-[0.3em] text-white/50">
+      <div className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 mix-blend-difference text-[0.56rem] tracking-[0.26em] text-white/45 md:block">
         wheel / arrows / drag to lift the world
       </div>
       <button
@@ -152,7 +152,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
         onClick={handleToggleSound}
         aria-pressed={sound === 'on'}
         aria-label={`Turn ambient wind ${sound === 'on' ? 'off' : 'on'}`}
-        className="absolute bottom-8 right-8 flex items-center gap-2 text-[0.7rem] tracking-[0.3em] text-white/70 transition-colors hover:text-white [text-shadow:0_1px_10px_rgba(30,40,52,0.5)]"
+        className="absolute bottom-6 right-6 flex items-center gap-2 text-[0.6rem] tracking-[0.26em] text-white/65 mix-blend-difference transition-colors hover:text-white sm:bottom-8 sm:right-10"
       >
         <span className="flex h-3 items-end gap-[2px]">
           {[0, 1, 2].map((bar) => (

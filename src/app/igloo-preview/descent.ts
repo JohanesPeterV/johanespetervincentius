@@ -320,7 +320,7 @@ export const NARRATIVE_STONES: NarrativeStone[] = DIVE_SECTIONS.flatMap(
   },
 );
 
-const NARRATIVE_STONE_CENTER_Y = 2.8;
+const NARRATIVE_STONE_CENTER_Y = 4.45;
 // REASON: stone sections sit 0.6 progress apart and the camera sees ~9 world
 // units vertically - a rate of 17 spaces stones ~10 units apart so only the
 // active stone is ever in frame
@@ -472,7 +472,7 @@ export type DiveTuning = {
 export const DIVE_TUNING: DiveTuning = {
   aberrationScale: 1,
   fovRush: 1,
-  snowSize: 3,
+  snowSize: 2.1,
   transitionScale: 1,
 };
 
@@ -490,5 +490,5 @@ export const rushFov = (velocity: number): number => {
 };
 
 export const riseMeters = (progress: number): number => {
-  return Math.max(0, Math.round(progress * 32));
+  return Math.max(0, Math.round((progress - DIVE_START) * 32));
 };

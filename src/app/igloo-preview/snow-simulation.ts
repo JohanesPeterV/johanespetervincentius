@@ -115,7 +115,7 @@ varying float vSeed;
 void main() {
   vec2 offset = gl_PointCoord - vec2(0.5);
   float distanceToCenter = length(offset);
-  float alpha = smoothstep(0.5, 0.12, distanceToCenter) * 0.75;
+  float alpha = smoothstep(0.48, 0.16, distanceToCenter) * 0.34;
   if (alpha < 0.02) {
     discard;
   }
@@ -194,7 +194,7 @@ export const createSnowSimulation = (): SnowSimulation => {
   const drawMaterial = new ShaderMaterial({
     uniforms: {
       uPositions: { value: initialTexture },
-      uSize: { value: 3 },
+      uSize: { value: 2.1 },
     },
     vertexShader: DRAW_VERTEX,
     fragmentShader: DRAW_FRAGMENT,

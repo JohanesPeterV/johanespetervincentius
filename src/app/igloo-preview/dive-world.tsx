@@ -69,7 +69,7 @@ export const applyBlockInstances = (
 export const SnowTerrain = () => {
   const { scene } = useGLTF(TERRAIN_URL);
   return (
-    <primitive object={scene} scale={TERRAIN_SCALE} position={[0, -1.2, 0]} />
+    <primitive object={scene} scale={TERRAIN_SCALE} position={[0, -1.8, 0]} />
   );
 };
 
@@ -285,10 +285,10 @@ export const SnowDrift = () => {
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.12}
+          size={0.08}
           color="#ffffff"
           transparent
-          opacity={0.6}
+          opacity={0.34}
           depthWrite={false}
         />
       </points>

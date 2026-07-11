@@ -157,24 +157,25 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
-      className="fixed inset-0 touch-none cursor-grab overflow-hidden bg-[#c2c8d0] font-mono text-white active:cursor-grabbing"
+      className="fixed inset-0 touch-none cursor-grab overflow-hidden bg-[#aeb5bf] font-mono text-white active:cursor-grabbing"
     >
       <Canvas
         camera={{ fov: 58, near: 0.2, far: 240, position: [0, 6.6, 16] }}
-        dpr={tier < 2 ? 1 : 1.75}
+        dpr={tier < 2 ? 1 : 1.5}
+        gl={{ toneMappingExposure: 0.5 }}
         performance={{ min: 0.5 }}
       >
-        <color attach="background" args={['#c2c8d0']} />
-        <fogExp2 attach="fog" args={['#c2c8d0', 0.05]} />
-        <hemisphereLight args={['#e8edf3', '#67727f', 0.9]} />
+        <color attach="background" args={['#aeb5bf']} />
+        <fogExp2 attach="fog" args={['#aeb5bf', 0.05]} />
+        <hemisphereLight args={['#e3e7ec', '#525b66', 0.68]} />
         <directionalLight
           position={[18, 32, 14]}
-          intensity={1.15}
+          intensity={0.82}
           color="#ffffff"
         />
         <pointLight
           position={[0, -10, 10]}
-          intensity={210}
+          intensity={56}
           distance={40}
           color="#e6f1ff"
         />
@@ -192,7 +193,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
           <Environment resolution={64} frames={1}>
             <Lightformer
               form="rect"
-              intensity={2.4}
+              intensity={1.7}
               color="#eaf4ff"
               position={[0, 30, 0]}
               rotation-x={-Math.PI / 2}
@@ -200,14 +201,14 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
             />
             <Lightformer
               form="rect"
-              intensity={0.9}
+              intensity={0.62}
               color="#b9d4ea"
               position={[-18, 4, -12]}
               scale={12}
             />
             <Lightformer
               form="rect"
-              intensity={0.7}
+              intensity={0.48}
               color="#8fb4d4"
               position={[16, -6, 10]}
               rotation-y={Math.PI}

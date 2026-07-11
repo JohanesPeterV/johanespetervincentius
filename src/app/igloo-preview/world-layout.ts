@@ -9,8 +9,8 @@ const DOME_RADIUS = 3.4;
 const DOME_ROWS = 6;
 const ENTRANCE_HALF_ANGLE = 0.46;
 const TUNNEL_RADIUS = 1.35;
-const RISING_STONE_COUNT = 30;
-const AMBIENT_SNOW_COUNT = 1000;
+const RISING_STONE_COUNT = 18;
+const AMBIENT_SNOW_COUNT = 620;
 const CAMERA_DISTANCE_Z = 16;
 const FIELD_MIN_AZIMUTH = 0.55;
 const FIELD_MAX_AZIMUTH = 0.78;
@@ -143,7 +143,7 @@ export const buildRisingStones = (): BlockTransform[] => {
   return blocks;
 };
 
-const CRYSTAL_SHARD_COUNT = 8;
+const CRYSTAL_SHARD_COUNT = 6;
 
 export const buildCrystalShards = (): BlockTransform[] => {
   const random = createSeededRandom(43);
