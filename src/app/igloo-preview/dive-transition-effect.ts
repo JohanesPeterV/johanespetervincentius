@@ -13,19 +13,19 @@ void mainUv(inout vec2 uv) {
   if (uIntensity < 0.01) {
     return;
   }
-  float amount = pow(uIntensity, 0.6);
-  float frame = floor(uTime * 12.0);
-  vec2 coarseCell = floor(uv * vec2(9.0, 14.0));
-  float coarseGate = step(1.0 - amount * 0.55, diveGlitchHash(coarseCell + frame));
-  vec2 coarseShift = vec2(
-    diveGlitchHash(coarseCell * 1.7 + frame) - 0.5,
-    (diveGlitchHash(coarseCell * 2.3 + frame) - 0.5) * 0.35
-  );
-  vec2 fineCell = floor(uv * vec2(42.0, 64.0));
-  float fineGate = step(1.0 - amount * 0.4, diveGlitchHash(fineCell + frame * 1.31));
-  float fineShift = diveGlitchHash(fineCell * 3.1 + frame) - 0.5;
-  uv += coarseShift * coarseGate * amount * 0.16;
-  uv.x += fineShift * fineGate * amount * 0.07;
+  float amount = smoothstep(0.02, 0.92, uIntensity);
+  float frame = floor(uTime * 18.0);
+  float band = floor(uv.y * 34.0);
+  float bandNoise = diveGlitchHash(vec2(band, frame));
+  float bandGate = step(1.0 - amount * 0.72, bandNoise);
+  float bandShift = (bandNoise - 0.5) * amount * 0.34;
+  vec2 shardCell = floor(uv * vec2(13.0, 22.0));
+  float shardNoise = diveGlitchHash(shardCell + vec2(frame, -frame * 0.37));
+  float shardGate = step(1.0 - amount * 0.58, shardNoise);
+  float direction = step(0.5, diveGlitchHash(vec2(band * 0.17, frame * 0.31))) * 2.0 - 1.0;
+  uv.x += bandShift * bandGate;
+  uv.x += direction * shardGate * amount * 0.09;
+  uv.y += (shardNoise - 0.5) * shardGate * amount * 0.045;
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
@@ -33,28 +33,38 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     outputColor = inputColor;
     return;
   }
-  float amount = pow(uIntensity, 0.6);
-  vec2 fromCenter = uv - vec2(0.5);
-  float radial = smoothstep(0.08, 0.62, length(fromCenter));
-  vec2 streakDirection = normalize(fromCenter + vec2(0.0001));
-  float reach = amount * radial * 0.3;
-  vec3 streaked = inputColor.rgb;
-  float weightTotal = 1.0;
-  for (int tap = 1; tap <= 7; tap++) {
-    float along = float(tap) / 7.0;
-    float weight = 1.0 - along * 0.65;
-    streaked += texture2D(inputBuffer, uv + streakDirection * along * reach).rgb * weight;
+  float amount = smoothstep(0.02, 0.92, uIntensity);
+  float frame = floor(uTime * 18.0);
+  float band = floor(uv.y * 34.0);
+  float bandNoise = diveGlitchHash(vec2(band, frame));
+  float bandGate = step(1.0 - amount * 0.72, bandNoise);
+  float reach = amount * (0.025 + bandGate * 0.16);
+  vec3 shredded = inputColor.rgb * 0.28;
+  float weightTotal = 0.28;
+  for (int tap = -4; tap <= 4; tap++) {
+    float along = float(tap) / 4.0;
+    float weight = 1.0 - abs(along) * 0.62;
+    vec2 offset = vec2(along * reach, along * reach * 0.08);
+    shredded += texture2D(inputBuffer, uv + offset).rgb * weight;
     weightTotal += weight;
   }
-  streaked /= weightTotal;
-  vec2 split = streakDirection * amount * (0.005 + radial * 0.022);
+  shredded /= weightTotal;
+  vec2 split = vec2(amount * (0.006 + bandGate * 0.024), amount * 0.002);
   vec3 fringed = vec3(
     texture2D(inputBuffer, uv + split).r,
-    streaked.g,
+    shredded.g,
     texture2D(inputBuffer, uv - split).b
   );
-  vec3 torn = mix(streaked, fringed, 0.65);
-  float blend = clamp(amount * (0.45 + radial * 0.95), 0.0, 1.0);
+  vec2 grid = fract(uv * vec2(13.0, 22.0));
+  float edge = 1.0 - smoothstep(0.0, 0.085, min(min(grid.x, 1.0 - grid.x), min(grid.y, 1.0 - grid.y)));
+  float shardNoise = diveGlitchHash(floor(uv * vec2(13.0, 22.0)) + frame);
+  float shardGate = step(1.0 - amount * 0.52, shardNoise);
+  float fracture = edge * shardGate * amount;
+  vec3 torn = mix(shredded, fringed, 0.76);
+  torn += vec3(0.56, 0.78, 0.94) * fracture * 0.72;
+  float whiteFlash = step(0.965, diveGlitchHash(vec2(band, frame * 1.71))) * bandGate;
+  torn = mix(torn, vec3(0.82, 0.92, 1.0), whiteFlash * amount * 0.36);
+  float blend = clamp(amount * (0.42 + bandGate * 0.5 + shardGate * 0.28), 0.0, 1.0);
   outputColor = vec4(mix(inputColor.rgb, torn, blend), inputColor.a);
 }
 `;

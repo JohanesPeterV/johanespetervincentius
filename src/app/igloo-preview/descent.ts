@@ -197,8 +197,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#8c99a7',
     fogDensity: 0.045,
     glow: 0,
-    veil: 0.1,
-    veilColor: '#141f2c',
+    veil: 0.04,
+    veilColor: '#b9c9da',
   },
   {
     at: 2.18,
@@ -207,8 +207,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#5c6d80',
     fogDensity: 0.05,
     glow: 0,
-    veil: 0.7,
-    veilColor: '#141f2c',
+    veil: 0.16,
+    veilColor: '#d5e6f4',
   },
   {
     at: 2.3,
@@ -217,8 +217,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#3f5065',
     fogDensity: 0.05,
     glow: 0.05,
-    veil: 0.35,
-    veilColor: '#141f2c',
+    veil: 0.22,
+    veilColor: '#dcebf5',
   },
   {
     at: 2.45,
@@ -227,8 +227,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#33465c',
     fogDensity: 0.048,
     glow: 0.1,
-    veil: 0.1,
-    veilColor: '#141f2c',
+    veil: 0.06,
+    veilColor: '#7890a7',
   },
   {
     at: 2.6,
@@ -293,7 +293,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
 ];
 
 const SEAM_CENTER = 2.3;
-const SEAM_SPAN = 0.55;
+const SEAM_SPAN = 0.38;
 const FINALE_CENTER = 4.58;
 const FINALE_SPAN = 0.4;
 
@@ -378,11 +378,11 @@ export const wrapProgress = (value: number): number => {
 };
 
 const WORLD_A_SETTLE_DROP = 3.2;
-const WORLD_A_EXIT_START = 1.55;
-const WORLD_A_EXIT_END = 2.6;
+const WORLD_A_EXIT_START = 2.08;
+const WORLD_A_EXIT_END = 2.48;
 const WORLD_A_EXIT_LIFT = 46;
-const WORLD_B_ENTER_AT = 2.05;
-const WORLD_B_RISE_RATE = 26;
+const WORLD_B_ENTER_AT = 1.98;
+const WORLD_B_RISE_RATE = 30;
 
 export const worldARise = (progress: number): number => {
   const settle = WORLD_A_SETTLE_DROP * (1 - smoothstep(0, 0.65, progress));
