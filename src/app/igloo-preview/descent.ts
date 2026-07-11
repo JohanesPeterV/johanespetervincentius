@@ -373,8 +373,8 @@ export const createDescentFrame = (): DescentFrame => ({
   veilColor: [0, 0, 0],
 });
 
-export const clampProgress = (value: number): number => {
-  return Math.min(DIVE_LENGTH, Math.max(0, value));
+export const wrapProgress = (value: number): number => {
+  return ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
 };
 
 const WORLD_A_SETTLE_DROP = 3.2;
@@ -410,13 +410,13 @@ export const writeDescentFrame = (
   target: DescentFrame,
   progress: number,
 ): DescentFrame => {
-  const clamped = clampProgress(progress);
+  const wrapped = wrapProgress(progress);
   let start = DESCENT_KEYS[0];
   let end = DESCENT_KEYS[DESCENT_KEYS.length - 1];
   for (let index = 0; index < DESCENT_KEYS.length - 1; index++) {
     if (
-      clamped >= DESCENT_KEYS[index].at &&
-      clamped <= DESCENT_KEYS[index + 1].at
+      wrapped >= DESCENT_KEYS[index].at &&
+      wrapped <= DESCENT_KEYS[index + 1].at
     ) {
       start = DESCENT_KEYS[index];
       end = DESCENT_KEYS[index + 1];
@@ -424,7 +424,7 @@ export const writeDescentFrame = (
     }
   }
   const span = Math.max(0.0001, end.at - start.at);
-  const t = smoothstep(0, 1, (clamped - start.at) / span);
+  const t = smoothstep(0, 1, (wrapped - start.at) / span);
   writeTriple(target.position, start.position, end.position, t);
   writeTriple(target.look, start.look, end.look, t);
   writeTriple(target.fogColor, start.fogColor, end.fogColor, t);

@@ -152,8 +152,11 @@ W5 is intentionally open.
 
 ## 8. How It Maps to the Code
 
-Progress runs on a **clamped `0 → 5` scroll scale** (`DIVE_LENGTH = 5`, `clampProgress`).
-It **does not loop** and must stay clamped. Scroll drives progress; progress drives everything.
+Progress is sampled on a **circular `0 ≤ progress < 5` scroll scale** (`DIVE_LENGTH = 5`,
+`wrapProgress`). Scroll intent remains unbounded, and the sampled scene progress wraps from the
+end of W6 directly back to the start of W1. The user can keep scrolling in the same direction
+forever; the implementation must never clamp at either edge or damp backward through the beats.
+Scroll drives progress; progress drives everything.
 
 Approximate current mapping (see `descent.ts` keyframes):
 
@@ -174,8 +177,9 @@ Approximate current mapping (see `descent.ts` keyframes):
 - **~4.35 – 4.8** → W6, the finale flash (`FINALE_CENTER = 4.58`): a bright veil
   (`#dfeefb` → `#eaf4fd`, the counter-image of the dark seam veil) bursts up and hides the
   one great camera launch; behind it the sun mesh sweeps overhead (`finaleSunLift`).
-- **~4.8 – 5** → the flash clears; the camera settles looking up into the sun's god-ray glow
-  with dark stones silhouetted against the sky, and the last section lands.
+- **~4.8 – <5** → the flash clears; the camera settles looking up into the sun's god-ray glow
+  with dark stones silhouetted against the sky, and the last section lands. Continued downward
+  scroll wraps to `0`, where W1's opening veil hides the world reset and starts the next cycle.
 
 The shred/glitch impulse is velocity-driven but **zone-gated**: it is multiplied by
 `seamBoost + finaleBoost`, so it only ever fires around T (`SEAM_CENTER = 2.3`) and W6
@@ -221,7 +225,7 @@ Before claiming a preview change is done, confirm **all** of these:
 - [ ] You did **not** add portfolio content to drive the 3D (unless explicitly asked).
 - [ ] W2–W4 use three intentional stones, and each content panel stays attached to its stone.
 - [ ] The two protected moments (W1 reveal, T seam) still land and were not regressed.
-- [ ] Progress stays **clamped `0–5`** and does not loop.
+- [ ] Progress wraps on **`0 ≤ progress < 5`** and continuous input has no scroll endpoint.
 - [ ] The composer subtree does not re-render.
 - [ ] Verified in the running app, not just build/lint (per repo verify practice).
 
@@ -233,7 +237,7 @@ Before claiming a preview change is done, confirm **all** of these:
 - **Seam (T)** — the single transition between World A (ice) and World B (crystal).
 - **Rise** — objects moving upward through the frame as the user scrolls down. The core motion.
 - **Blockout / greybox** — rough placeholder geometry standing in for future real assets.
-- **Progress** — the clamped `0–5` scroll value that drives the whole scene.
+- **Progress** — the circular `0 ≤ progress < 5` sampled value that drives the whole scene.
 
 ---
 

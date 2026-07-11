@@ -9,7 +9,6 @@ import {
   DIVE_START,
   TOUCH_SENSITIVITY,
   WHEEL_SENSITIVITY,
-  clampProgress,
   worldARise,
   worldBRise,
 } from './descent';
@@ -73,9 +72,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
   const tier = tierOverride ?? gpu.tier;
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
-    targetRef.current = clampProgress(
-      targetRef.current + event.deltaY * WHEEL_SENSITIVITY,
-    );
+    targetRef.current += event.deltaY * WHEEL_SENSITIVITY;
   };
 
   const handlePointerDown = (
@@ -108,10 +105,8 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
     if (dragRef.current.id !== event.pointerId) {
       return;
     }
-    targetRef.current = clampProgress(
-      targetRef.current +
-        (dragRef.current.y - event.clientY) * TOUCH_SENSITIVITY,
-    );
+    targetRef.current +=
+      (dragRef.current.y - event.clientY) * TOUCH_SENSITIVITY;
     dragRef.current.y = event.clientY;
   };
 
@@ -132,10 +127,10 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'ArrowDown') {
-        targetRef.current = clampProgress(targetRef.current + 0.5);
+        targetRef.current += 0.5;
       }
       if (event.key === 'ArrowUp') {
-        targetRef.current = clampProgress(targetRef.current - 0.5);
+        targetRef.current -= 0.5;
       }
     };
     window.addEventListener('keydown', handleKeyDown);

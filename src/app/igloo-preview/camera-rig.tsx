@@ -23,7 +23,6 @@ import {
   DescentFrame,
   NARRATIVE_STONES,
   aberrationStrength,
-  clampProgress,
   createDescentFrame,
   finaleBoost,
   finaleSunLift,
@@ -31,6 +30,7 @@ import {
   rushFov,
   seamBoost,
   transitionStrength,
+  wrapProgress,
   writeDescentFrame,
 } from './descent';
 import { applyOverlay } from './dive-overlay-motion';
@@ -105,7 +105,7 @@ export default function CameraRig({
     if (live && Math.abs(targetRef.current - currentRef.current) < 0.0004) {
       currentRef.current = targetRef.current;
     }
-    const progress = clampProgress(currentRef.current);
+    const progress = wrapProgress(currentRef.current);
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
     const parallax = parallaxRef.current;
