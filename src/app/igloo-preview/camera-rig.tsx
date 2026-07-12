@@ -136,7 +136,7 @@ export default function CameraRig({
       seamBoost(progress) + finaleBoost(progress),
     );
     camera.rotateZ(
-      Math.max(-0.05, Math.min(0.05, -driveStep * 0.6)) * transitionZone,
+      Math.max(-0.018, Math.min(0.018, -driveStep * 0.22)) * transitionZone,
     );
     if (camera instanceof PerspectiveCamera) {
       const nextFov = rushFov(driveStep * transitionZone);
@@ -168,7 +168,7 @@ export default function CameraRig({
     }
     const impulse = Math.min(
       1,
-      transitionStrength(driveStep) * transitionZone * 2.5,
+      transitionStrength(driveStep) * transitionZone * 1.25,
     );
     rushRef.current = Math.max(
       impulse,
@@ -176,7 +176,11 @@ export default function CameraRig({
     );
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
     if (transitionRef.current) {
-      transitionRef.current.setDriveState(rush, clock.elapsedTime);
+      transitionRef.current.setDriveState(
+        Math.max(rush * 0.56, transitionZone * 0.72),
+        clock.elapsedTime,
+        progress,
+      );
     }
     setWindDrive(progress / DIVE_LENGTH, rush);
     if (glowRef.current) {

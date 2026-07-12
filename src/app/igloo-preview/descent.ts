@@ -197,7 +197,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#8c99a7',
     fogDensity: 0.045,
     glow: 0,
-    veil: 0.04,
+    veil: 0.03,
     veilColor: '#b9c9da',
   },
   {
@@ -207,7 +207,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#5c6d80',
     fogDensity: 0.05,
     glow: 0,
-    veil: 0.16,
+    veil: 0.1,
     veilColor: '#d5e6f4',
   },
   {
@@ -217,7 +217,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#3f5065',
     fogDensity: 0.05,
     glow: 0.05,
-    veil: 0.22,
+    veil: 0.32,
     veilColor: '#dcebf5',
   },
   {
@@ -227,7 +227,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#33465c',
     fogDensity: 0.048,
     glow: 0.1,
-    veil: 0.06,
+    veil: 0.08,
     veilColor: '#7890a7',
   },
   {
@@ -381,8 +381,8 @@ const WORLD_A_SETTLE_DROP = 3.2;
 const WORLD_A_EXIT_START = 2.08;
 const WORLD_A_EXIT_END = 2.48;
 const WORLD_A_EXIT_LIFT = 46;
-const WORLD_B_ENTER_AT = 1.98;
-const WORLD_B_RISE_RATE = 30;
+const WORLD_B_ENTER_AT = 2.16;
+const WORLD_B_RISE_RATE = 24;
 
 export const worldARise = (progress: number): number => {
   const settle = WORLD_A_SETTLE_DROP * (1 - smoothstep(0, 0.65, progress));
@@ -477,7 +477,7 @@ export const DIVE_TUNING: DiveTuning = {
 };
 
 export const transitionStrength = (velocity: number): number => {
-  return Math.min(1, Math.abs(velocity) * 34) * DIVE_TUNING.transitionScale;
+  return Math.min(1, Math.abs(velocity) * 20) * DIVE_TUNING.transitionScale;
 };
 
 export const aberrationStrength = (velocity: number): number => {
@@ -486,7 +486,7 @@ export const aberrationStrength = (velocity: number): number => {
 };
 
 export const rushFov = (velocity: number): number => {
-  return 58 + Math.min(20, Math.abs(velocity) * 520) * DIVE_TUNING.fovRush;
+  return 58 + Math.min(6, Math.abs(velocity) * 160) * DIVE_TUNING.fovRush;
 };
 
 export const riseMeters = (progress: number): number => {

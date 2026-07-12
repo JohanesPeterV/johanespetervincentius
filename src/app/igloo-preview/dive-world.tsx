@@ -11,25 +11,24 @@ import {
   MeshBasicMaterial,
   Object3D,
 } from 'three';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 import { NARRATIVE_STONES, narrativeStoneY } from './descent';
 import {
+  IGLOO_BLOCK_GEOMETRY,
+  IGLOO_BLOCKS,
+  applyIglooBreakup,
+} from './igloo-breakup';
+import {
   BlockTransform,
-  buildIglooBlocks,
   buildRisingStones,
   buildSnowPositions,
 } from './world-layout';
 
 const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
-const IGLOO_BLOCKS = buildIglooBlocks();
-const IGLOO_BLOCK_GEOMETRY = new RoundedBoxGeometry(1, 1, 1, 3, 0.12);
 const RISING_STONE_BLOCKS = buildRisingStones();
 const SNOW_POSITIONS = buildSnowPositions();
 const narrativeStoneHelper = new Object3D();
-const iglooBlockHelper = new Object3D();
-iglooBlockHelper.rotation.order = 'YXZ';
 
 export const applyBlockInstances = (
   mesh: InstancedMesh | null,
@@ -75,46 +74,6 @@ export const SnowTerrain = () => {
 
 useGLTF.preload(TERRAIN_URL);
 
-const iglooBreakup = (progress: number): number => {
-  const t = Math.min(1, Math.max(0, (progress - 1.08) / 0.72));
-  return t * t * (3 - 2 * t);
-};
-
-const applyIglooBreakup = (
-  mesh: InstancedMesh | null,
-  progress: number,
-): void => {
-  if (!mesh) {
-    return;
-  }
-  const breakup = iglooBreakup(progress);
-  IGLOO_BLOCKS.forEach((block, index) => {
-    const variation = ((index * 17) % 19) / 18;
-    const spread = 1 + breakup * (0.04 + variation * 0.05);
-    const lift =
-      breakup *
-      (0.12 + variation * 0.72 + Math.max(0, block.position[1]) * 0.06);
-    iglooBlockHelper.position.set(
-      block.position[0] * spread,
-      block.position[1] + lift,
-      block.position[2] * spread,
-    );
-    iglooBlockHelper.rotation.set(
-      block.rotation[0] + breakup * (variation - 0.5) * 0.12,
-      block.rotation[1] + breakup * (variation - 0.5) * 0.2,
-      block.rotation[2] + breakup * (variation - 0.5) * 0.1,
-    );
-    iglooBlockHelper.scale.set(
-      block.scale[0] * 0.94,
-      block.scale[1] * 0.94,
-      block.scale[2] * 0.94,
-    );
-    iglooBlockHelper.updateMatrix();
-    mesh.setMatrixAt(index, iglooBlockHelper.matrix);
-  });
-  mesh.instanceMatrix.needsUpdate = true;
-};
-
 type IglooShelterParams = {
   progressRef: RefObject<number>;
 };
@@ -130,10 +89,10 @@ export const IglooShelter = ({ progressRef }: IglooShelterParams) => {
       return;
     }
     previousProgressRef.current = progress;
-    const domeFade = Math.min(1, Math.max(0, (progress - 0.98) / 0.16));
-    const entranceFade = Math.min(1, Math.max(0, (progress - 1.08) / 0.28));
+    const domeFade = Math.min(1, Math.max(0, (progress - 2.04) / 0.34));
+    const entranceFade = Math.min(1, Math.max(0, (progress - 1.56) / 0.3));
     if (domeGlowRef.current) {
-      domeGlowRef.current.opacity = 0.88 * (1 - domeFade);
+      domeGlowRef.current.opacity = 0.92 * (1 - domeFade);
     }
     if (entranceRef.current) {
       entranceRef.current.opacity = 1 - entranceFade;
@@ -148,7 +107,7 @@ export const IglooShelter = ({ progressRef }: IglooShelterParams) => {
           ref={domeGlowRef}
           color="#edf6ff"
           transparent
-          opacity={0.88}
+          opacity={0.92}
           toneMapped={false}
           depthWrite={false}
         />
@@ -173,7 +132,12 @@ export const IglooShelter = ({ progressRef }: IglooShelterParams) => {
         }}
       >
         <primitive attach="geometry" object={IGLOO_BLOCK_GEOMETRY} />
-        <meshStandardMaterial roughness={0.86} metalness={0.04} />
+        <meshStandardMaterial
+          roughness={0.8}
+          metalness={0.05}
+          emissive="#263746"
+          emissiveIntensity={0.16}
+        />
       </instancedMesh>
       <pointLight
         position={[0, 1.2, 0]}

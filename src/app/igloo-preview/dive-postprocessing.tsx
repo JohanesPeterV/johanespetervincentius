@@ -54,9 +54,9 @@ const DivePostprocessing = memo(function DivePostprocessing({
         radialModulation
         modulationOffset={0.4}
       />
-      <DiveTransition ref={transitionRef} />
       <HueSaturation saturation={-0.46} />
       <BrightnessContrast brightness={-0.045} contrast={0.19} />
+      <DiveTransition ref={transitionRef} />
       <Noise opacity={0.14} blendFunction={BlendFunction.OVERLAY} />
       <Vignette offset={0.24} darkness={0.48} />
     </EffectComposer>
