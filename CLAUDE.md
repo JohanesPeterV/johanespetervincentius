@@ -67,6 +67,7 @@ Read files before editing them. Read only the rulebooks that match the owned cha
 - **BLOCKER**: When present, `REVIEW_FOCUS.md` prioritises review scope but never creates a finding by itself. When absent, use the evidence-bound optimise-and-refactor default in `REVIEW.md`.
 - **BLOCKER**: The reviewer automation may create or update only `queue/AUTOMATED_REVIEW_FIXES.md`; it must never implement source fixes.
 - **BLOCKER**: The queue worker may implement only one validated row at a time and must never invent work when no pending row exists.
+- **BLOCKER**: Outstanding queue rows (`[ ]` plus `[-]`) must never exceed the number of active queue-worker automations targeting this repository. With the current single worker automation, queue capacity is one row.
 - **BLOCKER**: Treat queue-only, agent-rule-only, review-policy-only, and automation-memory-only commits as administrative changes, not new source-review candidates. Mixed commits containing source changes remain reviewable.
 - **BLOCKER**: Follow `queue/AGENTS.md` for committed claims, lease recovery, releases, and final queue cleanup.
 

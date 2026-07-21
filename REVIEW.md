@@ -50,7 +50,9 @@ Do not report formatting trivia, personal taste, speculative concerns, pre-exist
 - Wait for both reviewers, then independently validate every finding against current code and matching rulebooks.
 - Reproduce browser or runtime claims when practical.
 - Remove duplicates and search `queue/AUTOMATED_REVIEW_FIXES.md`, automation memory, and recent queue history for equivalent work.
-- Prefer one cohesive row when findings share one implementation concern. Add at most two rows per run.
+- Set queue capacity to the number of active queue-worker automations targeting this repository. Count `[ ]` and `[-]` rows as outstanding work; `[v]` rows wait for cleanup and do not create new capacity.
+- Add no more rows than available capacity. With the current single worker automation, create at most one outstanding row and never append while its queue still exists.
+- When multiple findings survive, queue the highest-impact cohesive concern and keep the rest deferred in automation memory. Revalidate deferred findings after capacity reopens before reviewing a new range.
 - Every row must identify where to start, the concrete end state, and how completion is proved.
 
 The reviewer automation may create queue work but must never edit source code. Source implementation belongs only to the queue worker.
