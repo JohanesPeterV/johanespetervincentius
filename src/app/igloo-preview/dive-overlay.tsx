@@ -72,8 +72,8 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
             }}
             className={
               section.placement === 'stone'
-                ? "group absolute left-0 top-0 flex w-[min(22rem,46vw)] flex-col items-start gap-3 text-left opacity-0 before:absolute before:right-full before:top-1/2 before:h-px before:w-12 before:-translate-y-1/2 before:bg-white/30 before:content-['']"
-                : 'group absolute inset-0 flex flex-col items-center justify-center gap-4 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)]'
+                ? "group absolute left-0 top-0 flex w-[min(22rem,46vw)] flex-col items-start gap-3 text-left opacity-0 [will-change:transform,opacity] before:absolute before:right-full before:top-1/2 before:h-px before:w-12 before:-translate-y-1/2 before:bg-white/30 before:content-['']"
+                : 'group absolute inset-0 flex flex-col items-center justify-center gap-4 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)] [will-change:transform,opacity]'
             }
           >
             <span className="text-[0.6rem] tracking-[0.4em] text-white/55">
@@ -140,7 +140,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
             ref={(element) => {
               overlayRef.current.rail[index] = element;
             }}
-            className="h-px w-6 origin-right bg-white opacity-20"
+            className="h-px w-6 origin-right bg-white opacity-20 [will-change:transform,opacity]"
           />
         ))}
       </div>

@@ -13,6 +13,9 @@ The purpose of this preview is now narrow: preserve the scroll-led transition la
 near-fixed camera model, then make both feel as smooth, legible, and expensive as possible.
 Timing, restraint, and frame stability matter more than adding spectacle.
 
+This is a finish pass, not another concept pass. The current composition is accepted; do not reopen
+it unless a concrete motion, legibility, continuity, or runtime problem requires a visual change.
+
 Polish in this order: continuous motion, readable pace, quiet camera, stable frame time, then
 effects. New detail is never allowed to compensate for a weak transition.
 
@@ -248,6 +251,8 @@ Before claiming a preview change is done, confirm **all** of these:
 - [ ] Wheel, keyboard, and drag input keep the beats slow enough to read without feeling laggy.
 - [ ] Rapid repeated input queues the journey at the same calm top speed instead of skipping beats
       or producing a velocity spike.
+- [ ] At that top speed, each stone section remains readable and the finale camera move takes longer
+      than one second; copy choreography must not be cut off by the next beat.
 - [ ] T and W6 move continuously without stepped noise, abrupt camera stops, or gratuitous lens
       distortion.
 - [ ] Centered copy leaves cleanly without blur-smearing, and lens/roll accents ease in and out

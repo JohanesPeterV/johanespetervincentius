@@ -8,6 +8,8 @@ This file tells reviewer agents what matters most now. It prioritises review; it
 
 Make `/igloo-preview` feel as smooth, legible, expensive, and whole as possible while preserving the accepted world-rise concept. Timing, restraint, and frame stability matter more than additional spectacle.
 
+The concept and composition are already accepted. Review finish quality only; do not reopen visual direction or create speculative parity work.
+
 ## Prioritise
 
 - Continuous motion and readable pacing across the full loop.

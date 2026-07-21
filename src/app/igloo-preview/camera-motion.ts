@@ -8,8 +8,8 @@ export type DriveMotion = {
   velocity: number;
 };
 
-const DRIVE_VELOCITY_DAMPING = 5;
-const MAX_DRIVE_SPEED = 0.62;
+const DRIVE_VELOCITY_DAMPING = 4;
+const MAX_DRIVE_SPEED = 0.44;
 const POSITION_EPSILON = 0.0004;
 const VELOCITY_EPSILON = 0.001;
 const FINALE_LAUNCH_START = 4.42;

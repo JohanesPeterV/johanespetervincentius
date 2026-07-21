@@ -62,7 +62,9 @@ const MAX_FRAME_DELTA = 0.05;
 const PARALLAX_DAMPING = 2.2;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
-const RUSH_DAMPING = 4.5;
+const RUSH_DAMPING = 4;
+const TRANSITION_BASE_INTENSITY = 0.4;
+const TRANSITION_RUSH_INTENSITY = 0.24;
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
@@ -194,7 +196,10 @@ export default function CameraRig({
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
     if (transitionRef.current) {
       transitionRef.current.setDriveState(
-        Math.max(rush * 0.28, transitionZone * 0.46),
+        Math.max(
+          rush * TRANSITION_RUSH_INTENSITY,
+          transitionZone * TRANSITION_BASE_INTENSITY,
+        ),
         progress,
       );
     }
