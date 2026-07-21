@@ -15,6 +15,7 @@ import {
 import DiveLoader from './dive-loader';
 import DiveOverlay from './dive-overlay';
 import {
+  IceRidges,
   IglooShelter,
   NarrativeStones,
   RisingStones,
@@ -170,13 +171,14 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
         />
         <pointLight
           position={[0, -10, 10]}
-          intensity={56}
-          distance={40}
+          intensity={10}
+          distance={28}
           color="#e6f1ff"
         />
         <Suspense fallback={null}>
           <RisingWorld progressRef={progressRef} rise={worldARise}>
             <SnowTerrain />
+            <IceRidges />
             <IglooShelter progressRef={progressRef} />
           </RisingWorld>
           <RisingWorld progressRef={progressRef} rise={worldBRise}>

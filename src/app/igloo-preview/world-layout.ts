@@ -143,6 +143,39 @@ export const buildRisingStones = (): BlockTransform[] => {
   return blocks;
 };
 
+export const buildIceRidges = (): BlockTransform[] => [
+  {
+    position: [-19, 2.2, -24],
+    rotation: [0.08, 0.28, -0.06],
+    scale: [10.5, 7.6, 7],
+    shade: 0.82,
+  },
+  {
+    position: [-2, 3.2, -38],
+    rotation: [-0.04, -0.2, 0.03],
+    scale: [14, 10, 10],
+    shade: 0.94,
+  },
+  {
+    position: [22, 1.4, -29],
+    rotation: [0.06, -0.36, 0.08],
+    scale: [10.5, 7.2, 8],
+    shade: 0.76,
+  },
+  {
+    position: [-35, 2.3, -43],
+    rotation: [0.02, 0.44, -0.05],
+    scale: [18, 6.5, 11],
+    shade: 0.7,
+  },
+  {
+    position: [38, 2.8, -46],
+    rotation: [-0.05, -0.38, 0.04],
+    scale: [20, 7.2, 12],
+    shade: 0.68,
+  },
+];
+
 const CRYSTAL_SHARD_COUNT = 6;
 
 export const buildCrystalShards = (): BlockTransform[] => {

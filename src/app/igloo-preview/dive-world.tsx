@@ -20,12 +20,14 @@ import {
 } from './igloo-breakup';
 import {
   BlockTransform,
+  buildIceRidges,
   buildRisingStones,
   buildSnowPositions,
 } from './world-layout';
 
 const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
+const ICE_RIDGE_BLOCKS = buildIceRidges();
 const RISING_STONE_BLOCKS = buildRisingStones();
 const SNOW_POSITIONS = buildSnowPositions();
 const narrativeStoneHelper = new Object3D();
@@ -71,6 +73,18 @@ export const SnowTerrain = () => {
     <primitive object={scene} scale={TERRAIN_SCALE} position={[0, -1.8, 0]} />
   );
 };
+
+export const IceRidges = () => (
+  <instancedMesh
+    args={[undefined, undefined, ICE_RIDGE_BLOCKS.length]}
+    ref={(mesh) => {
+      applyBlockInstances(mesh, ICE_RIDGE_BLOCKS, '#9ba6b2');
+    }}
+  >
+    <icosahedronGeometry args={[1, 2]} />
+    <meshStandardMaterial flatShading color="#9ba6b2" roughness={1} />
+  </instancedMesh>
+);
 
 useGLTF.preload(TERRAIN_URL);
 
