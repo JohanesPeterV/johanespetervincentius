@@ -1,6 +1,6 @@
 # Review Rules
 
-Use this file for automated and explicit reviews. `AGENTS.md` owns the hard gates, `REVIEW_FOCUS.md` supplies current priority, and feature documents such as `IGLOO-PREVIEW.md` own local intent.
+Use this file for automated and explicit reviews. `AGENTS.md` owns the hard gates, optional `REVIEW_FOCUS.md` supplies current priority, and feature documents such as `IGLOO-PREVIEW.md` own local intent.
 
 ## Candidate Scope
 
@@ -8,7 +8,18 @@ Use this file for automated and explicit reviews. `AGENTS.md` owns the hard gate
 - Walk first-parent commits after the automation-memory watermark in chronological order. Select one coherent range that represents one route, feature, or implementation concern.
 - Ignore commits containing only queue files, agent rules, review policy, documentation, formatting, generated files, or automation memory. Review a mixed commit when it also contains substantive source or build-configuration changes.
 - Defer a candidate without advancing its watermark when its source paths are dirty or owned by an active task.
-- Establish intent from commit messages, changed callers, relevant feature documents, and `REVIEW_FOCUS.md`. If intent remains ambiguous, do not queue a guess.
+- Establish intent from commit messages, changed callers, relevant feature documents, and `REVIEW_FOCUS.md` when present. If intent remains ambiguous, do not queue a guess.
+
+## Default Focus
+
+When `REVIEW_FOCUS.md` is absent, review the selected committed range for evidence-backed optimisation and refactoring opportunities:
+
+- Remove clear duplication, dead work, avoidable renders, allocation churn, or unnecessary runtime cost.
+- Reuse an existing helper, component, hook, or pattern when the reviewed change introduced a parallel implementation.
+- Simplify component, hook, state, and module boundaries when current code creates concrete maintenance or correctness risk.
+- Preserve behaviour and visual intent. Do not invent features, redesign working UI, introduce speculative abstractions, or queue micro-optimisations without a reproducible cost.
+
+The default focus is a prioritisation lane, not permission for repo-wide cleanup. An empty review remains valid.
 
 ## Reviewer Wave
 

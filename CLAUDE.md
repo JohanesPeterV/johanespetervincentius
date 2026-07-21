@@ -41,15 +41,15 @@ Clearer does not mean weaker. These rules are strict; the levels below only sepa
 
 Read files before editing them. Read only the rulebooks that match the owned change; if multiple rows match, read all matching rulebooks before editing.
 
-| Trigger                                                          | Required before editing         |
-| ---------------------------------------------------------------- | ------------------------------- |
-| Any repo task                                                    | `CLAUDE.md` / `AGENTS.md`       |
-| React components, pages, hooks, styling, or UI composition       | `FRONTEND-CODE-STANDARDS.md`    |
-| Visual hierarchy, Liquid Glass treatment, theme or 3D look       | `FRONTEND-DESIGN-PRINCIPLES.md` |
-| Reviewing committed changes or writing review findings           | `REVIEW.md`, `REVIEW_FOCUS.md`  |
-| Queue creation, claims, status changes, recovery, or cleanup     | `queue/AGENTS.md`               |
-| Committing or dirty-worktree handling                            | `GIT.md`                        |
-| Implementation tradeoffs are unclear or no other rulebook covers | `CLEAN-CODE.md`                 |
+| Trigger                                                          | Required before editing                     |
+| ---------------------------------------------------------------- | ------------------------------------------- |
+| Any repo task                                                    | `CLAUDE.md` / `AGENTS.md`                   |
+| React components, pages, hooks, styling, or UI composition       | `FRONTEND-CODE-STANDARDS.md`                |
+| Visual hierarchy, Liquid Glass treatment, theme or 3D look       | `FRONTEND-DESIGN-PRINCIPLES.md`             |
+| Reviewing committed changes or writing review findings           | `REVIEW.md`; `REVIEW_FOCUS.md` when present |
+| Queue creation, claims, status changes, recovery, or cleanup     | `queue/AGENTS.md`                           |
+| Committing or dirty-worktree handling                            | `GIT.md`                                    |
+| Implementation tradeoffs are unclear or no other rulebook covers | `CLEAN-CODE.md`                             |
 
 ## Operating Defaults
 
@@ -64,7 +64,7 @@ Read files before editing them. Read only the rulebooks that match the owned cha
 
 ## Automated Review Queue
 
-- **BLOCKER**: `REVIEW_FOCUS.md` prioritises review scope but never creates a finding by itself. Findings still require current code, rulebook, or reproducible runtime evidence.
+- **BLOCKER**: When present, `REVIEW_FOCUS.md` prioritises review scope but never creates a finding by itself. When absent, use the evidence-bound optimise-and-refactor default in `REVIEW.md`.
 - **BLOCKER**: The reviewer automation may create or update only `queue/AUTOMATED_REVIEW_FIXES.md`; it must never implement source fixes.
 - **BLOCKER**: The queue worker may implement only one validated row at a time and must never invent work when no pending row exists.
 - **BLOCKER**: Treat queue-only, agent-rule-only, review-policy-only, and automation-memory-only commits as administrative changes, not new source-review candidates. Mixed commits containing source changes remain reviewable.

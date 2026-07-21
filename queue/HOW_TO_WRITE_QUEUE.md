@@ -29,7 +29,7 @@ Follow `queue/AGENTS.md`, claim one pending row, complete its proof, commit it a
 - Make one row one cohesive implementation concern, not a mechanical step or a collection of unrelated fixes.
 - State where to start, what done means, and how to verify it.
 - Preserve implementation freedom. Specify the invariant and outcome, not unnecessary mechanics.
-- Queue only validated findings that satisfy `REVIEW.md`. Current focus alone is not evidence.
+- Queue only validated findings that satisfy `REVIEW.md`. A focus file or the default optimise-and-refactor lane alone is not evidence.
 - Add at most two rows per reviewer run.
 - Never add reviewer transcripts, screenshots, command output, progress notes, investigation diaries, or stale blocker history.
 - Keep completion as `[v]` with the original item text. Put detailed proof in the implementation commit or automation memory.
