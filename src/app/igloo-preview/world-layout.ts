@@ -5,10 +5,6 @@ export type BlockTransform = {
   shade: number;
 };
 
-const DOME_RADIUS = 3.4;
-const DOME_ROWS = 6;
-const ENTRANCE_HALF_ANGLE = 0.46;
-const TUNNEL_RADIUS = 1.35;
 const RISING_STONE_COUNT = 18;
 const AMBIENT_SNOW_COUNT = 620;
 const CAMERA_DISTANCE_Z = 16;
@@ -45,85 +41,6 @@ export const createSeededRandom = (seed: number): (() => number) => {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-};
-
-const wrapAngle = (angle: number): number => {
-  let wrapped = angle % (Math.PI * 2);
-  if (wrapped > Math.PI) {
-    wrapped -= Math.PI * 2;
-  }
-  if (wrapped < -Math.PI) {
-    wrapped += Math.PI * 2;
-  }
-  return wrapped;
-};
-
-const buildDomeRows = (random: () => number): BlockTransform[] => {
-  const blocks: BlockTransform[] = [];
-  const rowSpan = Math.PI / 2 / (DOME_ROWS + 1);
-  for (let row = 0; row < DOME_ROWS; row++) {
-    const latitude = (row + 0.5) * rowSpan;
-    const ringRadius = DOME_RADIUS * Math.cos(latitude);
-    const ringY = DOME_RADIUS * Math.sin(latitude);
-    const count = Math.max(5, Math.round((Math.PI * 2 * ringRadius) / 1.15));
-    for (let slot = 0; slot < count; slot++) {
-      const angle = ((slot + row * 0.37) / count) * Math.PI * 2;
-      const facesEntrance = Math.abs(wrapAngle(angle)) < ENTRANCE_HALF_ANGLE;
-      if (row < 2 && facesEntrance) {
-        continue;
-      }
-      blocks.push({
-        position: [
-          Math.sin(angle) * ringRadius,
-          ringY + (random() - 0.5) * 0.04,
-          Math.cos(angle) * ringRadius,
-        ],
-        rotation: [latitude * (0.85 + (random() - 0.5) * 0.2), angle, 0],
-        scale: [
-          ((Math.PI * 2 * ringRadius) / count) * 0.94,
-          rowSpan * DOME_RADIUS * 0.96,
-          0.8 + random() * 0.15,
-        ],
-        shade: 0.82 + random() * 0.18,
-      });
-    }
-  }
-  blocks.push({
-    position: [0, DOME_RADIUS * 0.96, 0],
-    rotation: [0, random() * Math.PI, 0],
-    scale: [1.3, 0.5, 1.3],
-    shade: 0.9,
-  });
-  return blocks;
-};
-
-const buildEntranceTunnel = (random: () => number): BlockTransform[] => {
-  const blocks: BlockTransform[] = [];
-  for (const ringZ of [2.9, 3.7, 4.5]) {
-    for (let slot = 0; slot < 7; slot++) {
-      const angle = Math.PI * (0.12 + (0.76 * slot) / 6);
-      blocks.push({
-        position: [
-          Math.cos(angle) * TUNNEL_RADIUS,
-          Math.sin(angle) * TUNNEL_RADIUS,
-          ringZ + (random() - 0.5) * 0.12,
-        ],
-        rotation: [0, 0, angle - Math.PI / 2],
-        scale: [
-          0.6 + random() * 0.1,
-          0.55 + random() * 0.1,
-          0.7 + random() * 0.1,
-        ],
-        shade: 0.82 + random() * 0.18,
-      });
-    }
-  }
-  return blocks;
-};
-
-export const buildIglooBlocks = (): BlockTransform[] => {
-  const random = createSeededRandom(7);
-  return [...buildDomeRows(random), ...buildEntranceTunnel(random)];
 };
 
 export const buildRisingStones = (): BlockTransform[] => {

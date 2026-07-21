@@ -3,7 +3,6 @@ import { Uniform } from 'three';
 
 const FRAGMENT = `
 uniform float uIntensity;
-uniform float uTime;
 uniform float uProgress;
 
 float diveGlitchHash(vec2 point) {
@@ -13,6 +12,7 @@ float diveGlitchHash(vec2 point) {
 float diveGlitchNoise(float value, float seed) {
   float cell = floor(value);
   float blend = fract(value);
+  blend = blend * blend * (3.0 - 2.0 * blend);
   return mix(
     diveGlitchHash(vec2(cell, seed)),
     diveGlitchHash(vec2(cell + 1.0, seed)),
@@ -29,17 +29,16 @@ void mainUv(inout vec2 uv) {
     ? clamp((uProgress - 1.92) / 0.76, 0.0, 1.0)
     : clamp((uProgress - 4.18) / 0.8, 0.0, 1.0);
   float front = mix(-0.14, 1.14, phase);
-  float fractureFrame = floor(uTime * 10.0);
-  float fracture = (diveGlitchNoise(uv.x * 18.0, fractureFrame * 0.37) - 0.5) * 0.07;
-  fracture += (diveGlitchNoise(uv.x * 47.0, fractureFrame * 0.61) - 0.5) * 0.022;
+  float flow = phase * 10.0;
+  float fracture = (diveGlitchNoise(uv.x * 14.0 + flow, 0.37) - 0.5) * 0.055;
+  fracture += (diveGlitchNoise(uv.x * 34.0 - flow * 0.7, 0.61) - 0.5) * 0.018;
   front += fracture;
-  float envelope = 1.0 - smoothstep(0.02, 0.16, abs(uv.y - front));
-  float frame = floor(uTime * 16.0);
-  float row = floor(uv.y * 38.0);
-  float rowNoise = diveGlitchHash(vec2(row, frame));
-  float slice = step(0.38, rowNoise) * envelope * amount;
-  uv.x += (rowNoise - 0.5) * slice * 0.11;
-  uv.y += (diveGlitchHash(vec2(row * 0.37, frame)) - 0.5) * slice * 0.012;
+  float envelope = 1.0 - smoothstep(0.015, 0.12, abs(uv.y - front));
+  float column = floor(uv.x * 30.0);
+  float facet = diveGlitchNoise(column + phase * 4.5, 1.7);
+  float slice = smoothstep(0.25, 0.82, facet) * envelope * amount;
+  uv.x += (facet - 0.5) * slice * 0.05;
+  uv.y += (diveGlitchNoise(column * 0.31 + phase * 3.0, 2.4) - 0.5) * slice * 0.006;
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
@@ -52,37 +51,29 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     ? clamp((uProgress - 1.92) / 0.76, 0.0, 1.0)
     : clamp((uProgress - 4.18) / 0.8, 0.0, 1.0);
   float front = mix(-0.14, 1.14, phase);
-  float fractureFrame = floor(uTime * 10.0);
-  float fracture = (diveGlitchNoise(uv.x * 18.0, fractureFrame * 0.37) - 0.5) * 0.07;
-  fracture += (diveGlitchNoise(uv.x * 47.0, fractureFrame * 0.61) - 0.5) * 0.022;
+  float flow = phase * 10.0;
+  float fracture = (diveGlitchNoise(uv.x * 14.0 + flow, 0.37) - 0.5) * 0.055;
+  fracture += (diveGlitchNoise(uv.x * 34.0 - flow * 0.7, 0.61) - 0.5) * 0.018;
   front += fracture;
   float distanceToFront = abs(uv.y - front);
-  float envelope = 1.0 - smoothstep(0.018, 0.16, distanceToFront);
-  float core = 1.0 - smoothstep(0.0, 0.022, distanceToFront);
-  float frame = floor(uTime * 16.0);
-  float row = floor(uv.y * 38.0);
-  float rowNoise = diveGlitchHash(vec2(row, frame));
-  float reach = envelope * amount * (0.012 + rowNoise * 0.045);
-  vec3 shredded = inputColor.rgb * 0.42;
-  float weightTotal = 0.42;
-  for (int tap = -3; tap <= 3; tap++) {
-    float along = float(tap) / 3.0;
-    float weight = 1.0 - abs(along) * 0.68;
-    vec2 offset = vec2(along * reach, along * reach * 0.08);
-    shredded += texture2D(inputBuffer, uv + offset).rgb * weight;
-    weightTotal += weight;
-  }
-  shredded /= weightTotal;
-  vec2 split = vec2(reach * 0.16 + core * 0.008, core * 0.002);
-  vec3 fringed = vec3(
-    texture2D(inputBuffer, uv + split).r,
-    shredded.g,
-    texture2D(inputBuffer, uv - split).b
+  float envelope = 1.0 - smoothstep(0.015, 0.12, distanceToFront);
+  float core = 1.0 - smoothstep(0.0, 0.009, distanceToFront);
+  float column = floor(uv.x * 30.0);
+  float facet = diveGlitchNoise(column + phase * 4.5, 1.7);
+  float verticalFacet = diveGlitchNoise(column * 0.31 + phase * 3.0, 2.4);
+  vec2 refraction = vec2(
+    (facet - 0.5) * envelope * amount * 0.038,
+    (verticalFacet - 0.5) * envelope * amount * 0.006
   );
-  float sparkle = step(0.92, diveGlitchHash(vec2(floor(uv.x * 28.0), row + frame)));
-  vec3 torn = mix(shredded, fringed, 0.78);
-  torn += vec3(0.58, 0.8, 1.0) * core * amount * (0.64 + sparkle * 0.32);
-  float blend = clamp(envelope * amount * 0.84 + core * amount * 0.16, 0.0, 0.92);
+  vec3 glass = vec3(
+    texture2D(inputBuffer, uv + refraction * 1.06).r,
+    texture2D(inputBuffer, uv + refraction).g,
+    texture2D(inputBuffer, uv + refraction * 0.94).b
+  );
+  float facetLight = smoothstep(0.7, 0.98, facet) * envelope * amount;
+  glass = mix(glass, glass * vec3(0.72, 0.86, 1.08), 0.22);
+  glass += vec3(0.58, 0.8, 1.0) * (core * 0.34 + facetLight * 0.08);
+  float blend = clamp(envelope * amount * 0.58 + core * amount * 0.16, 0.0, 0.74);
   float revealed = 1.0 - smoothstep(front - 0.045, front + 0.045, uv.y);
   vec3 regimeColor = inputColor.rgb;
   if (uProgress < 3.5) {
@@ -98,7 +89,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
       revealed * amount * 0.24
     );
   }
-  outputColor = vec4(mix(regimeColor, torn, blend), inputColor.a);
+  outputColor = vec4(mix(regimeColor, glass, blend), inputColor.a);
 }
 `;
 
@@ -108,20 +99,15 @@ export class DiveTransitionEffect extends Effect {
       blendFunction: BlendFunction.NORMAL,
       uniforms: new Map<string, Uniform>([
         ['uIntensity', new Uniform(0)],
-        ['uTime', new Uniform(0)],
         ['uProgress', new Uniform(0)],
       ]),
     });
   }
 
-  setDriveState(intensity: number, time: number, progress: number): void {
+  setDriveState(intensity: number, progress: number): void {
     const intensityUniform = this.uniforms.get('uIntensity');
     if (intensityUniform) {
       intensityUniform.value = intensity;
-    }
-    const timeUniform = this.uniforms.get('uTime');
-    if (timeUniform) {
-      timeUniform.value = time;
     }
     const progressUniform = this.uniforms.get('uProgress');
     if (progressUniform) {

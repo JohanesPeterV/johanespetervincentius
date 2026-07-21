@@ -20,7 +20,7 @@ import { Mesh, Vector2 } from 'three';
 import { DiveTransitionEffect } from './dive-transition-effect';
 
 const DiveTransition = wrapEffect(DiveTransitionEffect);
-const ABERRATION_OFFSET = new Vector2(0.0011, 0.0006);
+const ABERRATION_OFFSET = new Vector2(0.00055, 0.0003);
 
 type DivePostprocessingParams = {
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
@@ -38,10 +38,10 @@ const DivePostprocessing = memo(function DivePostprocessing({
   return (
     <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
       <SMAA />
-      <Bloom intensity={0.48} luminanceThreshold={0.78} mipmapBlur />
+      <Bloom intensity={0.42} luminanceThreshold={0.78} mipmapBlur />
       <GodRays
         sun={sun}
-        samples={36}
+        samples={24}
         density={0.85}
         decay={0.92}
         weight={0.25}
@@ -57,8 +57,8 @@ const DivePostprocessing = memo(function DivePostprocessing({
       <HueSaturation saturation={-0.46} />
       <BrightnessContrast brightness={-0.045} contrast={0.19} />
       <DiveTransition ref={transitionRef} />
-      <Noise opacity={0.14} blendFunction={BlendFunction.OVERLAY} />
-      <Vignette offset={0.24} darkness={0.48} />
+      <Noise opacity={0.05} blendFunction={BlendFunction.OVERLAY} />
+      <Vignette offset={0.24} darkness={0.42} />
     </EffectComposer>
   );
 });

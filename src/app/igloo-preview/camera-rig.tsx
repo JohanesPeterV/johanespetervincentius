@@ -57,8 +57,29 @@ type CameraRigParams = {
 
 const BASELINE_FPS = 60;
 const MAX_FRAME_DELTA = 0.05;
-const PARALLAX_DAMPING = 2.76;
-const RUSH_DECAY = 5;
+const PARALLAX_DAMPING = 2.2;
+const RUSH_DECAY = 3.5;
+const FINALE_LAUNCH_START = 4.48;
+const FINALE_LAUNCH_END = 4.96;
+
+const applyFinaleCamera = (frame: DescentFrame, progress: number): void => {
+  const distance = Math.min(
+    1,
+    Math.max(
+      0,
+      (progress - FINALE_LAUNCH_START) /
+        (FINALE_LAUNCH_END - FINALE_LAUNCH_START),
+    ),
+  );
+  if (distance === 0) {
+    return;
+  }
+  const eased = distance * distance * (3 - 2 * distance);
+  frame.position[1] = MathUtils.lerp(3.5, 11.5, eased);
+  frame.position[2] = MathUtils.lerp(16, 21, eased);
+  frame.look[1] = MathUtils.lerp(2.4, 15.5, eased);
+  frame.look[2] = MathUtils.lerp(0, -10, eased);
+};
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
@@ -88,7 +109,7 @@ export default function CameraRig({
   }
   const descentFrame = frameRef.current;
 
-  useFrame(({ camera, scene, clock, size }, delta) => {
+  useFrame(({ camera, scene, performance, size }, delta) => {
     const frameDelta = Math.min(delta, MAX_FRAME_DELTA);
     const live = stageRef.current === 'live';
     const previousProgress = currentRef.current;
@@ -108,6 +129,10 @@ export default function CameraRig({
     const progress = wrapProgress(currentRef.current);
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
+    applyFinaleCamera(frame, progress);
+    if (live && Math.abs(step) > 0.00008) {
+      performance.regress();
+    }
     const parallax = parallaxRef.current;
     parallax.x = MathUtils.damp(
       parallax.x,
@@ -122,13 +147,13 @@ export default function CameraRig({
       frameDelta,
     );
     camera.position.set(
-      frame.position[0] + parallax.x * 0.7,
-      frame.position[1] - parallax.y * 0.35,
+      frame.position[0] + parallax.x * 0.38,
+      frame.position[1] - parallax.y * 0.18,
       frame.position[2],
     );
     camera.lookAt(
-      frame.look[0] + parallax.x * 2.2,
-      frame.look[1] - parallax.y * 1.4,
+      frame.look[0] + parallax.x * 0.9,
+      frame.look[1] - parallax.y * 0.55,
       frame.look[2],
     );
     const transitionZone = Math.min(
@@ -136,7 +161,7 @@ export default function CameraRig({
       seamBoost(progress) + finaleBoost(progress),
     );
     camera.rotateZ(
-      Math.max(-0.018, Math.min(0.018, -driveStep * 0.22)) * transitionZone,
+      Math.max(-0.006, Math.min(0.006, -driveStep * 0.07)) * transitionZone,
     );
     if (camera instanceof PerspectiveCamera) {
       const nextFov = rushFov(driveStep * transitionZone);
@@ -166,10 +191,7 @@ export default function CameraRig({
       const strength = aberrationStrength(driveStep) * transitionZone;
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
-    const impulse = Math.min(
-      1,
-      transitionStrength(driveStep) * transitionZone * 1.25,
-    );
+    const impulse = Math.min(1, transitionStrength(driveStep) * transitionZone);
     rushRef.current = Math.max(
       impulse,
       rushRef.current * Math.exp(-RUSH_DECAY * frameDelta),
@@ -177,8 +199,7 @@ export default function CameraRig({
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
     if (transitionRef.current) {
       transitionRef.current.setDriveState(
-        Math.max(rush * 0.56, transitionZone * 0.72),
-        clock.elapsedTime,
+        Math.max(rush * 0.4, transitionZone * 0.62),
         progress,
       );
     }

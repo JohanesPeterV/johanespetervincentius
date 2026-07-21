@@ -3,21 +3,9 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { ReactNode, RefObject, useRef } from 'react';
-import {
-  Color,
-  DynamicDrawUsage,
-  Group,
-  InstancedMesh,
-  MeshBasicMaterial,
-  Object3D,
-} from 'three';
+import { Color, Group, InstancedMesh, Object3D } from 'three';
 
 import { NARRATIVE_STONES, narrativeStoneY } from './descent';
-import {
-  IGLOO_BLOCK_GEOMETRY,
-  IGLOO_BLOCKS,
-  applyIglooBreakup,
-} from './igloo-breakup';
 import {
   BlockTransform,
   buildIceRidges,
@@ -87,81 +75,6 @@ export const IceRidges = () => (
 );
 
 useGLTF.preload(TERRAIN_URL);
-
-type IglooShelterParams = {
-  progressRef: RefObject<number>;
-};
-
-export const IglooShelter = ({ progressRef }: IglooShelterParams) => {
-  const meshRef = useRef<InstancedMesh>(null);
-  const domeGlowRef = useRef<MeshBasicMaterial>(null);
-  const entranceRef = useRef<MeshBasicMaterial>(null);
-  const previousProgressRef = useRef(Number.NaN);
-  useFrame(() => {
-    const progress = progressRef.current;
-    if (Math.abs(previousProgressRef.current - progress) < 0.0001) {
-      return;
-    }
-    previousProgressRef.current = progress;
-    const domeFade = Math.min(1, Math.max(0, (progress - 2.04) / 0.34));
-    const entranceFade = Math.min(1, Math.max(0, (progress - 1.56) / 0.3));
-    if (domeGlowRef.current) {
-      domeGlowRef.current.opacity = 0.92 * (1 - domeFade);
-    }
-    if (entranceRef.current) {
-      entranceRef.current.opacity = 1 - entranceFade;
-    }
-    applyIglooBreakup(meshRef.current, progress);
-  });
-  return (
-    <group position={[0, 1.2, 0]} scale={1.2}>
-      <mesh position={[0, 0.08, 0]}>
-        <sphereGeometry args={[3.03, 36, 20, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshBasicMaterial
-          ref={domeGlowRef}
-          color="#edf6ff"
-          transparent
-          opacity={0.92}
-          toneMapped={false}
-          depthWrite={false}
-        />
-      </mesh>
-      <mesh position={[0, 1.12, 4.62]}>
-        <circleGeometry args={[0.78, 32]} />
-        <meshBasicMaterial
-          ref={entranceRef}
-          color="#34404d"
-          transparent
-          opacity={1}
-        />
-      </mesh>
-      <instancedMesh
-        args={[undefined, undefined, IGLOO_BLOCKS.length]}
-        ref={(mesh) => {
-          meshRef.current = mesh;
-          if (mesh) {
-            mesh.instanceMatrix.setUsage(DynamicDrawUsage);
-          }
-          applyBlockInstances(mesh, IGLOO_BLOCKS, '#8d98a4');
-        }}
-      >
-        <primitive attach="geometry" object={IGLOO_BLOCK_GEOMETRY} />
-        <meshStandardMaterial
-          roughness={0.8}
-          metalness={0.05}
-          emissive="#263746"
-          emissiveIntensity={0.16}
-        />
-      </instancedMesh>
-      <pointLight
-        position={[0, 1.2, 0]}
-        intensity={46}
-        distance={17}
-        color="#eef5fd"
-      />
-    </group>
-  );
-};
 
 export const RisingStones = () => (
   <instancedMesh

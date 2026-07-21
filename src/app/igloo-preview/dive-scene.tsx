@@ -1,6 +1,11 @@
 'use client';
 
-import { Environment, Lightformer, useDetectGPU } from '@react-three/drei';
+import {
+  AdaptiveDpr,
+  Environment,
+  Lightformer,
+  useDetectGPU,
+} from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { RefObject, Suspense, useEffect, useRef } from 'react';
 
@@ -16,7 +21,6 @@ import DiveLoader from './dive-loader';
 import DiveOverlay from './dive-overlay';
 import {
   IceRidges,
-  IglooShelter,
   NarrativeStones,
   RisingStones,
   RisingWorld,
@@ -42,16 +46,47 @@ type PointerDrag = {
   y: number;
 };
 
+const LINE_DELTA_MODE = 1;
+const PAGE_DELTA_MODE = 2;
+const LINE_HEIGHT_PX = 16;
+const MAX_WHEEL_DELTA_PX = 120;
+const KEYBOARD_STEP = 0.36;
+
+const normalizeWheelDelta = (
+  event: React.WheelEvent<HTMLDivElement>,
+): number => {
+  let pixels = event.deltaY;
+  if (event.deltaMode === LINE_DELTA_MODE) {
+    pixels *= LINE_HEIGHT_PX;
+  }
+  if (event.deltaMode === PAGE_DELTA_MODE) {
+    pixels *= window.innerHeight;
+  }
+  return Math.max(-MAX_WHEEL_DELTA_PX, Math.min(MAX_WHEEL_DELTA_PX, pixels));
+};
+
 const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
-  // REASON: Suspense resolution is only observable from a mounted child - mark
-  // the dive live and fade the loader once the terrain GLB is actually ready
+  // REASON: Suspense resolution is only observable from a mounted child, and
+  // the camera reveal must wait until the loader has fully cleared the scene
   useEffect(() => {
-    stageRef.current = 'live';
     const loader = loaderRef.current;
-    if (loader) {
-      loader.style.opacity = '0';
-      loader.style.pointerEvents = 'none';
+    if (!loader) {
+      stageRef.current = 'live';
+      return;
     }
+    const handleTransitionEnd = (event: TransitionEvent): void => {
+      if (event.target !== loader || event.propertyName !== 'opacity') {
+        return;
+      }
+      stageRef.current = 'live';
+      loader.removeEventListener('transitionend', handleTransitionEnd);
+    };
+    loader.addEventListener('transitionend', handleTransitionEnd);
+    loader.style.opacity = '0';
+    loader.style.pointerEvents = 'none';
+    return () => {
+      loader.removeEventListener('transitionend', handleTransitionEnd);
+    };
   }, [stageRef, loaderRef]);
   return null;
 };
@@ -73,12 +108,18 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
   const tier = tierOverride ?? gpu.tier;
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
-    targetRef.current += event.deltaY * WHEEL_SENSITIVITY;
+    if (stageRef.current !== 'live') {
+      return;
+    }
+    targetRef.current += normalizeWheelDelta(event) * WHEEL_SENSITIVITY;
   };
 
   const handlePointerDown = (
     event: React.PointerEvent<HTMLDivElement>,
   ): void => {
+    if (stageRef.current !== 'live') {
+      return;
+    }
     if (event.button !== 0) {
       return;
     }
@@ -127,11 +168,14 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
   // full-screen div is never focused, so an onKeyDown prop would not fire
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
+      if (stageRef.current !== 'live') {
+        return;
+      }
       if (event.key === 'ArrowDown') {
-        targetRef.current += 0.5;
+        targetRef.current += KEYBOARD_STEP;
       }
       if (event.key === 'ArrowUp') {
-        targetRef.current -= 0.5;
+        targetRef.current -= KEYBOARD_STEP;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -159,8 +203,9 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
         camera={{ fov: 58, near: 0.2, far: 240, position: [0, 6.6, 16] }}
         dpr={tier < 2 ? 1 : 1.5}
         gl={{ toneMappingExposure: 0.5 }}
-        performance={{ min: 0.5 }}
+        performance={{ min: 0.72, debounce: 350 }}
       >
+        <AdaptiveDpr />
         <color attach="background" args={['#aeb5bf']} />
         <fogExp2 attach="fog" args={['#aeb5bf', 0.05]} />
         <hemisphereLight args={['#e3e7ec', '#525b66', 0.68]} />
@@ -179,7 +224,6 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
           <RisingWorld progressRef={progressRef} rise={worldARise}>
             <SnowTerrain />
             <IceRidges />
-            <IglooShelter progressRef={progressRef} />
           </RisingWorld>
           <RisingWorld progressRef={progressRef} rise={worldBRise}>
             <RisingStones />

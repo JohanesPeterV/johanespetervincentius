@@ -1,46 +1,43 @@
-# Igloo Preview — Concept Spec
+# World Rise Preview — Concept Spec
 
 This is the canonical concept for `src/app/igloo-preview/`. Read it **before** touching any
 file in that folder. When a request about the preview is ambiguous, this doc wins over your
-own intuition. `igloo.inc` is a **look-and-feel reference only** — never a thing to clone.
-This file is where the concept lives; the preview is where we build it.
+own intuition. The route name is historical; this file is where the accepted concept lives,
+and the preview is where we refine it.
 
-Its whole reason to exist: stop the back-and-forth. The concept below has been misread the
-same way many times and wasted many tokens. If you catch yourself building something that
-contradicts the **Mental Model** or the **Banned Misreads**, stop — you have the concept wrong.
+The reference-discovery stage is over. Do **not** reopen, study, or chase parity with
+`igloo.inc` unless the user explicitly asks for a new comparison. Its useful limit is already
+understood, and the current preview is an accepted foundation.
 
-**If you were handed only this file:** the reference site is **igloo.inc**. Open it first (§0),
-then build or iterate on the `/igloo-preview` page following the concept in this doc. That is
-the whole job — nothing here requires any context beyond this file plus the live reference.
+The purpose of this preview is now narrow: preserve the scroll-led transition language and the
+near-fixed camera model, then make both feel as smooth, legible, and expensive as possible.
+Timing, restraint, and frame stability matter more than adding spectacle.
 
 ---
 
-## 0. The Reference Site — open it first
+## 0. Scope Is Locked
 
-**URL: https://igloo.inc** — actually open it and scroll through it before you write any code.
-You (the AI) can browse it; do so. Absorb how it feels; do not read its source to copy it.
+`/igloo-preview` is no longer a reference-matching exercise. Future work starts from the live
+preview and this document, not from another site.
 
-What it is: **igloo.inc**, Awwwards **Site of the Year 2024** (built by studio Abeto with
-Bureaux). It is a near-100% WebGL scroll experience — an icy, crystalline world where
-**scrolling drives a choreographed 3D journey** through distinct scenes joined by signature
-glitch/aberration transitions. It is widely treated as a **craft benchmark**: the kind of site
-that makes people's jaw drop. That craft bar is why we reference it.
+Keep:
 
-What we **borrow** from it:
+- Scroll input driving a choreographed world-to-world transition.
+- A camera that stays nearly fixed while the world rises, except for the protected finale move.
+- A deliberate, readable pace that lets the viewer see the transition happen.
+- A premium finish: continuous motion, quiet camera behaviour, stable frame time, and restrained
+  postprocessing.
 
-- The **mood** and the **level of craft** — playful yet stunning, obsessively polished (§5).
-- The **core idea** that scrolling drives a choreographed 3D world with world-to-world
-  transitions (§6, §7).
+Do not:
 
-What we do **NOT** take:
+- Compare the page against `igloo.inc` by default or spend time closing visual-parity gaps.
+- Reintroduce an igloo shelter, logo, or other literal reference object. The former block-built
+  shelter was removed because it dominated the composition and looked unfinished.
+- Add frantic glitch, sharp FOV punches, abrupt camera keyframes, or noise that makes the work
+  feel faster or cheaper.
+- Add assets merely to make the blockout busier.
 
-- Its content, layout, copy, fonts, or assets. This is a portfolio, not a clone.
-- Its exact camera behaviour. **igloo.inc is not our spec — §1 is.** On igloo.inc the camera
-  moves through scenes; **our** concept is deliberately different: scroll down → the world
-  **rises up** past a **near-fixed** camera. When igloo's behaviour and §1 disagree, §1 wins.
-
-Bottom line: use igloo.inc to calibrate the **feeling and the quality bar**, then greybox
-**our** concept (§1–§7). Reference for mood, never a target to reproduce.
+Historical route and file names may remain for continuity; they do not define the visual content.
 
 ---
 
@@ -67,17 +64,20 @@ If you can only keep one sentence: **scroll down → stuff goes up → camera ba
   "dive" for historical reasons — ignore the word; obey this doc.)
 - ❌ **"Go source / generate / hand-craft 3D models."** Not your job. See §3.
 - ❌ **"Add the portfolio content / sections now."** Not yet. See §4.
-- ❌ **"Clone igloo.inc."** It is a mood and craft-bar reference, not a spec to reproduce.
+- ❌ **"Make it closer to igloo.inc."** That comparison stage is complete unless explicitly
+  reopened by the user.
 
 ---
 
-## 3. Your Job: Concept & Blockout, NOT Art
+## 3. Your Job: Choreography & Blockout, NOT Reference Matching
 
 Your role is to be a **greybox level designer** for the experience:
 
 - **Place placeholder objects, choreograph the beats, and nail the timing / motion / transitions.**
 - Placeholders are **bare primitives** — boxes, spheres, rough rock/crystal shapes. No labels,
   no textures, no sourced meshes. Position, scale, and motion are what matter.
+- Placeholder does not mean careless. Silhouette, spacing, lighting, easing, and restraint must
+  still feel intentional and presentation-ready.
 - **Real 3D models come from the user, later.** After the _concept_ reads right, the user swaps
   the primitives for finished assets. Do not block on art; do not go looking for it.
 - Get the **shape of the experience** right. Think choreography, not decoration.
@@ -99,10 +99,16 @@ slideshow, and the three stones must never read as randomly scattered meshes.
 
 ## 5. Feeling Target
 
-- **Primary:** playful curiosity — inviting, a little toy-like, "what happens if I scroll?"
-- **Held to the standard of:** jaw-dropping craft. The bar is "makes people's jaw drop in awe."
-  Playful, but _stunningly_ executed.
-- Both at once: approachable on the surface, breathtaking in the polish.
+- **Primary:** premium curiosity — inviting enough to encourage the first scroll, composed enough
+  to reward watching every transition.
+- **Pace:** unhurried and legible. Input should feel responsive, but no beat should rush past before
+  its motion can be understood.
+- **Camera:** quiet, weighted, and continuous. World motion does the storytelling; FOV, roll, and
+  pointer parallax stay restrained.
+- **Effects:** refined rather than loud. No low-frame-rate glitch stepping, persistent flicker,
+  excessive chromatic split, heavy grain, or effect added only to signal speed.
+- **Performance:** smoothness is part of the visual design. During motion, protect frame time first;
+  restore maximum clarity once the scene settles.
 
 ---
 
@@ -128,8 +134,8 @@ add, remove, or reorder a beat. Each beat is a stretch of scroll progress (§8 e
 
 | Beat   | Name             | What happens                                                                                                    | Protected? |
 | ------ | ---------------- | --------------------------------------------------------------------------------------------------------------- | ---------- |
-| **W1** | **First reveal** | Preloader dissolves; the natural-ice world snaps into being. First breath.                                      | 🛡️ **YES** |
-| **T**  | **The seam**     | World A shreds/glitches open into World B; palette flips natural → crystal.                                     | 🛡️ **YES** |
+| **W1** | **First reveal** | Preloader dissolves completely; the natural-ice world settles into being. First breath.                         | 🛡️ **YES** |
+| **T**  | **The seam**     | World A opens through a smooth crystalline shred into World B; palette flips natural → crystal.                 | 🛡️ **YES** |
 | **W2** | First stone      | The Work Experience stone rises into view with its copy attached beside it.                                     |            |
 | **W3** | Second stone     | The Projects stone follows on the same path with its own attached copy.                                         |            |
 | **W4** | Third stone      | The Tech Stack stone continues the sequence with its own attached copy.                                         |            |
@@ -181,14 +187,15 @@ Approximate current mapping (see `descent.ts` keyframes):
   with dark stones silhouetted against the sky, and the last section lands. Continued downward
   scroll wraps to `0`, where W1's opening veil hides the world reset and starts the next cycle.
 
-The shred/glitch impulse is velocity-driven but **zone-gated**: it is multiplied by
-`seamBoost + finaleBoost`, so it only ever fires around T (`SEAM_CENTER = 2.3`) and W6
-(`FINALE_CENTER = 4.58`). Everywhere else, scroll is clean.
+The shred impulse is progress-driven, velocity-accented, and **zone-gated**: it is multiplied by
+`seamBoost + finaleBoost`, so it only ever appears around T (`SEAM_CENTER = 2.3`) and W6
+(`FINALE_CENTER = 4.58`). Its noise moves continuously with progress and freezes cleanly when
+input stops. Everywhere else, scroll is clean.
 
 Key files (`src/app/igloo-preview/`):
 
 - `descent.ts` — the scroll→scene mapping: keyframes, seam, narrative stones, clamp. **The spine.**
-- `world-layout.ts` — placeholder geometry (dome blocks, peripheral stones, crystals, snow).
+- `world-layout.ts` — placeholder geometry (peripheral stones, crystals, snow).
 - `dive-scene.tsx` / `dive-world.tsx` — R3F scene assembly.
 - `camera-rig.tsx` — camera behaviour.
 - `dive-transition-effect.ts` — the seam shred/glitch effect.
@@ -199,10 +206,10 @@ Key files (`src/app/igloo-preview/`):
 - `wind-audio.ts` — ambient wind.
 
 **Camera contract:** the camera is parked at `y≈3.5, z=16` for the whole run, apart from a
-small settle during the W1 reveal and the single W6 launch at the tail (which happens behind
-the finale flash, `~4.5 – 4.8`). Scroll never translates the camera through the world; it
-drives `worldARise` / `worldBRise` in `descent.ts`, which lift the two world groups past the
-lens. Keep it that way.
+small settle during the W1 reveal and the single continuous W6 launch at the tail (which begins
+behind the finale flash and settles as it clears, `~4.48 – 4.96`). Scroll never translates the
+camera through the world; it drives `worldARise` / `worldBRise` in `descent.ts`, which lift the
+two world groups past the lens. Keep it that way.
 
 **Color-space contract:** the keyframe hex colors in `descent.ts` are sRGB. On the DOM veil
 they are written as CSS `rgb()` directly; on the WebGL side (`scene.fog` / `scene.background`)
@@ -225,6 +232,11 @@ Before claiming a preview change is done, confirm **all** of these:
 - [ ] You did **not** add portfolio content to drive the 3D (unless explicitly asked).
 - [ ] W2–W4 use three intentional stones, and each content panel stays attached to its stone.
 - [ ] The two protected moments (W1 reveal, T seam) still land and were not regressed.
+- [ ] The loader clears before W1 camera motion begins; input during loading cannot skip the reveal.
+- [ ] Wheel, keyboard, and drag input keep the beats slow enough to read without feeling laggy.
+- [ ] T and W6 move continuously without stepped noise, abrupt camera stops, or gratuitous lens
+      distortion.
+- [ ] Moving frames may trade a little resolution for stability, then recover full clarity at rest.
 - [ ] Progress wraps on **`0 ≤ progress < 5`** and continuous input has no scroll endpoint.
 - [ ] The composer subtree does not re-render.
 - [ ] Verified in the running app, not just build/lint (per repo verify practice).

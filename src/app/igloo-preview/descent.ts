@@ -136,9 +136,9 @@ export const DIVE_SECTIONS: DiveSection[] = [
 
 export const DIVE_LENGTH = 5;
 export const DIVE_START = 0.95;
-export const DIVE_DAMPING = 4.68;
-export const WHEEL_SENSITIVITY = 1 / 850;
-export const TOUCH_SENSITIVITY = 1 / 600;
+export const DIVE_DAMPING = 2.8;
+export const WHEEL_SENSITIVITY = 1 / 1100;
+export const TOUCH_SENSITIVITY = 1 / 800;
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const value = parseInt(hex.slice(1), 16);
@@ -297,13 +297,20 @@ const SEAM_SPAN = 0.38;
 const FINALE_CENTER = 4.58;
 const FINALE_SPAN = 0.4;
 
-export const seamBoost = (progress: number): number => {
-  return 1 - Math.min(1, Math.abs(progress - SEAM_CENTER) / SEAM_SPAN);
+const transitionBoost = (
+  progress: number,
+  center: number,
+  span: number,
+): number => {
+  const distance = Math.min(1, Math.abs(progress - center) / span);
+  return 1 - distance * distance * (3 - 2 * distance);
 };
 
-export const finaleBoost = (progress: number): number => {
-  return 1 - Math.min(1, Math.abs(progress - FINALE_CENTER) / FINALE_SPAN);
-};
+export const seamBoost = (progress: number): number =>
+  transitionBoost(progress, SEAM_CENTER, SEAM_SPAN);
+
+export const finaleBoost = (progress: number): number =>
+  transitionBoost(progress, FINALE_CENTER, FINALE_SPAN);
 
 export type NarrativeStone = {
   center: number;
@@ -373,15 +380,15 @@ export const createDescentFrame = (): DescentFrame => ({
   veilColor: [0, 0, 0],
 });
 
-export const wrapProgress = (value: number): number => {
-  return ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
-};
+export const wrapProgress = (value: number): number =>
+  ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
 
 const WORLD_A_SETTLE_DROP = 3.2;
 const WORLD_A_EXIT_START = 2.08;
 const WORLD_A_EXIT_END = 2.48;
 const WORLD_A_EXIT_LIFT = 46;
 const WORLD_B_ENTER_AT = 2.16;
+const WORLD_B_ACCELERATION_SPAN = 0.24;
 const WORLD_B_RISE_RATE = 24;
 
 export const worldARise = (progress: number): number => {
@@ -393,7 +400,12 @@ export const worldARise = (progress: number): number => {
 };
 
 export const worldBRise = (progress: number): number => {
-  return Math.max(0, progress - WORLD_B_ENTER_AT) * WORLD_B_RISE_RATE;
+  const distance = Math.max(0, progress - WORLD_B_ENTER_AT);
+  return (
+    distance *
+    smoothstep(0, WORLD_B_ACCELERATION_SPAN, distance) *
+    WORLD_B_RISE_RATE
+  );
 };
 
 const FINALE_SUN_START = 4.45;
@@ -462,14 +474,7 @@ export const railProximity = (progress: number, center: number): number => {
   return 1 - Math.min(1, Math.abs(progress - center) / 0.6);
 };
 
-export type DiveTuning = {
-  aberrationScale: number;
-  fovRush: number;
-  snowSize: number;
-  transitionScale: number;
-};
-
-export const DIVE_TUNING: DiveTuning = {
+export const DIVE_TUNING = {
   aberrationScale: 1,
   fovRush: 1,
   snowSize: 2.1,
@@ -477,16 +482,16 @@ export const DIVE_TUNING: DiveTuning = {
 };
 
 export const transitionStrength = (velocity: number): number => {
-  return Math.min(1, Math.abs(velocity) * 20) * DIVE_TUNING.transitionScale;
+  return Math.min(1, Math.abs(velocity) * 12) * DIVE_TUNING.transitionScale;
 };
 
 export const aberrationStrength = (velocity: number): number => {
-  const base = Math.min(0.007, 0.0011 + Math.abs(velocity) * 0.055);
+  const base = Math.min(0.0028, 0.00055 + Math.abs(velocity) * 0.024);
   return base * DIVE_TUNING.aberrationScale;
 };
 
 export const rushFov = (velocity: number): number => {
-  return 58 + Math.min(6, Math.abs(velocity) * 160) * DIVE_TUNING.fovRush;
+  return 58 + Math.min(1.4, Math.abs(velocity) * 42) * DIVE_TUNING.fovRush;
 };
 
 export const riseMeters = (progress: number): number => {
