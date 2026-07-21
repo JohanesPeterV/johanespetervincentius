@@ -135,9 +135,9 @@ export const DIVE_SECTIONS: DiveSection[] = [
 
 export const DIVE_LENGTH = 5;
 export const DIVE_START = 0.95;
-export const DIVE_DAMPING = 2.45;
-export const WHEEL_SENSITIVITY = 1 / 1100;
-export const TOUCH_SENSITIVITY = 1 / 800;
+export const DRIVE_FOLLOW_RATE = 1.65;
+export const WHEEL_SENSITIVITY = 1 / 1350;
+export const TOUCH_SENSITIVITY = 1 / 1000;
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const value = parseInt(hex.slice(1), 16);
@@ -283,11 +283,11 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     at: 5,
     position: [0, 3.5, 16],
     look: [0, 2.4, 0],
-    fog: '#3a5f83',
-    fogDensity: 0.034,
-    glow: 0.4,
-    veil: 0,
-    veilColor: '#eaf4fd',
+    fog: '#c6ccd4',
+    fogDensity: 0.05,
+    glow: 0,
+    veil: 1,
+    veilColor: '#e9edf2',
   },
 ];
 
@@ -349,9 +349,9 @@ const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
   veilColor: hexToRgb(raw.veilColor),
 }));
 
-const smoothstep = (edge0: number, edge1: number, value: number): number => {
+const smootherstep = (edge0: number, edge1: number, value: number): number => {
   const t = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
+  return t * t * t * (t * (t * 6 - 15) + 10);
 };
 
 const lerp = (from: number, to: number, t: number): number => {
@@ -391,9 +391,9 @@ const WORLD_B_ACCELERATION_SPAN = 0.24;
 const WORLD_B_RISE_RATE = 24;
 
 export const worldARise = (progress: number): number => {
-  const settle = WORLD_A_SETTLE_DROP * (1 - smoothstep(0, 0.65, progress));
+  const settle = WORLD_A_SETTLE_DROP * (1 - smootherstep(0, 0.65, progress));
   const exit =
-    smoothstep(WORLD_A_EXIT_START, WORLD_A_EXIT_END, progress) *
+    smootherstep(WORLD_A_EXIT_START, WORLD_A_EXIT_END, progress) *
     WORLD_A_EXIT_LIFT;
   return exit - settle;
 };
@@ -402,7 +402,7 @@ export const worldBRise = (progress: number): number => {
   const distance = Math.max(0, progress - WORLD_B_ENTER_AT);
   return (
     distance *
-    smoothstep(0, WORLD_B_ACCELERATION_SPAN, distance) *
+    smootherstep(0, WORLD_B_ACCELERATION_SPAN, distance) *
     WORLD_B_RISE_RATE
   );
 };
@@ -411,7 +411,7 @@ const FINALE_SUN_START = 4.45;
 const FINALE_SUN_END = 4.85;
 
 export const finaleSunLift = (progress: number): number => {
-  return smoothstep(FINALE_SUN_START, FINALE_SUN_END, progress);
+  return smootherstep(FINALE_SUN_START, FINALE_SUN_END, progress);
 };
 
 // REASON: runs every frame from the camera rig - writing into a caller-owned
@@ -435,7 +435,7 @@ export const writeDescentFrame = (
     }
   }
   const span = Math.max(0.0001, end.at - start.at);
-  const t = smoothstep(0, 1, (wrapped - start.at) / span);
+  const t = smootherstep(0, 1, (wrapped - start.at) / span);
   writeTriple(target.position, start.position, end.position, t);
   writeTriple(target.look, start.look, end.look, t);
   writeTriple(target.fogColor, start.fogColor, end.fogColor, t);
@@ -451,19 +451,19 @@ export const sectionMotion = (
   section: DiveSection,
 ): SectionMotion => {
   if (section.placement === 'stone') {
-    const fadeIn = smoothstep(
-      section.center - 0.26,
+    const fadeIn = smootherstep(
+      section.center - 0.34,
       section.center - 0.16,
       progress,
     );
     const fadeOut =
-      1 - smoothstep(section.center + 0.16, section.center + 0.26, progress);
+      1 - smootherstep(section.center + 0.16, section.center + 0.34, progress);
     return { opacity: fadeIn * fadeOut, shift: 0 };
   }
   const delta = progress - section.center;
   const distance = Math.abs(delta);
   return {
-    opacity: 1 - smoothstep(0.22, 0.52, distance),
+    opacity: 1 - smootherstep(0.22, 0.52, distance),
     shift: -delta * 110,
   };
 };
@@ -484,12 +484,12 @@ export const transitionStrength = (velocity: number): number => {
 };
 
 export const aberrationStrength = (velocity: number): number => {
-  const base = Math.min(0.0018, 0.00035 + Math.abs(velocity) * 0.014);
+  const base = Math.min(0.0011, Math.abs(velocity) * 0.008);
   return base * DIVE_TUNING.aberrationScale;
 };
 
 export const rushFov = (velocity: number): number => {
-  return 58 + Math.min(0.8, Math.abs(velocity) * 24) * DIVE_TUNING.fovRush;
+  return 58 + Math.min(0.4, Math.abs(velocity) * 14) * DIVE_TUNING.fovRush;
 };
 
 export const riseMeters = (progress: number): number => {

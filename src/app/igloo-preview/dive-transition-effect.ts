@@ -30,15 +30,15 @@ void mainUv(inout vec2 uv) {
     : clamp((uProgress - 4.18) / 0.8, 0.0, 1.0);
   float front = mix(-0.14, 1.14, phase);
   float flow = phase * 10.0;
-  float fracture = (diveGlitchNoise(uv.x * 14.0 + flow, 0.37) - 0.5) * 0.055;
-  fracture += (diveGlitchNoise(uv.x * 34.0 - flow * 0.7, 0.61) - 0.5) * 0.018;
+  float fracture = (diveGlitchNoise(uv.x * 12.0 + flow, 0.37) - 0.5) * 0.038;
+  fracture += (diveGlitchNoise(uv.x * 26.0 - flow * 0.7, 0.61) - 0.5) * 0.012;
   front += fracture;
-  float envelope = 1.0 - smoothstep(0.015, 0.12, abs(uv.y - front));
-  float column = floor(uv.x * 30.0);
+  float envelope = 1.0 - smoothstep(0.02, 0.17, abs(uv.y - front));
+  float column = floor(uv.x * 22.0);
   float facet = diveGlitchNoise(column + phase * 4.5, 1.7);
-  float slice = smoothstep(0.25, 0.82, facet) * envelope * amount;
-  uv.x += (facet - 0.5) * slice * 0.05;
-  uv.y += (diveGlitchNoise(column * 0.31 + phase * 3.0, 2.4) - 0.5) * slice * 0.006;
+  float slice = smoothstep(0.32, 0.86, facet) * envelope * amount;
+  uv.x += (facet - 0.5) * slice * 0.026;
+  uv.y += (diveGlitchNoise(column * 0.31 + phase * 3.0, 2.4) - 0.5) * slice * 0.004;
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
@@ -52,18 +52,18 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     : clamp((uProgress - 4.18) / 0.8, 0.0, 1.0);
   float front = mix(-0.14, 1.14, phase);
   float flow = phase * 10.0;
-  float fracture = (diveGlitchNoise(uv.x * 14.0 + flow, 0.37) - 0.5) * 0.055;
-  fracture += (diveGlitchNoise(uv.x * 34.0 - flow * 0.7, 0.61) - 0.5) * 0.018;
+  float fracture = (diveGlitchNoise(uv.x * 12.0 + flow, 0.37) - 0.5) * 0.038;
+  fracture += (diveGlitchNoise(uv.x * 26.0 - flow * 0.7, 0.61) - 0.5) * 0.012;
   front += fracture;
   float distanceToFront = abs(uv.y - front);
-  float envelope = 1.0 - smoothstep(0.015, 0.12, distanceToFront);
-  float core = 1.0 - smoothstep(0.0, 0.009, distanceToFront);
-  float column = floor(uv.x * 30.0);
+  float envelope = 1.0 - smoothstep(0.02, 0.17, distanceToFront);
+  float core = 1.0 - smoothstep(0.0, 0.016, distanceToFront);
+  float column = floor(uv.x * 22.0);
   float facet = diveGlitchNoise(column + phase * 4.5, 1.7);
   float verticalFacet = diveGlitchNoise(column * 0.31 + phase * 3.0, 2.4);
   vec2 refraction = vec2(
-    (facet - 0.5) * envelope * amount * 0.038,
-    (verticalFacet - 0.5) * envelope * amount * 0.006
+    (facet - 0.5) * envelope * amount * 0.022,
+    (verticalFacet - 0.5) * envelope * amount * 0.004
   );
   vec3 glass = vec3(
     texture2D(inputBuffer, uv + refraction * 1.06).r,
@@ -71,9 +71,9 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     texture2D(inputBuffer, uv + refraction * 0.94).b
   );
   float facetLight = smoothstep(0.7, 0.98, facet) * envelope * amount;
-  glass = mix(glass, glass * vec3(0.72, 0.86, 1.08), 0.22);
-  glass += vec3(0.58, 0.8, 1.0) * (core * 0.34 + facetLight * 0.08);
-  float blend = clamp(envelope * amount * 0.58 + core * amount * 0.16, 0.0, 0.74);
+  glass = mix(glass, glass * vec3(0.78, 0.9, 1.06), 0.14);
+  glass += vec3(0.58, 0.8, 1.0) * (core * 0.18 + facetLight * 0.05);
+  float blend = clamp(envelope * amount * 0.42 + core * amount * 0.1, 0.0, 0.54);
   float revealed = 1.0 - smoothstep(front - 0.045, front + 0.045, uv.y);
   vec3 regimeColor = inputColor.rgb;
   if (uProgress < 3.5) {

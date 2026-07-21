@@ -13,6 +13,9 @@ The purpose of this preview is now narrow: preserve the scroll-led transition la
 near-fixed camera model, then make both feel as smooth, legible, and expensive as possible.
 Timing, restraint, and frame stability matter more than adding spectacle.
 
+Polish in this order: continuous motion, readable pace, quiet camera, stable frame time, then
+effects. New detail is never allowed to compensate for a weak transition.
+
 ---
 
 ## 0. Scope Is Locked
@@ -25,6 +28,7 @@ Keep:
 - Scroll input driving a choreographed world-to-world transition.
 - A camera that stays nearly fixed while the world rises, except for the protected finale move.
 - A deliberate, readable pace that lets the viewer see the transition happen.
+- Scroll intent that remains responsive without allowing fast input to sprint through the beats.
 - A premium finish: continuous motion, quiet camera behaviour, stable frame time, and restrained
   postprocessing.
 
@@ -35,6 +39,7 @@ Do not:
   shelter was removed because it dominated the composition and looked unfinished.
 - Add frantic glitch, sharp FOV punches, abrupt camera keyframes, or noise that makes the work
   feel faster or cheaper.
+- Let raw wheel, key, or drag velocity directly dictate camera or effect intensity.
 - Add assets merely to make the blockout busier.
 
 Historical route and file names may remain for continuity; they do not define the visual content.
@@ -103,6 +108,8 @@ slideshow, and the three stones must never read as randomly scattered meshes.
   to reward watching every transition.
 - **Pace:** unhurried and legible. Input should feel responsive, but no beat should rush past before
   its motion can be understood.
+- **Input:** preserve every scroll intention, but play it back through weighted acceleration and a
+  calm maximum speed so rapid input still reveals the full choreography.
 - **Camera:** quiet, weighted, and continuous. World motion does the storytelling; FOV, roll, and
   pointer parallax stay restrained.
 - **Effects:** refined rather than loud. No low-frame-rate glitch stepping, persistent flicker,
@@ -184,8 +191,13 @@ Approximate current mapping (see `descent.ts` keyframes):
   (`#dfeefb` → `#eaf4fd`, the counter-image of the dark seam veil) bursts up and hides the
   one great camera launch; behind it the sun mesh sweeps overhead (`finaleSunLift`).
 - **~4.8 – <5** → the flash clears; the camera settles looking up into the sun's god-ray glow
-  with dark stones silhouetted against the sky, and the last section lands. Continued downward
-  scroll wraps to `0`, where W1's opening veil hides the world reset and starts the next cycle.
+  with dark stones silhouetted against the sky, and the last section lands. The pale veil then
+  closes fully before progress wraps to `0`; that same opaque frame becomes W1's opening veil, so
+  the world and camera reset invisibly instead of flashing across a hard cut.
+
+The absolute scroll target stays unbounded, but the sampled progress follows it with smoothed
+acceleration, deceleration, and a calm top speed. Fast input may queue more choreography; it must
+never make the camera or worlds sprint to catch up, and it must never discard the user's intent.
 
 The shred impulse is progress-driven, velocity-accented, and **zone-gated**: it is multiplied by
 `seamBoost + finaleBoost`, so it only ever appears around T (`SEAM_CENTER = 2.3`) and W6
@@ -234,12 +246,15 @@ Before claiming a preview change is done, confirm **all** of these:
 - [ ] The two protected moments (W1 reveal, T seam) still land and were not regressed.
 - [ ] The loader clears before W1 camera motion begins; input during loading cannot skip the reveal.
 - [ ] Wheel, keyboard, and drag input keep the beats slow enough to read without feeling laggy.
+- [ ] Rapid repeated input queues the journey at the same calm top speed instead of skipping beats
+      or producing a velocity spike.
 - [ ] T and W6 move continuously without stepped noise, abrupt camera stops, or gratuitous lens
       distortion.
 - [ ] Centered copy leaves cleanly without blur-smearing, and lens/roll accents ease in and out
       instead of following raw input deltas.
 - [ ] Moving frames may trade a little resolution for stability, then recover full clarity at rest.
 - [ ] Progress wraps on **`0 ≤ progress < 5`** and continuous input has no scroll endpoint.
+- [ ] The closing W6 veil and opening W1 veil meet at full opacity, hiding the loop reset.
 - [ ] The composer subtree does not re-render.
 - [ ] Verified in the running app, not just build/lint (per repo verify practice).
 

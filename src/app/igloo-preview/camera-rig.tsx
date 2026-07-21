@@ -18,9 +18,7 @@ import {
 } from 'three';
 
 import {
-  DIVE_DAMPING,
   DIVE_LENGTH,
-  DescentFrame,
   NARRATIVE_STONES,
   aberrationStrength,
   createDescentFrame,
@@ -33,6 +31,9 @@ import {
   wrapProgress,
   writeDescentFrame,
 } from './descent';
+import type { DescentFrame } from './descent';
+import { advanceDrive, applyFinaleCamera } from './camera-motion';
+import type { DriveMotion } from './camera-motion';
 import { applyOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
 import DivePostprocessing from './dive-postprocessing';
@@ -62,27 +63,6 @@ const PARALLAX_DAMPING = 2.2;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
 const RUSH_DAMPING = 4.5;
-const FINALE_LAUNCH_START = 4.48;
-const FINALE_LAUNCH_END = 4.96;
-
-const applyFinaleCamera = (frame: DescentFrame, progress: number): void => {
-  const distance = Math.min(
-    1,
-    Math.max(
-      0,
-      (progress - FINALE_LAUNCH_START) /
-        (FINALE_LAUNCH_END - FINALE_LAUNCH_START),
-    ),
-  );
-  if (distance === 0) {
-    return;
-  }
-  const eased = distance * distance * (3 - 2 * distance);
-  frame.position[1] = MathUtils.lerp(3.5, 11.5, eased);
-  frame.position[2] = MathUtils.lerp(16, 21, eased);
-  frame.look[1] = MathUtils.lerp(2.4, 15.5, eased);
-  frame.look[2] = MathUtils.lerp(0, -10, eased);
-};
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
@@ -97,7 +77,7 @@ export default function CameraRig({
   gpuTier,
   stageRef,
 }: CameraRigParams) {
-  const currentRef = useRef(0);
+  const driveRef = useRef<DriveMotion>({ current: 0, velocity: 0 });
   const fovRef = useRef(BASE_FOV);
   const rollRef = useRef(0);
   const rushRef = useRef(0);
@@ -117,21 +97,14 @@ export default function CameraRig({
   useFrame(({ camera, scene, performance, size }, delta) => {
     const frameDelta = Math.min(delta, MAX_FRAME_DELTA);
     const live = stageRef.current === 'live';
-    const previousProgress = currentRef.current;
+    const drive = driveRef.current;
+    const previousProgress = drive.current;
     if (live) {
-      currentRef.current = MathUtils.damp(
-        previousProgress,
-        targetRef.current,
-        DIVE_DAMPING,
-        frameDelta,
-      );
+      advanceDrive(drive, targetRef.current, frameDelta);
     }
-    const step = currentRef.current - previousProgress;
+    const step = drive.current - previousProgress;
     const driveStep = frameDelta > 0 ? step / (frameDelta * BASELINE_FPS) : 0;
-    if (live && Math.abs(targetRef.current - currentRef.current) < 0.0004) {
-      currentRef.current = targetRef.current;
-    }
-    const progress = wrapProgress(currentRef.current);
+    const progress = wrapProgress(drive.current);
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
     applyFinaleCamera(frame, progress);
@@ -152,13 +125,13 @@ export default function CameraRig({
       frameDelta,
     );
     camera.position.set(
-      frame.position[0] + parallax.x * 0.38,
-      frame.position[1] - parallax.y * 0.18,
+      frame.position[0] + parallax.x * 0.22,
+      frame.position[1] - parallax.y * 0.1,
       frame.position[2],
     );
     camera.lookAt(
-      frame.look[0] + parallax.x * 0.9,
-      frame.look[1] - parallax.y * 0.55,
+      frame.look[0] + parallax.x * 0.48,
+      frame.look[1] - parallax.y * 0.28,
       frame.look[2],
     );
     const transitionZone = Math.min(
@@ -166,7 +139,7 @@ export default function CameraRig({
       seamBoost(progress) + finaleBoost(progress),
     );
     const targetRoll =
-      Math.max(-0.006, Math.min(0.006, -driveStep * 0.07)) * transitionZone;
+      Math.max(-0.003, Math.min(0.003, -driveStep * 0.035)) * transitionZone;
     rollRef.current = MathUtils.damp(
       rollRef.current,
       targetRoll,
@@ -221,7 +194,7 @@ export default function CameraRig({
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
     if (transitionRef.current) {
       transitionRef.current.setDriveState(
-        Math.max(rush * 0.4, transitionZone * 0.62),
+        Math.max(rush * 0.28, transitionZone * 0.46),
         progress,
       );
     }

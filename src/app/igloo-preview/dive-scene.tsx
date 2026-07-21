@@ -50,7 +50,7 @@ const LINE_DELTA_MODE = 1;
 const PAGE_DELTA_MODE = 2;
 const LINE_HEIGHT_PX = 16;
 const MAX_WHEEL_DELTA_PX = 120;
-const KEYBOARD_STEP = 0.24;
+const KEYBOARD_STEP = 0.18;
 
 const normalizeWheelDelta = (
   event: React.WheelEvent<HTMLDivElement>,
