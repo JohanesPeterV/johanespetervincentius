@@ -236,6 +236,8 @@ Before claiming a preview change is done, confirm **all** of these:
 - [ ] Wheel, keyboard, and drag input keep the beats slow enough to read without feeling laggy.
 - [ ] T and W6 move continuously without stepped noise, abrupt camera stops, or gratuitous lens
       distortion.
+- [ ] Centered copy leaves cleanly without blur-smearing, and lens/roll accents ease in and out
+      instead of following raw input deltas.
 - [ ] Moving frames may trade a little resolution for stability, then recover full clarity at rest.
 - [ ] Progress wraps on **`0 ≤ progress < 5`** and continuous input has no scroll endpoint.
 - [ ] The composer subtree does not re-render.

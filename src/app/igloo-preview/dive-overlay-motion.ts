@@ -51,14 +51,15 @@ export const applyOverlay = (
     if (element.style.visibility !== visibility) {
       element.style.visibility = visibility;
     }
-    const visible = motion.opacity > 0.4 ? 'true' : 'false';
-    if (element.dataset.visible !== visible) {
-      element.dataset.visible = visible;
+    if (motion.opacity > 0.4 && element.dataset.visible !== 'true') {
+      element.dataset.visible = 'true';
+    }
+    if (motion.opacity < 0.05 && element.dataset.visible !== 'false') {
+      element.dataset.visible = 'false';
     }
     if (section.placement === 'stone') {
       positionStoneSection(element, frame, frame.stones[section.stoneIndex]);
     } else {
-      element.style.filter = `blur(${motion.blur}px)`;
       element.style.transform = `translateY(${motion.shift}px)`;
     }
   });

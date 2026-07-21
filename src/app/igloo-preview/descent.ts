@@ -38,7 +38,6 @@ export type DescentFrame = {
 export type SectionMotion = {
   opacity: number;
   shift: number;
-  blur: number;
 };
 
 type RawDescentKey = {
@@ -136,7 +135,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
 
 export const DIVE_LENGTH = 5;
 export const DIVE_START = 0.95;
-export const DIVE_DAMPING = 2.8;
+export const DIVE_DAMPING = 2.45;
 export const WHEEL_SENSITIVITY = 1 / 1100;
 export const TOUCH_SENSITIVITY = 1 / 800;
 
@@ -252,8 +251,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 4.52,
-    position: [0, 3.65, 16],
-    look: [0, 2.7, 0],
+    position: [0, 3.5, 16],
+    look: [0, 2.4, 0],
     fog: '#48688a',
     fogDensity: 0.05,
     glow: 0.2,
@@ -262,8 +261,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 4.64,
-    position: [0, 7.6, 18.6],
-    look: [0, 8.5, -5],
+    position: [0, 3.5, 16],
+    look: [0, 2.4, 0],
     fog: '#7fa3c2',
     fogDensity: 0.044,
     glow: 0.3,
@@ -272,8 +271,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 4.8,
-    position: [0, 10.6, 21],
-    look: [0, 14, -10],
+    position: [0, 3.5, 16],
+    look: [0, 2.4, 0],
     fog: '#33597e',
     fogDensity: 0.038,
     glow: 0.34,
@@ -282,8 +281,8 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 5,
-    position: [0, 11.5, 21],
-    look: [0, 15.5, -10],
+    position: [0, 3.5, 16],
+    look: [0, 2.4, 0],
     fog: '#3a5f83',
     fogDensity: 0.034,
     glow: 0.4,
@@ -459,14 +458,13 @@ export const sectionMotion = (
     );
     const fadeOut =
       1 - smoothstep(section.center + 0.16, section.center + 0.26, progress);
-    return { opacity: fadeIn * fadeOut, shift: 0, blur: 0 };
+    return { opacity: fadeIn * fadeOut, shift: 0 };
   }
   const delta = progress - section.center;
   const distance = Math.abs(delta);
   return {
     opacity: 1 - smoothstep(0.22, 0.52, distance),
     shift: -delta * 110,
-    blur: smoothstep(0.16, 0.5, distance) * 7,
   };
 };
 
@@ -486,12 +484,12 @@ export const transitionStrength = (velocity: number): number => {
 };
 
 export const aberrationStrength = (velocity: number): number => {
-  const base = Math.min(0.0028, 0.00055 + Math.abs(velocity) * 0.024);
+  const base = Math.min(0.0018, 0.00035 + Math.abs(velocity) * 0.014);
   return base * DIVE_TUNING.aberrationScale;
 };
 
 export const rushFov = (velocity: number): number => {
-  return 58 + Math.min(1.4, Math.abs(velocity) * 42) * DIVE_TUNING.fovRush;
+  return 58 + Math.min(0.8, Math.abs(velocity) * 24) * DIVE_TUNING.fovRush;
 };
 
 export const riseMeters = (progress: number): number => {

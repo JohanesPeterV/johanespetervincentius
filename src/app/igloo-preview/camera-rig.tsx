@@ -56,9 +56,12 @@ type CameraRigParams = {
 };
 
 const BASELINE_FPS = 60;
+const BASE_FOV = 58;
 const MAX_FRAME_DELTA = 0.05;
 const PARALLAX_DAMPING = 2.2;
-const RUSH_DECAY = 3.5;
+const LENS_DAMPING = 5.5;
+const ROLL_DAMPING = 6;
+const RUSH_DAMPING = 4.5;
 const FINALE_LAUNCH_START = 4.48;
 const FINALE_LAUNCH_END = 4.96;
 
@@ -95,6 +98,8 @@ export default function CameraRig({
   stageRef,
 }: CameraRigParams) {
   const currentRef = useRef(0);
+  const fovRef = useRef(BASE_FOV);
+  const rollRef = useRef(0);
   const rushRef = useRef(0);
   const overlayProgressRef = useRef(Number.NaN);
   const overlaySizeRef = useRef(new Vector2());
@@ -160,13 +165,28 @@ export default function CameraRig({
       1,
       seamBoost(progress) + finaleBoost(progress),
     );
-    camera.rotateZ(
-      Math.max(-0.006, Math.min(0.006, -driveStep * 0.07)) * transitionZone,
+    const targetRoll =
+      Math.max(-0.006, Math.min(0.006, -driveStep * 0.07)) * transitionZone;
+    rollRef.current = MathUtils.damp(
+      rollRef.current,
+      targetRoll,
+      ROLL_DAMPING,
+      frameDelta,
     );
+    camera.rotateZ(rollRef.current);
     if (camera instanceof PerspectiveCamera) {
-      const nextFov = rushFov(driveStep * transitionZone);
-      if (nextFov !== camera.fov) {
-        camera.fov = nextFov;
+      const targetFov = rushFov(driveStep * transitionZone);
+      fovRef.current = MathUtils.damp(
+        fovRef.current,
+        targetFov,
+        LENS_DAMPING,
+        frameDelta,
+      );
+      if (Math.abs(fovRef.current - targetFov) < 0.001) {
+        fovRef.current = targetFov;
+      }
+      if (fovRef.current !== camera.fov) {
+        camera.fov = fovRef.current;
         camera.updateProjectionMatrix();
       }
     }
@@ -192,9 +212,11 @@ export default function CameraRig({
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
     const impulse = Math.min(1, transitionStrength(driveStep) * transitionZone);
-    rushRef.current = Math.max(
+    rushRef.current = MathUtils.damp(
+      rushRef.current,
       impulse,
-      rushRef.current * Math.exp(-RUSH_DECAY * frameDelta),
+      RUSH_DAMPING,
+      frameDelta,
     );
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
     if (transitionRef.current) {
