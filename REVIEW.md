@@ -1,0 +1,45 @@
+# Review Rules
+
+Use this file for automated and explicit reviews. `AGENTS.md` owns the hard gates, `REVIEW_FOCUS.md` supplies current priority, and feature documents such as `IGLOO-PREVIEW.md` own local intent.
+
+## Candidate Scope
+
+- Review committed source on `dev` only. Never include uncommitted files in the review range.
+- Walk first-parent commits after the automation-memory watermark in chronological order. Select one coherent range that represents one route, feature, or implementation concern.
+- Ignore commits containing only queue files, agent rules, review policy, documentation, formatting, generated files, or automation memory. Review a mixed commit when it also contains substantive source or build-configuration changes.
+- Defer a candidate without advancing its watermark when its source paths are dirty or owned by an active task.
+- Establish intent from commit messages, changed callers, relevant feature documents, and `REVIEW_FOCUS.md`. If intent remains ambiguous, do not queue a guess.
+
+## Reviewer Wave
+
+Run exactly two independent, read-only reviewers in parallel. Give both the exact commit range, owned files, intent, relevant rulebooks, and known unrelated failures. Each reviewer gets one turn, must not delegate, and must not edit files.
+
+### Runtime Experience
+
+Inspect behaviour, edge cases, keyboard and pointer interaction, accessibility, responsive behaviour, browser console failures, animation continuity, WebGL lifecycle, frame stability, and weaker-hardware degradation. Check security only when the change introduces user input, external URLs, browser trust boundaries, or side effects.
+
+### Design And Code Shape
+
+Inspect feature-spec compliance, visual hierarchy, component and hook boundaries, state ownership, naming, semantic colours, reuse, abstraction cost, call-site readability, file-size limits, and whether complexity was removed rather than moved.
+
+## Finding Bar
+
+A finding survives only when all of these are true:
+
+- The reviewed change introduced it or made it materially worse.
+- It still exists in current committed code.
+- The exact affected scenario, route, input, viewport, or runtime condition is identified.
+- It meaningfully affects correctness, accessibility, performance, security, visual intent, or maintainability.
+- The author would reasonably fix it after seeing the evidence.
+
+Do not report formatting trivia, personal taste, speculative concerns, pre-existing issues, or extraction based on line count alone. An empty review is valid.
+
+## Consolidation
+
+- Wait for both reviewers, then independently validate every finding against current code and matching rulebooks.
+- Reproduce browser or runtime claims when practical.
+- Remove duplicates and search `queue/AUTOMATED_REVIEW_FIXES.md`, automation memory, and recent queue history for equivalent work.
+- Prefer one cohesive row when findings share one implementation concern. Add at most two rows per run.
+- Every row must identify where to start, the concrete end state, and how completion is proved.
+
+The reviewer automation may create queue work but must never edit source code. Source implementation belongs only to the queue worker.

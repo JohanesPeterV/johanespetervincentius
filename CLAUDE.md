@@ -46,6 +46,8 @@ Read files before editing them. Read only the rulebooks that match the owned cha
 | Any repo task                                                    | `CLAUDE.md` / `AGENTS.md`       |
 | React components, pages, hooks, styling, or UI composition       | `FRONTEND-CODE-STANDARDS.md`    |
 | Visual hierarchy, Liquid Glass treatment, theme or 3D look       | `FRONTEND-DESIGN-PRINCIPLES.md` |
+| Reviewing committed changes or writing review findings           | `REVIEW.md`, `REVIEW_FOCUS.md`  |
+| Queue creation, claims, status changes, recovery, or cleanup     | `queue/AGENTS.md`               |
 | Committing or dirty-worktree handling                            | `GIT.md`                        |
 | Implementation tradeoffs are unclear or no other rulebook covers | `CLEAN-CODE.md`                 |
 
@@ -59,6 +61,14 @@ Read files before editing them. Read only the rulebooks that match the owned cha
 - **DEFAULT**: Default to Server Components; add `"use client"` only when required.
 - **DEFAULT**: Use semantic colours such as `bg-primary`, `bg-muted`, and `text-foreground`. Do not hardcode interface colours.
 - **DEFAULT**: Treat abbreviations as words in new or touched names: `PdfViewer`, `HslColor`.
+
+## Automated Review Queue
+
+- **BLOCKER**: `REVIEW_FOCUS.md` prioritises review scope but never creates a finding by itself. Findings still require current code, rulebook, or reproducible runtime evidence.
+- **BLOCKER**: The reviewer automation may create or update only `queue/AUTOMATED_REVIEW_FIXES.md`; it must never implement source fixes.
+- **BLOCKER**: The queue worker may implement only one validated row at a time and must never invent work when no pending row exists.
+- **BLOCKER**: Treat queue-only, agent-rule-only, review-policy-only, and automation-memory-only commits as administrative changes, not new source-review candidates. Mixed commits containing source changes remain reviewable.
+- **BLOCKER**: Follow `queue/AGENTS.md` for committed claims, lease recovery, releases, and final queue cleanup.
 
 ## Verification
 
