@@ -60,7 +60,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
           overlayRef.current.veil = element;
         }}
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[#e9edf2] opacity-0"
+        className="pointer-events-none absolute inset-0 z-10 bg-[#e9edf2] opacity-0"
       />
       <div className="pointer-events-none absolute inset-0">
         {DIVE_SECTIONS.map((section, index) => (
@@ -152,7 +152,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
         onClick={handleToggleSound}
         aria-pressed={sound === 'on'}
         aria-label={`Turn ambient wind ${sound === 'on' ? 'off' : 'on'}`}
-        className="absolute bottom-6 right-6 flex items-center gap-2 text-[0.6rem] tracking-[0.26em] text-white/65 mix-blend-difference transition-colors hover:text-white sm:bottom-8 sm:right-10"
+        className="absolute bottom-6 right-6 z-20 flex items-center gap-2 text-[0.6rem] tracking-[0.26em] text-white/65 mix-blend-difference transition-colors hover:text-white sm:bottom-8 sm:right-10"
       >
         <span className="flex h-3 items-end gap-[2px]">
           {[0, 1, 2].map((bar) => (
