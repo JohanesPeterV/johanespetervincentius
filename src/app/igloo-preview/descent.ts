@@ -135,7 +135,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
 
 export const DIVE_LENGTH = 5;
 export const DIVE_START = 0.95;
-export const DRIVE_FOLLOW_RATE = 1.15;
+export const DRIVE_FOLLOW_RATE = 8;
 export const WHEEL_SENSITIVITY = 1 / 1350;
 export const TOUCH_SENSITIVITY = 1 / 1000;
 
