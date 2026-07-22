@@ -79,7 +79,7 @@ export default function CameraRig({
   gpuTier,
   stageRef,
 }: CameraRigParams) {
-  const driveRef = useRef<DriveMotion>({ current: 0, velocity: 0 });
+  const driveRef = useRef<DriveMotion>({ current: 0, target: 0 });
   const fovRef = useRef(BASE_FOV);
   const rollRef = useRef(0);
   const rushRef = useRef(0);

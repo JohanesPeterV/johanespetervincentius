@@ -1,17 +1,16 @@
 import { MathUtils } from 'three';
 
-import { DRIVE_FOLLOW_RATE } from './descent';
 import type { DescentFrame } from './descent';
 
 export type DriveMotion = {
   current: number;
-  velocity: number;
+  target: number;
 };
 
-const DRIVE_VELOCITY_DAMPING = 32;
-const MAX_DRIVE_SPEED = 2;
+const TARGET_FOLLOW_RATE = 4.68;
+const POSITION_FOLLOW_RATE = 9.75;
+const MAX_TARGET_SPEED = 4.5;
 const POSITION_EPSILON = 0.0004;
-const VELOCITY_EPSILON = 0.001;
 const FINALE_LAUNCH_START = 4.38;
 const FINALE_LAUNCH_END = 4.98;
 
@@ -25,31 +24,28 @@ export const advanceDrive = (
   target: number,
   delta: number,
 ): void => {
-  const distance = target - motion.current;
-  const targetVelocity = MathUtils.clamp(
-    distance * DRIVE_FOLLOW_RATE,
-    -MAX_DRIVE_SPEED,
-    MAX_DRIVE_SPEED,
-  );
-  motion.velocity = MathUtils.damp(
-    motion.velocity,
-    targetVelocity,
-    DRIVE_VELOCITY_DAMPING,
+  const followedTarget = MathUtils.damp(
+    motion.target,
+    target,
+    TARGET_FOLLOW_RATE,
     delta,
   );
-  const step = motion.velocity * delta;
-  const reachesTarget =
-    Math.sign(step) === Math.sign(distance) &&
-    Math.abs(step) >= Math.abs(distance);
-  const isSettled =
-    Math.abs(distance) < POSITION_EPSILON &&
-    Math.abs(motion.velocity) < VELOCITY_EPSILON;
-  if (reachesTarget || isSettled) {
+  const maxTargetStep = MAX_TARGET_SPEED * delta;
+  motion.target += MathUtils.clamp(
+    followedTarget - motion.target,
+    -maxTargetStep,
+    maxTargetStep,
+  );
+  motion.current = MathUtils.damp(
+    motion.current,
+    motion.target,
+    POSITION_FOLLOW_RATE,
+    delta,
+  );
+  if (Math.abs(target - motion.current) < POSITION_EPSILON) {
     motion.current = target;
-    motion.velocity = 0;
-    return;
+    motion.target = target;
   }
-  motion.current += step;
 };
 
 export const applyFinaleCamera = (
