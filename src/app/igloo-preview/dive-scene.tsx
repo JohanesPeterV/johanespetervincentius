@@ -49,7 +49,6 @@ type PointerDrag = {
 const LINE_DELTA_MODE = 1;
 const PAGE_DELTA_MODE = 2;
 const LINE_HEIGHT_PX = 16;
-const MAX_WHEEL_DELTA_PX = 120;
 const KEYBOARD_STEP = 0.16;
 
 const getCanvasDpr = (tier: number): number => {
@@ -72,7 +71,7 @@ const normalizeWheelDelta = (
   if (event.deltaMode === PAGE_DELTA_MODE) {
     pixels *= window.innerHeight;
   }
-  return Math.max(-MAX_WHEEL_DELTA_PX, Math.min(MAX_WHEEL_DELTA_PX, pixels));
+  return pixels;
 };
 
 const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
