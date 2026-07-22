@@ -22,16 +22,16 @@ export default function IceCrystals({ gpuTier }: IceCrystalsParams) {
       <octahedronGeometry args={[1, 0]} />
       {gpuTier >= 2 ? (
         <MeshTransmissionMaterial
-          samples={5}
-          resolution={384}
+          samples={3}
+          resolution={320}
           thickness={1.4}
           ior={1.31}
-          chromaticAberration={0.12}
-          anisotropicBlur={0.3}
+          chromaticAberration={0.05}
+          anisotropicBlur={0.18}
           roughness={0.12}
-          distortion={0.25}
-          distortionScale={0.4}
-          temporalDistortion={0.08}
+          distortion={0.16}
+          distortionScale={0.28}
+          temporalDistortion={0.025}
           color="#cfe6f5"
           attenuationColor="#9fd0ee"
           attenuationDistance={2.5}

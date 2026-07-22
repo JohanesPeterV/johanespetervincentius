@@ -50,7 +50,17 @@ const LINE_DELTA_MODE = 1;
 const PAGE_DELTA_MODE = 2;
 const LINE_HEIGHT_PX = 16;
 const MAX_WHEEL_DELTA_PX = 120;
-const KEYBOARD_STEP = 0.18;
+const KEYBOARD_STEP = 0.16;
+
+const getCanvasDpr = (tier: number): number => {
+  if (tier >= 3) {
+    return 1.5;
+  }
+  if (tier >= 2) {
+    return 1.25;
+  }
+  return 1;
+};
 
 const normalizeWheelDelta = (
   event: React.WheelEvent<HTMLDivElement>,
@@ -201,8 +211,8 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
     >
       <Canvas
         camera={{ fov: 58, near: 0.2, far: 240, position: [0, 6.6, 16] }}
-        dpr={tier < 2 ? 1 : 1.5}
-        gl={{ toneMappingExposure: 0.5 }}
+        dpr={getCanvasDpr(tier)}
+        gl={{ toneMappingExposure: 0.44 }}
         performance={{ min: 0.72, debounce: 350 }}
       >
         <AdaptiveDpr />
@@ -211,7 +221,7 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
         <hemisphereLight args={['#e3e7ec', '#525b66', 0.68]} />
         <directionalLight
           position={[18, 32, 14]}
-          intensity={0.82}
+          intensity={0.74}
           color="#ffffff"
         />
         <pointLight

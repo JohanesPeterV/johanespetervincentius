@@ -10,14 +10,19 @@ The reference-discovery stage is over. Do **not** reopen, study, or chase parity
 understood, and the current preview is an accepted foundation.
 
 The purpose of this preview is now narrow: preserve the scroll-led transition language and the
-near-fixed camera model, then make both feel as smooth, legible, and expensive as possible.
-Timing, restraint, and frame stability matter more than adding spectacle.
+near-fixed camera model, then make both feel as smooth, legible, expensive, and whole as possible.
+Timing, restraint, continuity, and frame stability matter more than adding spectacle.
 
 This is a finish pass, not another concept pass. The current composition is accepted; do not reopen
 it unless a concrete motion, legibility, continuity, or runtime problem requires a visual change.
 
 Polish in this order: continuous motion, readable pace, quiet camera, stable frame time, then
 effects. New detail is never allowed to compensate for a weak transition.
+
+"Expensive" means the viewer can perceive the full arc of every move: nothing snaps into speed,
+stalls without purpose, or calls attention to an effect instead of the transition.
+"Whole" means the world rise, veil, refraction, copy, and camera feel like parts of one movement;
+no layer should appear to start a separate animation.
 
 ---
 
@@ -117,6 +122,8 @@ slideshow, and the three stones must never read as randomly scattered meshes.
   pointer parallax stay restrained.
 - **Effects:** refined rather than loud. No low-frame-rate glitch stepping, persistent flicker,
   excessive chromatic split, heavy grain, or effect added only to signal speed.
+- **Continuity:** each beat inherits motion from the previous one. Nearby geometry must never sweep
+  through the lens uncovered, and a transition must not reveal the machinery used to stage it.
 - **Performance:** smoothness is part of the visual design. During motion, protect frame time first;
   restore maximum clarity once the scene settles.
 
@@ -222,7 +229,7 @@ Key files (`src/app/igloo-preview/`):
 
 **Camera contract:** the camera is parked at `y≈3.5, z=16` for the whole run, apart from a
 small settle during the W1 reveal and the single continuous W6 launch at the tail (which begins
-behind the finale flash and settles as it clears, `~4.48 – 4.96`). Scroll never translates the
+behind the finale flash and settles as it clears, `~4.38 – 4.98`). Scroll never translates the
 camera through the world; it drives `worldARise` / `worldBRise` in `descent.ts`, which lift the
 two world groups past the lens. Keep it that way.
 

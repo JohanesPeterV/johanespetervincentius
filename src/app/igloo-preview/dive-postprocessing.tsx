@@ -36,10 +36,10 @@ const DivePostprocessing = memo(function DivePostprocessing({
   return (
     <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
       <SMAA />
-      <Bloom intensity={0.42} luminanceThreshold={0.78} mipmapBlur />
+      <Bloom intensity={0.3} luminanceThreshold={0.88} mipmapBlur />
       <GodRays
         sun={sun}
-        samples={24}
+        samples={20}
         density={0.85}
         decay={0.92}
         weight={0.25}

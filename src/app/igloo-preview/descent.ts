@@ -135,7 +135,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
 
 export const DIVE_LENGTH = 5;
 export const DIVE_START = 0.95;
-export const DRIVE_FOLLOW_RATE = 1.65;
+export const DRIVE_FOLLOW_RATE = 1.15;
 export const WHEEL_SENSITIVITY = 1 / 1350;
 export const TOUCH_SENSITIVITY = 1 / 1000;
 
@@ -196,7 +196,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#8c99a7',
     fogDensity: 0.045,
     glow: 0,
-    veil: 0.03,
+    veil: 0.08,
     veilColor: '#b9c9da',
   },
   {
@@ -206,7 +206,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#5c6d80',
     fogDensity: 0.05,
     glow: 0,
-    veil: 0.1,
+    veil: 0.36,
     veilColor: '#d5e6f4',
   },
   {
@@ -216,7 +216,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#3f5065',
     fogDensity: 0.05,
     glow: 0.05,
-    veil: 0.32,
+    veil: 0.6,
     veilColor: '#dcebf5',
   },
   {
@@ -226,7 +226,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#33465c',
     fogDensity: 0.048,
     glow: 0.1,
-    veil: 0.08,
+    veil: 0.34,
     veilColor: '#7890a7',
   },
   {
@@ -292,7 +292,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
 ];
 
 const SEAM_CENTER = 2.3;
-const SEAM_SPAN = 0.38;
+const SEAM_SPAN = 0.46;
 const FINALE_CENTER = 4.58;
 const FINALE_SPAN = 0.4;
 
@@ -383,12 +383,12 @@ export const wrapProgress = (value: number): number =>
   ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
 
 const WORLD_A_SETTLE_DROP = 3.2;
-const WORLD_A_EXIT_START = 2.08;
-const WORLD_A_EXIT_END = 2.48;
+const WORLD_A_EXIT_START = 2.14;
+const WORLD_A_EXIT_END = 2.58;
 const WORLD_A_EXIT_LIFT = 46;
-const WORLD_B_ENTER_AT = 2.16;
-const WORLD_B_ACCELERATION_SPAN = 0.24;
-const WORLD_B_RISE_RATE = 24;
+const WORLD_B_ENTER_AT = 2.2;
+const WORLD_B_ACCELERATION_SPAN = 0.38;
+const WORLD_B_RISE_RATE = 20;
 
 export const worldARise = (progress: number): number => {
   const settle = WORLD_A_SETTLE_DROP * (1 - smootherstep(0, 0.65, progress));

@@ -58,13 +58,13 @@ type CameraRigParams = {
 
 const BASELINE_FPS = 60;
 const BASE_FOV = 58;
-const MAX_FRAME_DELTA = 0.05;
-const PARALLAX_DAMPING = 2.2;
+const MAX_FRAME_DELTA = 1 / 30;
+const PARALLAX_DAMPING = 1.7;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
 const RUSH_DAMPING = 4;
-const TRANSITION_BASE_INTENSITY = 0.4;
-const TRANSITION_RUSH_INTENSITY = 0.24;
+const TRANSITION_BASE_INTENSITY = 0.34;
+const TRANSITION_RUSH_INTENSITY = 0.16;
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
@@ -127,13 +127,13 @@ export default function CameraRig({
       frameDelta,
     );
     camera.position.set(
-      frame.position[0] + parallax.x * 0.22,
-      frame.position[1] - parallax.y * 0.1,
+      frame.position[0] + parallax.x * 0.14,
+      frame.position[1] - parallax.y * 0.07,
       frame.position[2],
     );
     camera.lookAt(
-      frame.look[0] + parallax.x * 0.48,
-      frame.look[1] - parallax.y * 0.28,
+      frame.look[0] + parallax.x * 0.28,
+      frame.look[1] - parallax.y * 0.16,
       frame.look[2],
     );
     const transitionZone = Math.min(
