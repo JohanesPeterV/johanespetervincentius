@@ -2,7 +2,7 @@
 
 import { Leva, useControls } from 'leva';
 
-import { DIVE_TUNING } from './descent';
+import { DIVE_TUNING } from '@/components/dive/descent';
 
 export default function DiveDebugPanel() {
   useControls('dive', {

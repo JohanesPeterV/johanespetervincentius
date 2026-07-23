@@ -1,38 +1,25 @@
 'use client';
 
-import {
-  AdaptiveDpr,
-  Environment,
-  Lightformer,
-  useDetectGPU,
-} from '@react-three/drei';
+import { useConfig } from '@/hooks/use-config';
+import { getFluidThemeColors } from '@/lib/theme-colors';
+import { AdaptiveDpr, useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
+import { useTheme } from 'next-themes';
 import { RefObject, Suspense, useEffect, useRef } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
-import {
-  DIVE_START,
-  TOUCH_SENSITIVITY,
-  WHEEL_SENSITIVITY,
-  worldARise,
-  worldBRise,
-} from './descent';
+import { DIVE_START, TOUCH_SENSITIVITY, WHEEL_SENSITIVITY } from './descent';
+import type { DiveAppearance } from './dive-palette';
+import { getDivePalette } from './dive-palette';
 import DiveLoader from './dive-loader';
 import DiveOverlay from './dive-overlay';
-import {
-  IceRidges,
-  NarrativeStones,
-  RisingStones,
-  RisingWorld,
-  SnowDrift,
-  SnowTerrain,
-} from './dive-world';
 import type { OverlayNodes } from './dive-overlay-motion';
-import IceCrystals from './ice-crystals';
-import SnowGpu from './snow-gpu';
+import IglooWorld from './igloo-world';
+import SpaceWorld from './space-world';
 import { disposeWindAudio } from './wind-audio';
 
 type DiveSceneParams = {
+  appearance: DiveAppearance;
   tierOverride: number | null;
 };
 
@@ -100,7 +87,10 @@ const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
   return null;
 };
 
-export default function DiveScene({ tierOverride }: DiveSceneParams) {
+export default function DiveScene({
+  appearance,
+  tierOverride,
+}: DiveSceneParams) {
   const targetRef = useRef(DIVE_START);
   const progressRef = useRef(DIVE_START);
   const dragRef = useRef<PointerDrag>({ id: null, y: 0 });
@@ -115,6 +105,12 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
   });
   const gpu = useDetectGPU();
   const tier = tierOverride ?? gpu.tier;
+  const [{ theme }] = useConfig();
+  const { resolvedTheme } = useTheme();
+  const palette = getDivePalette(
+    appearance,
+    getFluidThemeColors(theme, resolvedTheme),
+  );
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
     if (stageRef.current !== 'live') {
@@ -206,65 +202,29 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
-      className="fixed inset-0 touch-none cursor-grab overflow-hidden bg-[#aeb5bf] font-mono text-white active:cursor-grabbing"
+      className="fixed inset-0 touch-none cursor-grab overflow-hidden font-mono active:cursor-grabbing"
+      style={{ backgroundColor: palette.background, color: palette.foreground }}
     >
       <Canvas
         camera={{ fov: 58, near: 0.2, far: 240, position: [0, 6.6, 16] }}
         dpr={getCanvasDpr(tier)}
-        gl={{ toneMappingExposure: 0.44 }}
+        gl={{ toneMappingExposure: palette.exposure }}
         performance={{ min: 0.72, debounce: 350 }}
       >
         <AdaptiveDpr />
-        <color attach="background" args={['#aeb5bf']} />
-        <fogExp2 attach="fog" args={['#aeb5bf', 0.05]} />
-        <hemisphereLight args={['#e3e7ec', '#525b66', 0.68]} />
-        <directionalLight
-          position={[18, 32, 14]}
-          intensity={0.74}
-          color="#ffffff"
-        />
-        <pointLight
-          position={[0, -10, 10]}
-          intensity={10}
-          distance={28}
-          color="#e6f1ff"
-        />
+        <color attach="background" args={[palette.background]} />
+        <fogExp2 attach="fog" args={[palette.background, palette.fogDensity]} />
         <Suspense fallback={null}>
-          <RisingWorld progressRef={progressRef} rise={worldARise}>
-            <SnowTerrain />
-            <IceRidges />
-          </RisingWorld>
-          <RisingWorld progressRef={progressRef} rise={worldBRise}>
-            <RisingStones />
-            <IceCrystals gpuTier={tier} />
-          </RisingWorld>
-          <NarrativeStones progressRef={progressRef} />
-          {tier < 2 ? <SnowDrift /> : <SnowGpu />}
-          <Environment resolution={64} frames={1}>
-            <Lightformer
-              form="rect"
-              intensity={1.7}
-              color="#eaf4ff"
-              position={[0, 30, 0]}
-              rotation-x={-Math.PI / 2}
-              scale={40}
+          {appearance === 'space' ? (
+            <SpaceWorld
+              accentColor={palette.accent}
+              gpuTier={tier}
+              progressRef={progressRef}
+              rockColor={palette.rock}
             />
-            <Lightformer
-              form="rect"
-              intensity={0.62}
-              color="#b9d4ea"
-              position={[-18, 4, -12]}
-              scale={12}
-            />
-            <Lightformer
-              form="rect"
-              intensity={0.48}
-              color="#8fb4d4"
-              position={[16, -6, 10]}
-              rotation-y={Math.PI}
-              scale={10}
-            />
-          </Environment>
+          ) : (
+            <IglooWorld gpuTier={tier} progressRef={progressRef} />
+          )}
           <LoadedSignal stageRef={stageRef} loaderRef={loaderRef} />
         </Suspense>
         <CameraRig
@@ -272,12 +232,13 @@ export default function DiveScene({ tierOverride }: DiveSceneParams) {
           progressRef={progressRef}
           pointerRef={pointerRef}
           overlayRef={overlayRef}
+          palette={palette}
           gpuTier={tier}
           stageRef={stageRef}
         />
       </Canvas>
-      <DiveOverlay overlayRef={overlayRef} />
-      <DiveLoader loaderRef={loaderRef} />
+      <DiveOverlay appearance={appearance} overlayRef={overlayRef} />
+      <DiveLoader loaderRef={loaderRef} palette={palette} />
     </div>
   );
 }

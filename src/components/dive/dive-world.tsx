@@ -9,6 +9,7 @@ import { NARRATIVE_STONES, narrativeStoneY } from './descent';
 import {
   BlockTransform,
   buildIceRidges,
+  buildRockDrift,
   buildRisingStones,
   buildSnowPositions,
 } from './world-layout';
@@ -18,6 +19,7 @@ const TERRAIN_SCALE = 40;
 const ICE_RIDGE_BLOCKS = buildIceRidges();
 const RISING_STONE_BLOCKS = buildRisingStones();
 const SNOW_POSITIONS = buildSnowPositions();
+const ROCK_DRIFT_BLOCKS = buildRockDrift();
 const narrativeStoneHelper = new Object3D();
 
 export const applyBlockInstances = (
@@ -74,17 +76,37 @@ export const IceRidges = () => (
   </instancedMesh>
 );
 
+type ColoredFieldParams = {
+  color: string;
+};
+
+type RisingStonesParams = {
+  color?: string;
+};
+
+export const SpaceRidges = ({ color }: ColoredFieldParams) => (
+  <instancedMesh
+    args={[undefined, undefined, ICE_RIDGE_BLOCKS.length]}
+    ref={(mesh) => {
+      applyBlockInstances(mesh, ICE_RIDGE_BLOCKS, color);
+    }}
+  >
+    <icosahedronGeometry args={[1, 1]} />
+    <meshStandardMaterial flatShading color={color} roughness={0.94} />
+  </instancedMesh>
+);
+
 useGLTF.preload(TERRAIN_URL);
 
-export const RisingStones = () => (
+export const RisingStones = ({ color = '#7890a7' }: RisingStonesParams) => (
   <instancedMesh
     args={[undefined, undefined, RISING_STONE_BLOCKS.length]}
     ref={(mesh) => {
-      applyBlockInstances(mesh, RISING_STONE_BLOCKS, '#5f7591');
+      applyBlockInstances(mesh, RISING_STONE_BLOCKS, color);
     }}
   >
     <dodecahedronGeometry args={[1, 0]} />
-    <meshStandardMaterial color="#7890a7" roughness={0.86} metalness={0.04} />
+    <meshStandardMaterial color={color} roughness={0.86} metalness={0.04} />
   </instancedMesh>
 );
 
@@ -109,10 +131,16 @@ export const RisingWorld = ({
 };
 
 type NarrativeStonesParams = {
+  accentColor?: string;
+  color?: string;
   progressRef: RefObject<number>;
 };
 
-export const NarrativeStones = ({ progressRef }: NarrativeStonesParams) => {
+export const NarrativeStones = ({
+  accentColor = '#6f94b2',
+  color = '#d6e6f2',
+  progressRef,
+}: NarrativeStonesParams) => {
   const meshRef = useRef<InstancedMesh>(null);
   useFrame((state) => {
     const mesh = meshRef.current;
@@ -148,13 +176,38 @@ export const NarrativeStones = ({ progressRef }: NarrativeStonesParams) => {
       <icosahedronGeometry args={[1, 1]} />
       <meshStandardMaterial
         flatShading
-        color="#d6e6f2"
+        color={color}
         roughness={0.62}
         metalness={0.08}
-        emissive="#6f94b2"
+        emissive={accentColor}
         emissiveIntensity={0.58}
       />
     </instancedMesh>
+  );
+};
+
+export const RockDrift = ({ color }: ColoredFieldParams) => {
+  const groupRef = useRef<Group>(null);
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y =
+        Math.sin(state.clock.elapsedTime * 0.08) * 0.08;
+      groupRef.current.position.y =
+        Math.cos(state.clock.elapsedTime * 0.12) * 0.2;
+    }
+  });
+  return (
+    <group ref={groupRef}>
+      <instancedMesh
+        args={[undefined, undefined, ROCK_DRIFT_BLOCKS.length]}
+        ref={(mesh) => {
+          applyBlockInstances(mesh, ROCK_DRIFT_BLOCKS, color);
+        }}
+      >
+        <dodecahedronGeometry args={[1, 0]} />
+        <meshStandardMaterial color={color} roughness={0.92} metalness={0.08} />
+      </instancedMesh>
+    </group>
   );
 };
 

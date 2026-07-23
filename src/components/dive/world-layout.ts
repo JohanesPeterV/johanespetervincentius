@@ -7,6 +7,7 @@ export type BlockTransform = {
 
 const RISING_STONE_COUNT = 18;
 const AMBIENT_SNOW_COUNT = 620;
+const AMBIENT_ROCK_COUNT = 160;
 const CAMERA_DISTANCE_Z = 16;
 const FIELD_MIN_AZIMUTH = 0.55;
 const FIELD_MAX_AZIMUTH = 0.78;
@@ -137,4 +138,20 @@ export const buildSnowPositions = (): Float32Array => {
     positions[index * 3 + 2] = 16 + (random() - 0.5) * 95;
   }
   return positions;
+};
+
+export const buildRockDrift = (): BlockTransform[] => {
+  const random = createSeededRandom(71);
+  const blocks: BlockTransform[] = [];
+  for (let index = 0; index < AMBIENT_ROCK_COUNT; index++) {
+    const slot = sampleFieldSlot(random, index % 2 === 0 ? 1 : -1);
+    const size = slot.distance * (0.012 + random() * 0.018);
+    blocks.push({
+      position: [slot.x, -18 + random() * 76, slot.z],
+      rotation: [random() * Math.PI, random() * Math.PI, random() * Math.PI],
+      scale: [size, size * (0.55 + random()), size * (0.7 + random() * 0.6)],
+      shade: 0.42 + random() * 0.54,
+    });
+  }
+  return blocks;
 };

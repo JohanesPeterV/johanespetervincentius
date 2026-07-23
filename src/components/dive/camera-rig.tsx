@@ -36,6 +36,8 @@ import { advanceDrive, applyFinaleCamera } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import { applyOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
+import { applyDivePalette } from './dive-palette';
+import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
 import { DiveTransitionEffect } from './dive-transition-effect';
 import { setWindDrive } from './wind-audio';
@@ -52,6 +54,7 @@ type CameraRigParams = {
   progressRef: RefObject<number>;
   pointerRef: RefObject<PointerState>;
   overlayRef: RefObject<OverlayNodes>;
+  palette: DivePalette;
   gpuTier: number;
   stageRef: RefObject<DiveStage>;
 };
@@ -76,6 +79,7 @@ export default function CameraRig({
   progressRef,
   pointerRef,
   overlayRef,
+  palette,
   gpuTier,
   stageRef,
 }: CameraRigParams) {
@@ -90,6 +94,7 @@ export default function CameraRig({
   const glowRef = useRef<PointLight>(null);
   const transitionRef = useRef<DiveTransitionEffect | null>(null);
   const [sunMesh, setSunMesh] = useState<SunMesh | null>(null);
+  const transitionColor = new Color(palette.accent);
   const frameRef = useRef<DescentFrame | null>(null);
   if (frameRef.current === null) {
     frameRef.current = createDescentFrame();
@@ -109,6 +114,7 @@ export default function CameraRig({
     const progress = wrapProgress(drive.current);
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
+    applyDivePalette(frame, palette, progress);
     applyFinaleCamera(frame, progress);
     if (live && Math.abs(step) > 0.00008) {
       performance.regress();
@@ -201,9 +207,12 @@ export default function CameraRig({
           transitionZone * TRANSITION_BASE_INTENSITY,
         ),
         progress,
+        transitionColor,
       );
     }
-    setWindDrive(progress / DIVE_LENGTH, rush);
+    if (palette.appearance === 'igloo') {
+      setWindDrive(progress / DIVE_LENGTH, rush);
+    }
     if (glowRef.current) {
       glowRef.current.intensity = frame.glow * 260;
     }
@@ -249,12 +258,12 @@ export default function CameraRig({
         position={[0, -9, 4]}
         distance={42}
         intensity={0}
-        color="#e9f3fc"
+        color={palette.accent}
       />
       <mesh ref={setSunMesh} position={[0, -7, -6]}>
         <sphereGeometry args={[2.4, 24, 24]} />
         <meshBasicMaterial
-          color="#f2f8ff"
+          color={palette.foreground}
           transparent
           opacity={0}
           depthWrite={false}

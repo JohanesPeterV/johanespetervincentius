@@ -3,10 +3,12 @@
 import { RefObject, useState } from 'react';
 
 import { DIVE_SECTIONS } from './descent';
+import type { DiveAppearance } from './dive-palette';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { toggleWindAudio } from './wind-audio';
 
 type DiveOverlayParams = {
+  appearance: DiveAppearance;
   overlayRef: RefObject<OverlayNodes>;
 };
 
@@ -46,8 +48,16 @@ const HeadlineLines = ({ title }: HeadlineLinesParams) => {
   );
 };
 
-export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
+export default function DiveOverlay({
+  appearance,
+  overlayRef,
+}: DiveOverlayParams) {
   const [sound, setSound] = useState<'on' | 'off'>('off');
+  const measureLabel = appearance === 'space' ? 'ALT' : 'RISE';
+  const gestureLabel =
+    appearance === 'space'
+      ? 'wheel / arrows / drag to move through orbit'
+      : 'wheel / arrows / drag to lift the world';
 
   const handleToggleSound = (): void => {
     setSound(toggleWindAudio());
@@ -124,7 +134,7 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
         <div>All Rights Reserved.</div>
       </div>
       <div className="pointer-events-none absolute bottom-6 left-6 mix-blend-difference text-[0.6rem] tracking-[0.26em] text-white/65 sm:bottom-8 sm:left-10">
-        RISE{' '}
+        {measureLabel}{' '}
         <span
           ref={(element) => {
             overlayRef.current.rise = element;
@@ -145,29 +155,31 @@ export default function DiveOverlay({ overlayRef }: DiveOverlayParams) {
         ))}
       </div>
       <div className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 mix-blend-difference text-[0.56rem] tracking-[0.26em] text-white/45 md:block">
-        wheel / arrows / drag to lift the world
+        {gestureLabel}
       </div>
-      <button
-        type="button"
-        onClick={handleToggleSound}
-        aria-pressed={sound === 'on'}
-        aria-label={`Turn ambient wind ${sound === 'on' ? 'off' : 'on'}`}
-        className="absolute bottom-6 right-6 z-20 flex items-center gap-2 text-[0.6rem] tracking-[0.26em] text-white/65 mix-blend-difference transition-colors hover:text-white sm:bottom-8 sm:right-10"
-      >
-        <span className="flex h-3 items-end gap-[2px]">
-          {[0, 1, 2].map((bar) => (
-            <span
-              key={bar}
-              className={`w-px bg-current ${sound === 'on' ? 'animate-pulse' : ''}`}
-              style={{
-                height: `${(bar + 1) * 4}px`,
-                animationDelay: `${bar * 160}ms`,
-              }}
-            />
-          ))}
-        </span>
-        SOUND {sound === 'on' ? 'ON' : 'OFF'}
-      </button>
+      {appearance === 'igloo' ? (
+        <button
+          type="button"
+          onClick={handleToggleSound}
+          aria-pressed={sound === 'on'}
+          aria-label={`Turn ambient wind ${sound === 'on' ? 'off' : 'on'}`}
+          className="absolute bottom-6 right-6 z-20 flex items-center gap-2 text-[0.6rem] tracking-[0.26em] text-white/65 mix-blend-difference transition-colors hover:text-white sm:bottom-8 sm:right-10"
+        >
+          <span className="flex h-3 items-end gap-[2px]">
+            {[0, 1, 2].map((bar) => (
+              <span
+                key={bar}
+                className={`w-px bg-current ${sound === 'on' ? 'animate-pulse' : ''}`}
+                style={{
+                  height: `${(bar + 1) * 4}px`,
+                  animationDelay: `${bar * 160}ms`,
+                }}
+              />
+            ))}
+          </span>
+          SOUND {sound === 'on' ? 'ON' : 'OFF'}
+        </button>
+      ) : null}
     </>
   );
 }

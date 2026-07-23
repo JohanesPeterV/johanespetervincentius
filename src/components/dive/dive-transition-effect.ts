@@ -1,9 +1,10 @@
 import { BlendFunction, Effect } from 'postprocessing';
-import { Uniform } from 'three';
+import { Color, Uniform } from 'three';
 
 const FRAGMENT = `
 uniform float uIntensity;
 uniform float uProgress;
+uniform vec3 uAccentColor;
 
 float diveGlitchHash(vec2 point) {
   return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453123);
@@ -71,8 +72,8 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     texture2D(inputBuffer, uv + refraction * 0.94).b
   );
   float facetLight = smoothstep(0.7, 0.98, facet) * envelope * amount;
-  glass = mix(glass, glass * vec3(0.78, 0.9, 1.06), 0.14);
-  glass += vec3(0.58, 0.8, 1.0) * (core * 0.18 + facetLight * 0.05);
+  glass = mix(glass, glass * mix(vec3(0.78, 0.9, 1.06), uAccentColor, 0.36), 0.14);
+  glass += mix(vec3(0.58, 0.8, 1.0), uAccentColor, 0.52) * (core * 0.18 + facetLight * 0.05);
   float blend = clamp(envelope * amount * 0.42 + core * amount * 0.1, 0.0, 0.54);
   float revealed = 1.0 - smoothstep(front - 0.045, front + 0.045, uv.y);
   vec3 regimeColor = inputColor.rgb;
@@ -85,7 +86,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   } else {
     regimeColor = mix(
       inputColor.rgb,
-      vec3(0.84, 0.93, 1.0),
+      mix(vec3(0.84, 0.93, 1.0), uAccentColor, 0.32),
       revealed * amount * 0.24
     );
   }
@@ -100,11 +101,12 @@ export class DiveTransitionEffect extends Effect {
       uniforms: new Map<string, Uniform>([
         ['uIntensity', new Uniform(0)],
         ['uProgress', new Uniform(0)],
+        ['uAccentColor', new Uniform(new Color('#9fd0ee'))],
       ]),
     });
   }
 
-  setDriveState(intensity: number, progress: number): void {
+  setDriveState(intensity: number, progress: number, accentColor: Color): void {
     const intensityUniform = this.uniforms.get('uIntensity');
     if (intensityUniform) {
       intensityUniform.value = intensity;
@@ -112,6 +114,10 @@ export class DiveTransitionEffect extends Effect {
     const progressUniform = this.uniforms.get('uProgress');
     if (progressUniform) {
       progressUniform.value = progress;
+    }
+    const accentUniform = this.uniforms.get('uAccentColor');
+    if (accentUniform) {
+      accentUniform.value.copy(accentColor);
     }
   }
 }
