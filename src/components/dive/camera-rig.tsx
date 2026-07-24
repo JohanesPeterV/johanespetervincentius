@@ -32,7 +32,11 @@ import {
   writeDescentFrame,
 } from './descent';
 import type { DescentFrame } from './descent';
-import { advanceDrive, applyFinaleCamera } from './camera-motion';
+import {
+  MAX_TARGET_LEAD,
+  advanceDrive,
+  applyFinaleCamera,
+} from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import { applyOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
@@ -107,6 +111,11 @@ export default function CameraRig({
     const drive = driveRef.current;
     const previousProgress = drive.current;
     if (live) {
+      targetRef.current = MathUtils.clamp(
+        targetRef.current,
+        drive.current - MAX_TARGET_LEAD,
+        drive.current + MAX_TARGET_LEAD,
+      );
       advanceDrive(drive, targetRef.current, frameDelta);
     }
     const step = drive.current - previousProgress;

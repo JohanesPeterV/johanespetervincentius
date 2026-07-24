@@ -17,6 +17,12 @@ import {
 const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
 const TERRAIN_SCALE = 40;
 const ICE_RIDGE_BLOCKS = buildIceRidges();
+// REASON: the shared ridge silhouettes read as bright mid-frame masses against
+// the dark space backdrop, so the space world recedes them into the fog
+const SPACE_RIDGE_BLOCKS = ICE_RIDGE_BLOCKS.map((block) => ({
+  ...block,
+  shade: block.shade * 0.55,
+}));
 const RISING_STONE_BLOCKS = buildRisingStones();
 const SNOW_POSITIONS = buildSnowPositions();
 const ROCK_DRIFT_BLOCKS = buildRockDrift();
@@ -86,9 +92,9 @@ type RisingStonesParams = {
 
 export const SpaceRidges = ({ color }: ColoredFieldParams) => (
   <instancedMesh
-    args={[undefined, undefined, ICE_RIDGE_BLOCKS.length]}
+    args={[undefined, undefined, SPACE_RIDGE_BLOCKS.length]}
     ref={(mesh) => {
-      applyBlockInstances(mesh, ICE_RIDGE_BLOCKS, color);
+      applyBlockInstances(mesh, SPACE_RIDGE_BLOCKS, color);
     }}
   >
     <icosahedronGeometry args={[1, 1]} />

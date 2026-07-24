@@ -10,6 +10,9 @@ export type DriveMotion = {
 const TARGET_FOLLOW_RATE = 4.68;
 const POSITION_FOLLOW_RATE = 9.75;
 const MAX_TARGET_SPEED = 4.5;
+// REASON: unclamped wheel deltas bank whole extra loops on trackpad momentum
+// flicks - the target may never lead the camera by more than ~1.4 sections
+export const MAX_TARGET_LEAD = 0.85;
 const POSITION_EPSILON = 0.0004;
 const FINALE_LAUNCH_START = 4.38;
 const FINALE_LAUNCH_END = 4.98;

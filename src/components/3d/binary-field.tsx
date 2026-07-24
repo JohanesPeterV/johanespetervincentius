@@ -97,8 +97,8 @@ const createDigitField = (count: number): DigitField => {
     positions[index * 3 + 2] = radius * Math.cos(phi);
 
     glyphs[index] = Math.random() < 0.5 ? 0 : 1;
-    sizes[index] = 5 + Math.pow(Math.random(), 1.6) * 14;
-    brights[index] = 0.35 + Math.random() * 0.4;
+    sizes[index] = 5 + Math.pow(Math.random(), 1.6) * 9;
+    brights[index] = 0.28 + Math.random() * 0.36;
     phases[index] = Math.random() * Math.PI * 2;
   }
 
