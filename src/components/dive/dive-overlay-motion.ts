@@ -28,7 +28,9 @@ const positionStoneSection = (
   frame: OverlayFrame,
   stone: Vector2,
 ): void => {
-  const horizontalGap = Math.min(140, Math.max(72, frame.width * 0.1));
+  // REASON: the stone projects to ~120px screen radius, so the gap must stay
+  // beyond it or headlines start on top of the sphere
+  const horizontalGap = Math.min(320, Math.max(96, frame.width * 0.16));
   const left = Math.max(
     24,
     Math.min(frame.width - 24, stone.x + horizontalGap),

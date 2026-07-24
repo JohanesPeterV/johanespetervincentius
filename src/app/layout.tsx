@@ -2,13 +2,20 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { DEFAULT_BASE_COLOR } from '@/registry/registry-base-colors';
 import type { Metadata, Viewport } from 'next';
-import { Poppins } from 'next/font/google';
+import { Instrument_Serif, Poppins } from 'next/font/google';
 import './globals.css';
 
 const poppins = Poppins({
   subsets: ['latin'],
   weight: ['400', '700'],
   variable: '--font-poppins',
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-display',
 });
 
 const getCssColor = (value: string) => `hsl(${value})`;
@@ -149,7 +156,7 @@ export default function RootLayout({
       </head>
       <body
         className={`
-          ${poppins.variable} antialiased font-poppins overflow-x-hidden min-h-screen bg-background`}
+          ${poppins.variable} ${instrumentSerif.variable} antialiased font-poppins overflow-x-hidden min-h-screen bg-background`}
       >
         <ThemeProvider
           attribute="class"

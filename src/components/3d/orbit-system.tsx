@@ -67,6 +67,7 @@ const PassingMark = ({ path, url, size, opacity, plate }: MarkConfig) => {
     }
 
     writeOrbitPosition(path, state.clock.elapsedTime, meshRef.current.position);
+    meshRef.current.quaternion.copy(state.camera.quaternion);
   });
 
   const [width, planeHeight] = size;

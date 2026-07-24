@@ -195,7 +195,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#8c99a7',
     fogDensity: 0.045,
     glow: 0,
-    veil: 0.08,
+    veil: 0,
     veilColor: '#b9c9da',
   },
   {
@@ -205,7 +205,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#5c6d80',
     fogDensity: 0.05,
     glow: 0,
-    veil: 0.36,
+    veil: 0.22,
     veilColor: '#d5e6f4',
   },
   {
@@ -215,7 +215,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#3f5065',
     fogDensity: 0.05,
     glow: 0.05,
-    veil: 0.6,
+    veil: 0.85,
     veilColor: '#dcebf5',
   },
   {
@@ -225,7 +225,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#33465c',
     fogDensity: 0.048,
     glow: 0.1,
-    veil: 0.34,
+    veil: 0.2,
     veilColor: '#7890a7',
   },
   {
@@ -255,7 +255,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#48688a',
     fogDensity: 0.05,
     glow: 0.2,
-    veil: 0.6,
+    veil: 0.28,
     veilColor: '#dfeefb',
   },
   {
@@ -275,7 +275,7 @@ const RAW_DESCENT_KEYS: RawDescentKey[] = [
     fog: '#33597e',
     fogDensity: 0.038,
     glow: 0.34,
-    veil: 0.14,
+    veil: 0.08,
     veilColor: '#eaf4fd',
   },
   {

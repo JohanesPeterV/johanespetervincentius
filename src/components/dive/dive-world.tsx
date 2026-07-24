@@ -160,7 +160,7 @@ export const NarrativeStones = ({
         0.5 + index * 0.55 + progress * 0.22 + idle,
         -0.18 + index * 0.1,
       );
-      const size = 1.55 + index * 0.08;
+      const size = 1.26 + index * 0.06;
       narrativeStoneHelper.scale.set(size, size * 0.84, size * 0.94);
       narrativeStoneHelper.updateMatrix();
       mesh.setMatrixAt(index, narrativeStoneHelper.matrix);
@@ -177,10 +177,10 @@ export const NarrativeStones = ({
       <meshStandardMaterial
         flatShading
         color={color}
-        roughness={0.62}
-        metalness={0.08}
+        roughness={0.46}
+        metalness={0.12}
         emissive={accentColor}
-        emissiveIntensity={0.58}
+        emissiveIntensity={0.3}
       />
     </instancedMesh>
   );

@@ -26,6 +26,7 @@ export type DivePalette = {
   loaderForeground: string;
   loaderTrack: string;
   rock: string;
+  stone: string;
 };
 
 const toRgbColor = (value: string): RgbColor => {
@@ -55,6 +56,7 @@ export const getDivePalette = (
       loaderForeground: '#29313a',
       loaderTrack: '#89919a',
       rock: '#7890a7',
+      stone: '#d6e6f2',
     };
   }
 
@@ -75,6 +77,11 @@ export const getDivePalette = (
       0.24,
     ),
     rock: blendColor(themeColors.fluidColor, themeColors.textColor, 0.34),
+    stone: blendColor(
+      themeColors.fluidColor,
+      themeColors.backgroundColor,
+      0.52,
+    ),
   };
 };
 

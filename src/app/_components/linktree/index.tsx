@@ -5,7 +5,7 @@ import ProfileHeader from './profile-header';
 export default function LinktreeSection() {
   return (
     <section className="flex w-full justify-center px-4">
-      <div className="animate-card-in relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-md">
         <div
           aria-hidden
           className="pointer-events-none absolute -inset-2 rounded-[2.25rem] bg-primary/10 opacity-50 blur-2xl"

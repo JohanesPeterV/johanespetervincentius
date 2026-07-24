@@ -218,12 +218,12 @@ export default function CameraRig({
     }
     if (sunMesh) {
       const sunLift = finaleSunLift(progress);
-      sunMesh.position.set(0, -7 + sunLift * 31, -6 - sunLift * 16);
+      sunMesh.position.set(0, -7 + sunLift * 34, -6 - sunLift * 16);
       sunMesh.scale.setScalar(1 + sunLift * 1.6);
-      sunMesh.material.opacity = Math.min(
-        1,
-        sunLift * (0.45 + frame.glow * 1.4),
-      );
+      // REASON: below tier 2 the composer is disabled, so without god rays the
+      // sun mesh renders as a flat grey disc behind the finale headline
+      sunMesh.material.opacity =
+        gpuTier >= 2 ? Math.min(1, sunLift * (0.45 + frame.glow * 1.4)) : 0;
     }
     NARRATIVE_STONES.forEach((stone, index) => {
       const projection = STONE_PROJECTIONS[index];

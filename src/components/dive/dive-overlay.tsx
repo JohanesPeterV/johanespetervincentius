@@ -28,7 +28,7 @@ const HeadlineLines = ({ title }: HeadlineLinesParams) => {
         return (
           <span
             key={line}
-            className="-mb-[0.12em] block overflow-hidden pb-[0.12em]"
+            className="-mb-[0.22em] block overflow-hidden pb-[0.22em]"
           >
             {[...line].map((char, index) => (
               <span
@@ -92,8 +92,8 @@ export default function DiveOverlay({
             <h2
               className={
                 section.placement === 'stone'
-                  ? 'font-sans text-3xl font-medium leading-[1.02] sm:text-5xl'
-                  : 'text-center font-sans text-4xl font-medium leading-[1.02] sm:text-5xl'
+                  ? 'font-display text-4xl leading-[1.04] sm:text-5xl'
+                  : 'text-center font-display text-5xl leading-[1.04] sm:text-6xl'
               }
             >
               <HeadlineLines title={section.title} />
@@ -127,7 +127,7 @@ export default function DiveOverlay({
         ))}
       </div>
       <div className="pointer-events-none absolute left-6 top-6 mix-blend-difference text-[0.58rem] leading-relaxed tracking-[0.18em] text-white/65 sm:left-10 sm:top-9">
-        <div className="font-sans text-xl font-semibold tracking-[0.12em] text-white sm:text-2xl">
+        <div className="font-display text-xl tracking-[0.2em] text-white sm:text-2xl">
           JOHANES
         </div>
         <div className="mt-2">{'// Portfolio © 2026'}</div>

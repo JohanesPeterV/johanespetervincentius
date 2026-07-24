@@ -221,6 +221,7 @@ export default function DiveScene({
               gpuTier={tier}
               progressRef={progressRef}
               rockColor={palette.rock}
+              stoneColor={palette.stone}
             />
           ) : (
             <IglooWorld gpuTier={tier} progressRef={progressRef} />

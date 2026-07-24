@@ -20,6 +20,7 @@ type SpaceWorldParams = {
   gpuTier: number;
   progressRef: RefObject<number>;
   rockColor: string;
+  stoneColor: string;
 };
 
 export default function SpaceWorld({
@@ -27,6 +28,7 @@ export default function SpaceWorld({
   gpuTier,
   progressRef,
   rockColor,
+  stoneColor,
 }: SpaceWorldParams) {
   const binaryCount = gpuTier < 2 ? 900 : 2400;
 
@@ -57,7 +59,7 @@ export default function SpaceWorld({
       </RisingWorld>
       <NarrativeStones
         accentColor={accentColor}
-        color={rockColor}
+        color={stoneColor}
         progressRef={progressRef}
       />
       <RockDrift color={rockColor} />
