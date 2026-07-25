@@ -22,19 +22,17 @@ const ABERRATION_OFFSET = new Vector2();
 
 type DivePostprocessingParams = {
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
-  gpuTier: number;
   sun: Mesh;
   transitionRef: RefObject<DiveTransitionEffect | null>;
 };
 
 const DivePostprocessing = memo(function DivePostprocessing({
   aberrationRef,
-  gpuTier,
   sun,
   transitionRef,
 }: DivePostprocessingParams) {
   return (
-    <EffectComposer enabled={gpuTier >= 2} multisampling={0}>
+    <EffectComposer multisampling={0}>
       <SMAA />
       <Bloom intensity={0.3} luminanceThreshold={0.88} mipmapBlur />
       <GodRays

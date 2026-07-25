@@ -278,10 +278,9 @@ export default function CameraRig({
           depthWrite={false}
         />
       </mesh>
-      {sunMesh ? (
+      {sunMesh && gpuTier >= 2 ? (
         <DivePostprocessing
           aberrationRef={aberrationRef}
-          gpuTier={gpuTier}
           sun={sunMesh}
           transitionRef={transitionRef}
         />
