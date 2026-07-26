@@ -14,8 +14,8 @@ const MAX_TARGET_SPEED = 4.5;
 // flicks - the target may never lead the camera by more than ~1.4 sections
 export const MAX_TARGET_LEAD = 0.85;
 const POSITION_EPSILON = 0.0004;
-const FINALE_LAUNCH_START = 4.38;
-const FINALE_LAUNCH_END = 4.98;
+const FINALE_LAUNCH_START = 3.48;
+const FINALE_LAUNCH_END = 4.08;
 
 const smootherstep = (value: number): number => {
   const t = MathUtils.clamp(value, 0, 1);

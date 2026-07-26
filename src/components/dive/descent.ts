@@ -1,3 +1,5 @@
+import { RAW_DESCENT_KEYS } from './descent-keys';
+
 export type DiveSectionLink = {
   label: string;
   href: string;
@@ -40,17 +42,6 @@ export type SectionMotion = {
   shift: number;
 };
 
-type RawDescentKey = {
-  at: number;
-  position: [number, number, number];
-  look: [number, number, number];
-  fog: string;
-  fogDensity: number;
-  glow: number;
-  veil: number;
-  veilColor: string;
-};
-
 type DescentKey = DescentFrame & { at: number };
 
 export const DIVE_SECTIONS: DiveSection[] = [
@@ -65,7 +56,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     tag: '// 02',
     title: 'Work\nExperience',
     subtitle: '2020 — present',
-    center: 2.85,
+    center: 1.95,
     placement: 'stone',
     stoneIndex: 0,
     x: -1.65,
@@ -81,7 +72,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     tag: '// 03',
     title: 'Selected\nProjects',
     subtitle: 'a few things built',
-    center: 3.45,
+    center: 2.55,
     placement: 'stone',
     stoneIndex: 1,
     x: -1.45,
@@ -105,7 +96,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     tag: '// 04',
     title: 'Tech\nStack',
     subtitle: 'tools of the trade',
-    center: 4.05,
+    center: 3.15,
     placement: 'stone',
     stoneIndex: 2,
     x: -1.6,
@@ -120,7 +111,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     tag: '// 05',
     title: "Let's\nTalk",
     subtitle: 'say hello',
-    center: 4.82,
+    center: 3.92,
     placement: 'center',
     links: [
       { label: 'Email', href: 'mailto:johanespeter.jp@gmail.com' },
@@ -133,7 +124,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
   },
 ];
 
-export const DIVE_LENGTH = 5;
+export const DIVE_LENGTH = 4.1;
 export const DIVE_START = 0.95;
 export const WHEEL_SENSITIVITY = 1 / 2000;
 export const TOUCH_SENSITIVITY = 1 / 1000;
@@ -147,152 +138,9 @@ const hexToRgb = (hex: string): [number, number, number] => {
   ];
 };
 
-const RAW_DESCENT_KEYS: RawDescentKey[] = [
-  {
-    at: 0,
-    position: [0, 6.6, 16],
-    look: [0, 3.4, -2],
-    fog: '#c6ccd4',
-    fogDensity: 0.05,
-    glow: 0,
-    veil: 1,
-    veilColor: '#e9edf2',
-  },
-  {
-    at: 0.3,
-    position: [0, 5.1, 16],
-    look: [0, 3, -1],
-    fog: '#c2c8d0',
-    fogDensity: 0.042,
-    glow: 0,
-    veil: 0,
-    veilColor: '#e9edf2',
-  },
-  {
-    at: 0.65,
-    position: [0, 3.8, 16],
-    look: [0, 2.6, 0],
-    fog: '#b9c0c9',
-    fogDensity: 0.03,
-    glow: 0,
-    veil: 0,
-    veilColor: '#e9edf2',
-  },
-  {
-    at: 1.7,
-    position: [0, 3.8, 16],
-    look: [0, 2.6, 0],
-    fog: '#b3bac4',
-    fogDensity: 0.032,
-    glow: 0,
-    veil: 0,
-    veilColor: '#dfe5ec',
-  },
-  {
-    at: 2.05,
-    position: [0, 3.7, 16],
-    look: [0, 2.5, 0],
-    fog: '#8c99a7',
-    fogDensity: 0.045,
-    glow: 0,
-    veil: 0,
-    veilColor: '#b9c9da',
-  },
-  {
-    at: 2.18,
-    position: [0, 3.6, 16],
-    look: [0, 2.45, 0],
-    fog: '#5c6d80',
-    fogDensity: 0.05,
-    glow: 0,
-    veil: 0.22,
-    veilColor: '#d5e6f4',
-  },
-  {
-    at: 2.3,
-    position: [0, 3.55, 16],
-    look: [0, 2.4, 0],
-    fog: '#3f5065',
-    fogDensity: 0.05,
-    glow: 0.05,
-    veil: 0.85,
-    veilColor: '#dcebf5',
-  },
-  {
-    at: 2.45,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#33465c',
-    fogDensity: 0.048,
-    glow: 0.1,
-    veil: 0.2,
-    veilColor: '#7890a7',
-  },
-  {
-    at: 2.6,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#1e3049',
-    fogDensity: 0.042,
-    glow: 0.15,
-    veil: 0,
-    veilColor: '#141f2c',
-  },
-  {
-    at: 4.35,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#24425f',
-    fogDensity: 0.05,
-    glow: 0.12,
-    veil: 0,
-    veilColor: '#dfeefb',
-  },
-  {
-    at: 4.52,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#48688a',
-    fogDensity: 0.05,
-    glow: 0.2,
-    veil: 0.28,
-    veilColor: '#dfeefb',
-  },
-  {
-    at: 4.64,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#7fa3c2',
-    fogDensity: 0.044,
-    glow: 0.3,
-    veil: 0.97,
-    veilColor: '#eaf4fd',
-  },
-  {
-    at: 4.8,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#33597e',
-    fogDensity: 0.038,
-    glow: 0.34,
-    veil: 0.08,
-    veilColor: '#eaf4fd',
-  },
-  {
-    at: 5,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#c6ccd4',
-    fogDensity: 0.05,
-    glow: 0,
-    veil: 1,
-    veilColor: '#e9edf2',
-  },
-];
-
-const SEAM_CENTER = 2.3;
+const SEAM_CENTER = 1.4;
 const SEAM_SPAN = 0.46;
-const FINALE_CENTER = 4.58;
+const FINALE_CENTER = 3.68;
 const FINALE_SPAN = 0.4;
 
 const transitionBoost = (
@@ -382,19 +230,28 @@ export const wrapProgress = (value: number): number =>
   ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
 
 const WORLD_A_SETTLE_DROP = 3.2;
-const WORLD_A_EXIT_START = 2.14;
-const WORLD_A_EXIT_END = 2.58;
+const WORLD_A_SETTLE_END = 0.65;
+const WORLD_A_DRIFT_RATE = 3;
+const WORLD_A_EXIT_START = 1.24;
+const WORLD_A_EXIT_END = 1.68;
 const WORLD_A_EXIT_LIFT = 46;
-const WORLD_B_ENTER_AT = 2.2;
+const WORLD_B_ENTER_AT = 1.3;
 const WORLD_B_ACCELERATION_SPAN = 0.38;
 const WORLD_B_RISE_RATE = 20;
 
 export const worldARise = (progress: number): number => {
-  const settle = WORLD_A_SETTLE_DROP * (1 - smootherstep(0, 0.65, progress));
+  const settle =
+    WORLD_A_SETTLE_DROP * (1 - smootherstep(0, WORLD_A_SETTLE_END, progress));
+  // REASON: settle and exit leave the terrain motionless across the whole
+  // opening section, so scrolling the hero reads as a dead input - a constant
+  // lift between them keeps the world rising the moment the wheel moves
+  const drift =
+    Math.max(0, Math.min(progress, WORLD_A_EXIT_START) - WORLD_A_SETTLE_END) *
+    WORLD_A_DRIFT_RATE;
   const exit =
     smootherstep(WORLD_A_EXIT_START, WORLD_A_EXIT_END, progress) *
     WORLD_A_EXIT_LIFT;
-  return exit - settle;
+  return exit + drift - settle;
 };
 
 export const worldBRise = (progress: number): number => {
@@ -406,8 +263,8 @@ export const worldBRise = (progress: number): number => {
   );
 };
 
-const FINALE_SUN_START = 4.45;
-const FINALE_SUN_END = 4.85;
+const FINALE_SUN_START = 3.55;
+const FINALE_SUN_END = 3.95;
 
 export const finaleSunLift = (progress: number): number => {
   return smootherstep(FINALE_SUN_START, FINALE_SUN_END, progress);
@@ -492,5 +349,5 @@ export const rushFov = (velocity: number): number => {
 };
 
 export const riseMeters = (progress: number): number => {
-  return Math.max(0, Math.round((progress - DIVE_START) * 32));
+  return Math.max(0, Math.round((progress - DIVE_START) * 41));
 };
