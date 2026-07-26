@@ -149,15 +149,15 @@ The experience is a sequence of **beats**. Six today; the structure should make 
 add, remove, or reorder a beat. Each beat is a stretch of scroll progress (§8 explains the
 `0–5` scale). Treat the ranges as approximate choreography, not hard law.
 
-| Beat   | Name             | What happens                                                                                                    | Protected? |
-| ------ | ---------------- | --------------------------------------------------------------------------------------------------------------- | ---------- |
-| **W1** | **First reveal** | Preloader dissolves completely; the natural-ice world settles into being. First breath.                         | 🛡️ **YES** |
-| **T**  | **The seam**     | World A opens through a smooth crystalline shred into World B; palette flips natural → crystal.                 | 🛡️ **YES** |
-| **W2** | First stone      | The Work Experience stone rises into view with its copy attached beside it.                                     |            |
-| **W3** | Second stone     | The Projects stone follows on the same path with its own attached copy.                                         |            |
-| **W4** | Third stone      | The Tech Stack stone continues the sequence with its own attached copy.                                         |            |
-| **W5** | _(open)_         | Not yet defined. Leave a clean seam to slot a beat here.                                                        |            |
-| **W6** | The finale flash | A bright counter-seam: a white-ice flash hides the one great camera launch; it clears looking up into sun glow. |            |
+| Beat   | Name             | What happens                                                                                                      | Protected? |
+| ------ | ---------------- | ----------------------------------------------------------------------------------------------------------------- | ---------- |
+| **W1** | **First reveal** | The natural-ice world settles into being as its assets land, with no loading screen in front of it. First breath. | 🛡️ **YES** |
+| **T**  | **The seam**     | World A opens through a smooth crystalline shred into World B; palette flips natural → crystal.                   | 🛡️ **YES** |
+| **W2** | First stone      | The Work Experience stone rises into view with its copy attached beside it.                                       |            |
+| **W3** | Second stone     | The Projects stone follows on the same path with its own attached copy.                                           |            |
+| **W4** | Third stone      | The Tech Stack stone continues the sequence with its own attached copy.                                           |            |
+| **W5** | _(open)_         | Not yet defined. Leave a clean seam to slot a beat here.                                                          |            |
+| **W6** | The finale flash | A bright counter-seam: a white-ice flash hides the one great camera launch; it clears looking up into sun glow.   |            |
 
 Transitions are **only** at T and W6. W2–W4 is one continuous world — scrolling through it
 must stay clean; the shred/glitch never fires there.
@@ -224,7 +224,6 @@ Key files (`src/app/igloo-preview/`):
 - `snow-gpu.tsx` / `snow-simulation.ts` — GPGPU snow.
 - `ice-crystals.tsx` — transmission crystal material.
 - `dive-overlay.tsx` / `dive-overlay-motion.ts` — headlines and hero-stone attachment.
-- `dive-loader.tsx` — preloader.
 - `wind-audio.ts` — ambient wind.
 
 **Camera contract:** the camera is parked at `y≈3.5, z=16` for the whole run, apart from a
@@ -254,7 +253,7 @@ Before claiming a preview change is done, confirm **all** of these:
 - [ ] You did **not** add portfolio content to drive the 3D (unless explicitly asked).
 - [ ] W2–W4 use three intentional stones, and each content panel stays attached to its stone.
 - [ ] The two protected moments (W1 reveal, T seam) still land and were not regressed.
-- [ ] The loader clears before W1 camera motion begins; input during loading cannot skip the reveal.
+- [ ] There is no loading screen; input before the world finishes loading cannot skip the W1 reveal.
 - [ ] Wheel, keyboard, and drag input keep the beats slow enough to read without feeling laggy.
 - [ ] Rapid repeated input queues the journey at the same calm top speed instead of skipping beats
       or producing a velocity spike.

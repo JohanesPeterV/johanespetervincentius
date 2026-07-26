@@ -23,8 +23,6 @@ export type DivePalette = {
   foreground: string;
   foregroundRgb: RgbColor;
   fogDensity: number;
-  loaderForeground: string;
-  loaderTrack: string;
   rock: string;
   stone: string;
 };
@@ -53,8 +51,6 @@ export const getDivePalette = (
       foreground: '#ffffff',
       foregroundRgb: toRgbColor('#ffffff'),
       fogDensity: 0.05,
-      loaderForeground: '#29313a',
-      loaderTrack: '#89919a',
       rock: '#7890a7',
       stone: '#d6e6f2',
     };
@@ -70,12 +66,6 @@ export const getDivePalette = (
     foreground: themeColors.textColor,
     foregroundRgb: toRgbColor(themeColors.textColor),
     fogDensity: 0.024,
-    loaderForeground: themeColors.textColor,
-    loaderTrack: blendColor(
-      themeColors.backgroundColor,
-      themeColors.textColor,
-      0.24,
-    ),
     rock: blendColor(themeColors.fluidColor, themeColors.textColor, 0.34),
     stone: blendColor(
       themeColors.fluidColor,

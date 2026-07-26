@@ -11,7 +11,6 @@ import CameraRig, { DiveStage, PointerState } from './camera-rig';
 import { DIVE_START, TOUCH_SENSITIVITY, WHEEL_SENSITIVITY } from './descent';
 import type { DiveAppearance } from './dive-palette';
 import { getDivePalette } from './dive-palette';
-import DiveLoader from './dive-loader';
 import DiveOverlay from './dive-overlay';
 import type { OverlayNodes } from './dive-overlay-motion';
 import IglooWorld from './igloo-world';
@@ -25,7 +24,6 @@ type DiveSceneParams = {
 
 type LoadedSignalParams = {
   stageRef: RefObject<DiveStage>;
-  loaderRef: RefObject<HTMLDivElement | null>;
 };
 
 type PointerDrag = {
@@ -61,29 +59,12 @@ const normalizeWheelDelta = (
   return pixels;
 };
 
-const LoadedSignal = ({ stageRef, loaderRef }: LoadedSignalParams) => {
-  // REASON: Suspense resolution is only observable from a mounted child, and
-  // the camera reveal must wait until the loader has fully cleared the scene
+const LoadedSignal = ({ stageRef }: LoadedSignalParams) => {
+  // REASON: Suspense resolution is only observable from a mounted child, so
+  // scroll stays disabled until the world assets are in the scene
   useEffect(() => {
-    const loader = loaderRef.current;
-    if (!loader) {
-      stageRef.current = 'live';
-      return;
-    }
-    const handleTransitionEnd = (event: TransitionEvent): void => {
-      if (event.target !== loader || event.propertyName !== 'opacity') {
-        return;
-      }
-      stageRef.current = 'live';
-      loader.removeEventListener('transitionend', handleTransitionEnd);
-    };
-    loader.addEventListener('transitionend', handleTransitionEnd);
-    loader.style.opacity = '0';
-    loader.style.pointerEvents = 'none';
-    return () => {
-      loader.removeEventListener('transitionend', handleTransitionEnd);
-    };
-  }, [stageRef, loaderRef]);
+    stageRef.current = 'live';
+  }, [stageRef]);
   return null;
 };
 
@@ -96,7 +77,6 @@ export default function DiveScene({
   const dragRef = useRef<PointerDrag>({ id: null, y: 0 });
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const stageRef = useRef<DiveStage>('loading');
-  const loaderRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<OverlayNodes>({
     sections: [],
     rail: [],
@@ -226,7 +206,7 @@ export default function DiveScene({
           ) : (
             <IglooWorld gpuTier={tier} progressRef={progressRef} />
           )}
-          <LoadedSignal stageRef={stageRef} loaderRef={loaderRef} />
+          <LoadedSignal stageRef={stageRef} />
         </Suspense>
         <CameraRig
           targetRef={targetRef}
@@ -239,7 +219,6 @@ export default function DiveScene({
         />
       </Canvas>
       <DiveOverlay appearance={appearance} overlayRef={overlayRef} />
-      <DiveLoader loaderRef={loaderRef} palette={palette} />
     </div>
   );
 }
