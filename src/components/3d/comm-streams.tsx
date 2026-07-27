@@ -27,7 +27,7 @@ type PacketField = {
   brights: Float32Array;
 };
 
-const PACKETS_PER_PATH = 14;
+const PACKETS_PER_PATH = 5;
 const WHITE = new THREE.Color('#ffffff');
 
 const VERTEX_SHADER = `

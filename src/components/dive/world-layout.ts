@@ -7,7 +7,7 @@ export type BlockTransform = {
 
 const RISING_STONE_COUNT = 18;
 const AMBIENT_SNOW_COUNT = 620;
-const AMBIENT_ROCK_COUNT = 90;
+const AMBIENT_ROCK_COUNT = 40;
 const CAMERA_DISTANCE_Z = 16;
 const FIELD_MIN_AZIMUTH = 0.55;
 const FIELD_MAX_AZIMUTH = 0.78;

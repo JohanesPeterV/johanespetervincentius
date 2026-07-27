@@ -30,7 +30,7 @@ export default function SpaceWorld({
   rockColor,
   stoneColor,
 }: SpaceWorldParams) {
-  const binaryCount = gpuTier < 2 ? 550 : 1400;
+  const binaryCount = gpuTier < 2 ? 120 : 260;
 
   return (
     <>
