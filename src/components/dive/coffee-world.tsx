@@ -4,7 +4,9 @@ import { RefObject } from 'react';
 
 import { worldARise, worldBRise } from './descent';
 import { NarrativeStones, RisingStones, RisingWorld } from './dive-world';
-import { RainRipples, RainStreaks } from './rain';
+import RainRipples from './rain-ripples';
+import RainStreaks from './rain-streaks';
+import { WORLD_A_FLOOR_Y } from './world-layout';
 
 type CoffeeWorldParams = {
   accentColor: string;
@@ -40,7 +42,7 @@ export default function CoffeeWorld({
         color="#ffbf78"
       />
       <RisingWorld progressRef={progressRef} rise={worldARise}>
-        <group position={[0, -1.6, 0]}>
+        <group position={[0, WORLD_A_FLOOR_Y, 0]}>
           <mesh rotation-x={-Math.PI / 2}>
             <circleGeometry args={[FLOOR_RADIUS, 64]} />
             <meshBasicMaterial color={FLOOR_COLOR} />
@@ -56,7 +58,7 @@ export default function CoffeeWorld({
         color={stoneColor}
         progressRef={progressRef}
       />
-      <RainStreaks />
+      <RainStreaks progressRef={progressRef} />
     </>
   );
 }

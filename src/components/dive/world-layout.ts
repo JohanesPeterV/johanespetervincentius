@@ -34,6 +34,8 @@ const sampleFieldSlot = (random: () => number, side: 1 | -1): FieldSlot => {
   };
 };
 
+export const WORLD_A_FLOOR_Y = -1.6;
+
 export const createSeededRandom = (seed: number): (() => number) => {
   let state = seed;
   return () => {
