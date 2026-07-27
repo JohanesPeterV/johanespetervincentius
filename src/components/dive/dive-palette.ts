@@ -3,7 +3,7 @@ import { Color } from 'three';
 import type { DescentFrame } from './descent';
 import { finaleBoost, seamBoost } from './descent';
 
-export type DiveAppearance = 'igloo' | 'space';
+export type DiveAppearance = 'coffee' | 'igloo' | 'space';
 
 type ThemeColors = {
   backgroundColor: string;
@@ -40,6 +40,24 @@ export const getDivePalette = (
   appearance: DiveAppearance,
   themeColors: ThemeColors,
 ): DivePalette => {
+  // REASON: the coffee blockout is warm-locked by design - one warm hue in a
+  // cold-dark frame is the concept, so it must not react to the theme switcher
+  if (appearance === 'coffee') {
+    return {
+      accent: '#d08a3e',
+      accentRgb: toRgbColor('#d08a3e'),
+      appearance,
+      background: '#0d0805',
+      backgroundRgb: toRgbColor('#0d0805'),
+      exposure: 0.72,
+      foreground: '#f3e7d3',
+      foregroundRgb: toRgbColor('#f3e7d3'),
+      fogDensity: 0.03,
+      rock: '#3f2818',
+      stone: '#b07c46',
+    };
+  }
+
   if (appearance === 'igloo') {
     return {
       accent: '#9fd0ee',

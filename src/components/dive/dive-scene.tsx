@@ -8,6 +8,7 @@ import { useTheme } from 'next-themes';
 import { RefObject, Suspense, useEffect, useRef } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
+import CoffeeWorld from './coffee-world';
 import { DIVE_START, TOUCH_SENSITIVITY, WHEEL_SENSITIVITY } from './descent';
 import type { DiveAppearance } from './dive-palette';
 import { getDivePalette } from './dive-palette';
@@ -195,6 +196,14 @@ export default function DiveScene({
         <color attach="background" args={[palette.background]} />
         <fogExp2 attach="fog" args={[palette.background, palette.fogDensity]} />
         <Suspense fallback={null}>
+          {appearance === 'coffee' ? (
+            <CoffeeWorld
+              accentColor={palette.accent}
+              progressRef={progressRef}
+              rockColor={palette.rock}
+              stoneColor={palette.stone}
+            />
+          ) : null}
           {appearance === 'space' ? (
             <SpaceWorld
               accentColor={palette.accent}
@@ -203,9 +212,10 @@ export default function DiveScene({
               rockColor={palette.rock}
               stoneColor={palette.stone}
             />
-          ) : (
+          ) : null}
+          {appearance === 'igloo' ? (
             <IglooWorld gpuTier={tier} progressRef={progressRef} />
-          )}
+          ) : null}
           <LoadedSignal stageRef={stageRef} />
         </Suspense>
         <CameraRig
