@@ -14,12 +14,16 @@ export type QuadField = {
   seeds: Float32Array;
 };
 
-const RAIN_COUNT = 150;
+// REASON: rain reads calm because it is a dense field of faint drops, not a
+// handful of bright ones - a sparse field turns every streak into an object
+// the eye tracks individually, which is what made it look like a meteor shower
+const RAIN_COUNT = 700;
 const FALL_SPAN = 24;
 const FIELD_WIDTH = 84;
 const FIELD_NEAR_Z = 18;
 const FIELD_DEPTH = 56;
 const MID_SLANT = 0.12;
+const RIPPLE_LIMIT = 24;
 const RIPPLE_MAX_X = 14;
 const RIPPLE_NEAR_Z = 2;
 const RIPPLE_FAR_Z = -30;
@@ -34,7 +38,7 @@ export const DROP_MOTION = `
 const float FALL_SPAN = ${FALL_SPAN.toFixed(1)};
 
 float dropSpeed(float seed) {
-  return 5.5 + seed * 4.0;
+  return 8.0 + seed * 5.0;
 }
 
 float dropSlant(float time) {
@@ -86,12 +90,14 @@ const DROPS = buildDrops();
 
 export const RAIN_FIELD = buildQuadField(DROPS);
 
-// REASON: every drop that lands inside the view cone gets a ring, so the eye
-// never sees a landing without a splash or a splash without a landing - drops
-// outside it are cut because their landing is off-screen, not to thin the field
+// REASON: a ring is only ever built from a drop that lands inside the view
+// cone - the two failures are not symmetric, a landing with no ring is
+// invisible but a ring with no landing is what read as broken
 const landsInView = (drop: Drop): boolean =>
   Math.abs(drop.x - MID_SLANT * FALL_SPAN) < RIPPLE_MAX_X &&
   drop.z < RIPPLE_NEAR_Z &&
   drop.z > RIPPLE_FAR_Z;
 
-export const RIPPLE_FIELD = buildQuadField(DROPS.filter(landsInView));
+export const RIPPLE_FIELD = buildQuadField(
+  DROPS.filter(landsInView).slice(0, RIPPLE_LIMIT),
+);

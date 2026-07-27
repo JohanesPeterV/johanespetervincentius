@@ -2,7 +2,7 @@
 
 import { useFrame } from '@react-three/fiber';
 import { RefObject, useRef } from 'react';
-import { AdditiveBlending, Color, ShaderMaterial } from 'three';
+import { Color, ShaderMaterial } from 'three';
 
 import { worldARise } from './descent';
 import { DROP_MOTION, RAIN_FIELD } from './rain-field';
@@ -35,13 +35,18 @@ uniform float uImpactY;
 varying vec2 vCorner;
 varying float vFade;
 
-const float WIDTH_PER_DEPTH = 0.0022;
+const float WIDTH_PER_DEPTH = 0.0016;
+
+// REASON: a rain streak IS motion blur, so its length is the distance the drop
+// covers while the shutter is open - a length picked independently of speed
+// draws a slow solid object instead, which is exactly a meteor
+const float SHUTTER = 0.055;
 
 void main() {
   float speed = dropSpeed(aSeed);
   float slant = dropSlant(uTime);
   float fall = dropFall(position.y, uTime, speed);
-  float streakLength = 0.55 + aSeed * 0.7;
+  float streakLength = speed * SHUTTER;
 
   vec3 dropPosition = vec3(
     position.x - slant * (FALL_SPAN - fall),
@@ -67,7 +72,7 @@ void main() {
     smoothstep(1.0, 4.5, viewDepth) *
     (1.0 - smoothstep(34.0, 62.0, viewDepth)) *
     (1.0 - smoothstep(FALL_SPAN - 5.0, FALL_SPAN, fall)) *
-    (0.35 + aSeed * 0.65);
+    (0.62 + aSeed * 0.38);
 
   vCorner = vec2(aCorner.x, alongStreak);
   gl_Position = projectionMatrix * viewPosition;
@@ -79,13 +84,14 @@ uniform vec3 uColor;
 varying vec2 vCorner;
 varying float vFade;
 
-// REASON: an even streak with both ends softened reads as rain - a point head
-// with a squared falloff behind it is the profile of a meteor
+// REASON: motion blur is even along its path and soft at BOTH ends - any
+// head-to-tail gradient hands the streak a direction and a nose, and that is
+// what the eye classifies as a meteor rather than water
 void main() {
-  float core = smoothstep(1.0, 0.35, abs(vCorner.x));
-  float trail =
-    smoothstep(0.0, 0.08, vCorner.y) * (1.0 - smoothstep(0.3, 1.0, vCorner.y));
-  float alpha = core * trail * vFade * 0.45;
+  float core = smoothstep(1.0, 0.25, abs(vCorner.x));
+  float ends =
+    smoothstep(0.0, 0.2, vCorner.y) * (1.0 - smoothstep(0.8, 1.0, vCorner.y));
+  float alpha = core * ends * vFade * 0.3;
   if (alpha < 0.003) {
     discard;
   }
@@ -131,7 +137,6 @@ export default function RainStreaks({ color, progressRef }: RainStreaksParams) {
         vertexShader={RAIN_VERTEX}
         fragmentShader={RAIN_FRAGMENT}
         uniforms={RAIN_UNIFORMS}
-        blending={AdditiveBlending}
         transparent
         depthWrite={false}
       />
