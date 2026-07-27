@@ -129,33 +129,6 @@ export const buildCrystalShards = (): BlockTransform[] => {
   return blocks;
 };
 
-const CREMA_PATCH_COUNT = 200;
-
-// REASON: pow biases the spiral dense at the centre and sparse at the rim, so
-// the swirl reads as foam settling on liquid instead of an even particle ring
-export const buildCremaSwirl = (): BlockTransform[] => {
-  const random = createSeededRandom(87);
-  const blocks: BlockTransform[] = [];
-  for (let index = 0; index < CREMA_PATCH_COUNT; index++) {
-    const t = index / CREMA_PATCH_COUNT;
-    const arm = index % 2 === 0 ? 0 : Math.PI;
-    const radius = 0.8 + 11.4 * Math.pow(t, 0.72) + random() * 0.55;
-    const angle = arm + t * 5.2 + random() * 0.3;
-    const size = (0.28 + random() * 0.55) * (1.1 - t * 0.55);
-    blocks.push({
-      position: [
-        Math.cos(angle) * radius,
-        0.02 + random() * 0.04,
-        Math.sin(angle) * radius,
-      ],
-      rotation: [0, random() * Math.PI, 0],
-      scale: [size, 0.045, size * (0.6 + random() * 0.7)],
-      shade: 0.5 + random() * 0.5,
-    });
-  }
-  return blocks;
-};
-
 export const buildSnowPositions = (): Float32Array => {
   const random = createSeededRandom(31);
   const positions = new Float32Array(AMBIENT_SNOW_COUNT * 3);
