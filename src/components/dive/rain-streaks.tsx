@@ -42,7 +42,7 @@ void main() {
   float speed = dropSpeed(aSeed);
   float slant = dropSlant(uTime);
   float fall = dropFall(position.y, uTime, speed);
-  float streakLength = 0.8 + aSeed * 1.3;
+  float streakLength = 0.55 + aSeed * 0.7;
 
   vec3 dropPosition = vec3(
     position.x - slant * (FALL_SPAN - fall),
@@ -80,10 +80,13 @@ uniform vec3 uColor;
 varying vec2 vCorner;
 varying float vFade;
 
+// REASON: an even streak with both ends softened reads as rain - a point head
+// with a squared falloff behind it is the profile of a meteor
 void main() {
   float core = smoothstep(1.0, 0.35, abs(vCorner.x));
-  float trail = 1.0 - vCorner.y;
-  float alpha = core * trail * trail * vFade * 0.5;
+  float trail =
+    smoothstep(0.0, 0.08, vCorner.y) * (1.0 - smoothstep(0.3, 1.0, vCorner.y));
+  float alpha = core * trail * vFade * 0.45;
   if (alpha < 0.003) {
     discard;
   }
