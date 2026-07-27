@@ -200,6 +200,7 @@ export default function DiveScene({
             <CoffeeWorld
               accentColor={palette.accent}
               progressRef={progressRef}
+              rainColor={palette.rain}
               rockColor={palette.rock}
               stoneColor={palette.stone}
             />

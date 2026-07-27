@@ -9,10 +9,9 @@ import { DROP_MOTION, RAIN_FIELD } from './rain-field';
 import { WORLD_A_FLOOR_Y } from './world-layout';
 
 type RainStreaksParams = {
+  color: string;
   progressRef: RefObject<number>;
 };
-
-const RAIN_COLOR = '#9db6cf';
 
 // REASON: once the world lifts out of frame the floor races upward - the rain
 // column has to stop following it or the whole curtain flies off with it
@@ -21,7 +20,7 @@ const IMPACT_CEILING = 0.4;
 const RAIN_UNIFORMS = {
   uTime: { value: 0 },
   uImpactY: { value: 0 },
-  uColor: { value: new Color(RAIN_COLOR) },
+  uColor: { value: new Color() },
 };
 
 // REASON: width is set per depth rather than in world units so every streak
@@ -94,12 +93,17 @@ void main() {
 }
 `;
 
-export default function RainStreaks({ progressRef }: RainStreaksParams) {
+export default function RainStreaks({ color, progressRef }: RainStreaksParams) {
   const materialRef = useRef<ShaderMaterial>(null);
+  const appliedColorRef = useRef('');
   useFrame((state) => {
     const material = materialRef.current;
     if (!material) {
       return;
+    }
+    if (appliedColorRef.current !== color) {
+      material.uniforms.uColor.value.set(color);
+      appliedColorRef.current = color;
     }
     const floorY = WORLD_A_FLOOR_Y + worldARise(progressRef.current);
     material.uniforms.uTime.value = state.clock.elapsedTime;

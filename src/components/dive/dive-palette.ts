@@ -23,9 +23,13 @@ export type DivePalette = {
   foreground: string;
   foregroundRgb: RgbColor;
   fogDensity: number;
+  rain: string;
   rock: string;
   stone: string;
 };
+
+const RAIN_TEMPER_COLOR = '#dbe4ee';
+const RAIN_TEMPER_AMOUNT = 0.35;
 
 const toRgbColor = (value: string): RgbColor => {
   const color = new Color(value);
@@ -35,6 +39,12 @@ const toRgbColor = (value: string): RgbColor => {
 const blendColor = (from: string, to: string, amount: number): string => {
   return new Color(from).lerp(new Color(to), amount).getStyle();
 };
+
+// REASON: the rain is the one channel that leaves the coffee world's warm lock
+// - it is what the shuffle button visibly drives on the landing frame - and it
+// is tempered toward grey so a warm theme still reads as water, not sparks
+const temperRain = (color: string): string =>
+  blendColor(color, RAIN_TEMPER_COLOR, RAIN_TEMPER_AMOUNT);
 
 export const getDivePalette = (
   appearance: DiveAppearance,
@@ -53,6 +63,7 @@ export const getDivePalette = (
       foreground: '#f3e7d3',
       foregroundRgb: toRgbColor('#f3e7d3'),
       fogDensity: 0.03,
+      rain: temperRain(themeColors.fluidColor),
       rock: '#3f2818',
       stone: '#b07c46',
     };
@@ -69,6 +80,7 @@ export const getDivePalette = (
       foreground: '#ffffff',
       foregroundRgb: toRgbColor('#ffffff'),
       fogDensity: 0.05,
+      rain: temperRain(themeColors.fluidColor),
       rock: '#7890a7',
       stone: '#d6e6f2',
     };
@@ -84,6 +96,7 @@ export const getDivePalette = (
     foreground: themeColors.textColor,
     foregroundRgb: toRgbColor(themeColors.textColor),
     fogDensity: 0.024,
+    rain: temperRain(themeColors.fluidColor),
     rock: blendColor(themeColors.fluidColor, themeColors.textColor, 0.34),
     stone: blendColor(
       themeColors.fluidColor,

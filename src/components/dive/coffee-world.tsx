@@ -11,6 +11,7 @@ import { WORLD_A_FLOOR_Y } from './world-layout';
 type CoffeeWorldParams = {
   accentColor: string;
   progressRef: RefObject<number>;
+  rainColor: string;
   rockColor: string;
   stoneColor: string;
 };
@@ -22,6 +23,7 @@ const FLOOR_RADIUS = 46;
 export default function CoffeeWorld({
   accentColor,
   progressRef,
+  rainColor,
   rockColor,
   stoneColor,
 }: CoffeeWorldParams) {
@@ -47,7 +49,7 @@ export default function CoffeeWorld({
             <circleGeometry args={[FLOOR_RADIUS, 64]} />
             <meshBasicMaterial color={FLOOR_COLOR} />
           </mesh>
-          <RainRipples />
+          <RainRipples color={rainColor} />
         </group>
       </RisingWorld>
       <RisingWorld progressRef={progressRef} rise={worldBRise}>
@@ -58,7 +60,7 @@ export default function CoffeeWorld({
         color={stoneColor}
         progressRef={progressRef}
       />
-      <RainStreaks progressRef={progressRef} />
+      <RainStreaks color={rainColor} progressRef={progressRef} />
     </>
   );
 }

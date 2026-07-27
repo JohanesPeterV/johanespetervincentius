@@ -6,11 +6,13 @@ import { AdditiveBlending, Color, DoubleSide, ShaderMaterial } from 'three';
 
 import { DROP_MOTION, RIPPLE_FIELD } from './rain-field';
 
-const RIPPLE_COLOR = '#c9c3bb';
+type RainRipplesParams = {
+  color: string;
+};
 
 const RIPPLE_UNIFORMS = {
   uTime: { value: 0 },
-  uColor: { value: new Color(RIPPLE_COLOR) },
+  uColor: { value: new Color() },
 };
 
 // REASON: the ring is keyed off the drop that lands here - age counts from the
@@ -71,12 +73,19 @@ void main() {
 }
 `;
 
-export default function RainRipples() {
+export default function RainRipples({ color }: RainRipplesParams) {
   const materialRef = useRef<ShaderMaterial>(null);
+  const appliedColorRef = useRef('');
   useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+    const material = materialRef.current;
+    if (!material) {
+      return;
     }
+    if (appliedColorRef.current !== color) {
+      material.uniforms.uColor.value.set(color);
+      appliedColorRef.current = color;
+    }
+    material.uniforms.uTime.value = state.clock.elapsedTime;
   });
   return (
     <mesh frustumCulled={false}>
