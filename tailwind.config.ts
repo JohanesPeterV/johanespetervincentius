@@ -32,7 +32,7 @@ export default {
       },
       fontFamily: {
         poppins: ['var(--font-poppins)', 'sans-serif'],
-        display: ['var(--font-display)', 'serif'],
+        display: ['var(--font-display)', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
