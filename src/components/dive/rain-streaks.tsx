@@ -61,10 +61,12 @@ void main() {
     viewAxis * (alongStreak * streakLength) +
     viewSide * (aCorner.x * streakWidth);
 
+  // REASON: no fade-out near the floor - the head has to stay lit right down
+  // to the impact or it dies before its ring blooms and the two read as
+  // unrelated effects; the floor plane is what hides the drop from there
   vFade =
     smoothstep(1.0, 4.5, viewDepth) *
     (1.0 - smoothstep(34.0, 62.0, viewDepth)) *
-    smoothstep(0.0, 0.5, fall) *
     (1.0 - smoothstep(FALL_SPAN - 5.0, FALL_SPAN, fall)) *
     (0.35 + aSeed * 0.65);
 

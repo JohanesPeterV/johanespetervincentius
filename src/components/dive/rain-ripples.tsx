@@ -40,12 +40,17 @@ void main() {
     position.z + aCorner.y * radius
   );
   vec4 viewPosition = modelViewMatrix * vec4(ringPosition, 1.0);
+  float viewDepth = -viewPosition.z;
 
+  // REASON: the same weighting the streak uses - a drop too faint or too far
+  // to see must not land a ring the eye cannot trace back to it
   vFade =
     step(phase, 1.0) *
     (1.0 - settled) *
     (1.0 - settled) *
-    (1.0 - smoothstep(24.0, 44.0, -viewPosition.z));
+    (0.35 + aSeed * 0.65) *
+    smoothstep(1.0, 4.5, viewDepth) *
+    (1.0 - smoothstep(34.0, 62.0, viewDepth));
   vCorner = aCorner;
   gl_Position = projectionMatrix * viewPosition;
 }

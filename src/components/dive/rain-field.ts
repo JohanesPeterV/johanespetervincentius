@@ -19,8 +19,10 @@ const FALL_SPAN = 24;
 const FIELD_WIDTH = 84;
 const FIELD_NEAR_Z = 18;
 const FIELD_DEPTH = 56;
-const RIPPLE_LIMIT = 20;
-const RIPPLE_REACH = 30;
+const MID_SLANT = 0.12;
+const RIPPLE_MAX_X = 14;
+const RIPPLE_NEAR_Z = 2;
+const RIPPLE_FAR_Z = -30;
 
 const QUAD_CORNERS = [-1, -1, 1, -1, -1, 1, 1, 1];
 const QUAD_INDICES = [0, 1, 2, 2, 1, 3];
@@ -84,11 +86,12 @@ const DROPS = buildDrops();
 
 export const RAIN_FIELD = buildQuadField(DROPS);
 
-// REASON: only drops landing near the camera get a ring - one splash per drop
-// across the whole field would carpet the floor
-export const RIPPLE_FIELD = buildQuadField(
-  DROPS.filter((drop) => Math.hypot(drop.x, drop.z) < RIPPLE_REACH).slice(
-    0,
-    RIPPLE_LIMIT,
-  ),
-);
+// REASON: every drop that lands inside the view cone gets a ring, so the eye
+// never sees a landing without a splash or a splash without a landing - drops
+// outside it are cut because their landing is off-screen, not to thin the field
+const landsInView = (drop: Drop): boolean =>
+  Math.abs(drop.x - MID_SLANT * FALL_SPAN) < RIPPLE_MAX_X &&
+  drop.z < RIPPLE_NEAR_Z &&
+  drop.z > RIPPLE_FAR_Z;
+
+export const RIPPLE_FIELD = buildQuadField(DROPS.filter(landsInView));
