@@ -11,6 +11,7 @@ import {
   RisingWorld,
   applyBlockInstances,
 } from './dive-world';
+import RainStreaks from './rain-streaks';
 import { buildCremaSwirl, createSeededRandom } from './world-layout';
 
 type CoffeeWorldParams = {
@@ -21,11 +22,6 @@ type CoffeeWorldParams = {
 };
 
 type SteamField = {
-  positions: Float32Array;
-  seeds: Float32Array;
-};
-
-type RainField = {
   positions: Float32Array;
   seeds: Float32Array;
 };
@@ -129,78 +125,6 @@ const SteamDrift = () => {
   );
 };
 
-const RAIN_COUNT = 340;
-const RAIN_COLOR = '#8fa8bd';
-const RAIN_FLOOR_Y = -10;
-const RAIN_SPAN_Y = 30;
-const RAIN_SLANT = 0.14;
-
-const rainDropLength = (seed: number): number => 0.45 + seed * 0.75;
-
-const buildRainField = (): RainField => {
-  const random = createSeededRandom(113);
-  const positions = new Float32Array(RAIN_COUNT * 6);
-  const seeds = new Float32Array(RAIN_COUNT);
-  for (let index = 0; index < RAIN_COUNT; index++) {
-    const seed = random();
-    const x = (random() - 0.5) * 80;
-    const y = RAIN_FLOOR_Y + random() * RAIN_SPAN_Y;
-    const z = -30 + random() * 40;
-    const length = rainDropLength(seed);
-    positions[index * 6] = x;
-    positions[index * 6 + 1] = y;
-    positions[index * 6 + 2] = z;
-    positions[index * 6 + 3] = x + RAIN_SLANT * length;
-    positions[index * 6 + 4] = y + length;
-    positions[index * 6 + 5] = z;
-    seeds[index] = seed;
-  }
-  return { positions, seeds };
-};
-
-const RainDrift = () => {
-  const fieldRef = useRef<RainField | null>(null);
-  if (fieldRef.current === null) {
-    fieldRef.current = buildRainField();
-  }
-  const field = fieldRef.current;
-  const geometryRef = useRef<BufferGeometry>(null);
-  useFrame((_, delta) => {
-    const geometry = geometryRef.current;
-    if (!geometry) {
-      return;
-    }
-    const frameDelta = Math.min(delta, MAX_DRIFT_DELTA);
-    const positions = field.positions;
-    for (let index = 0; index < RAIN_COUNT; index++) {
-      const seed = field.seeds[index];
-      let y = positions[index * 6 + 1] - (9 + seed * 7) * frameDelta;
-      if (y < RAIN_FLOOR_Y) {
-        y += RAIN_SPAN_Y;
-      }
-      positions[index * 6 + 1] = y;
-      positions[index * 6 + 4] = y + rainDropLength(seed);
-    }
-    geometry.attributes.position.needsUpdate = true;
-  });
-  return (
-    <lineSegments frustumCulled={false}>
-      <bufferGeometry ref={geometryRef}>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[field.positions, 3]}
-        />
-      </bufferGeometry>
-      <lineBasicMaterial
-        color={RAIN_COLOR}
-        transparent
-        opacity={0.34}
-        depthWrite={false}
-      />
-    </lineSegments>
-  );
-};
-
 const CremaSwirl = () => {
   const groupRef = useRef<Group>(null);
   useFrame((state) => {
@@ -267,7 +191,7 @@ export default function CoffeeWorld({
         progressRef={progressRef}
       />
       <SteamDrift />
-      <RainDrift />
+      <RainStreaks />
     </>
   );
 }
