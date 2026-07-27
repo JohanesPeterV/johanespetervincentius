@@ -13,10 +13,6 @@ type RainStreaksParams = {
   progressRef: RefObject<number>;
 };
 
-// REASON: once the world lifts out of frame the floor races upward - the rain
-// column has to stop following it or the whole curtain flies off with it
-const IMPACT_CEILING = 0.4;
-
 const RAIN_UNIFORMS = {
   uTime: { value: 0 },
   uImpactY: { value: 0 },
@@ -111,9 +107,12 @@ export default function RainStreaks({ color, progressRef }: RainStreaksParams) {
       material.uniforms.uColor.value.set(color);
       appliedColorRef.current = color;
     }
-    const floorY = WORLD_A_FLOOR_Y + worldARise(progressRef.current);
     material.uniforms.uTime.value = state.clock.elapsedTime;
-    material.uniforms.uImpactY.value = Math.min(floorY, IMPACT_CEILING);
+    // REASON: the impact height tracks the floor with no ceiling on purpose -
+    // at the seam the departing world carries its whole rain curtain up and
+    // out of frame, which is what keeps rain existing only in the opening
+    material.uniforms.uImpactY.value =
+      WORLD_A_FLOOR_Y + worldARise(progressRef.current);
   });
   return (
     <mesh frustumCulled={false}>

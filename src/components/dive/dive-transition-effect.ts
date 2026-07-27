@@ -1,6 +1,9 @@
 import { BlendFunction, Effect } from 'postprocessing';
 import { Color, Uniform } from 'three';
 
+// REASON: the wavefront's first window rides 1.2-1.6, in sync with the floor
+// lifting past the lens - the seam's intensity envelope peaks at 1.4, so a
+// later window leaves the effect invisible
 const FRAGMENT = `
 uniform float uIntensity;
 uniform float uProgress;
@@ -27,7 +30,7 @@ void mainUv(inout vec2 uv) {
   }
   float amount = smoothstep(0.02, 0.92, uIntensity);
   float phase = uProgress < 3.5
-    ? clamp((uProgress - 1.92) / 0.76, 0.0, 1.0)
+    ? clamp((uProgress - 1.2) / 0.4, 0.0, 1.0)
     : clamp((uProgress - 4.18) / 0.8, 0.0, 1.0);
   float front = mix(-0.14, 1.14, phase);
   float flow = phase * 10.0;
@@ -49,7 +52,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   }
   float amount = smoothstep(0.02, 0.92, uIntensity);
   float phase = uProgress < 3.5
-    ? clamp((uProgress - 1.92) / 0.76, 0.0, 1.0)
+    ? clamp((uProgress - 1.2) / 0.4, 0.0, 1.0)
     : clamp((uProgress - 4.18) / 0.8, 0.0, 1.0);
   float front = mix(-0.14, 1.14, phase);
   float flow = phase * 10.0;

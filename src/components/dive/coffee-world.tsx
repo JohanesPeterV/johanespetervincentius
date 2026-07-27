@@ -1,6 +1,7 @@
 'use client';
 
 import { RefObject } from 'react';
+import { DoubleSide } from 'three';
 
 import { worldARise, worldBRise } from './descent';
 import { NarrativeStones, RisingStones, RisingWorld } from './dive-world';
@@ -47,7 +48,9 @@ export default function CoffeeWorld({
         <group position={[0, WORLD_A_FLOOR_Y, 0]}>
           <mesh rotation-x={-Math.PI / 2}>
             <circleGeometry args={[FLOOR_RADIUS, 64]} />
-            <meshBasicMaterial color={FLOOR_COLOR} />
+            {/* REASON: the unveiled seam lifts this disc past the lens - a
+                single-sided floor pops out of existence at the crossing */}
+            <meshBasicMaterial color={FLOOR_COLOR} side={DoubleSide} />
           </mesh>
           <RainRipples color={rainColor} />
         </group>

@@ -110,6 +110,8 @@ const blendChannel = (from: number, to: number, amount: number): number => {
   return from + (to - from) * amount;
 };
 
+const SEAM_MIST_DENSITY = 0.055;
+
 export const applyDivePalette = (
   frame: DescentFrame,
   palette: DivePalette,
@@ -119,7 +121,8 @@ export const applyDivePalette = (
     return;
   }
 
-  const transition = Math.max(seamBoost(progress), finaleBoost(progress));
+  const seam = seamBoost(progress);
+  const transition = Math.max(seam, finaleBoost(progress));
   const accentAmount = 0.08 + transition * 0.3 + frame.glow * 0.2;
   const veilAmount = 0.42 + transition * 0.32;
 
@@ -153,6 +156,11 @@ export const applyDivePalette = (
     palette.foregroundRgb[2],
     veilAmount,
   );
-  frame.fogDensity = Math.max(0.014, frame.fogDensity * 0.58);
+  // REASON: the shared descent keys flash a bright veil across the seam, which
+  // strobes on this dark grade - the crossing reads as a breath of accent-lit
+  // mist instead, so the veil is muted and fog density carries the handoff
+  frame.veil *= 1 - seam;
+  frame.fogDensity =
+    Math.max(0.014, frame.fogDensity * 0.58) + seam * SEAM_MIST_DENSITY;
   frame.glow = Math.max(frame.glow, transition * 0.16);
 };

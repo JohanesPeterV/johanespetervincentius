@@ -9,7 +9,12 @@ import { RefObject, Suspense, useEffect, useRef } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
 import CoffeeWorld from './coffee-world';
-import { DIVE_START, TOUCH_SENSITIVITY, WHEEL_SENSITIVITY } from './descent';
+import {
+  DIVE_START,
+  TOUCH_SENSITIVITY,
+  WHEEL_SENSITIVITY,
+  sectionStepDelta,
+} from './descent';
 import type { DiveAppearance } from './dive-palette';
 import { getDivePalette } from './dive-palette';
 import DiveOverlay from './dive-overlay';
@@ -35,7 +40,6 @@ type PointerDrag = {
 const LINE_DELTA_MODE = 1;
 const PAGE_DELTA_MODE = 2;
 const LINE_HEIGHT_PX = 16;
-const KEYBOARD_STEP = 0.16;
 
 const getCanvasDpr = (tier: number): number => {
   if (tier >= 3) {
@@ -158,10 +162,10 @@ export default function DiveScene({
         return;
       }
       if (event.key === 'ArrowDown') {
-        targetRef.current += KEYBOARD_STEP;
+        targetRef.current += sectionStepDelta(targetRef.current, 1);
       }
       if (event.key === 'ArrowUp') {
-        targetRef.current -= KEYBOARD_STEP;
+        targetRef.current += sectionStepDelta(targetRef.current, -1);
       }
     };
     window.addEventListener('keydown', handleKeyDown);

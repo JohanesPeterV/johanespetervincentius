@@ -328,6 +328,38 @@ export const railProximity = (progress: number, center: number): number => {
   return 1 - Math.min(1, Math.abs(progress - center) / 0.6);
 };
 
+const SECTION_STEP_EPSILON = 0.05;
+
+export const sectionStepDelta = (
+  progress: number,
+  direction: 1 | -1,
+): number => {
+  const wrapped = wrapProgress(progress);
+  let nearest = DIVE_LENGTH;
+  for (const section of DIVE_SECTIONS) {
+    const forward = wrapProgress((section.center - wrapped) * direction);
+    if (forward > SECTION_STEP_EPSILON && forward < nearest) {
+      nearest = forward;
+    }
+  }
+  return direction * nearest;
+};
+
+export const nearestSectionDelta = (progress: number): number => {
+  const wrapped = wrapProgress(progress);
+  let best = 0;
+  let bestDistance = DIVE_LENGTH;
+  for (const section of DIVE_SECTIONS) {
+    const forward = wrapProgress(section.center - wrapped);
+    const delta = forward > DIVE_LENGTH / 2 ? forward - DIVE_LENGTH : forward;
+    if (Math.abs(delta) < bestDistance) {
+      bestDistance = Math.abs(delta);
+      best = delta;
+    }
+  }
+  return best;
+};
+
 export const DIVE_TUNING = {
   aberrationScale: 1,
   fovRush: 1,
