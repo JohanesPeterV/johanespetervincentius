@@ -9,27 +9,21 @@ import {
   HueSaturation,
   SMAA,
   Vignette,
-  wrapEffect,
 } from '@react-three/postprocessing';
 import type { ChromaticAberrationEffect } from 'postprocessing';
 import { memo, RefObject } from 'react';
 import { Mesh, Vector2 } from 'three';
 
-import { DiveTransitionEffect } from './dive-transition-effect';
-
-const DiveTransition = wrapEffect(DiveTransitionEffect);
 const ABERRATION_OFFSET = new Vector2();
 
 type DivePostprocessingParams = {
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
   sun: Mesh;
-  transitionRef: RefObject<DiveTransitionEffect | null>;
 };
 
 const DivePostprocessing = memo(function DivePostprocessing({
   aberrationRef,
   sun,
-  transitionRef,
 }: DivePostprocessingParams) {
   return (
     <EffectComposer multisampling={0}>
@@ -52,7 +46,6 @@ const DivePostprocessing = memo(function DivePostprocessing({
       />
       <HueSaturation saturation={-0.46} />
       <BrightnessContrast brightness={-0.045} contrast={0.19} />
-      <DiveTransition ref={transitionRef} />
       <Vignette offset={0.24} darkness={0.42} />
     </EffectComposer>
   );

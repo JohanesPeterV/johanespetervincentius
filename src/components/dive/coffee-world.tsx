@@ -1,11 +1,9 @@
 'use client';
 
 import { RefObject } from 'react';
-import { DoubleSide } from 'three';
 
-import { worldARise, worldBRise } from './descent';
+import { worldBRise } from './descent';
 import { NarrativeStones, RisingStones, RisingWorld } from './dive-world';
-import { WORLD_A_FLOOR_Y } from './world-layout';
 
 type CoffeeWorldParams = {
   accentColor: string;
@@ -15,8 +13,6 @@ type CoffeeWorldParams = {
 };
 
 const KEY_LIGHT_COLOR = '#ffb066';
-const FLOOR_COLOR = '#080604';
-const FLOOR_RADIUS = 46;
 
 export default function CoffeeWorld({
   accentColor,
@@ -40,16 +36,6 @@ export default function CoffeeWorld({
         distance={26}
         color="#ffbf78"
       />
-      <RisingWorld progressRef={progressRef} rise={worldARise}>
-        <group position={[0, WORLD_A_FLOOR_Y, 0]}>
-          <mesh rotation-x={-Math.PI / 2}>
-            <circleGeometry args={[FLOOR_RADIUS, 64]} />
-            {/* REASON: the unveiled seam lifts this disc past the lens - a
-                single-sided floor pops out of existence at the crossing */}
-            <meshBasicMaterial color={FLOOR_COLOR} side={DoubleSide} />
-          </mesh>
-        </group>
-      </RisingWorld>
       <RisingWorld progressRef={progressRef} rise={worldBRise}>
         <RisingStones color={rockColor} />
       </RisingWorld>

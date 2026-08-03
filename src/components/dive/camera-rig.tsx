@@ -39,7 +39,6 @@ import type { OverlayNodes } from './dive-overlay-motion';
 import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
-import { DiveTransitionEffect } from './dive-transition-effect';
 import { setWindDrive } from './wind-audio';
 
 export type PointerState = {
@@ -66,8 +65,6 @@ const PARALLAX_DAMPING = 1.7;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
 const RUSH_DAMPING = 4;
-const TRANSITION_BASE_INTENSITY = 0.34;
-const TRANSITION_RUSH_INTENSITY = 0.16;
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
@@ -97,9 +94,7 @@ export default function CameraRig({
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
-  const transitionRef = useRef<DiveTransitionEffect | null>(null);
   const [sunMesh, setSunMesh] = useState<SunMesh | null>(null);
-  const transitionColor = new Color(palette.accent);
   const frameRef = useRef<DescentFrame | null>(null);
   if (frameRef.current === null) {
     frameRef.current = createDescentFrame();
@@ -205,16 +200,6 @@ export default function CameraRig({
       frameDelta,
     );
     const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
-    if (transitionRef.current) {
-      transitionRef.current.setDriveState(
-        Math.max(
-          rush * TRANSITION_RUSH_INTENSITY,
-          transitionZone * TRANSITION_BASE_INTENSITY,
-        ),
-        progress,
-        transitionColor,
-      );
-    }
     if (palette.appearance === 'igloo') {
       setWindDrive(progress / DIVE_LENGTH, rush);
     }
@@ -275,11 +260,7 @@ export default function CameraRig({
         />
       </mesh>
       {sunMesh && gpuTier >= 2 ? (
-        <DivePostprocessing
-          aberrationRef={aberrationRef}
-          sun={sunMesh}
-          transitionRef={transitionRef}
-        />
+        <DivePostprocessing aberrationRef={aberrationRef} sun={sunMesh} />
       ) : null}
     </>
   );
