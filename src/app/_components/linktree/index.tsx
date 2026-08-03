@@ -1,70 +1,91 @@
-import Link from 'next/link';
+'use client';
 
-export default function LinktreeSection() {
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel';
+import { type WheelEvent, useEffect, useState } from 'react';
+
+import ClassicCard from './classic-card';
+import MinimalCard from './minimal-card';
+
+export type CardType = 1 | 2;
+
+type LinktreeSectionParams = {
+  cardType: CardType;
+};
+
+const updateCardTypeUrl = (api: CarouselApi): void => {
+  if (!api) {
+    return;
+  }
+  const selectedCardType = String(api.selectedScrollSnap() + 1);
+  const url = new URL(window.location.href);
+  if (url.searchParams.get('card_type') === selectedCardType) {
+    return;
+  }
+  url.searchParams.set('card_type', selectedCardType);
+  window.history.replaceState(null, '', url);
+};
+
+export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
+  const [api, setApi] = useState<CarouselApi>();
+
+  // REASON: Embla exposes selection only after mount, so card_type synchronization needs its client event API
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+    api.scrollTo(cardType - 1);
+    const handleSelect = (): void => {
+      updateCardTypeUrl(api);
+    };
+    api.on('select', handleSelect);
+    return () => {
+      api.off('select', handleSelect);
+    };
+  }, [api, cardType]);
+
+  const handleWheel = (event: WheelEvent<HTMLDivElement>): void => {
+    if (!api || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+      return;
+    }
+    event.preventDefault();
+    if (event.deltaX > 0) {
+      api.scrollNext();
+      return;
+    }
+    api.scrollPrev();
+  };
+
   return (
     <section
-      aria-labelledby="intro-heading"
-      className="flex w-full justify-center px-5 sm:px-8"
+      aria-label="Profile card styles"
+      className="pointer-events-auto w-full px-4 sm:px-8"
     >
-      <div className="relative z-10 w-full max-w-xl rounded-[2rem] border border-border/60 bg-background/80 px-7 py-8 text-foreground shadow-2xl ring-1 ring-foreground/5 backdrop-blur-2xl sm:px-10 sm:py-10">
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-          Software engineer
-        </p>
-        <h1
-          id="intro-heading"
-          className="mt-4 max-w-lg text-4xl font-medium leading-tight tracking-[-0.04em] sm:text-5xl"
-        >
-          Johanes Peter Vincentius
-        </h1>
-        <p className="mt-4 max-w-md text-base leading-7 text-muted-foreground">
-          Building thoughtful products for the web.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/portfolio"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+      <Carousel
+        setApi={setApi}
+        opts={{ align: 'center', startIndex: cardType - 1 }}
+        onWheel={handleWheel}
+        className="mx-auto w-full max-w-2xl"
+      >
+        <CarouselContent>
+          <CarouselItem
+            aria-label="Original card, 1 of 2"
+            className="basis-[92%] sm:basis-[82%]"
           >
-            View portfolio
-          </Link>
-          <a
-            href="mailto:johanespeter.jp@gmail.com"
-            className="inline-flex h-11 items-center justify-center rounded-full border border-border bg-background/50 px-5 text-sm font-medium transition-colors hover:bg-muted"
+            <ClassicCard />
+          </CarouselItem>
+          <CarouselItem
+            aria-label="Minimal card, 2 of 2"
+            className="basis-[92%] sm:basis-[82%]"
           >
-            Get in touch
-          </a>
-        </div>
-
-        <nav
-          aria-label="Social links"
-          className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-border/60 pt-6 text-sm text-muted-foreground"
-        >
-          <a
-            href="https://github.com/JohanesPeterV"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground"
-          >
-            GitHub ↗
-          </a>
-          <a
-            href="https://www.linkedin.com/in/johanes-vincentius-714b311a4"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground"
-          >
-            LinkedIn ↗
-          </a>
-          <a
-            href="https://www.instagram.com/johanespeterv"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground"
-          >
-            Instagram ↗
-          </a>
-        </nav>
-      </div>
+            <MinimalCard />
+          </CarouselItem>
+        </CarouselContent>
+      </Carousel>
     </section>
   );
 }

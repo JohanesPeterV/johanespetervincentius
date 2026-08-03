@@ -1,0 +1,48 @@
+import { FaEnvelope, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa';
+import { IconType } from 'react-icons/lib';
+
+type ContactIcon = {
+  icon: IconType;
+  label: string;
+  url: string;
+};
+
+const CONTACT_ICONS: ContactIcon[] = [
+  {
+    icon: FaWhatsapp,
+    label: 'WhatsApp',
+    url: 'https://api.whatsapp.com/send?phone=628118503508',
+  },
+  {
+    icon: FaEnvelope,
+    label: 'Email',
+    url: 'mailto:johanespeter.jp@gmail.com',
+  },
+  {
+    icon: FaLinkedinIn,
+    label: 'LinkedIn',
+    url: 'https://www.linkedin.com/in/johanes-vincentius-714b311a4',
+  },
+];
+
+export default function ContactIcons() {
+  return (
+    <div className="flex items-center justify-center gap-5">
+      {CONTACT_ICONS.map(({ icon: Icon, label, url }) => {
+        const isExternal = url.startsWith('http');
+        return (
+          <a
+            key={label}
+            href={url}
+            aria-label={label}
+            target={isExternal ? '_blank' : undefined}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground shadow-md backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10 hover:text-primary"
+          >
+            <Icon className="text-xl" />
+          </a>
+        );
+      })}
+    </div>
+  );
+}
