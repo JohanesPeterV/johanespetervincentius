@@ -98,6 +98,12 @@ const configureMetadata = (): Metadata => ({
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: {
+      url: '/jopditto.webp',
+      type: 'image/webp',
+    },
+  },
   manifest: '/manifest.json',
   other: {
     'apple-mobile-web-app-capable': 'yes',
