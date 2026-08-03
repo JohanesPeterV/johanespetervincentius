@@ -46,14 +46,14 @@ type DescentKey = DescentFrame & { at: number };
 
 export const DIVE_SECTIONS: DiveSection[] = [
   {
-    tag: '// 01',
+    tag: '01',
     title: 'Johanes Peter\nVincentius',
-    subtitle: 'scroll to make the world rise',
+    subtitle: 'Scroll to explore',
     center: 0.95,
     placement: 'center',
   },
   {
-    tag: '// 02',
+    tag: '02',
     title: 'Work\nExperience',
     subtitle: '2020 — present',
     center: 1.95,
@@ -69,7 +69,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     ],
   },
   {
-    tag: '// 03',
+    tag: '03',
     title: 'Selected\nProjects',
     subtitle: 'a few things built',
     center: 2.55,
@@ -93,7 +93,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     ],
   },
   {
-    tag: '// 04',
+    tag: '04',
     title: 'Tech\nStack',
     subtitle: 'tools of the trade',
     center: 3.15,
@@ -108,7 +108,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     ],
   },
   {
-    tag: '// 05',
+    tag: '05',
     title: "Let's\nTalk",
     subtitle: 'say hello',
     center: 3.92,
@@ -324,10 +324,6 @@ export const sectionMotion = (
   };
 };
 
-export const railProximity = (progress: number, center: number): number => {
-  return 1 - Math.min(1, Math.abs(progress - center) / 0.6);
-};
-
 const SECTION_STEP_EPSILON = 0.05;
 
 export const sectionStepDelta = (
@@ -378,8 +374,4 @@ export const aberrationStrength = (velocity: number): number => {
 
 export const rushFov = (velocity: number): number => {
   return 58 + Math.min(0.4, Math.abs(velocity) * 14) * DIVE_TUNING.fovRush;
-};
-
-export const riseMeters = (progress: number): number => {
-  return Math.max(0, Math.round((progress - DIVE_START) * 41));
 };

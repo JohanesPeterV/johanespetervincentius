@@ -84,9 +84,7 @@ export default function DiveScene({
   const stageRef = useRef<DiveStage>('loading');
   const overlayRef = useRef<OverlayNodes>({
     sections: [],
-    rail: [],
     veil: null,
-    rise: null,
   });
   const gpu = useDetectGPU();
   const tier = tierOverride ?? gpu.tier;

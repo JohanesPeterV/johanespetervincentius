@@ -53,11 +53,6 @@ export default function DiveOverlay({
   overlayRef,
 }: DiveOverlayParams) {
   const [sound, setSound] = useState<'on' | 'off'>('off');
-  const measureLabel = appearance === 'space' ? 'ALT' : 'RISE';
-  const gestureLabel =
-    appearance === 'space'
-      ? 'wheel / arrows / drag to move through orbit'
-      : 'wheel / arrows / drag to lift the world';
 
   const handleToggleSound = (): void => {
     setSound(toggleWindAudio());
@@ -82,41 +77,41 @@ export default function DiveOverlay({
             }}
             className={
               section.placement === 'stone'
-                ? "group absolute left-0 top-0 flex w-[min(22rem,46vw)] flex-col items-start gap-3 text-left opacity-0 [will-change:transform,opacity] before:absolute before:right-full before:top-1/2 before:h-px before:w-12 before:-translate-y-1/2 before:bg-white/30 before:content-['']"
-                : 'group absolute inset-0 flex flex-col items-center justify-center gap-4 opacity-0 [text-shadow:0_1px_18px_rgba(30,40,52,0.55)] [will-change:transform,opacity]'
+                ? 'group absolute left-0 top-0 flex w-[min(24rem,70vw)] flex-col items-start gap-3 text-left opacity-0 [will-change:transform,opacity]'
+                : 'group absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 [will-change:transform,opacity]'
             }
           >
-            <span className="text-[0.6rem] tracking-[0.4em] text-white/55">
+            <span className="text-[0.65rem] font-medium tracking-[0.28em] opacity-50">
               {section.tag}
             </span>
             <h2
               className={
                 section.placement === 'stone'
-                  ? 'font-display text-4xl leading-[1.04] sm:text-5xl'
-                  : 'text-center font-display text-5xl leading-[1.04] sm:text-6xl'
+                  ? 'font-display text-4xl leading-[1.04] tracking-[-0.04em] sm:text-5xl'
+                  : 'text-center font-display text-4xl leading-[1.04] tracking-[-0.04em] sm:text-5xl'
               }
             >
               <HeadlineLines title={section.title} />
             </h2>
-            <span className="text-[0.6rem] tracking-[0.28em] text-white/45">
+            <span className="text-xs tracking-[0.16em] opacity-50">
               {section.subtitle}
             </span>
             {section.details ? (
-              <ul className="space-y-1.5 text-[0.62rem] leading-relaxed tracking-[0.16em] text-white/62">
+              <ul className="mt-2 space-y-2 text-sm leading-relaxed opacity-60">
                 {section.details.map((detail) => (
                   <li key={detail}>{detail}</li>
                 ))}
               </ul>
             ) : null}
             {section.links ? (
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.64rem] tracking-[0.18em]">
+              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                 {section.links.map((link) => (
                   <a
                     key={link.href}
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="pointer-events-auto text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
+                    className="pointer-events-auto opacity-70 underline-offset-4 transition-opacity hover:opacity-100 hover:underline"
                   >
                     {link.label} ↗
                   </a>
@@ -126,36 +121,8 @@ export default function DiveOverlay({
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute left-6 top-6 mix-blend-difference text-[0.58rem] leading-relaxed tracking-[0.18em] text-white/65 sm:left-10 sm:top-9">
-        <div className="font-display text-xl tracking-[0.2em] text-white sm:text-2xl">
-          JOHANES
-        </div>
-        <div className="mt-2">{'// Portfolio © 2026'}</div>
-        <div>All Rights Reserved.</div>
-      </div>
-      <div className="pointer-events-none absolute bottom-6 left-6 mix-blend-difference text-[0.6rem] tracking-[0.26em] text-white/65 sm:bottom-8 sm:left-10">
-        {measureLabel}{' '}
-        <span
-          ref={(element) => {
-            overlayRef.current.rise = element;
-          }}
-        >
-          0000M
-        </span>
-      </div>
-      <div className="pointer-events-none absolute right-5 top-1/2 flex -translate-y-1/2 flex-col items-end gap-3 mix-blend-difference sm:right-9">
-        {DIVE_SECTIONS.map((section, index) => (
-          <div
-            key={section.tag}
-            ref={(element) => {
-              overlayRef.current.rail[index] = element;
-            }}
-            className="h-px w-6 origin-right bg-white opacity-20 [will-change:transform,opacity]"
-          />
-        ))}
-      </div>
-      <div className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 mix-blend-difference text-[0.56rem] tracking-[0.26em] text-white/45 md:block">
-        {gestureLabel}
+      <div className="pointer-events-none absolute bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[0.65rem] tracking-[0.18em] opacity-50">
+        Scroll or drag to explore
       </div>
       {appearance === 'igloo' ? (
         <button

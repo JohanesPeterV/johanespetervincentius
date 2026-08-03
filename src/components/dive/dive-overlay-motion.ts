@@ -1,18 +1,10 @@
 import type { Vector2 } from 'three';
 
-import {
-  DIVE_SECTIONS,
-  DescentFrame,
-  railProximity,
-  riseMeters,
-  sectionMotion,
-} from './descent';
+import { DIVE_SECTIONS, DescentFrame, sectionMotion } from './descent';
 
 export type OverlayNodes = {
   sections: (HTMLDivElement | null)[];
-  rail: (HTMLDivElement | null)[];
   veil: HTMLDivElement | null;
-  rise: HTMLSpanElement | null;
 };
 
 export type OverlayFrame = {
@@ -65,15 +57,6 @@ export const applyOverlay = (
       element.style.transform = `translateY(${motion.shift}px)`;
     }
   });
-  DIVE_SECTIONS.forEach((section, index) => {
-    const notch = nodes.rail[index];
-    if (!notch) {
-      return;
-    }
-    const proximity = railProximity(frame.progress, section.center);
-    notch.style.opacity = String(0.2 + proximity * 0.8);
-    notch.style.transform = `scaleX(${1 + proximity * 1.6})`;
-  });
   if (nodes.veil) {
     nodes.veil.style.opacity = String(frame.descent.veil);
     nodes.veil.style.backgroundColor = `rgb(${Math.round(
@@ -81,12 +64,5 @@ export const applyOverlay = (
     )}, ${Math.round(frame.descent.veilColor[1] * 255)}, ${Math.round(
       frame.descent.veilColor[2] * 255,
     )})`;
-  }
-  if (nodes.rise) {
-    const meters = String(riseMeters(frame.progress)).padStart(4, '0');
-    const rise = `${meters}M`;
-    if (nodes.rise.textContent !== rise) {
-      nodes.rise.textContent = rise;
-    }
   }
 };

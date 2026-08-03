@@ -1,30 +1,69 @@
-import ContactIcons from './contact-icons';
-import LinkButtons from './link-buttons';
-import ProfileHeader from './profile-header';
+import Link from 'next/link';
 
 export default function LinktreeSection() {
   return (
-    <section className="flex w-full justify-center px-4">
-      <div className="relative z-10 w-full max-w-md">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-2 rounded-[2.25rem] bg-primary/10 opacity-50 blur-2xl"
-        />
-        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-3xl border border-white/15 bg-black/60 p-8 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 via-white/0 to-transparent"
-          />
-          <div className="relative z-10 flex w-full flex-col items-center gap-8">
-            <ProfileHeader />
-            <LinkButtons />
-            <ContactIcons />
-          </div>
+    <section
+      aria-labelledby="intro-heading"
+      className="flex w-full justify-center px-5 sm:px-8"
+    >
+      <div className="relative z-10 w-full max-w-xl rounded-[2rem] border border-border/60 bg-background/80 px-7 py-8 text-foreground shadow-2xl ring-1 ring-foreground/5 backdrop-blur-2xl sm:px-10 sm:py-10">
+        <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          Software engineer
+        </p>
+        <h1
+          id="intro-heading"
+          className="mt-4 max-w-lg text-4xl font-medium leading-tight tracking-[-0.04em] sm:text-5xl"
+        >
+          Johanes Peter Vincentius
+        </h1>
+        <p className="mt-4 max-w-md text-base leading-7 text-muted-foreground">
+          Building thoughtful products for the web.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href="/portfolio"
+            className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            View portfolio
+          </Link>
+          <a
+            href="mailto:johanespeter.jp@gmail.com"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-border bg-background/50 px-5 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            Get in touch
+          </a>
         </div>
+
+        <nav
+          aria-label="Social links"
+          className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-border/60 pt-6 text-sm text-muted-foreground"
+        >
+          <a
+            href="https://github.com/JohanesPeterV"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            GitHub ↗
+          </a>
+          <a
+            href="https://www.linkedin.com/in/johanes-vincentius-714b311a4"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            LinkedIn ↗
+          </a>
+          <a
+            href="https://www.instagram.com/johanespeterv"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            Instagram ↗
+          </a>
+        </nav>
       </div>
     </section>
   );
