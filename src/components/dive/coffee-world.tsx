@@ -5,14 +5,11 @@ import { DoubleSide } from 'three';
 
 import { worldARise, worldBRise } from './descent';
 import { NarrativeStones, RisingStones, RisingWorld } from './dive-world';
-import RainRipples from './rain-ripples';
-import RainStreaks from './rain-streaks';
 import { WORLD_A_FLOOR_Y } from './world-layout';
 
 type CoffeeWorldParams = {
   accentColor: string;
   progressRef: RefObject<number>;
-  rainColor: string;
   rockColor: string;
   stoneColor: string;
 };
@@ -24,7 +21,6 @@ const FLOOR_RADIUS = 46;
 export default function CoffeeWorld({
   accentColor,
   progressRef,
-  rainColor,
   rockColor,
   stoneColor,
 }: CoffeeWorldParams) {
@@ -52,7 +48,6 @@ export default function CoffeeWorld({
                 single-sided floor pops out of existence at the crossing */}
             <meshBasicMaterial color={FLOOR_COLOR} side={DoubleSide} />
           </mesh>
-          <RainRipples color={rainColor} />
         </group>
       </RisingWorld>
       <RisingWorld progressRef={progressRef} rise={worldBRise}>
@@ -63,7 +58,6 @@ export default function CoffeeWorld({
         color={stoneColor}
         progressRef={progressRef}
       />
-      <RainStreaks color={rainColor} progressRef={progressRef} />
     </>
   );
 }
