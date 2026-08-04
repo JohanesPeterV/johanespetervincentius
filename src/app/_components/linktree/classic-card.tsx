@@ -4,7 +4,7 @@ import ProfileHeader from './profile-header';
 
 export default function ClassicCard() {
   return (
-    <div className="relative z-10 mx-auto w-full max-w-md">
+    <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-md">
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-2 rounded-[2.25rem] bg-primary/10 opacity-50 blur-2xl"

@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function MinimalCard() {
   return (
-    <div className="relative z-10 mx-auto w-full max-w-xl rounded-[2rem] border border-border/60 bg-background/80 px-7 py-8 text-foreground shadow-2xl ring-1 ring-foreground/5 backdrop-blur-2xl sm:px-10 sm:py-10">
+    <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-xl rounded-[2rem] border border-border/60 bg-background/80 px-7 py-8 text-foreground shadow-2xl ring-1 ring-foreground/5 backdrop-blur-2xl sm:px-10 sm:py-10">
       <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
         Software engineer
       </p>

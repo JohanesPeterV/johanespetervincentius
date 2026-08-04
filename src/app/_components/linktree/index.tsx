@@ -63,24 +63,29 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
   return (
     <section
       aria-label="Profile card styles"
-      className="pointer-events-auto w-full px-4 sm:px-8"
+      className="pointer-events-none w-full"
     >
       <Carousel
         setApi={setApi}
-        opts={{ align: 'center', startIndex: cardType - 1 }}
+        opts={{
+          align: 'center',
+          dragFree: false,
+          skipSnaps: false,
+          startIndex: cardType - 1,
+        }}
         onWheel={handleWheel}
-        className="mx-auto w-full max-w-2xl"
+        className="pointer-events-none w-full select-none"
       >
         <CarouselContent>
           <CarouselItem
             aria-label="Original card, 1 of 2"
-            className="basis-[92%] sm:basis-[82%]"
+            className="flex items-center justify-center px-4 sm:px-8"
           >
             <ClassicCard />
           </CarouselItem>
           <CarouselItem
             aria-label="Minimal card, 2 of 2"
-            className="basis-[92%] sm:basis-[82%]"
+            className="flex items-center justify-center px-4 sm:px-8"
           >
             <MinimalCard />
           </CarouselItem>
