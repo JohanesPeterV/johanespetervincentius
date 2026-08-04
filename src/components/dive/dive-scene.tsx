@@ -172,11 +172,11 @@ export default function DiveScene({
     };
   }, []);
 
-  // REASON: the route owns a module-level Web Audio graph that would otherwise
-  // keep playing after navigation
+  // REASON: the active world owns a module-level Web Audio graph that must stop
+  // when the user switches atmosphere or leaves the route
   useEffect(() => {
     return disposeWindAudio;
-  }, []);
+  }, [appearance]);
 
   return (
     <div
@@ -230,7 +230,11 @@ export default function DiveScene({
           stageRef={stageRef}
         />
       </Canvas>
-      <DiveOverlay appearance={appearance} overlayRef={overlayRef} />
+      <DiveOverlay
+        key={appearance}
+        appearance={appearance}
+        overlayRef={overlayRef}
+      />
     </div>
   );
 }
