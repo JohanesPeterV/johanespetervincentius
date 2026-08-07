@@ -2,6 +2,7 @@ import ScrollContainer from '@/components/scroll-container';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { Card, CardContent } from '@/components/ui/card';
+import { FaRegImage } from 'react-icons/fa';
 import { WORK_EXPERIENCES } from './work-experiences';
 
 export default function WorkExperience() {
@@ -48,6 +49,26 @@ export default function WorkExperience() {
                           )}
                         </div>
                       ))}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {workExperience.showcases.map((showcase) => (
+                          <figure key={showcase.title} className="space-y-1.5">
+                            <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
+                              <FaRegImage
+                                size={24}
+                                className="text-muted-foreground"
+                              />
+                            </div>
+                            <figcaption>
+                              <p className="text-xs sm:text-sm font-medium">
+                                {showcase.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {showcase.description}
+                              </p>
+                            </figcaption>
+                          </figure>
+                        ))}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
