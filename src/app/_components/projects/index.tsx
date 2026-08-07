@@ -2,7 +2,8 @@ import ScrollContainer from '@/components/scroll-container';
 import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FaGithub } from 'react-icons/fa';
+import Image from 'next/image';
+import { FaExternalLinkAlt, FaGithub } from 'react-icons/fa';
 import { projects } from './projects';
 
 export const Projects = () => {
@@ -22,13 +23,30 @@ export const Projects = () => {
               {projects.map((project, index) => (
                 <Card
                   key={index}
-                  onClick={() => window.open(project.repoLink, '_blank')}
-                  className="relative bg-opacity-60 backdrop-blur-2xl cursor-pointer group/card transition-all duration-300 hover:scale-[1.02] flex flex-col"
+                  onClick={() =>
+                    window.open(project.link ?? project.repoLink, '_blank')
+                  }
+                  className="relative bg-opacity-60 backdrop-blur-2xl cursor-pointer group/card transition-all duration-300 hover:scale-[1.02] flex flex-col overflow-hidden"
                 >
-                  <div className="w-full h-full absolute inset-0 hidden group-hover/card:flex justify-center items-center rounded-xl bg-background/80 backdrop-blur-sm transition-all duration-300">
-                    <FaGithub size={60} />
+                  <div className="w-full h-full absolute inset-0 z-10 hidden group-hover/card:flex justify-center items-center rounded-2xl bg-background/80 backdrop-blur-sm transition-all duration-300">
+                    {project.link ? (
+                      <FaExternalLinkAlt size={48} />
+                    ) : (
+                      <FaGithub size={60} />
+                    )}
                   </div>
                   <div className="group-hover/card:blur-md transition-all duration-300 flex flex-col flex-1">
+                    {project.image && (
+                      <div className="relative aspect-[16/10] border-b border-border/60">
+                        <Image
+                          src={project.image}
+                          alt={`${project.title} live site`}
+                          fill
+                          sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 90vw"
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="text-lg sm:text-xl lg:text-2xl">
                         {project.title}

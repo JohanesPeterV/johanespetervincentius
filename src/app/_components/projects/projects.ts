@@ -2,11 +2,20 @@ type Project = {
   title: string;
   description: string;
   technologies: string[];
-  repoLink: string;
+  repoLink?: string;
   link?: string;
+  image?: string;
 };
 
 export const projects: Project[] = [
+  {
+    title: 'Pomodoro Planter',
+    description:
+      'A Pomodoro timer that grows a plant for every completed focus session, with custom cycles and a timer that stays live across devices.',
+    technologies: ['Next.js', 'Convex', 'Clerk'],
+    link: 'https://pomoplanter.com',
+    image: '/projects/pomoplanter.webp',
+  },
   {
     title: 'Simple Helpdesk',
     description:
@@ -26,7 +35,6 @@ export const projects: Project[] = [
     description:
       'My current portfolio website built with modern UI components and theming.',
     technologies: ['Next.js', 'shadcn/ui'],
-    link: 'https://johanespetervincentius.my.id',
     repoLink: 'https://github.com/JohanesPeterV/johanespetervincentius',
   },
   {
@@ -34,7 +42,6 @@ export const projects: Project[] = [
     description:
       'My previous portfolio site, featuring a particle background, light/dark mode, and smooth transitions.',
     technologies: ['React', 'Gatsby', 'Tailwind'],
-    link: 'https://jpv.my.id',
     repoLink: 'https://github.com/JopHme/jpv',
   },
   {
