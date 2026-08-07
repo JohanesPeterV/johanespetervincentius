@@ -1,9 +1,17 @@
 import type { Vector2 } from 'three';
 
-import { DIVE_SECTIONS, DescentFrame, sectionMotion } from './descent';
+import {
+  DIVE_SECTIONS,
+  DescentFrame,
+  TECH_STONE,
+  sectionMotion,
+  stoneSectionOpacity,
+} from './descent';
 
 export type OverlayNodes = {
   sections: (HTMLDivElement | null)[];
+  skillLayer: HTMLDivElement | null;
+  skillWords: (HTMLSpanElement | null)[];
   veil: HTMLDivElement | null;
 };
 
@@ -11,8 +19,39 @@ export type OverlayFrame = {
   descent: DescentFrame;
   height: number;
   progress: number;
+  skillDepths: Float32Array;
+  skillScreens: Vector2[];
   stones: Vector2[];
   width: number;
+};
+
+const SKILL_HIDE_THRESHOLD = 0.05;
+
+const applySkillWords = (nodes: OverlayNodes, frame: OverlayFrame): void => {
+  const layer = nodes.skillLayer;
+  if (!layer) {
+    return;
+  }
+  const opacity = stoneSectionOpacity(frame.progress, TECH_STONE.center);
+  layer.style.opacity = String(opacity);
+  const visibility = opacity < SKILL_HIDE_THRESHOLD ? 'hidden' : 'visible';
+  if (layer.style.visibility !== visibility) {
+    layer.style.visibility = visibility;
+  }
+  if (opacity < SKILL_HIDE_THRESHOLD) {
+    return;
+  }
+  nodes.skillWords.forEach((element, index) => {
+    if (!element) {
+      return;
+    }
+    const screen = frame.skillScreens[index];
+    const depth = Math.max(-1, Math.min(1, frame.skillDepths[index]));
+    const lift = (depth + 1) / 2;
+    element.style.transform = `translate3d(${screen.x}px, ${screen.y}px, 0) translate(-50%, -50%) scale(${0.78 + lift * 0.3})`;
+    element.style.opacity = String(0.16 + lift * 0.84);
+    element.style.zIndex = String(Math.round(lift * 10));
+  });
 };
 
 const positionStoneSection = (
@@ -57,6 +96,7 @@ export const applyOverlay = (
       element.style.transform = `translateY(${motion.shift}px)`;
     }
   });
+  applySkillWords(nodes, frame);
   if (nodes.veil) {
     nodes.veil.style.opacity = String(frame.descent.veil);
     nodes.veil.style.backgroundColor = `rgb(${Math.round(

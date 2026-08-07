@@ -5,6 +5,7 @@ import { RefObject, useState } from 'react';
 import { DIVE_SECTIONS } from './descent';
 import type { DiveAppearance } from './dive-palette';
 import type { OverlayNodes } from './dive-overlay-motion';
+import { SKILL_ORBIT_ENTRIES } from './skill-orbit';
 import { toggleWindAudio } from './wind-audio';
 
 type DiveOverlayParams = {
@@ -67,6 +68,28 @@ export default function DiveOverlay({
         aria-hidden
         className="pointer-events-none absolute inset-0 z-10 bg-[#e9edf2] opacity-0"
       />
+      <div
+        ref={(element) => {
+          overlayRef.current.skillLayer = element;
+        }}
+        className="pointer-events-none absolute inset-0 opacity-0"
+      >
+        {SKILL_ORBIT_ENTRIES.map((entry, index) => (
+          <span
+            key={`${entry.ring}-${entry.label}`}
+            ref={(element) => {
+              overlayRef.current.skillWords[index] = element;
+            }}
+            className={
+              entry.kind === 'category'
+                ? 'absolute left-0 top-0 whitespace-nowrap text-[0.6rem] font-semibold uppercase tracking-[0.32em]'
+                : 'absolute left-0 top-0 whitespace-nowrap text-[0.72rem] tracking-[0.04em]'
+            }
+          >
+            {entry.label}
+          </span>
+        ))}
+      </div>
       <div className="pointer-events-none absolute inset-0">
         {DIVE_SECTIONS.map((section, index) => (
           <div

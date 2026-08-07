@@ -21,6 +21,7 @@ type CenterDiveSection = DiveSectionBase & {
 type StoneDiveSection = DiveSectionBase & {
   placement: 'stone';
   stoneIndex: number;
+  stoneScale?: number;
   x: number;
   z: number;
 };
@@ -43,6 +44,8 @@ export type SectionMotion = {
 };
 
 type DescentKey = DescentFrame & { at: number };
+
+export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
 
 export const DIVE_SECTIONS: DiveSection[] = [
   {
@@ -96,16 +99,12 @@ export const DIVE_SECTIONS: DiveSection[] = [
     tag: '04',
     title: 'Tech\nStack',
     subtitle: 'tools of the trade',
-    center: 3.15,
     placement: 'stone',
     stoneIndex: 2,
-    x: -1.6,
-    z: 8.1,
-    details: [
-      'Next.js · React · Three.js',
-      'Nest.js · GraphQL · PostgreSQL',
-      'Kotlin · Flutter · ASP.NET',
-    ],
+    // REASON: this stone is the nucleus of the skill orbit - at full size its
+    // silhouette swallows the inner rings of orbiting words
+    stoneScale: 0.6,
+    ...TECH_STONE,
   },
   {
     tag: '05',
@@ -160,6 +159,7 @@ export const finaleBoost = (progress: number): number =>
 
 export type NarrativeStone = {
   center: number;
+  scale: number;
   x: number;
   z: number;
 };
@@ -169,7 +169,14 @@ export const NARRATIVE_STONES: NarrativeStone[] = DIVE_SECTIONS.flatMap(
     if (section.placement === 'center') {
       return [];
     }
-    return [{ center: section.center, x: section.x, z: section.z }];
+    return [
+      {
+        center: section.center,
+        scale: section.stoneScale ?? 1,
+        x: section.x,
+        z: section.z,
+      },
+    ];
   },
 );
 
@@ -302,19 +309,21 @@ export const writeDescentFrame = (
   return target;
 };
 
+export const stoneSectionOpacity = (
+  progress: number,
+  center: number,
+): number => {
+  const fadeIn = smootherstep(center - 0.34, center - 0.16, progress);
+  const fadeOut = 1 - smootherstep(center + 0.16, center + 0.34, progress);
+  return fadeIn * fadeOut;
+};
+
 export const sectionMotion = (
   progress: number,
   section: DiveSection,
 ): SectionMotion => {
   if (section.placement === 'stone') {
-    const fadeIn = smootherstep(
-      section.center - 0.34,
-      section.center - 0.16,
-      progress,
-    );
-    const fadeOut =
-      1 - smootherstep(section.center + 0.16, section.center + 0.34, progress);
-    return { opacity: fadeIn * fadeOut, shift: 0 };
+    return { opacity: stoneSectionOpacity(progress, section.center), shift: 0 };
   }
   const delta = progress - section.center;
   const distance = Math.abs(delta);

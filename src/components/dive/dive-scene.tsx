@@ -20,6 +20,7 @@ import { getDivePalette } from './dive-palette';
 import DiveOverlay from './dive-overlay';
 import type { OverlayNodes } from './dive-overlay-motion';
 import IglooWorld from './igloo-world';
+import SkillConstellation from './skill-constellation';
 import SpaceWorld from './space-world';
 import { disposeWindAudio } from './wind-audio';
 
@@ -84,6 +85,8 @@ export default function DiveScene({
   const stageRef = useRef<DiveStage>('loading');
   const overlayRef = useRef<OverlayNodes>({
     sections: [],
+    skillLayer: null,
+    skillWords: [],
     veil: null,
   });
   const gpu = useDetectGPU();
@@ -220,6 +223,10 @@ export default function DiveScene({
           ) : null}
           <LoadedSignal stageRef={stageRef} />
         </Suspense>
+        <SkillConstellation
+          accentColor={palette.accent}
+          progressRef={progressRef}
+        />
         <CameraRig
           targetRef={targetRef}
           progressRef={progressRef}

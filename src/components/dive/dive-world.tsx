@@ -166,7 +166,7 @@ export const NarrativeStones = ({
         0.5 + index * 0.55 + progress * 0.22 + idle,
         -0.18 + index * 0.1,
       );
-      const size = 1.26 + index * 0.06;
+      const size = (1.26 + index * 0.06) * stone.scale;
       narrativeStoneHelper.scale.set(size, size * 0.84, size * 0.94);
       narrativeStoneHelper.updateMatrix();
       mesh.setMatrixAt(index, narrativeStoneHelper.matrix);
