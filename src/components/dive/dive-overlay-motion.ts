@@ -7,7 +7,7 @@ import {
   sectionMotion,
   techSectionOpacity,
 } from './descent';
-import { WORK_MOTION } from './camera-motion';
+import { WORK_MOTION, workPull } from './camera-motion';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 
 export type OverlayNodes = {
@@ -70,6 +70,8 @@ const applyGalaxyLabels = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   });
 };
 
+const WORK_PULL_NUDGE_PX = 18;
+
 const applyWorkShowcase = (nodes: OverlayNodes): void => {
   const active = WORK_MOTION.job;
   const mark = (element: HTMLDivElement | null, index: number): void => {
@@ -82,7 +84,22 @@ const applyWorkShowcase = (nodes: OverlayNodes): void => {
     }
   };
   nodes.workRail.forEach(mark);
-  nodes.workPanels.forEach(mark);
+  const pull = workPull();
+  nodes.workPanels.forEach((element, index) => {
+    if (!element) {
+      return;
+    }
+    mark(element, index);
+    // REASON: the inline nudge must clear when idle or inactive so the
+    // class-driven enter and exit transitions own the transform again
+    const transform =
+      index === active && pull !== 0
+        ? `translateY(${(-pull * WORK_PULL_NUDGE_PX).toFixed(2)}px)`
+        : '';
+    if (element.style.transform !== transform) {
+      element.style.transform = transform;
+    }
+  });
 };
 
 // REASON: the galaxy claims the screen centre, so this section's copy docks

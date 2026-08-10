@@ -58,11 +58,24 @@ const driftTargetToSection = (
   return next;
 };
 
+const WORK_PULL_DECAY_RATE = 1.4;
+
 export const advanceDrive = (
   motion: DriveMotion,
   target: number,
   delta: number,
 ): number => {
+  // REASON: a sub-threshold scroll leaves the pull hint extended - decaying
+  // it here springs the peeked panel back once input stops arriving
+  WORK_MOTION.accum = MathUtils.damp(
+    WORK_MOTION.accum,
+    0,
+    WORK_PULL_DECAY_RATE,
+    delta,
+  );
+  if (Math.abs(WORK_MOTION.accum) < 0.004) {
+    WORK_MOTION.accum = 0;
+  }
   const lead = MathUtils.clamp(
     target,
     motion.current - MAX_TARGET_LEAD,
@@ -98,24 +111,29 @@ export type WorkLockInput = {
   target: number;
   progress: number;
   step: number;
-  accum: number;
+  now: number;
 };
 
-export type WorkLockResult = {
-  delta: number;
-  accum: number;
-};
-
-// REASON: overlay motion reads the active job every frame outside React, so
-// the lock publishes it as module state like the galaxy does
-export const WORK_MOTION = { job: 0 };
+// REASON: overlay motion reads the active job and pull every frame outside
+// React, so the lock publishes them as module state like the galaxy does
+export const WORK_MOTION = { accum: 0, job: 0, swappedAt: 0 };
 
 const WORK_CATCH_HALF = 0.3;
 const WORK_ZONE_START = WORK_STONE.center - WORK_CATCH_HALF;
 const WORK_ZONE_END = WORK_STONE.center + WORK_CATCH_HALF;
-const WORK_STEP_THRESHOLD = 0.09;
+const WORK_STEP_THRESHOLD = 0.18;
 const WORK_SETTLE_EPSILON = 0.03;
+// REASON: with the target frozen the settle gate never re-arms between
+// swaps, so one long trackpad swipe would chain through every job or carry
+// its leftover momentum straight past the next section on release - the
+// cooldown matches the 700ms swap animation and absorbs the swipe tail
+const WORK_SWAP_COOLDOWN_MS = 700;
 const LAST_JOB = WORK_JOBS.length - 1;
+
+// REASON: a sub-threshold scroll must visibly tug the active panel so short
+// gestures never read as dead input - pull is the signed fraction of a swap
+export const workPull = (): number =>
+  MathUtils.clamp(WORK_MOTION.accum / WORK_STEP_THRESHOLD, -1, 1);
 
 // REASON: while jobs swap, the stone and camera must stay perfectly still -
 // jobs are overlay state instead of scroll stops, so any scroll or drag
@@ -125,41 +143,53 @@ export const workLockedDelta = ({
   target,
   progress,
   step,
-  accum,
-}: WorkLockInput): WorkLockResult => {
+  now,
+}: WorkLockInput): number => {
   const wrapped = wrapProgress(target);
   const inside = wrapped > WORK_ZONE_START && wrapped < WORK_ZONE_END;
   if (!inside) {
+    WORK_MOTION.accum = 0;
+    if (now - WORK_MOTION.swappedAt < WORK_SWAP_COOLDOWN_MS) {
+      return 0;
+    }
     const next = wrapped + step;
     if (wrapped <= WORK_ZONE_START && next > WORK_ZONE_START) {
       WORK_MOTION.job = 0;
-      return { delta: WORK_STONE.center - wrapped, accum: 0 };
+      return WORK_STONE.center - wrapped;
     }
     if (wrapped >= WORK_ZONE_END && next < WORK_ZONE_END) {
       WORK_MOTION.job = LAST_JOB;
-      return { delta: WORK_STONE.center - wrapped, accum: 0 };
+      return WORK_STONE.center - wrapped;
     }
-    return { delta: step, accum: 0 };
+    return step;
   }
   if (Math.abs(wrapProgress(progress) - wrapped) > WORK_SETTLE_EPSILON) {
-    return { delta: 0, accum: 0 };
+    WORK_MOTION.accum = 0;
+    return 0;
   }
-  const nextAccum = accum + step;
+  if (now - WORK_MOTION.swappedAt < WORK_SWAP_COOLDOWN_MS) {
+    WORK_MOTION.accum = 0;
+    return 0;
+  }
+  const nextAccum = WORK_MOTION.accum + step;
   if (Math.abs(nextAccum) < WORK_STEP_THRESHOLD) {
-    return { delta: 0, accum: nextAccum };
+    WORK_MOTION.accum = nextAccum;
+    return 0;
   }
+  WORK_MOTION.accum = 0;
+  WORK_MOTION.swappedAt = now;
   if (nextAccum > 0) {
     if (WORK_MOTION.job < LAST_JOB) {
       WORK_MOTION.job += 1;
-      return { delta: 0, accum: 0 };
+      return 0;
     }
-    return { delta: sectionStepDelta(wrapped, 1), accum: 0 };
+    return sectionStepDelta(wrapped, 1);
   }
   if (WORK_MOTION.job > 0) {
     WORK_MOTION.job -= 1;
-    return { delta: 0, accum: 0 };
+    return 0;
   }
-  return { delta: sectionStepDelta(wrapped, -1), accum: 0 };
+  return sectionStepDelta(wrapped, -1);
 };
 
 export const applyFinaleCamera = (

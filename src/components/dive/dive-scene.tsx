@@ -99,21 +99,18 @@ export default function DiveScene({
     workRail: [],
   });
   const modeRef = useRef<DiveMode>('dive');
-  const workAccumRef = useRef(0);
   const [mode, setMode] = useState<DiveMode>('dive');
   const gpu = useDetectGPU();
   const tier = tierOverride ?? gpu.tier;
   const palette = getDivePalette(appearance);
 
   const applyDriveDelta = (step: number): void => {
-    const locked = workLockedDelta({
+    targetRef.current += workLockedDelta({
       target: targetRef.current,
       progress: progressRef.current,
       step,
-      accum: workAccumRef.current,
+      now: performance.now(),
     });
-    workAccumRef.current = locked.accum;
-    targetRef.current += locked.delta;
   };
 
   const handleEngage = (category: number | null): void => {

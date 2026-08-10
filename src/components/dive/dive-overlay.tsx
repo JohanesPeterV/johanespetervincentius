@@ -163,7 +163,7 @@ export default function DiveOverlay({
                         ref={(element) => {
                           overlayRef.current.workPanels[jobIndex] = element;
                         }}
-                        className="col-start-1 row-start-1 flex flex-col gap-4 opacity-0 transition-opacity duration-500 data-[active=true]:opacity-100"
+                        className="col-start-1 row-start-1 flex translate-y-5 flex-col gap-4 opacity-0 transition-[opacity,transform] duration-700 [transition-timing-function:cubic-bezier(0.19,1,0.22,1)] data-[active=true]:translate-y-0 data-[active=true]:opacity-100"
                       >
                         <p className="text-xs leading-relaxed opacity-60 sm:text-sm">
                           {job.description}
