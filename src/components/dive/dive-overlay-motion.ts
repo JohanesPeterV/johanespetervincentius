@@ -3,14 +3,15 @@ import type { Vector2 } from 'three';
 import {
   DIVE_SECTIONS,
   DescentFrame,
-  TECH_STONE,
   sectionMotion,
-  stoneSectionOpacity,
+  techSectionOpacity,
 } from './descent';
+import { activeCategoryIndex } from './skill-dial';
 
 export type OverlayNodes = {
   sections: (HTMLDivElement | null)[];
   skillLayer: HTMLDivElement | null;
+  skillRail: (HTMLDivElement | null)[];
   skillWords: (HTMLSpanElement | null)[];
   veil: HTMLDivElement | null;
 };
@@ -19,7 +20,7 @@ export type OverlayFrame = {
   descent: DescentFrame;
   height: number;
   progress: number;
-  skillDepths: Float32Array;
+  skillAlphas: Float32Array;
   skillScreens: Vector2[];
   stones: Vector2[];
   width: number;
@@ -27,12 +28,12 @@ export type OverlayFrame = {
 
 const SKILL_HIDE_THRESHOLD = 0.05;
 
-const applySkillWords = (nodes: OverlayNodes, frame: OverlayFrame): void => {
+const applySkillDial = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   const layer = nodes.skillLayer;
   if (!layer) {
     return;
   }
-  const opacity = stoneSectionOpacity(frame.progress, TECH_STONE.center);
+  const opacity = techSectionOpacity(frame.progress);
   layer.style.opacity = String(opacity);
   const visibility = opacity < SKILL_HIDE_THRESHOLD ? 'hidden' : 'visible';
   if (layer.style.visibility !== visibility) {
@@ -41,16 +42,30 @@ const applySkillWords = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   if (opacity < SKILL_HIDE_THRESHOLD) {
     return;
   }
+  const active = activeCategoryIndex(frame.progress);
+  nodes.skillRail.forEach((element, index) => {
+    if (!element) {
+      return;
+    }
+    const value = index === active ? 'true' : 'false';
+    if (element.dataset.active !== value) {
+      element.dataset.active = value;
+    }
+  });
   nodes.skillWords.forEach((element, index) => {
     if (!element) {
       return;
     }
+    const alpha = frame.skillAlphas[index];
+    if (alpha <= 0) {
+      if (element.style.opacity !== '0') {
+        element.style.opacity = '0';
+      }
+      return;
+    }
     const screen = frame.skillScreens[index];
-    const depth = Math.max(-1, Math.min(1, frame.skillDepths[index]));
-    const lift = (depth + 1) / 2;
-    element.style.transform = `translate3d(${screen.x}px, ${screen.y}px, 0) translate(-50%, -50%) scale(${0.78 + lift * 0.3})`;
-    element.style.opacity = String(0.16 + lift * 0.84);
-    element.style.zIndex = String(Math.round(lift * 10));
+    element.style.transform = `translate3d(${screen.x}px, ${screen.y}px, 0) translate(-50%, -50%) scale(${0.9 + alpha * 0.1})`;
+    element.style.opacity = String(alpha);
   });
 };
 
@@ -96,7 +111,7 @@ export const applyOverlay = (
       element.style.transform = `translateY(${motion.shift}px)`;
     }
   });
-  applySkillWords(nodes, frame);
+  applySkillDial(nodes, frame);
   if (nodes.veil) {
     nodes.veil.style.opacity = String(frame.descent.veil);
     nodes.veil.style.backgroundColor = `rgb(${Math.round(

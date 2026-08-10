@@ -46,6 +46,7 @@ export type SectionMotion = {
 type DescentKey = DescentFrame & { at: number };
 
 export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
+export const TECH_DWELL_HALF = 0.3;
 
 export const DIVE_SECTIONS: DiveSection[] = [
   {
@@ -105,8 +106,8 @@ export const DIVE_SECTIONS: DiveSection[] = [
     subtitle: 'tools of the trade',
     placement: 'stone',
     stoneIndex: 2,
-    // REASON: this stone is the nucleus of the skill orbit - at full size its
-    // silhouette swallows the inner rings of orbiting words
+    // REASON: this stone is the hub of the category dial - at full size its
+    // silhouette swallows the ring of words around it
     stoneScale: 0.6,
     ...TECH_STONE,
   },
@@ -175,10 +176,19 @@ const NARRATIVE_STONE_CENTER_Y = 4.45;
 // active stone is ever in frame
 const NARRATIVE_STONE_RISE_RATE = 17;
 
+const TECH_DWELL_RATE = 2.5;
+
 export const narrativeStoneY = (progress: number, center: number): number => {
-  return (
-    NARRATIVE_STONE_CENTER_Y + (progress - center) * NARRATIVE_STONE_RISE_RATE
-  );
+  let delta = progress - center;
+  // REASON: the tech stone hosts the category dial - compressing its travel
+  // inside the dwell keeps the dial on screen while five categories scrub
+  // past, then full rise speed resumes at the dwell edges
+  if (center === TECH_STONE.center) {
+    const held = Math.max(-TECH_DWELL_HALF, Math.min(TECH_DWELL_HALF, delta));
+    delta =
+      held * (TECH_DWELL_RATE / NARRATIVE_STONE_RISE_RATE) + (delta - held);
+  }
+  return NARRATIVE_STONE_CENTER_Y + delta * NARRATIVE_STONE_RISE_RATE;
 };
 
 const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
@@ -307,12 +317,26 @@ export const stoneSectionOpacity = (
   return fadeIn * fadeOut;
 };
 
+const TECH_FADE_SPAN = 0.18;
+
+export const techSectionOpacity = (progress: number): number => {
+  const distance = Math.abs(progress - TECH_STONE.center);
+  return (
+    1 -
+    smootherstep(TECH_DWELL_HALF, TECH_DWELL_HALF + TECH_FADE_SPAN, distance)
+  );
+};
+
 export const sectionMotion = (
   progress: number,
   section: DiveSection,
 ): SectionMotion => {
   if (section.placement === 'stone') {
-    return { opacity: stoneSectionOpacity(progress, section.center), shift: 0 };
+    const opacity =
+      section.center === TECH_STONE.center
+        ? techSectionOpacity(progress)
+        : stoneSectionOpacity(progress, section.center);
+    return { opacity, shift: 0 };
   }
   const delta = progress - section.center;
   const distance = Math.abs(delta);
@@ -324,14 +348,16 @@ export const sectionMotion = (
 
 const SECTION_STEP_EPSILON = 0.05;
 
+const SNAP_CENTERS: number[] = DIVE_SECTIONS.map((section) => section.center);
+
 export const sectionStepDelta = (
   progress: number,
   direction: 1 | -1,
 ): number => {
   const wrapped = wrapProgress(progress);
   let nearest = DIVE_LENGTH;
-  for (const section of DIVE_SECTIONS) {
-    const forward = wrapProgress((section.center - wrapped) * direction);
+  for (const center of SNAP_CENTERS) {
+    const forward = wrapProgress((center - wrapped) * direction);
     if (forward > SECTION_STEP_EPSILON && forward < nearest) {
       nearest = forward;
     }
@@ -343,8 +369,8 @@ export const nearestSectionDelta = (progress: number): number => {
   const wrapped = wrapProgress(progress);
   let best = 0;
   let bestDistance = DIVE_LENGTH;
-  for (const section of DIVE_SECTIONS) {
-    const forward = wrapProgress(section.center - wrapped);
+  for (const center of SNAP_CENTERS) {
+    const forward = wrapProgress(center - wrapped);
     const delta = forward > DIVE_LENGTH / 2 ? forward - DIVE_LENGTH : forward;
     if (Math.abs(delta) < bestDistance) {
       bestDistance = Math.abs(delta);

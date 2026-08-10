@@ -20,7 +20,6 @@ import {
 import {
   DIVE_LENGTH,
   NARRATIVE_STONES,
-  TECH_STONE,
   aberrationStrength,
   createDescentFrame,
   finaleBoost,
@@ -28,7 +27,7 @@ import {
   narrativeStoneY,
   rushFov,
   seamBoost,
-  stoneSectionOpacity,
+  techSectionOpacity,
   transitionStrength,
   wrapProgress,
   writeDescentFrame,
@@ -41,7 +40,7 @@ import type { OverlayNodes } from './dive-overlay-motion';
 import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
-import { SKILL_ORBIT_ENTRIES, writeSkillScreens } from './skill-orbit';
+import { SKILL_DIAL_ENTRIES, writeSkillDialScreens } from './skill-dial';
 import { setWindDrive } from './wind-audio';
 
 export type PointerState = {
@@ -71,8 +70,8 @@ const RUSH_DAMPING = 4;
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
-const SKILL_SCREENS = SKILL_ORBIT_ENTRIES.map(() => new Vector2());
-const SKILL_DEPTHS = new Float32Array(SKILL_ORBIT_ENTRIES.length);
+const SKILL_SCREENS = SKILL_DIAL_ENTRIES.map(() => new Vector2());
+const SKILL_ALPHAS = new Float32Array(SKILL_DIAL_ENTRIES.length);
 
 type SunMesh = Mesh<SphereGeometry, MeshBasicMaterial>;
 
@@ -230,10 +229,10 @@ export default function CameraRig({
         ((1 - projection.y) * size.height) / 2,
       );
     });
-    if (stoneSectionOpacity(progress, TECH_STONE.center) > 0) {
-      writeSkillScreens({
+    if (techSectionOpacity(progress) > 0) {
+      writeSkillDialScreens({
+        alphas: SKILL_ALPHAS,
         camera,
-        depths: SKILL_DEPTHS,
         height: size.height,
         progress,
         screens: SKILL_SCREENS,
@@ -250,7 +249,7 @@ export default function CameraRig({
         descent: frame,
         height: size.height,
         progress,
-        skillDepths: SKILL_DEPTHS,
+        skillAlphas: SKILL_ALPHAS,
         skillScreens: SKILL_SCREENS,
         stones: STONE_SCREENS,
         width: size.width,

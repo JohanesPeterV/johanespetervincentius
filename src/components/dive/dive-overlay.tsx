@@ -2,10 +2,10 @@
 
 import { RefObject, useState } from 'react';
 
-import { DIVE_SECTIONS } from './descent';
+import { DIVE_SECTIONS, TECH_STONE } from './descent';
 import type { DiveAppearance } from './dive-palette';
 import type { OverlayNodes } from './dive-overlay-motion';
-import { SKILL_ORBIT_ENTRIES } from './skill-orbit';
+import { SKILL_DIAL_CATEGORIES, SKILL_DIAL_ENTRIES } from './skill-dial';
 import { toggleWindAudio } from './wind-audio';
 
 type DiveOverlayParams = {
@@ -74,17 +74,13 @@ export default function DiveOverlay({
         }}
         className="pointer-events-none absolute inset-0 opacity-0"
       >
-        {SKILL_ORBIT_ENTRIES.map((entry, index) => (
+        {SKILL_DIAL_ENTRIES.map((entry, index) => (
           <span
-            key={`${entry.ring}-${entry.label}`}
+            key={`${entry.category}-${entry.label}`}
             ref={(element) => {
               overlayRef.current.skillWords[index] = element;
             }}
-            className={
-              entry.kind === 'category'
-                ? 'absolute left-0 top-0 whitespace-nowrap text-[0.6rem] font-semibold uppercase tracking-[0.32em]'
-                : 'absolute left-0 top-0 whitespace-nowrap text-[0.72rem] tracking-[0.04em]'
-            }
+            className="absolute left-0 top-0 whitespace-nowrap text-xs tracking-[0.04em] sm:text-sm"
           >
             {entry.label}
           </span>
@@ -138,6 +134,28 @@ export default function DiveOverlay({
                   >
                     {link.label} ↗
                   </a>
+                ))}
+              </div>
+            ) : null}
+            {section.center === TECH_STONE.center ? (
+              <div className="mt-4 flex flex-col gap-2">
+                {SKILL_DIAL_CATEGORIES.map((category, categoryIndex) => (
+                  <div
+                    key={category.name}
+                    data-active="false"
+                    ref={(element) => {
+                      overlayRef.current.skillRail[categoryIndex] = element;
+                    }}
+                    className="flex items-baseline gap-3 text-xs tracking-[0.14em] opacity-30 transition-[opacity,transform] duration-500 data-[active=true]:translate-x-2 data-[active=true]:opacity-100"
+                  >
+                    <span className="text-[0.6rem] opacity-60">
+                      {String(categoryIndex + 1).padStart(2, '0')}
+                    </span>
+                    <span className="font-medium">{category.name}</span>
+                    <span className="text-[0.65rem] opacity-60">
+                      {category.count}
+                    </span>
+                  </div>
                 ))}
               </div>
             ) : null}
