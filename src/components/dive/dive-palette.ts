@@ -3,14 +3,11 @@ import { Color } from 'three';
 import type { DescentFrame } from './descent';
 import { finaleBoost, seamBoost } from './descent';
 
-export type DiveAppearance = 'coffee' | 'igloo';
-
 type RgbColor = [number, number, number];
 
 export type DivePalette = {
   accent: string;
   accentRgb: RgbColor;
-  appearance: DiveAppearance;
   background: string;
   backgroundRgb: RgbColor;
   exposure: number;
@@ -26,39 +23,19 @@ const toRgbColor = (value: string): RgbColor => {
   return [color.r, color.g, color.b];
 };
 
-// REASON: both worlds are hue-locked by design - one warm hue in a cold-dark
-// frame is the coffee concept, so neither reacts to the base-color theme
-const DIVE_PALETTES: Record<DiveAppearance, DivePalette> = {
-  coffee: {
-    accent: '#d08a3e',
-    accentRgb: toRgbColor('#d08a3e'),
-    appearance: 'coffee',
-    background: '#0d0805',
-    backgroundRgb: toRgbColor('#0d0805'),
-    exposure: 0.72,
-    foreground: '#f3e7d3',
-    foregroundRgb: toRgbColor('#f3e7d3'),
-    fogDensity: 0.03,
-    rock: '#3f2818',
-    stone: '#b07c46',
-  },
-  igloo: {
-    accent: '#9fd0ee',
-    accentRgb: toRgbColor('#9fd0ee'),
-    appearance: 'igloo',
-    background: '#aeb5bf',
-    backgroundRgb: toRgbColor('#aeb5bf'),
-    exposure: 0.44,
-    foreground: '#ffffff',
-    foregroundRgb: toRgbColor('#ffffff'),
-    fogDensity: 0.05,
-    rock: '#7890a7',
-    stone: '#d6e6f2',
-  },
-};
-
-export const getDivePalette = (appearance: DiveAppearance): DivePalette => {
-  return DIVE_PALETTES[appearance];
+// REASON: the coffee world is hue-locked by design - its warm hue in a
+// cold-dark frame should not react to the base-color theme
+export const DIVE_PALETTE: DivePalette = {
+  accent: '#d08a3e',
+  accentRgb: toRgbColor('#d08a3e'),
+  background: '#0d0805',
+  backgroundRgb: toRgbColor('#0d0805'),
+  exposure: 0.72,
+  foreground: '#f3e7d3',
+  foregroundRgb: toRgbColor('#f3e7d3'),
+  fogDensity: 0.03,
+  rock: '#3f2818',
+  stone: '#b07c46',
 };
 
 const blendChannel = (from: number, to: number, amount: number): number => {
@@ -72,10 +49,6 @@ export const applyDivePalette = (
   palette: DivePalette,
   progress: number,
 ): void => {
-  if (palette.appearance === 'igloo') {
-    return;
-  }
-
   const seam = seamBoost(progress);
   const transition = Math.max(seam, finaleBoost(progress));
   const accentAmount = 0.08 + transition * 0.3 + frame.glow * 0.2;

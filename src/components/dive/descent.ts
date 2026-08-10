@@ -268,37 +268,16 @@ export const createDescentFrame = (): DescentFrame => ({
 export const wrapProgress = (value: number): number =>
   ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
 
-const WORLD_A_SETTLE_DROP = 3.2;
-const WORLD_A_SETTLE_END = 0.65;
-const WORLD_A_DRIFT_RATE = 3;
-const WORLD_A_EXIT_START = 1.24;
-const WORLD_A_EXIT_END = 1.68;
-const WORLD_A_EXIT_LIFT = 46;
-const WORLD_B_ENTER_AT = 1.3;
-const WORLD_B_ACCELERATION_SPAN = 0.38;
-const WORLD_B_RISE_RATE = 20;
+const WORLD_ENTER_AT = 1.3;
+const WORLD_ACCELERATION_SPAN = 0.38;
+const WORLD_RISE_RATE = 20;
 
-export const worldARise = (progress: number): number => {
-  const settle =
-    WORLD_A_SETTLE_DROP * (1 - smootherstep(0, WORLD_A_SETTLE_END, progress));
-  // REASON: settle and exit leave the terrain motionless across the whole
-  // opening section, so scrolling the hero reads as a dead input - a constant
-  // lift between them keeps the world rising the moment the wheel moves
-  const drift =
-    Math.max(0, Math.min(progress, WORLD_A_EXIT_START) - WORLD_A_SETTLE_END) *
-    WORLD_A_DRIFT_RATE;
-  const exit =
-    smootherstep(WORLD_A_EXIT_START, WORLD_A_EXIT_END, progress) *
-    WORLD_A_EXIT_LIFT;
-  return exit + drift - settle;
-};
-
-export const worldBRise = (progress: number): number => {
-  const distance = Math.max(0, progress - WORLD_B_ENTER_AT);
+export const worldRise = (progress: number): number => {
+  const distance = Math.max(0, progress - WORLD_ENTER_AT);
   return (
     distance *
-    smootherstep(0, WORLD_B_ACCELERATION_SPAN, distance) *
-    WORLD_B_RISE_RATE
+    smootherstep(0, WORLD_ACCELERATION_SPAN, distance) *
+    WORLD_RISE_RATE
   );
 };
 
@@ -416,22 +395,10 @@ export const nearestSectionDelta = (progress: number): number => {
   return best;
 };
 
-export const DIVE_TUNING = {
-  aberrationScale: 1,
-  fovRush: 1,
-  snowSize: 2.1,
-  transitionScale: 1,
-};
-
-export const transitionStrength = (velocity: number): number => {
-  return Math.min(1, Math.abs(velocity) * 12) * DIVE_TUNING.transitionScale;
-};
-
 export const aberrationStrength = (velocity: number): number => {
-  const base = Math.min(0.0011, Math.abs(velocity) * 0.008);
-  return base * DIVE_TUNING.aberrationScale;
+  return Math.min(0.0011, Math.abs(velocity) * 0.008);
 };
 
 export const rushFov = (velocity: number): number => {
-  return 58 + Math.min(0.4, Math.abs(velocity) * 14) * DIVE_TUNING.fovRush;
+  return 58 + Math.min(0.4, Math.abs(velocity) * 14);
 };

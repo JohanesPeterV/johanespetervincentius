@@ -1,34 +1,16 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { ReactNode, RefObject, useRef } from 'react';
 import { Color, Group, InstancedMesh, Object3D } from 'three';
 
 import { NARRATIVE_STONES, narrativeStoneY } from './descent';
-import {
-  BlockTransform,
-  buildIceRidges,
-  buildRockDrift,
-  buildRisingStones,
-  buildSnowPositions,
-} from './world-layout';
+import { BlockTransform, buildRisingStones } from './world-layout';
 
-const TERRAIN_URL = '/models/snowy-terrain-transformed.glb';
-const TERRAIN_SCALE = 40;
-const ICE_RIDGE_BLOCKS = buildIceRidges();
-// REASON: the shared ridge silhouettes read as bright mid-frame masses against
-// the dark space backdrop, so the space world recedes them into the fog
-const SPACE_RIDGE_BLOCKS = ICE_RIDGE_BLOCKS.map((block) => ({
-  ...block,
-  shade: block.shade * 0.55,
-}));
 const RISING_STONE_BLOCKS = buildRisingStones();
-const SNOW_POSITIONS = buildSnowPositions();
-const ROCK_DRIFT_BLOCKS = buildRockDrift();
 const narrativeStoneHelper = new Object3D();
 
-export const applyBlockInstances = (
+const applyBlockInstances = (
   mesh: InstancedMesh | null,
   blocks: BlockTransform[],
   baseColor: string,
@@ -63,48 +45,11 @@ export const applyBlockInstances = (
   }
 };
 
-export const SnowTerrain = () => {
-  const { scene } = useGLTF(TERRAIN_URL);
-  return (
-    <primitive object={scene} scale={TERRAIN_SCALE} position={[0, -1.8, 0]} />
-  );
-};
-
-export const IceRidges = () => (
-  <instancedMesh
-    args={[undefined, undefined, ICE_RIDGE_BLOCKS.length]}
-    ref={(mesh) => {
-      applyBlockInstances(mesh, ICE_RIDGE_BLOCKS, '#9ba6b2');
-    }}
-  >
-    <icosahedronGeometry args={[1, 2]} />
-    <meshStandardMaterial flatShading color="#9ba6b2" roughness={1} />
-  </instancedMesh>
-);
-
-type ColoredFieldParams = {
+type RisingStonesParams = {
   color: string;
 };
 
-type RisingStonesParams = {
-  color?: string;
-};
-
-export const SpaceRidges = ({ color }: ColoredFieldParams) => (
-  <instancedMesh
-    args={[undefined, undefined, SPACE_RIDGE_BLOCKS.length]}
-    ref={(mesh) => {
-      applyBlockInstances(mesh, SPACE_RIDGE_BLOCKS, color);
-    }}
-  >
-    <icosahedronGeometry args={[1, 1]} />
-    <meshStandardMaterial flatShading color={color} roughness={0.94} />
-  </instancedMesh>
-);
-
-useGLTF.preload(TERRAIN_URL);
-
-export const RisingStones = ({ color = '#7890a7' }: RisingStonesParams) => (
+export const RisingStones = ({ color }: RisingStonesParams) => (
   <instancedMesh
     args={[undefined, undefined, RISING_STONE_BLOCKS.length]}
     ref={(mesh) => {
@@ -137,14 +82,14 @@ export const RisingWorld = ({
 };
 
 type NarrativeStonesParams = {
-  accentColor?: string;
-  color?: string;
+  accentColor: string;
+  color: string;
   progressRef: RefObject<number>;
 };
 
 export const NarrativeStones = ({
-  accentColor = '#6f94b2',
-  color = '#d6e6f2',
+  accentColor,
+  color,
   progressRef,
 }: NarrativeStonesParams) => {
   const meshRef = useRef<InstancedMesh>(null);
@@ -189,59 +134,5 @@ export const NarrativeStones = ({
         emissiveIntensity={0.3}
       />
     </instancedMesh>
-  );
-};
-
-export const RockDrift = ({ color }: ColoredFieldParams) => {
-  const groupRef = useRef<Group>(null);
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y =
-        Math.sin(state.clock.elapsedTime * 0.08) * 0.08;
-      groupRef.current.position.y =
-        Math.cos(state.clock.elapsedTime * 0.12) * 0.2;
-    }
-  });
-  return (
-    <group ref={groupRef}>
-      <instancedMesh
-        args={[undefined, undefined, ROCK_DRIFT_BLOCKS.length]}
-        ref={(mesh) => {
-          applyBlockInstances(mesh, ROCK_DRIFT_BLOCKS, color);
-        }}
-      >
-        <dodecahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color={color} roughness={0.92} metalness={0.08} />
-      </instancedMesh>
-    </group>
-  );
-};
-
-export const SnowDrift = () => {
-  const groupRef = useRef<Group>(null);
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y =
-        Math.sin(state.clock.elapsedTime * 0.15) * 0.06;
-    }
-  });
-  return (
-    <group ref={groupRef}>
-      <points>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[SNOW_POSITIONS, 3]}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          size={0.08}
-          color="#ffffff"
-          transparent
-          opacity={0.34}
-          depthWrite={false}
-        />
-      </points>
-    </group>
   );
 };

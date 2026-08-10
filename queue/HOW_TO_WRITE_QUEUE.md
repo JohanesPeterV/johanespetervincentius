@@ -44,7 +44,7 @@ Every executable row requires:
 - `npm run check:sizes` when a `.ts` or `.tsx` file is added or grows.
 - `git diff --check`.
 - Browser verification for visible UI, motion, responsive, accessibility, or 3D behaviour.
-- The matching feature Definition of Done, including `IGLOO-PREVIEW.md` for `/igloo-preview` changes.
+- The matching feature Definition of Done when one exists.
 
 Do not invent a test command while the repository has no test runner. If a future change adds a real test harness, update the repository rules before requiring it here.
 

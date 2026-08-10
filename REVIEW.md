@@ -1,6 +1,6 @@
 # Review Rules
 
-Use this file for automated and explicit reviews. `AGENTS.md` owns the hard gates, optional `REVIEW_FOCUS.md` supplies current priority, and feature documents such as `IGLOO-PREVIEW.md` own local intent.
+Use this file for automated and explicit reviews. `AGENTS.md` owns the hard gates, optional `REVIEW_FOCUS.md` supplies current priority, and relevant feature documents own local intent.
 
 ## Candidate Scope
 

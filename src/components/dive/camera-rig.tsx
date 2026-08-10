@@ -18,7 +18,6 @@ import {
 } from 'three';
 
 import {
-  DIVE_LENGTH,
   NARRATIVE_STONES,
   WORK_STONE,
   aberrationStrength,
@@ -30,7 +29,6 @@ import {
   seamBoost,
   stoneSectionOpacity,
   techSectionOpacity,
-  transitionStrength,
   wrapProgress,
   writeDescentFrame,
 } from './descent';
@@ -43,7 +41,6 @@ import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
 import { GALAXY_NODES, writeGalaxyScreens } from './skill-galaxy';
-import { setWindDrive } from './wind-audio';
 
 export type PointerState = {
   x: number;
@@ -68,7 +65,6 @@ const MAX_FRAME_DELTA = 1 / 30;
 const PARALLAX_DAMPING = 1.7;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
-const RUSH_DAMPING = 4;
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
@@ -95,7 +91,6 @@ export default function CameraRig({
   });
   const fovRef = useRef(BASE_FOV);
   const rollRef = useRef(0);
-  const rushRef = useRef(0);
   const overlayProgressRef = useRef(Number.NaN);
   const overlaySizeRef = useRef(new Vector2());
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
@@ -198,17 +193,6 @@ export default function CameraRig({
     if (aberrationRef.current) {
       const strength = aberrationStrength(driveStep) * transitionZone;
       aberrationRef.current.offset.set(strength, strength * 0.55);
-    }
-    const impulse = Math.min(1, transitionStrength(driveStep) * transitionZone);
-    rushRef.current = MathUtils.damp(
-      rushRef.current,
-      impulse,
-      RUSH_DAMPING,
-      frameDelta,
-    );
-    const rush = rushRef.current < 0.01 ? 0 : rushRef.current;
-    if (palette.appearance === 'igloo') {
-      setWindDrive(progress / DIVE_LENGTH, rush);
     }
     if (glowRef.current) {
       glowRef.current.intensity = frame.glow * 260;

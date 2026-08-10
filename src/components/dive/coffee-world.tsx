@@ -2,7 +2,7 @@
 
 import { RefObject } from 'react';
 
-import { worldBRise } from './descent';
+import { worldRise } from './descent';
 import { NarrativeStones, RisingStones, RisingWorld } from './dive-world';
 
 type CoffeeWorldParams = {
@@ -36,7 +36,7 @@ export default function CoffeeWorld({
         distance={26}
         color="#ffbf78"
       />
-      <RisingWorld progressRef={progressRef} rise={worldBRise}>
+      <RisingWorld progressRef={progressRef} rise={worldRise}>
         <RisingStones color={rockColor} />
       </RisingWorld>
       <NarrativeStones

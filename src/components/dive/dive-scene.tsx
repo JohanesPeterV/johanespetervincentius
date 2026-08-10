@@ -13,12 +13,10 @@ import {
   WHEEL_SENSITIVITY,
   sectionStepDelta,
 } from './descent';
-import type { DiveAppearance } from './dive-palette';
-import { getDivePalette } from './dive-palette';
+import { DIVE_PALETTE } from './dive-palette';
 import DiveOverlay from './dive-overlay';
 import type { DiveMode } from './dive-overlay';
 import type { OverlayNodes } from './dive-overlay-motion';
-import IglooWorld from './igloo-world';
 import {
   galaxyEngage,
   galaxyPointerDown,
@@ -28,12 +26,6 @@ import {
   galaxyZoomBy,
 } from './skill-galaxy';
 import SkillGalaxyScene from './skill-galaxy-scene';
-import { disposeWindAudio } from './wind-audio';
-
-type DiveSceneParams = {
-  appearance: DiveAppearance;
-  tierOverride: number | null;
-};
 
 type LoadedSignalParams = {
   stageRef: RefObject<DiveStage>;
@@ -80,10 +72,7 @@ const LoadedSignal = ({ stageRef }: LoadedSignalParams) => {
   return null;
 };
 
-export default function DiveScene({
-  appearance,
-  tierOverride,
-}: DiveSceneParams) {
+export default function DiveScene() {
   const targetRef = useRef(DIVE_START);
   const progressRef = useRef(DIVE_START);
   const dragRef = useRef<PointerDrag>({ id: null, y: 0 });
@@ -102,8 +91,8 @@ export default function DiveScene({
   const modeRef = useRef<DiveMode>('dive');
   const [mode, setMode] = useState<DiveMode>('dive');
   const gpu = useDetectGPU();
-  const tier = tierOverride ?? gpu.tier;
-  const palette = getDivePalette(appearance);
+  const tier = gpu.tier;
+  const palette = DIVE_PALETTE;
 
   const applyDriveDelta = (step: number): void => {
     targetRef.current += workLockedDelta({
@@ -228,12 +217,6 @@ export default function DiveScene({
     };
   }, []);
 
-  // REASON: the world owns a module-level Web Audio graph that outlives React,
-  // so it must be torn down when the route unmounts
-  useEffect(() => {
-    return disposeWindAudio;
-  }, []);
-
   return (
     <div
       onWheel={handleWheel}
@@ -254,17 +237,12 @@ export default function DiveScene({
         <color attach="background" args={[palette.background]} />
         <fogExp2 attach="fog" args={[palette.background, palette.fogDensity]} />
         <Suspense fallback={null}>
-          {appearance === 'coffee' ? (
-            <CoffeeWorld
-              accentColor={palette.accent}
-              progressRef={progressRef}
-              rockColor={palette.rock}
-              stoneColor={palette.stone}
-            />
-          ) : null}
-          {appearance === 'igloo' ? (
-            <IglooWorld gpuTier={tier} progressRef={progressRef} />
-          ) : null}
+          <CoffeeWorld
+            accentColor={palette.accent}
+            progressRef={progressRef}
+            rockColor={palette.rock}
+            stoneColor={palette.stone}
+          />
           <LoadedSignal stageRef={stageRef} />
         </Suspense>
         <SkillGalaxyScene
@@ -284,7 +262,6 @@ export default function DiveScene({
         />
       </Canvas>
       <DiveOverlay
-        appearance={appearance}
         overlayRef={overlayRef}
         mode={mode}
         onEngage={handleEngage}

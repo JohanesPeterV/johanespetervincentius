@@ -1,18 +1,15 @@
 'use client';
 
-import { RefObject, useEffect, useState } from 'react';
+import { RefObject, useEffect } from 'react';
 
 import { DIVE_SECTIONS, TECH_STONE, WORK_JOBS, WORK_STONE } from './descent';
-import type { DiveAppearance } from './dive-palette';
 import { disposeOverlayMotion } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
-import { toggleWindAudio } from './wind-audio';
 
 export type DiveMode = 'dive' | 'explore';
 
 type DiveOverlayParams = {
-  appearance: DiveAppearance;
   overlayRef: RefObject<OverlayNodes>;
   mode: DiveMode;
   onEngage: (category: number | null) => void;
@@ -56,14 +53,11 @@ const HeadlineLines = ({ title }: HeadlineLinesParams) => {
 };
 
 export default function DiveOverlay({
-  appearance,
   overlayRef,
   mode,
   onEngage,
   onToggleExplore,
 }: DiveOverlayParams) {
-  const [sound, setSound] = useState<'on' | 'off'>('off');
-
   // REASON: Anime.js instances are created from the R3F overlay bridge and
   // must release their DOM targets when the overlay unmounts
   useEffect(() => {
@@ -72,10 +66,6 @@ export default function DiveOverlay({
       disposeOverlayMotion(overlay);
     };
   }, [overlayRef]);
-
-  const handleToggleSound = (): void => {
-    setSound(toggleWindAudio());
-  };
 
   return (
     <>
@@ -250,29 +240,6 @@ export default function DiveOverlay({
           ? 'drag to orbit · scroll to zoom · click a tool to open its docs · esc to exit'
           : 'Scroll or drag to explore'}
       </div>
-      {appearance === 'igloo' ? (
-        <button
-          type="button"
-          onClick={handleToggleSound}
-          aria-pressed={sound === 'on'}
-          aria-label={`Turn ambient wind ${sound === 'on' ? 'off' : 'on'}`}
-          className="absolute bottom-6 right-6 z-20 flex items-center gap-2 text-[0.6rem] tracking-[0.26em] text-white/65 mix-blend-difference transition-colors hover:text-white sm:bottom-8 sm:right-10"
-        >
-          <span className="flex h-3 items-end gap-[2px]">
-            {[0, 1, 2].map((bar) => (
-              <span
-                key={bar}
-                className={`w-px bg-current ${sound === 'on' ? 'animate-pulse' : ''}`}
-                style={{
-                  height: `${(bar + 1) * 4}px`,
-                  animationDelay: `${bar * 160}ms`,
-                }}
-              />
-            ))}
-          </span>
-          SOUND {sound === 'on' ? 'ON' : 'OFF'}
-        </button>
-      ) : null}
     </>
   );
 }
