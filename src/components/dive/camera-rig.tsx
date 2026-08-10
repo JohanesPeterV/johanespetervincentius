@@ -40,7 +40,7 @@ import type { OverlayNodes } from './dive-overlay-motion';
 import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
-import { SKILL_DIAL_ENTRIES, writeSkillDialScreens } from './skill-dial';
+import { GALAXY_NODES, writeGalaxyScreens } from './skill-galaxy';
 import { setWindDrive } from './wind-audio';
 
 export type PointerState = {
@@ -70,8 +70,9 @@ const RUSH_DAMPING = 4;
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
-const SKILL_SCREENS = SKILL_DIAL_ENTRIES.map(() => new Vector2());
-const SKILL_ALPHAS = new Float32Array(SKILL_DIAL_ENTRIES.length);
+const SKILL_SCREENS = GALAXY_NODES.map(() => new Vector2());
+const SKILL_ALPHAS = new Float32Array(GALAXY_NODES.length);
+const SKILL_SCALES = new Float32Array(GALAXY_NODES.length);
 
 type SunMesh = Mesh<SphereGeometry, MeshBasicMaterial>;
 
@@ -229,12 +230,14 @@ export default function CameraRig({
         ((1 - projection.y) * size.height) / 2,
       );
     });
-    if (techSectionOpacity(progress) > 0) {
-      writeSkillDialScreens({
+    const techVisible = techSectionOpacity(progress) > 0;
+    if (techVisible) {
+      writeGalaxyScreens({
         alphas: SKILL_ALPHAS,
         camera,
         height: size.height,
         progress,
+        scales: SKILL_SCALES,
         screens: SKILL_SCREENS,
         width: size.width,
       });
@@ -242,7 +245,9 @@ export default function CameraRig({
     const sizeChanged =
       size.width !== overlaySizeRef.current.x ||
       size.height !== overlaySizeRef.current.y;
-    if (progress !== overlayProgressRef.current || sizeChanged) {
+    // REASON: the galaxy animates while progress is frozen in explore mode, so
+    // its labels need overlay writes every frame the tech section is visible
+    if (progress !== overlayProgressRef.current || sizeChanged || techVisible) {
       overlayProgressRef.current = progress;
       overlaySizeRef.current.set(size.width, size.height);
       applyOverlay(overlayRef.current, {
@@ -250,6 +255,7 @@ export default function CameraRig({
         height: size.height,
         progress,
         skillAlphas: SKILL_ALPHAS,
+        skillScales: SKILL_SCALES,
         skillScreens: SKILL_SCREENS,
         stones: STONE_SCREENS,
         width: size.width,
