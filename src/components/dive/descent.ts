@@ -73,7 +73,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
   },
   {
     tag: '03',
-    title: 'Selected\nProjects',
+    title: 'Projects',
     subtitle: 'a few things built',
     center: 2.55,
     placement: 'stone',
@@ -81,6 +81,10 @@ export const DIVE_SECTIONS: DiveSection[] = [
     x: -1.45,
     z: 8.4,
     links: [
+      {
+        label: 'Pomodoro Planter',
+        href: 'https://pomoplanter.com',
+      },
       {
         label: 'Simple Helpdesk',
         href: 'https://github.com/JohanesPeterV/simple-helpdesk',
@@ -105,21 +109,6 @@ export const DIVE_SECTIONS: DiveSection[] = [
     // silhouette swallows the inner rings of orbiting words
     stoneScale: 0.6,
     ...TECH_STONE,
-  },
-  {
-    tag: '05',
-    title: "Let's\nTalk",
-    subtitle: 'say hello',
-    center: 3.92,
-    placement: 'center',
-    links: [
-      { label: 'Email', href: 'mailto:johanespeter.jp@gmail.com' },
-      {
-        label: 'LinkedIn',
-        href: 'https://www.linkedin.com/in/johanes-vincentius-714b311a4',
-      },
-      { label: 'GitHub', href: 'https://github.com/JohanesPeterV' },
-    ],
   },
 ];
 

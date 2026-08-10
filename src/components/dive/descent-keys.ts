@@ -133,16 +133,6 @@ export const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#eaf4fd',
   },
   {
-    at: 3.9,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#33597e',
-    fogDensity: 0.038,
-    glow: 0.34,
-    veil: 0.08,
-    veilColor: '#eaf4fd',
-  },
-  {
     at: 4.1,
     position: [0, 3.5, 16],
     look: [0, 2.4, 0],
