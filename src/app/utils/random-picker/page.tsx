@@ -3,7 +3,7 @@
 import { AnimatedBackground } from '@/app/utils/random-picker/_components/animated-background';
 import { EditMode } from '@/app/utils/random-picker/_components/edit-mode';
 import { PickMode } from '@/app/utils/random-picker/_components/pick-mode';
-import RandomColorButton from '@/components/theme-buttons/random-color-button';
+import PalettePicker from '@/components/theme-buttons/palette-picker';
 import {
   Card,
   CardContent,
@@ -167,13 +167,12 @@ const RandomPickerContent = () => {
   return (
     <>
       <AnimatedBackground items={filledItems} />
+      <PalettePicker />
       <div className="flex flex-col min-h-screen items-center justify-center p-4 sm:p-6">
         <Card className="w-full max-w-2xl bg-card/50 backdrop-blur-sm border-border/50">
           <CardHeader className="text-center pb-4 sm:pb-6">
             <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-              Rand
-              <RandomColorButton className="text-2xl sm:text-3xl lg:text-4xl font-bold" />
-              m Picker
+              Random Picker
             </CardTitle>
             <CardDescription className="text-sm sm:text-base">
               {state.isEditing

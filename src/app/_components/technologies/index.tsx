@@ -1,5 +1,4 @@
 import ScrollContainer from '@/components/scroll-container';
-import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { TECHNOLOGIES } from './technologies';
 import TechnologySection from './technologies-section';
@@ -9,11 +8,7 @@ export default function Technologies() {
     <div className="flex flex-col h-screen">
       <div className="flex-1 flex flex-col items-center justify-center max-h-screen py-8">
         <div className="flex justify-center mb-6">
-          <Title>
-            Techn
-            <RandomColorButton />
-            logies
-          </Title>
+          <Title>Technologies</Title>
         </div>
         <div className="w-full max-w-7xl mx-auto px-4">
           <ScrollContainer>

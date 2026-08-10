@@ -6,6 +6,7 @@ import Technologies from '@/app/_components/technologies';
 import WorkExperience from '@/app/_components/work-experience';
 import HomeBackground from '@/components/backgrounds/home-background';
 import SnapScrollContainer from '@/components/snap-scroll-container';
+import PalettePicker from '@/components/theme-buttons/palette-picker';
 
 export default function PortfolioView() {
   return (
@@ -17,6 +18,7 @@ export default function PortfolioView() {
         <Technologies />
         <Summary />
       </SnapScrollContainer>
+      <PalettePicker />
       <HomeBackground />
     </div>
   );

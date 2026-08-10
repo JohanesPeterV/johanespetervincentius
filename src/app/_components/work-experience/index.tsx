@@ -1,5 +1,4 @@
 import ScrollContainer from '@/components/scroll-container';
-import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { Card, CardContent } from '@/components/ui/card';
 import { FaRegImage } from 'react-icons/fa';
@@ -10,11 +9,7 @@ export default function WorkExperience() {
     <div className="flex flex-col h-screen">
       <div className="flex-1 flex flex-col items-center justify-center max-h-screen py-8">
         <div className="flex justify-center mb-6">
-          <Title>
-            W
-            <RandomColorButton />
-            rk Experience
-          </Title>
+          <Title>Work Experience</Title>
         </div>
         <div className="w-full max-w-3xl mx-auto px-4 overflow-hidden">
           <ScrollContainer className="pr-2">

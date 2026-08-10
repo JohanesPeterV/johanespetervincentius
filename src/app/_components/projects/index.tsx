@@ -1,5 +1,4 @@
 import ScrollContainer from '@/components/scroll-container';
-import RandomColorButton from '@/components/theme-buttons/random-color-button';
 import { Title } from '@/components/title';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
@@ -11,11 +10,7 @@ export const Projects = () => {
     <div className="flex flex-col h-screen">
       <div className="flex-1 flex flex-col items-center justify-center max-h-screen py-8">
         <div className="flex justify-center mb-6">
-          <Title>
-            Pr
-            <RandomColorButton />
-            jects
-          </Title>
+          <Title>Projects</Title>
         </div>
         <div className="w-full max-w-7xl mx-auto px-4 overflow-hidden">
           <ScrollContainer className="pr-2">
