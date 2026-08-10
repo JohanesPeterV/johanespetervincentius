@@ -95,6 +95,7 @@ export default function DiveScene({
     skillRail: [],
     skillWords: [],
     veil: null,
+    workPanelContents: [],
     workPanels: [],
     workRail: [],
   });

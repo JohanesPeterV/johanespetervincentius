@@ -20,6 +20,7 @@ import {
 import {
   DIVE_LENGTH,
   NARRATIVE_STONES,
+  WORK_STONE,
   aberrationStrength,
   createDescentFrame,
   finaleBoost,
@@ -27,6 +28,7 @@ import {
   narrativeStoneY,
   rushFov,
   seamBoost,
+  stoneSectionOpacity,
   techSectionOpacity,
   transitionStrength,
   wrapProgress,
@@ -231,6 +233,7 @@ export default function CameraRig({
       );
     });
     const techVisible = techSectionOpacity(progress) > 0;
+    const workVisible = stoneSectionOpacity(progress, WORK_STONE.center) > 0;
     if (techVisible) {
       writeGalaxyScreens({
         alphas: SKILL_ALPHAS,
@@ -245,9 +248,14 @@ export default function CameraRig({
     const sizeChanged =
       size.width !== overlaySizeRef.current.x ||
       size.height !== overlaySizeRef.current.y;
-    // REASON: the galaxy animates while progress is frozen in explore mode, so
-    // its labels need overlay writes every frame the tech section is visible
-    if (progress !== overlayProgressRef.current || sizeChanged || techVisible) {
+    // REASON: galaxy labels and work panels animate while camera progress is
+    // frozen, so their visible sections still need overlay writes every frame
+    if (
+      progress !== overlayProgressRef.current ||
+      sizeChanged ||
+      techVisible ||
+      workVisible
+    ) {
       overlayProgressRef.current = progress;
       overlaySizeRef.current.set(size.width, size.height);
       applyOverlay(overlayRef.current, {
