@@ -106,26 +106,8 @@ body {
   animation: fadeInLate 0.8s ease-out 1.7s both;
 }
 
-@keyframes atmosphereReveal {
-  0% {
-    opacity: 0.82;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-.atmosphere-reveal {
-  opacity: 0;
-  animation: atmosphereReveal 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-late {
-    animation: none;
-  }
-
-  .atmosphere-reveal {
     animation: none;
   }
 }

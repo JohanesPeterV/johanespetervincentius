@@ -3,13 +3,7 @@ import { Color } from 'three';
 import type { DescentFrame } from './descent';
 import { finaleBoost, seamBoost } from './descent';
 
-export type DiveAppearance = 'coffee' | 'igloo' | 'space';
-
-type ThemeColors = {
-  backgroundColor: string;
-  fluidColor: string;
-  textColor: string;
-};
+export type DiveAppearance = 'coffee' | 'igloo';
 
 type RgbColor = [number, number, number];
 
@@ -32,65 +26,39 @@ const toRgbColor = (value: string): RgbColor => {
   return [color.r, color.g, color.b];
 };
 
-const blendColor = (from: string, to: string, amount: number): string => {
-  return new Color(from).lerp(new Color(to), amount).getStyle();
+// REASON: both worlds are hue-locked by design - one warm hue in a cold-dark
+// frame is the coffee concept, so neither reacts to the base-color theme
+const DIVE_PALETTES: Record<DiveAppearance, DivePalette> = {
+  coffee: {
+    accent: '#d08a3e',
+    accentRgb: toRgbColor('#d08a3e'),
+    appearance: 'coffee',
+    background: '#0d0805',
+    backgroundRgb: toRgbColor('#0d0805'),
+    exposure: 0.72,
+    foreground: '#f3e7d3',
+    foregroundRgb: toRgbColor('#f3e7d3'),
+    fogDensity: 0.03,
+    rock: '#3f2818',
+    stone: '#b07c46',
+  },
+  igloo: {
+    accent: '#9fd0ee',
+    accentRgb: toRgbColor('#9fd0ee'),
+    appearance: 'igloo',
+    background: '#aeb5bf',
+    backgroundRgb: toRgbColor('#aeb5bf'),
+    exposure: 0.44,
+    foreground: '#ffffff',
+    foregroundRgb: toRgbColor('#ffffff'),
+    fogDensity: 0.05,
+    rock: '#7890a7',
+    stone: '#d6e6f2',
+  },
 };
 
-export const getDivePalette = (
-  appearance: DiveAppearance,
-  themeColors: ThemeColors,
-): DivePalette => {
-  // REASON: the coffee blockout is warm-locked by design - one warm hue in a
-  // cold-dark frame is the concept, so it must not react to the theme switcher
-  if (appearance === 'coffee') {
-    return {
-      accent: '#d08a3e',
-      accentRgb: toRgbColor('#d08a3e'),
-      appearance,
-      background: '#0d0805',
-      backgroundRgb: toRgbColor('#0d0805'),
-      exposure: 0.72,
-      foreground: '#f3e7d3',
-      foregroundRgb: toRgbColor('#f3e7d3'),
-      fogDensity: 0.03,
-      rock: '#3f2818',
-      stone: '#b07c46',
-    };
-  }
-
-  if (appearance === 'igloo') {
-    return {
-      accent: '#9fd0ee',
-      accentRgb: toRgbColor('#9fd0ee'),
-      appearance,
-      background: '#aeb5bf',
-      backgroundRgb: toRgbColor('#aeb5bf'),
-      exposure: 0.44,
-      foreground: '#ffffff',
-      foregroundRgb: toRgbColor('#ffffff'),
-      fogDensity: 0.05,
-      rock: '#7890a7',
-      stone: '#d6e6f2',
-    };
-  }
-
-  return {
-    accent: themeColors.fluidColor,
-    accentRgb: toRgbColor(themeColors.fluidColor),
-    appearance,
-    background: themeColors.backgroundColor,
-    backgroundRgb: toRgbColor(themeColors.backgroundColor),
-    exposure: 0.78,
-    foreground: themeColors.textColor,
-    foregroundRgb: toRgbColor(themeColors.textColor),
-    fogDensity: 0.024,
-    rock: blendColor(themeColors.fluidColor, themeColors.textColor, 0.34),
-    stone: blendColor(
-      themeColors.fluidColor,
-      themeColors.backgroundColor,
-      0.52,
-    ),
-  };
+export const getDivePalette = (appearance: DiveAppearance): DivePalette => {
+  return DIVE_PALETTES[appearance];
 };
 
 const blendChannel = (from: number, to: number, amount: number): number => {

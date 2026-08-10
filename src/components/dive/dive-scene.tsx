@@ -1,10 +1,7 @@
 'use client';
 
-import { useConfig } from '@/hooks/use-config';
-import { getFluidThemeColors } from '@/lib/theme-colors';
 import { AdaptiveDpr, useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import { useTheme } from 'next-themes';
 import { RefObject, Suspense, useEffect, useRef } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
@@ -20,8 +17,7 @@ import { getDivePalette } from './dive-palette';
 import DiveOverlay from './dive-overlay';
 import type { OverlayNodes } from './dive-overlay-motion';
 import IglooWorld from './igloo-world';
-import SkillConstellation from './skill-constellation';
-import SpaceWorld from './space-world';
+import SkillDialRing from './skill-dial-ring';
 import { disposeWindAudio } from './wind-audio';
 
 type DiveSceneParams = {
@@ -86,17 +82,13 @@ export default function DiveScene({
   const overlayRef = useRef<OverlayNodes>({
     sections: [],
     skillLayer: null,
+    skillRail: [],
     skillWords: [],
     veil: null,
   });
   const gpu = useDetectGPU();
   const tier = tierOverride ?? gpu.tier;
-  const [{ theme }] = useConfig();
-  const { resolvedTheme } = useTheme();
-  const palette = getDivePalette(
-    appearance,
-    getFluidThemeColors(theme, resolvedTheme),
-  );
+  const palette = getDivePalette(appearance);
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
     if (stageRef.current !== 'live') {
@@ -175,11 +167,11 @@ export default function DiveScene({
     };
   }, []);
 
-  // REASON: the active world owns a module-level Web Audio graph that must stop
-  // when the user switches atmosphere or leaves the route
+  // REASON: the world owns a module-level Web Audio graph that outlives React,
+  // so it must be torn down when the route unmounts
   useEffect(() => {
     return disposeWindAudio;
-  }, [appearance]);
+  }, []);
 
   return (
     <div
@@ -209,24 +201,12 @@ export default function DiveScene({
               stoneColor={palette.stone}
             />
           ) : null}
-          {appearance === 'space' ? (
-            <SpaceWorld
-              accentColor={palette.accent}
-              gpuTier={tier}
-              progressRef={progressRef}
-              rockColor={palette.rock}
-              stoneColor={palette.stone}
-            />
-          ) : null}
           {appearance === 'igloo' ? (
             <IglooWorld gpuTier={tier} progressRef={progressRef} />
           ) : null}
           <LoadedSignal stageRef={stageRef} />
         </Suspense>
-        <SkillConstellation
-          accentColor={palette.accent}
-          progressRef={progressRef}
-        />
+        <SkillDialRing accentColor={palette.accent} progressRef={progressRef} />
         <CameraRig
           targetRef={targetRef}
           progressRef={progressRef}
@@ -237,11 +217,7 @@ export default function DiveScene({
           stageRef={stageRef}
         />
       </Canvas>
-      <DiveOverlay
-        key={appearance}
-        appearance={appearance}
-        overlayRef={overlayRef}
-      />
+      <DiveOverlay appearance={appearance} overlayRef={overlayRef} />
     </div>
   );
 }
