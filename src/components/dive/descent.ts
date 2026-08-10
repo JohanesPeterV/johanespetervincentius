@@ -48,7 +48,6 @@ export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
 export const TECH_DWELL_HALF = 0.3;
 
 export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
-export const WORK_DWELL_HALF = 0.3;
 
 export type DiveWorkJob = {
   label: string;
@@ -90,27 +89,6 @@ export const WORK_JOBS: DiveWorkJob[] = [
     ],
   },
 ];
-
-// REASON: scroll scrubs one job per slot inside the work dwell, so every job
-// owns an equal slice of the dwell window
-export const WORK_JOB_CENTERS: number[] = WORK_JOBS.map(
-  (job, index) =>
-    WORK_STONE.center -
-    WORK_DWELL_HALF +
-    ((WORK_DWELL_HALF * 2) / WORK_JOBS.length) * (index + 0.5),
-);
-
-export const activeWorkJobIndex = (progress: number): number => {
-  let best = 0;
-  WORK_JOB_CENTERS.forEach((center, index) => {
-    if (
-      Math.abs(progress - center) < Math.abs(progress - WORK_JOB_CENTERS[best])
-    ) {
-      best = index;
-    }
-  });
-  return best;
-};
 
 export const DIVE_SECTIONS: DiveSection[] = [
   {
@@ -234,25 +212,13 @@ const NARRATIVE_STONE_RISE_RATE = 17;
 
 const DWELL_RATE = 2.5;
 
-const stoneDwellHalf = (center: number): number | null => {
-  if (center === TECH_STONE.center) {
-    return TECH_DWELL_HALF;
-  }
-  if (center === WORK_STONE.center) {
-    return WORK_DWELL_HALF;
-  }
-  return null;
-};
-
 export const narrativeStoneY = (progress: number, center: number): number => {
   let delta = progress - center;
-  // REASON: the tech section hosts the skill galaxy and the work section
-  // scrubs through jobs - compressing travel inside each dwell holds the
-  // stone on screen for its whole story, then full rise speed resumes at
-  // the dwell edges
-  const half = stoneDwellHalf(center);
-  if (half !== null) {
-    const held = Math.max(-half, Math.min(half, delta));
+  // REASON: the tech section hosts the skill galaxy - compressing travel
+  // inside the dwell holds the galaxy on screen long enough to notice and
+  // explore it, then full rise speed resumes at the dwell edges
+  if (center === TECH_STONE.center) {
+    const held = Math.max(-TECH_DWELL_HALF, Math.min(TECH_DWELL_HALF, delta));
     delta = held * (DWELL_RATE / NARRATIVE_STONE_RISE_RATE) + (delta - held);
   }
   return NARRATIVE_STONE_CENTER_Y + delta * NARRATIVE_STONE_RISE_RATE;
@@ -384,29 +350,19 @@ export const stoneSectionOpacity = (
   return fadeIn * fadeOut;
 };
 
-const DWELL_FADE_SPAN = 0.18;
+const TECH_FADE_SPAN = 0.18;
 
-const dwellSectionOpacity = (
-  progress: number,
-  center: number,
-  dwellHalf: number,
-): number => {
-  const distance = Math.abs(progress - center);
-  return 1 - smootherstep(dwellHalf, dwellHalf + DWELL_FADE_SPAN, distance);
+export const techSectionOpacity = (progress: number): number => {
+  const distance = Math.abs(progress - TECH_STONE.center);
+  return (
+    1 -
+    smootherstep(TECH_DWELL_HALF, TECH_DWELL_HALF + TECH_FADE_SPAN, distance)
+  );
 };
-
-export const techSectionOpacity = (progress: number): number =>
-  dwellSectionOpacity(progress, TECH_STONE.center, TECH_DWELL_HALF);
-
-export const workSectionOpacity = (progress: number): number =>
-  dwellSectionOpacity(progress, WORK_STONE.center, WORK_DWELL_HALF);
 
 const stoneOpacity = (progress: number, center: number): number => {
   if (center === TECH_STONE.center) {
     return techSectionOpacity(progress);
-  }
-  if (center === WORK_STONE.center) {
-    return workSectionOpacity(progress);
   }
   return stoneSectionOpacity(progress, center);
 };
@@ -428,14 +384,7 @@ export const sectionMotion = (
 
 const SECTION_STEP_EPSILON = 0.05;
 
-// REASON: idle gravity and arrow keys must rest ON a job, never between two
-// crossfading ones, so the work centre is replaced by its per-job sub-stops
-const SNAP_CENTERS: number[] = [
-  ...DIVE_SECTIONS.flatMap((section) =>
-    section.center === WORK_STONE.center ? [] : [section.center],
-  ),
-  ...WORK_JOB_CENTERS,
-];
+const SNAP_CENTERS: number[] = DIVE_SECTIONS.map((section) => section.center);
 
 export const sectionStepDelta = (
   progress: number,

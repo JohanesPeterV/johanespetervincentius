@@ -2,9 +2,7 @@ import { MathUtils } from 'three';
 
 import type { DescentFrame } from './descent';
 import {
-  WORK_DWELL_HALF,
   WORK_JOBS,
-  WORK_JOB_CENTERS,
   WORK_STONE,
   nearestSectionDelta,
   sectionStepDelta,
@@ -108,15 +106,21 @@ export type WorkLockResult = {
   accum: number;
 };
 
-const WORK_ZONE_START = WORK_STONE.center - WORK_DWELL_HALF;
-const WORK_ZONE_END = WORK_STONE.center + WORK_DWELL_HALF;
+// REASON: overlay motion reads the active job every frame outside React, so
+// the lock publishes it as module state like the galaxy does
+export const WORK_MOTION = { job: 0 };
+
+const WORK_CATCH_HALF = 0.3;
+const WORK_ZONE_START = WORK_STONE.center - WORK_CATCH_HALF;
+const WORK_ZONE_END = WORK_STONE.center + WORK_CATCH_HALF;
 const WORK_STEP_THRESHOLD = 0.09;
 const WORK_SETTLE_EPSILON = 0.03;
+const LAST_JOB = WORK_JOBS.length - 1;
 
-// REASON: four job stops sit 0.15 apart, so free wheel or drag momentum blows
-// through the whole dwell in one flick - crossing into the zone is caught at
-// the edge job, and inside it input is absorbed until a full gesture steps
-// exactly one stop while the camera is settled
+// REASON: while jobs swap, the stone and camera must stay perfectly still -
+// jobs are overlay state instead of scroll stops, so any scroll or drag
+// crossing the zone is caught dead at the section centre, and each settled
+// full gesture swaps one job until the edges release back to free scroll
 export const workLockedDelta = ({
   target,
   progress,
@@ -128,13 +132,12 @@ export const workLockedDelta = ({
   if (!inside) {
     const next = wrapped + step;
     if (wrapped <= WORK_ZONE_START && next > WORK_ZONE_START) {
-      return { delta: WORK_JOB_CENTERS[0] - wrapped, accum: 0 };
+      WORK_MOTION.job = 0;
+      return { delta: WORK_STONE.center - wrapped, accum: 0 };
     }
     if (wrapped >= WORK_ZONE_END && next < WORK_ZONE_END) {
-      return {
-        delta: WORK_JOB_CENTERS[WORK_JOBS.length - 1] - wrapped,
-        accum: 0,
-      };
+      WORK_MOTION.job = LAST_JOB;
+      return { delta: WORK_STONE.center - wrapped, accum: 0 };
     }
     return { delta: step, accum: 0 };
   }
@@ -145,7 +148,18 @@ export const workLockedDelta = ({
   if (Math.abs(nextAccum) < WORK_STEP_THRESHOLD) {
     return { delta: 0, accum: nextAccum };
   }
-  return { delta: sectionStepDelta(wrapped, nextAccum > 0 ? 1 : -1), accum: 0 };
+  if (nextAccum > 0) {
+    if (WORK_MOTION.job < LAST_JOB) {
+      WORK_MOTION.job += 1;
+      return { delta: 0, accum: 0 };
+    }
+    return { delta: sectionStepDelta(wrapped, 1), accum: 0 };
+  }
+  if (WORK_MOTION.job > 0) {
+    WORK_MOTION.job -= 1;
+    return { delta: 0, accum: 0 };
+  }
+  return { delta: sectionStepDelta(wrapped, -1), accum: 0 };
 };
 
 export const applyFinaleCamera = (

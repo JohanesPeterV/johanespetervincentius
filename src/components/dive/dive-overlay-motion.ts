@@ -4,10 +4,10 @@ import {
   DIVE_SECTIONS,
   DescentFrame,
   TECH_STONE,
-  activeWorkJobIndex,
   sectionMotion,
   techSectionOpacity,
 } from './descent';
+import { WORK_MOTION } from './camera-motion';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 
 export type OverlayNodes = {
@@ -70,8 +70,8 @@ const applyGalaxyLabels = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   });
 };
 
-const applyWorkShowcase = (nodes: OverlayNodes, frame: OverlayFrame): void => {
-  const active = activeWorkJobIndex(frame.progress);
+const applyWorkShowcase = (nodes: OverlayNodes): void => {
+  const active = WORK_MOTION.job;
   const mark = (element: HTMLDivElement | null, index: number): void => {
     if (!element) {
       return;
@@ -139,7 +139,7 @@ export const applyOverlay = (
       positionStoneSection(element, frame, frame.stones[section.stoneIndex]);
     }
   });
-  applyWorkShowcase(nodes, frame);
+  applyWorkShowcase(nodes);
   applyGalaxyLabels(nodes, frame);
   if (nodes.veil) {
     nodes.veil.style.opacity = String(frame.descent.veil);
