@@ -14,7 +14,6 @@ export type GalaxyNode = {
 
 export type GalaxyCategory = {
   name: string;
-  count: number;
   yaw: number;
   pitch: number;
 };
@@ -76,7 +75,6 @@ const buildGalaxy = (): {
     const hub = direction.clone().multiplyScalar(HUB_RADIUS);
     categories.push({
       name: technology.category,
-      count: technology.contents.length,
       yaw: -HUB_AZIMUTHS[categoryIndex % HUB_AZIMUTHS.length],
       pitch: HUB_ELEVATIONS[categoryIndex % HUB_ELEVATIONS.length],
     });

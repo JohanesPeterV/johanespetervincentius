@@ -95,11 +95,6 @@ export default function DiveOverlay({
             }
           >
             {node.label}
-            {node.kind === 'hub' ? (
-              <span className="pl-2 opacity-60">
-                {GALAXY_CATEGORIES[node.category].count}
-              </span>
-            ) : null}
           </span>
         ))}
       </div>
@@ -214,15 +209,9 @@ export default function DiveOverlay({
                       ref={(element) => {
                         overlayRef.current.skillRail[categoryIndex] = element;
                       }}
-                      className="pointer-events-auto flex items-baseline gap-3 text-left text-xs tracking-[0.14em] opacity-40 transition-[opacity,transform] duration-500 hover:opacity-80 data-[active=true]:translate-x-2 data-[active=true]:opacity-100"
+                      className="pointer-events-auto text-left text-xs font-medium tracking-[0.14em] opacity-40 transition-[opacity,transform] duration-500 hover:opacity-80 data-[active=true]:translate-x-2 data-[active=true]:opacity-100"
                     >
-                      <span className="text-[0.6rem] opacity-60">
-                        {String(categoryIndex + 1).padStart(2, '0')}
-                      </span>
-                      <span className="font-medium">{category.name}</span>
-                      <span className="text-[0.65rem] opacity-60">
-                        {category.count}
-                      </span>
+                      {category.name}
                     </button>
                   ))}
                   <button
