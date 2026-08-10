@@ -1,4 +1,12 @@
-import { Camera, Euler, MathUtils, Quaternion, Vector2, Vector3 } from 'three';
+import {
+  Camera,
+  Euler,
+  MathUtils,
+  QuadraticBezierCurve3,
+  Quaternion,
+  Vector2,
+  Vector3,
+} from 'three';
 
 import { TECHNOLOGIES } from '@/app/_components/technologies/technologies';
 
@@ -114,18 +122,43 @@ const GALAXY = buildGalaxy();
 export const GALAXY_NODES = GALAXY.nodes;
 export const GALAXY_CATEGORIES = GALAXY.categories;
 
+const LINK_SEGMENTS = 8;
+// REASON: straight spokes read as a weightless network diagram - sagging every
+// link gives the structure weight, so it hangs instead of floating
+const LINK_SAG = 0.16;
+
+const pushSaggingLink = (
+  positions: number[],
+  from: Vector3,
+  to: Vector3,
+): void => {
+  const control = new Vector3().addVectors(from, to).multiplyScalar(0.5);
+  control.y -= from.distanceTo(to) * LINK_SAG;
+  const points = new QuadraticBezierCurve3(from, control, to).getPoints(
+    LINK_SEGMENTS,
+  );
+  for (let index = 0; index < points.length - 1; index++) {
+    positions.push(points[index].x, points[index].y, points[index].z);
+    positions.push(
+      points[index + 1].x,
+      points[index + 1].y,
+      points[index + 1].z,
+    );
+  }
+};
+
 export const GALAXY_LINKS: Float32Array = (() => {
   const positions: number[] = [];
+  const core = new Vector3();
   let hub: Vector3 | null = null;
   GALAXY_NODES.forEach((node) => {
     if (node.kind === 'hub') {
       hub = node.position;
-      positions.push(0, 0, 0, hub.x, hub.y, hub.z);
+      pushSaggingLink(positions, core, hub);
       return;
     }
     if (hub) {
-      positions.push(hub.x, hub.y, hub.z);
-      positions.push(node.position.x, node.position.y, node.position.z);
+      pushSaggingLink(positions, hub, node.position);
     }
   });
   return new Float32Array(positions);
@@ -371,6 +404,8 @@ export const writeGalaxyScreens = (write: GalaxyScreenWrite): void => {
     rotation,
   );
   const zoomBoost = MathUtils.clamp((motion.zoom - 1) * 0.5, 0, 0.55);
+  const centerDistance = write.camera.position.distanceTo(POSE_POSITION);
+  const depthSpan = Math.max(1, (HUB_RADIUS + SKILL_RADIUS) * scale * 2);
   GALAXY_NODES.forEach((node, index) => {
     pose
       .copy(node.position)
@@ -388,10 +423,22 @@ export const writeGalaxyScreens = (write: GalaxyScreenWrite): void => {
       0.6,
       2.4,
     );
+    const front = MathUtils.clamp(
+      (centerDistance - distance) / depthSpan + 0.5,
+      0,
+      1,
+    );
     let alpha = node.kind === 'hub' ? HUB_ALPHA : SKILL_BASE_ALPHA + zoomBoost;
     if (motion.focus !== null) {
       alpha = node.category === motion.focus ? 1 : DIM_ALPHA;
     }
+    // REASON: rear labels at full strength flatten the cloud into noise -
+    // depth attenuation keeps the near face readable and the far face quiet
+    const attenuation =
+      node.kind === 'hub' || node.category === motion.focus
+        ? 0.7 + 0.3 * front
+        : 0.4 + 0.6 * front;
+    alpha *= attenuation;
     if (motion.hovered === index) {
       alpha = 1;
     }
