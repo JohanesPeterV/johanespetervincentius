@@ -2,7 +2,7 @@
 
 import { AdaptiveDpr, useDetectGPU } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import { RefObject, Suspense, useEffect, useRef } from 'react';
+import { RefObject, Suspense, useEffect, useRef, useState } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
 import CoffeeWorld from './coffee-world';
@@ -15,9 +15,18 @@ import {
 import type { DiveAppearance } from './dive-palette';
 import { getDivePalette } from './dive-palette';
 import DiveOverlay from './dive-overlay';
+import type { DiveMode } from './dive-overlay';
 import type { OverlayNodes } from './dive-overlay-motion';
 import IglooWorld from './igloo-world';
-import SkillDialRing from './skill-dial-ring';
+import {
+  galaxyEngage,
+  galaxyPointerDown,
+  galaxyPointerMove,
+  galaxyPointerUp,
+  galaxyRelease,
+  galaxyZoomBy,
+} from './skill-galaxy';
+import SkillGalaxyScene from './skill-galaxy-scene';
 import { disposeWindAudio } from './wind-audio';
 
 type DiveSceneParams = {
@@ -85,13 +94,41 @@ export default function DiveScene({
     skillRail: [],
     skillWords: [],
     veil: null,
+    workPanels: [],
+    workRail: [],
   });
+  const modeRef = useRef<DiveMode>('dive');
+  const [mode, setMode] = useState<DiveMode>('dive');
   const gpu = useDetectGPU();
   const tier = tierOverride ?? gpu.tier;
   const palette = getDivePalette(appearance);
 
+  const handleEngage = (category: number | null): void => {
+    modeRef.current = 'explore';
+    setMode('explore');
+    galaxyEngage(category);
+  };
+
+  const handleRelease = (): void => {
+    modeRef.current = 'dive';
+    setMode('dive');
+    galaxyRelease();
+  };
+
+  const handleToggleExplore = (): void => {
+    if (modeRef.current === 'explore') {
+      handleRelease();
+      return;
+    }
+    handleEngage(null);
+  };
+
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
     if (stageRef.current !== 'live') {
+      return;
+    }
+    if (modeRef.current === 'explore') {
+      galaxyZoomBy(normalizeWheelDelta(event));
       return;
     }
     targetRef.current += normalizeWheelDelta(event) * WHEEL_SENSITIVITY;
@@ -113,6 +150,10 @@ export default function DiveScene({
       return;
     }
     event.currentTarget.setPointerCapture(event.pointerId);
+    if (modeRef.current === 'explore') {
+      galaxyPointerDown(event.pointerId, event.clientX, event.clientY);
+      return;
+    }
     dragRef.current = { id: event.pointerId, y: event.clientY };
   };
 
@@ -127,6 +168,10 @@ export default function DiveScene({
         y: (event.clientY / window.innerHeight) * 2 - 1,
       };
     }
+    if (modeRef.current === 'explore') {
+      galaxyPointerMove(event.pointerId, event.clientX, event.clientY);
+      return;
+    }
     if (dragRef.current.id !== event.pointerId) {
       return;
     }
@@ -138,9 +183,7 @@ export default function DiveScene({
   const handlePointerEnd = (
     event: React.PointerEvent<HTMLDivElement>,
   ): void => {
-    if (dragRef.current.id !== event.pointerId) {
-      return;
-    }
+    galaxyPointerUp(event.pointerId);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -152,6 +195,14 @@ export default function DiveScene({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (stageRef.current !== 'live') {
+        return;
+      }
+      if (modeRef.current === 'explore') {
+        if (event.key === 'Escape') {
+          modeRef.current = 'dive';
+          setMode('dive');
+          galaxyRelease();
+        }
         return;
       }
       if (event.key === 'ArrowDown') {
@@ -206,7 +257,11 @@ export default function DiveScene({
           ) : null}
           <LoadedSignal stageRef={stageRef} />
         </Suspense>
-        <SkillDialRing accentColor={palette.accent} progressRef={progressRef} />
+        <SkillGalaxyScene
+          accentColor={palette.accent}
+          progressRef={progressRef}
+          onEngage={handleEngage}
+        />
         <CameraRig
           targetRef={targetRef}
           progressRef={progressRef}
@@ -217,7 +272,13 @@ export default function DiveScene({
           stageRef={stageRef}
         />
       </Canvas>
-      <DiveOverlay appearance={appearance} overlayRef={overlayRef} />
+      <DiveOverlay
+        appearance={appearance}
+        overlayRef={overlayRef}
+        mode={mode}
+        onEngage={handleEngage}
+        onToggleExplore={handleToggleExplore}
+      />
     </div>
   );
 }

@@ -3,17 +3,21 @@ import type { Vector2 } from 'three';
 import {
   DIVE_SECTIONS,
   DescentFrame,
+  TECH_STONE,
+  activeWorkJobIndex,
   sectionMotion,
   techSectionOpacity,
 } from './descent';
-import { activeCategoryIndex } from './skill-dial';
+import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 
 export type OverlayNodes = {
   sections: (HTMLDivElement | null)[];
   skillLayer: HTMLDivElement | null;
-  skillRail: (HTMLDivElement | null)[];
+  skillRail: (HTMLButtonElement | null)[];
   skillWords: (HTMLSpanElement | null)[];
   veil: HTMLDivElement | null;
+  workPanels: (HTMLDivElement | null)[];
+  workRail: (HTMLDivElement | null)[];
 };
 
 export type OverlayFrame = {
@@ -21,6 +25,7 @@ export type OverlayFrame = {
   height: number;
   progress: number;
   skillAlphas: Float32Array;
+  skillScales: Float32Array;
   skillScreens: Vector2[];
   stones: Vector2[];
   width: number;
@@ -28,7 +33,7 @@ export type OverlayFrame = {
 
 const SKILL_HIDE_THRESHOLD = 0.05;
 
-const applySkillDial = (nodes: OverlayNodes, frame: OverlayFrame): void => {
+const applyGalaxyLabels = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   const layer = nodes.skillLayer;
   if (!layer) {
     return;
@@ -42,7 +47,10 @@ const applySkillDial = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   if (opacity < SKILL_HIDE_THRESHOLD) {
     return;
   }
-  const active = activeCategoryIndex(frame.progress);
+  const hovered = GALAXY_MOTION.hovered;
+  const active =
+    GALAXY_MOTION.focus ??
+    (hovered === null ? null : GALAXY_NODES[hovered].category);
   nodes.skillRail.forEach((element, index) => {
     if (!element) {
       return;
@@ -56,17 +64,35 @@ const applySkillDial = (nodes: OverlayNodes, frame: OverlayFrame): void => {
     if (!element) {
       return;
     }
-    const alpha = frame.skillAlphas[index];
-    if (alpha <= 0) {
-      if (element.style.opacity !== '0') {
-        element.style.opacity = '0';
-      }
+    const screen = frame.skillScreens[index];
+    element.style.transform = `translate3d(${screen.x}px, ${screen.y}px, 0) translate(-50%, -130%) scale(${frame.skillScales[index]})`;
+    element.style.opacity = String(frame.skillAlphas[index]);
+  });
+};
+
+const applyWorkShowcase = (nodes: OverlayNodes, frame: OverlayFrame): void => {
+  const active = activeWorkJobIndex(frame.progress);
+  const mark = (element: HTMLDivElement | null, index: number): void => {
+    if (!element) {
       return;
     }
-    const screen = frame.skillScreens[index];
-    element.style.transform = `translate3d(${screen.x}px, ${screen.y}px, 0) translate(-50%, -50%) scale(${0.9 + alpha * 0.1})`;
-    element.style.opacity = String(alpha);
-  });
+    const value = index === active ? 'true' : 'false';
+    if (element.dataset.active !== value) {
+      element.dataset.active = value;
+    }
+  };
+  nodes.workRail.forEach(mark);
+  nodes.workPanels.forEach(mark);
+};
+
+// REASON: the galaxy claims the screen centre, so this section's copy docks
+// as a hud in the top-left corner instead of chasing its stone
+const positionTechHud = (
+  element: HTMLDivElement,
+  frame: OverlayFrame,
+): void => {
+  const left = Math.max(24, frame.width * 0.05);
+  element.style.transform = `translate3d(${left}px, ${frame.height * 0.14}px, 0)`;
 };
 
 const positionStoneSection = (
@@ -105,13 +131,16 @@ export const applyOverlay = (
     if (motion.opacity < 0.05 && element.dataset.visible !== 'false') {
       element.dataset.visible = 'false';
     }
-    if (section.placement === 'stone') {
-      positionStoneSection(element, frame, frame.stones[section.stoneIndex]);
-    } else {
+    if (section.placement !== 'stone') {
       element.style.transform = `translateY(${motion.shift}px)`;
+    } else if (section.center === TECH_STONE.center) {
+      positionTechHud(element, frame);
+    } else {
+      positionStoneSection(element, frame, frame.stones[section.stoneIndex]);
     }
   });
-  applySkillDial(nodes, frame);
+  applyWorkShowcase(nodes, frame);
+  applyGalaxyLabels(nodes, frame);
   if (nodes.veil) {
     nodes.veil.style.opacity = String(frame.descent.veil);
     nodes.veil.style.backgroundColor = `rgb(${Math.round(

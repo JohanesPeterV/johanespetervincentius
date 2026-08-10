@@ -10,7 +10,6 @@ type DiveSectionBase = {
   title: string;
   subtitle: string;
   center: number;
-  details?: string[];
   links?: DiveSectionLink[];
 };
 
@@ -48,6 +47,71 @@ type DescentKey = DescentFrame & { at: number };
 export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
 export const TECH_DWELL_HALF = 0.3;
 
+export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
+export const WORK_DWELL_HALF = 0.3;
+
+export type DiveWorkJob = {
+  label: string;
+  description: string;
+  showcases: string[];
+};
+
+export const WORK_JOBS: DiveWorkJob[] = [
+  {
+    label: 'Smilie — Lead Software Engineer · 2025—now',
+    description: `Own technical direction end-to-end — architecture, database design, deployment, and reliability — across multi-product systems for corporate gifting, digital rewards, and e-commerce. Drive vendor integrations, partner with the Founder on platform strategy, and build AI-assisted workflows that let a lean team ship like a larger one.`,
+    showcases: [
+      'Corporate Gifting Platform',
+      'Digital Rewards',
+      'AI-Assisted Workflows',
+    ],
+  },
+  {
+    label: 'TableLink — Full-stack Developer · 2025',
+    description: `Delivered core venue SaaS workflows — QR ordering, dynamic menus, and real-time guest operations — and standardized frontend architecture across Next.js/Vite apps with reusable components and Storybook. Built shared real-time data infrastructure for synchronized live updates while cutting technical debt across a microservices stack.`,
+    showcases: [
+      'QR Ordering',
+      'Live Guest Operations',
+      'Shared Component Library',
+    ],
+  },
+  {
+    label: 'Farmio — Software Engineer · 2023—2024',
+    description: `Shipped one of the team's first LLM-in-production features — a GPT-3.5 + WhatsApp integration that turned free-form chats into structured orders. Built the Agent Portal end-to-end from auth to UI, moved checkout pricing server-side to guarantee price integrity, and standardized i18n across three locales.`,
+    showcases: ['WhatsApp Order Bot', 'Agent Portal', 'Server-Side Checkout'],
+  },
+  {
+    label: 'Software Lab Center, Binus · 2020—2024',
+    description: `Maintained the practicum database serving ~20,000 students per semester and an ASP.NET app used by 161 staff, and built full-stack tools with Next.js and Nest.js for practicum operations. Earlier, taught programming-based classes to 1,700+ students and shipped Vue.js/ASP.NET features for an internal app with 5,293 users.`,
+    showcases: [
+      'Practicum Operations Tools',
+      'Practicum Database',
+      'Staff Application',
+    ],
+  },
+];
+
+// REASON: scroll scrubs one job per slot inside the work dwell, so every job
+// owns an equal slice of the dwell window
+export const WORK_JOB_CENTERS: number[] = WORK_JOBS.map(
+  (job, index) =>
+    WORK_STONE.center -
+    WORK_DWELL_HALF +
+    ((WORK_DWELL_HALF * 2) / WORK_JOBS.length) * (index + 0.5),
+);
+
+export const activeWorkJobIndex = (progress: number): number => {
+  let best = 0;
+  WORK_JOB_CENTERS.forEach((center, index) => {
+    if (
+      Math.abs(progress - center) < Math.abs(progress - WORK_JOB_CENTERS[best])
+    ) {
+      best = index;
+    }
+  });
+  return best;
+};
+
 export const DIVE_SECTIONS: DiveSection[] = [
   {
     tag: '01',
@@ -60,17 +124,9 @@ export const DIVE_SECTIONS: DiveSection[] = [
     tag: '02',
     title: 'Work\nExperience',
     subtitle: '2020 — present',
-    center: 1.95,
     placement: 'stone',
     stoneIndex: 0,
-    x: -1.65,
-    z: 8,
-    details: [
-      'Smilie — Lead Software Engineer · 2025—now',
-      'TableLink — Full-stack Developer · 2025',
-      'Farmio — Software Engineer · 2023—2024',
-      'Software Lab Center, Binus · 2020—2024',
-    ],
+    ...WORK_STONE,
   },
   {
     tag: '03',
@@ -106,9 +162,9 @@ export const DIVE_SECTIONS: DiveSection[] = [
     subtitle: 'tools of the trade',
     placement: 'stone',
     stoneIndex: 2,
-    // REASON: this stone is the hub of the category dial - at full size its
-    // silhouette swallows the ring of words around it
-    stoneScale: 0.6,
+    // REASON: this stone passes behind the skill galaxy - at full size its
+    // silhouette fights the constellation for the frame
+    stoneScale: 0.38,
     ...TECH_STONE,
   },
 ];
@@ -176,17 +232,28 @@ const NARRATIVE_STONE_CENTER_Y = 4.45;
 // active stone is ever in frame
 const NARRATIVE_STONE_RISE_RATE = 17;
 
-const TECH_DWELL_RATE = 2.5;
+const DWELL_RATE = 2.5;
+
+const stoneDwellHalf = (center: number): number | null => {
+  if (center === TECH_STONE.center) {
+    return TECH_DWELL_HALF;
+  }
+  if (center === WORK_STONE.center) {
+    return WORK_DWELL_HALF;
+  }
+  return null;
+};
 
 export const narrativeStoneY = (progress: number, center: number): number => {
   let delta = progress - center;
-  // REASON: the tech stone hosts the category dial - compressing its travel
-  // inside the dwell keeps the dial on screen while five categories scrub
-  // past, then full rise speed resumes at the dwell edges
-  if (center === TECH_STONE.center) {
-    const held = Math.max(-TECH_DWELL_HALF, Math.min(TECH_DWELL_HALF, delta));
-    delta =
-      held * (TECH_DWELL_RATE / NARRATIVE_STONE_RISE_RATE) + (delta - held);
+  // REASON: the tech section hosts the skill galaxy and the work section
+  // scrubs through jobs - compressing travel inside each dwell holds the
+  // stone on screen for its whole story, then full rise speed resumes at
+  // the dwell edges
+  const half = stoneDwellHalf(center);
+  if (half !== null) {
+    const held = Math.max(-half, Math.min(half, delta));
+    delta = held * (DWELL_RATE / NARRATIVE_STONE_RISE_RATE) + (delta - held);
   }
   return NARRATIVE_STONE_CENTER_Y + delta * NARRATIVE_STONE_RISE_RATE;
 };
@@ -317,14 +384,31 @@ export const stoneSectionOpacity = (
   return fadeIn * fadeOut;
 };
 
-const TECH_FADE_SPAN = 0.18;
+const DWELL_FADE_SPAN = 0.18;
 
-export const techSectionOpacity = (progress: number): number => {
-  const distance = Math.abs(progress - TECH_STONE.center);
-  return (
-    1 -
-    smootherstep(TECH_DWELL_HALF, TECH_DWELL_HALF + TECH_FADE_SPAN, distance)
-  );
+const dwellSectionOpacity = (
+  progress: number,
+  center: number,
+  dwellHalf: number,
+): number => {
+  const distance = Math.abs(progress - center);
+  return 1 - smootherstep(dwellHalf, dwellHalf + DWELL_FADE_SPAN, distance);
+};
+
+export const techSectionOpacity = (progress: number): number =>
+  dwellSectionOpacity(progress, TECH_STONE.center, TECH_DWELL_HALF);
+
+export const workSectionOpacity = (progress: number): number =>
+  dwellSectionOpacity(progress, WORK_STONE.center, WORK_DWELL_HALF);
+
+const stoneOpacity = (progress: number, center: number): number => {
+  if (center === TECH_STONE.center) {
+    return techSectionOpacity(progress);
+  }
+  if (center === WORK_STONE.center) {
+    return workSectionOpacity(progress);
+  }
+  return stoneSectionOpacity(progress, center);
 };
 
 export const sectionMotion = (
@@ -332,11 +416,7 @@ export const sectionMotion = (
   section: DiveSection,
 ): SectionMotion => {
   if (section.placement === 'stone') {
-    const opacity =
-      section.center === TECH_STONE.center
-        ? techSectionOpacity(progress)
-        : stoneSectionOpacity(progress, section.center);
-    return { opacity, shift: 0 };
+    return { opacity: stoneOpacity(progress, section.center), shift: 0 };
   }
   const delta = progress - section.center;
   const distance = Math.abs(delta);
@@ -348,7 +428,14 @@ export const sectionMotion = (
 
 const SECTION_STEP_EPSILON = 0.05;
 
-const SNAP_CENTERS: number[] = DIVE_SECTIONS.map((section) => section.center);
+// REASON: idle gravity and arrow keys must rest ON a job, never between two
+// crossfading ones, so the work centre is replaced by its per-job sub-stops
+const SNAP_CENTERS: number[] = [
+  ...DIVE_SECTIONS.flatMap((section) =>
+    section.center === WORK_STONE.center ? [] : [section.center],
+  ),
+  ...WORK_JOB_CENTERS,
+];
 
 export const sectionStepDelta = (
   progress: number,

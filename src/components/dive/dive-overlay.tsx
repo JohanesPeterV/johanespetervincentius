@@ -2,15 +2,20 @@
 
 import { RefObject, useState } from 'react';
 
-import { DIVE_SECTIONS, TECH_STONE } from './descent';
+import { DIVE_SECTIONS, TECH_STONE, WORK_JOBS, WORK_STONE } from './descent';
 import type { DiveAppearance } from './dive-palette';
 import type { OverlayNodes } from './dive-overlay-motion';
-import { SKILL_DIAL_CATEGORIES, SKILL_DIAL_ENTRIES } from './skill-dial';
+import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
 import { toggleWindAudio } from './wind-audio';
+
+export type DiveMode = 'dive' | 'explore';
 
 type DiveOverlayParams = {
   appearance: DiveAppearance;
   overlayRef: RefObject<OverlayNodes>;
+  mode: DiveMode;
+  onEngage: (category: number | null) => void;
+  onToggleExplore: () => void;
 };
 
 type HeadlineLinesParams = {
@@ -52,6 +57,9 @@ const HeadlineLines = ({ title }: HeadlineLinesParams) => {
 export default function DiveOverlay({
   appearance,
   overlayRef,
+  mode,
+  onEngage,
+  onToggleExplore,
 }: DiveOverlayParams) {
   const [sound, setSound] = useState<'on' | 'off'>('off');
 
@@ -74,96 +82,166 @@ export default function DiveOverlay({
         }}
         className="pointer-events-none absolute inset-0 opacity-0"
       >
-        {SKILL_DIAL_ENTRIES.map((entry, index) => (
+        {GALAXY_NODES.map((node, index) => (
           <span
-            key={`${entry.category}-${entry.label}`}
+            key={`${node.category}-${node.label}`}
             ref={(element) => {
               overlayRef.current.skillWords[index] = element;
             }}
-            className="absolute left-0 top-0 whitespace-nowrap text-xs tracking-[0.04em] sm:text-sm"
+            className={
+              node.kind === 'hub'
+                ? 'absolute left-0 top-0 whitespace-nowrap text-[0.62rem] font-semibold uppercase tracking-[0.3em]'
+                : 'absolute left-0 top-0 whitespace-nowrap text-xs tracking-[0.04em]'
+            }
           >
-            {entry.label}
+            {node.label}
+            {node.kind === 'hub' ? (
+              <span className="pl-2 opacity-60">
+                {GALAXY_CATEGORIES[node.category].count}
+              </span>
+            ) : null}
           </span>
         ))}
       </div>
       <div className="pointer-events-none absolute inset-0">
-        {DIVE_SECTIONS.map((section, index) => (
-          <div
-            key={section.tag}
-            data-visible="false"
-            ref={(element) => {
-              overlayRef.current.sections[index] = element;
-            }}
-            className={
-              section.placement === 'stone'
-                ? 'group absolute left-0 top-0 flex w-[min(24rem,70vw)] flex-col items-start gap-3 text-left opacity-0 [will-change:transform,opacity]'
-                : 'group absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 [will-change:transform,opacity]'
-            }
-          >
-            <span className="text-[0.65rem] font-medium tracking-[0.28em] opacity-50">
-              {section.tag}
-            </span>
-            <h2
+        {DIVE_SECTIONS.map((section, index) => {
+          const dimStyle =
+            mode === 'explore' && section.center === TECH_STONE.center
+              ? { opacity: 0.15 }
+              : undefined;
+          return (
+            <div
+              key={section.tag}
+              data-visible="false"
+              ref={(element) => {
+                overlayRef.current.sections[index] = element;
+              }}
               className={
                 section.placement === 'stone'
-                  ? 'font-display text-4xl leading-[1.04] tracking-[-0.04em] sm:text-5xl'
-                  : 'text-center font-display text-4xl leading-[1.04] tracking-[-0.04em] sm:text-5xl'
+                  ? 'group absolute left-0 top-0 flex w-[min(24rem,70vw)] flex-col items-start gap-3 text-left opacity-0 [will-change:transform,opacity]'
+                  : 'group absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 [will-change:transform,opacity]'
               }
             >
-              <HeadlineLines title={section.title} />
-            </h2>
-            <span className="text-xs tracking-[0.16em] opacity-50">
-              {section.subtitle}
-            </span>
-            {section.details ? (
-              <ul className="mt-2 space-y-2 text-sm leading-relaxed opacity-60">
-                {section.details.map((detail) => (
-                  <li key={detail}>{detail}</li>
-                ))}
-              </ul>
-            ) : null}
-            {section.links ? (
-              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                {section.links.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="pointer-events-auto opacity-70 underline-offset-4 transition-opacity hover:opacity-100 hover:underline"
-                  >
-                    {link.label} ↗
-                  </a>
-                ))}
-              </div>
-            ) : null}
-            {section.center === TECH_STONE.center ? (
-              <div className="mt-4 flex flex-col gap-2">
-                {SKILL_DIAL_CATEGORIES.map((category, categoryIndex) => (
-                  <div
-                    key={category.name}
-                    data-active="false"
-                    ref={(element) => {
-                      overlayRef.current.skillRail[categoryIndex] = element;
-                    }}
-                    className="flex items-baseline gap-3 text-xs tracking-[0.14em] opacity-30 transition-[opacity,transform] duration-500 data-[active=true]:translate-x-2 data-[active=true]:opacity-100"
-                  >
-                    <span className="text-[0.6rem] opacity-60">
-                      {String(categoryIndex + 1).padStart(2, '0')}
-                    </span>
-                    <span className="font-medium">{category.name}</span>
-                    <span className="text-[0.65rem] opacity-60">
-                      {category.count}
-                    </span>
+              <span
+                style={dimStyle}
+                className="text-[0.65rem] font-medium tracking-[0.28em] opacity-50 transition-opacity duration-500"
+              >
+                {section.tag}
+              </span>
+              <h2
+                style={dimStyle}
+                className={
+                  section.placement === 'stone'
+                    ? 'font-display text-4xl leading-[1.04] tracking-[-0.04em] transition-opacity duration-500 sm:text-5xl'
+                    : 'text-center font-display text-4xl leading-[1.04] tracking-[-0.04em] transition-opacity duration-500 sm:text-5xl'
+                }
+              >
+                <HeadlineLines title={section.title} />
+              </h2>
+              <span
+                style={dimStyle}
+                className="text-xs tracking-[0.16em] opacity-50 transition-opacity duration-500"
+              >
+                {section.subtitle}
+              </span>
+              {section.center === WORK_STONE.center ? (
+                <div className="mt-2 flex w-full flex-col gap-5">
+                  <div className="flex flex-col gap-2 text-sm leading-relaxed">
+                    {WORK_JOBS.map((job, jobIndex) => (
+                      <div
+                        key={job.label}
+                        data-active="false"
+                        ref={(element) => {
+                          overlayRef.current.workRail[jobIndex] = element;
+                        }}
+                        className="opacity-30 transition-[opacity,transform] duration-500 data-[active=true]:translate-x-2 data-[active=true]:opacity-90"
+                      >
+                        {job.label}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        ))}
+                  <div className="grid">
+                    {WORK_JOBS.map((job, jobIndex) => (
+                      <div
+                        key={job.label}
+                        data-active="false"
+                        ref={(element) => {
+                          overlayRef.current.workPanels[jobIndex] = element;
+                        }}
+                        className="col-start-1 row-start-1 flex flex-col gap-4 opacity-0 transition-opacity duration-500 data-[active=true]:opacity-100"
+                      >
+                        <p className="text-xs leading-relaxed opacity-60 sm:text-sm">
+                          {job.description}
+                        </p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {job.showcases.map((showcase) => (
+                            <div
+                              key={showcase}
+                              className="flex aspect-video items-center justify-center rounded-md border border-current p-2 text-center text-[0.6rem] leading-snug tracking-[0.08em] opacity-40"
+                            >
+                              {showcase}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {section.links ? (
+                <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                  {section.links.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="pointer-events-auto opacity-70 underline-offset-4 transition-opacity hover:opacity-100 hover:underline"
+                    >
+                      {link.label} ↗
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+              {section.center === TECH_STONE.center ? (
+                <div className="mt-4 flex flex-col items-start gap-2">
+                  {GALAXY_CATEGORIES.map((category, categoryIndex) => (
+                    <button
+                      type="button"
+                      key={category.name}
+                      data-active="false"
+                      onClick={() => onEngage(categoryIndex)}
+                      ref={(element) => {
+                        overlayRef.current.skillRail[categoryIndex] = element;
+                      }}
+                      className="pointer-events-auto flex items-baseline gap-3 text-left text-xs tracking-[0.14em] opacity-40 transition-[opacity,transform] duration-500 hover:opacity-80 data-[active=true]:translate-x-2 data-[active=true]:opacity-100"
+                    >
+                      <span className="text-[0.6rem] opacity-60">
+                        {String(categoryIndex + 1).padStart(2, '0')}
+                      </span>
+                      <span className="font-medium">{category.name}</span>
+                      <span className="text-[0.65rem] opacity-60">
+                        {category.count}
+                      </span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={onToggleExplore}
+                    className="pointer-events-auto mt-3 text-[0.62rem] tracking-[0.3em] opacity-70 transition-opacity hover:opacity-100"
+                  >
+                    {mode === 'explore' ? '✕ EXIT' : '◉ EXPLORE'}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
       </div>
       <div className="pointer-events-none absolute bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[0.65rem] tracking-[0.18em] opacity-50">
-        Scroll or drag to explore
+        {mode === 'explore'
+          ? 'drag to orbit · scroll to zoom · click a tool to open its docs · esc to exit'
+          : 'Scroll or drag to explore'}
       </div>
       {appearance === 'igloo' ? (
         <button
