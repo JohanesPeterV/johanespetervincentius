@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { RefObject, Suspense, useEffect, useRef, useState } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
+import { workLockedDelta } from './camera-motion';
 import CoffeeWorld from './coffee-world';
 import {
   DIVE_START,
@@ -98,10 +99,22 @@ export default function DiveScene({
     workRail: [],
   });
   const modeRef = useRef<DiveMode>('dive');
+  const workAccumRef = useRef(0);
   const [mode, setMode] = useState<DiveMode>('dive');
   const gpu = useDetectGPU();
   const tier = tierOverride ?? gpu.tier;
   const palette = getDivePalette(appearance);
+
+  const applyDriveDelta = (step: number): void => {
+    const locked = workLockedDelta({
+      target: targetRef.current,
+      progress: progressRef.current,
+      step,
+      accum: workAccumRef.current,
+    });
+    workAccumRef.current = locked.accum;
+    targetRef.current += locked.delta;
+  };
 
   const handleEngage = (category: number | null): void => {
     modeRef.current = 'explore';
@@ -131,7 +144,7 @@ export default function DiveScene({
       galaxyZoomBy(normalizeWheelDelta(event));
       return;
     }
-    targetRef.current += normalizeWheelDelta(event) * WHEEL_SENSITIVITY;
+    applyDriveDelta(normalizeWheelDelta(event) * WHEEL_SENSITIVITY);
   };
 
   const handlePointerDown = (
@@ -175,8 +188,7 @@ export default function DiveScene({
     if (dragRef.current.id !== event.pointerId) {
       return;
     }
-    targetRef.current +=
-      (dragRef.current.y - event.clientY) * TOUCH_SENSITIVITY;
+    applyDriveDelta((dragRef.current.y - event.clientY) * TOUCH_SENSITIVITY);
     dragRef.current.y = event.clientY;
   };
 
@@ -259,6 +271,7 @@ export default function DiveScene({
         </Suspense>
         <SkillGalaxyScene
           accentColor={palette.accent}
+          stoneColor={palette.stone}
           progressRef={progressRef}
           onEngage={handleEngage}
         />

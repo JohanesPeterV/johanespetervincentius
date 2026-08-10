@@ -1,7 +1,15 @@
 import { MathUtils } from 'three';
 
 import type { DescentFrame } from './descent';
-import { nearestSectionDelta } from './descent';
+import {
+  WORK_DWELL_HALF,
+  WORK_JOBS,
+  WORK_JOB_CENTERS,
+  WORK_STONE,
+  nearestSectionDelta,
+  sectionStepDelta,
+  wrapProgress,
+} from './descent';
 
 export type DriveMotion = {
   current: number;
@@ -86,6 +94,58 @@ export const advanceDrive = (
     motion.target = resolved;
   }
   return resolved;
+};
+
+export type WorkLockInput = {
+  target: number;
+  progress: number;
+  step: number;
+  accum: number;
+};
+
+export type WorkLockResult = {
+  delta: number;
+  accum: number;
+};
+
+const WORK_ZONE_START = WORK_STONE.center - WORK_DWELL_HALF;
+const WORK_ZONE_END = WORK_STONE.center + WORK_DWELL_HALF;
+const WORK_STEP_THRESHOLD = 0.09;
+const WORK_SETTLE_EPSILON = 0.03;
+
+// REASON: four job stops sit 0.15 apart, so free wheel or drag momentum blows
+// through the whole dwell in one flick - crossing into the zone is caught at
+// the edge job, and inside it input is absorbed until a full gesture steps
+// exactly one stop while the camera is settled
+export const workLockedDelta = ({
+  target,
+  progress,
+  step,
+  accum,
+}: WorkLockInput): WorkLockResult => {
+  const wrapped = wrapProgress(target);
+  const inside = wrapped > WORK_ZONE_START && wrapped < WORK_ZONE_END;
+  if (!inside) {
+    const next = wrapped + step;
+    if (wrapped <= WORK_ZONE_START && next > WORK_ZONE_START) {
+      return { delta: WORK_JOB_CENTERS[0] - wrapped, accum: 0 };
+    }
+    if (wrapped >= WORK_ZONE_END && next < WORK_ZONE_END) {
+      return {
+        delta: WORK_JOB_CENTERS[WORK_JOBS.length - 1] - wrapped,
+        accum: 0,
+      };
+    }
+    return { delta: step, accum: 0 };
+  }
+  if (Math.abs(wrapProgress(progress) - wrapped) > WORK_SETTLE_EPSILON) {
+    return { delta: 0, accum: 0 };
+  }
+  const nextAccum = accum + step;
+  if (Math.abs(nextAccum) < WORK_STEP_THRESHOLD) {
+    return { delta: 0, accum: nextAccum };
+  }
+  return { delta: sectionStepDelta(wrapped, nextAccum > 0 ? 1 : -1), accum: 0 };
 };
 
 export const applyFinaleCamera = (
