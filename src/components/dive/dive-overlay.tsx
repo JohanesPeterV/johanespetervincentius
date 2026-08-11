@@ -1,9 +1,8 @@
 'use client';
 
-import { RefObject, useEffect } from 'react';
+import { RefObject } from 'react';
 
 import { DIVE_SECTIONS, TECH_STONE, WORK_JOBS, WORK_STONE } from './descent';
-import { disposeOverlayMotion } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
 
@@ -58,15 +57,6 @@ export default function DiveOverlay({
   onEngage,
   onToggleExplore,
 }: DiveOverlayParams) {
-  // REASON: Anime.js instances are created from the R3F overlay bridge and
-  // must release their DOM targets when the overlay unmounts
-  useEffect(() => {
-    const overlay = overlayRef.current;
-    return () => {
-      disposeOverlayMotion(overlay);
-    };
-  }, [overlayRef]);
-
   return (
     <>
       <div
@@ -163,28 +153,20 @@ export default function DiveOverlay({
                         ref={(element) => {
                           overlayRef.current.workPanels[jobIndex] = element;
                         }}
-                        className="col-start-1 row-start-1"
+                        className="col-start-1 row-start-1 flex translate-y-5 flex-col gap-4 opacity-0 transition-[opacity,transform] duration-700 [transition-timing-function:cubic-bezier(0.19,1,0.22,1)] data-[active=true]:translate-y-0 data-[active=true]:opacity-100"
                       >
-                        <div
-                          ref={(element) => {
-                            overlayRef.current.workPanelContents[jobIndex] =
-                              element;
-                          }}
-                          className="flex translate-y-5 flex-col gap-4 opacity-0"
-                        >
-                          <p className="text-xs leading-relaxed opacity-60 sm:text-sm">
-                            {job.description}
-                          </p>
-                          <div className="grid grid-cols-3 gap-2">
-                            {job.showcases.map((showcase) => (
-                              <div
-                                key={showcase}
-                                className="flex aspect-video items-center justify-center rounded-md border border-current p-2 text-center text-[0.6rem] leading-snug tracking-[0.08em] opacity-40"
-                              >
-                                {showcase}
-                              </div>
-                            ))}
-                          </div>
+                        <p className="text-xs leading-relaxed opacity-60 sm:text-sm">
+                          {job.description}
+                        </p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {job.showcases.map((showcase) => (
+                            <div
+                              key={showcase}
+                              className="flex aspect-video items-center justify-center rounded-md border border-current p-2 text-center text-[0.6rem] leading-snug tracking-[0.08em] opacity-40"
+                            >
+                              {showcase}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     ))}
