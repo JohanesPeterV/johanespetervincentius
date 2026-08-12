@@ -5,7 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { RefObject, Suspense, useEffect, useRef, useState } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
-import { workLockedDelta } from './camera-motion';
+import { resetWorkMotion, workLockedDelta } from './camera-motion';
 import CoffeeWorld from './coffee-world';
 import {
   DIVE_START,
@@ -24,6 +24,7 @@ import {
   galaxyPointerUp,
   galaxyRelease,
   galaxyZoomBy,
+  resetGalaxy,
 } from './skill-galaxy';
 import SkillGalaxyScene from './skill-galaxy-scene';
 
@@ -185,8 +186,18 @@ export default function DiveScene() {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    dragRef.current.id = null;
+    if (dragRef.current.id === event.pointerId) {
+      dragRef.current.id = null;
+    }
   };
+
+  // REASON: galaxy and work-lock motion live in module state that survives
+  // React remounts - without this reset a return visit starts zoomed, focused,
+  // or mid-job while the UI reports a fresh dive
+  useEffect(() => {
+    resetGalaxy();
+    resetWorkMotion();
+  }, []);
 
   // REASON: arrow-key navigation needs window-level key events - the
   // full-screen div is never focused, so an onKeyDown prop would not fire
@@ -204,10 +215,10 @@ export default function DiveScene() {
         return;
       }
       if (event.key === 'ArrowDown') {
-        targetRef.current += sectionStepDelta(targetRef.current, 1);
+        applyDriveDelta(sectionStepDelta(targetRef.current, 1));
       }
       if (event.key === 'ArrowUp') {
-        targetRef.current += sectionStepDelta(targetRef.current, -1);
+        applyDriveDelta(sectionStepDelta(targetRef.current, -1));
       }
     };
     window.addEventListener('keydown', handleKeyDown);

@@ -118,6 +118,14 @@ export type WorkLockInput = {
 // React, so the lock publishes them as module state like the galaxy does
 export const WORK_MOTION = { accum: 0, job: 0, swappedAt: 0 };
 
+// REASON: the lock is module state so it survives React remounts - a fresh
+// DiveScene must not inherit the previous visit's active job or pull
+export const resetWorkMotion = (): void => {
+  WORK_MOTION.accum = 0;
+  WORK_MOTION.job = 0;
+  WORK_MOTION.swappedAt = 0;
+};
+
 const WORK_CATCH_HALF = 0.3;
 const WORK_ZONE_START = WORK_STONE.center - WORK_CATCH_HALF;
 const WORK_ZONE_END = WORK_STONE.center + WORK_CATCH_HALF;

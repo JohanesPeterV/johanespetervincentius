@@ -260,6 +260,26 @@ export const galaxyPointerMove = (id: number, x: number, y: number): void => {
 
 export const galaxyPointerUp = (id: number): void => {
   activePointers.delete(id);
+  pinchDistance = activePointers.size >= 2 ? pointerGap() : null;
+};
+
+// REASON: motion and pointer tracking are module state so they survive React
+// remounts - a fresh DiveScene must not inherit a zoomed galaxy or orphaned
+// pointers from a previous visit
+export const resetGalaxy = (): void => {
+  Object.assign(GALAXY_MOTION, {
+    yaw: 0,
+    pitch: 0,
+    yawVelocity: 0,
+    pitchVelocity: 0,
+    zoom: 1,
+    zoomTarget: 1,
+    focus: null,
+    focusBlend: 0,
+    hovered: null,
+    exploring: false,
+  });
+  activePointers.clear();
   pinchDistance = null;
 };
 
