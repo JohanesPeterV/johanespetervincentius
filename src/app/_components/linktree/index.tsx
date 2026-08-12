@@ -6,7 +6,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import { type WheelEvent, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import ClassicCard from './classic-card';
 import MinimalCard from './minimal-card';
@@ -32,8 +32,12 @@ const updateCardTypeUrl = (api: CarouselApi): void => {
 
 export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
   const [api, setApi] = useState<CarouselApi>();
+  const sectionRef = useRef<HTMLElement>(null);
 
-  // REASON: Embla exposes selection only after mount, so card_type synchronization needs its client event API
+  // REASON: Embla exposes selection only after mount, and the horizontal
+  // wheel capture needs a native non-passive listener - React's root wheel
+  // listener is passive, so preventDefault cannot stop the browser's
+  // back/forward swipe gesture
   useEffect(() => {
     if (!api) {
       return;
@@ -43,25 +47,28 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
       updateCardTypeUrl(api);
     };
     api.on('select', handleSelect);
+    const section = sectionRef.current;
+    const handleWheel = (event: globalThis.WheelEvent): void => {
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+        return;
+      }
+      event.preventDefault();
+      if (event.deltaX > 0) {
+        api.scrollNext();
+        return;
+      }
+      api.scrollPrev();
+    };
+    section?.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
       api.off('select', handleSelect);
+      section?.removeEventListener('wheel', handleWheel);
     };
   }, [api, cardType]);
 
-  const handleWheel = (event: WheelEvent<HTMLDivElement>): void => {
-    if (!api || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
-      return;
-    }
-    event.preventDefault();
-    if (event.deltaX > 0) {
-      api.scrollNext();
-      return;
-    }
-    api.scrollPrev();
-  };
-
   return (
     <section
+      ref={sectionRef}
       aria-label="Profile card styles"
       className="pointer-events-none w-full"
     >
@@ -73,7 +80,6 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
           skipSnaps: false,
           startIndex: cardType - 1,
         }}
-        onWheel={handleWheel}
         className="pointer-events-none w-full select-none"
       >
         <CarouselContent>

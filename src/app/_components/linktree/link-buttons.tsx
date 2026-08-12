@@ -15,12 +15,10 @@ export default function LinkButtons() {
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           />
-          <Icon className="absolute left-5 shrink-0 text-2xl text-primary transition-colors group-hover:text-foreground" />
+          <Icon className="absolute left-5 shrink-0 text-2xl text-white/70 transition-colors group-hover:text-white" />
           <span className="flex flex-col items-center">
-            <span className="text-sm font-semibold text-foreground">
-              {label}
-            </span>
-            <span className="text-xs text-muted-foreground">{handle}</span>
+            <span className="text-sm font-semibold text-white">{label}</span>
+            <span className="text-xs text-white/60">{handle}</span>
           </span>
         </a>
       ))}
