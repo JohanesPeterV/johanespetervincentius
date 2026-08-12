@@ -1,6 +1,6 @@
 import { RAW_DESCENT_KEYS } from './descent-keys';
 
-export type DiveSectionLink = {
+type DiveSectionLink = {
   label: string;
   href: string;
 };
@@ -37,7 +37,7 @@ export type DescentFrame = {
   veilColor: [number, number, number];
 };
 
-export type SectionMotion = {
+type SectionMotion = {
   opacity: number;
   shift: number;
 };
@@ -45,11 +45,11 @@ export type SectionMotion = {
 type DescentKey = DescentFrame & { at: number };
 
 export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
-export const TECH_DWELL_HALF = 0.3;
+const TECH_DWELL_HALF = 0.3;
 
 export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
 
-export type DiveWorkJob = {
+type DiveWorkJob = {
   label: string;
   description: string;
   showcases: string[];
@@ -181,7 +181,7 @@ export const seamBoost = (progress: number): number =>
 export const finaleBoost = (progress: number): number =>
   transitionBoost(progress, FINALE_CENTER, FINALE_SPAN);
 
-export type NarrativeStone = {
+type NarrativeStone = {
   center: number;
   scale: number;
   x: number;

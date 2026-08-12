@@ -20,7 +20,7 @@ export const TECHNOLOGIES: Technology[] = [
 
       {
         name: 'Flutter',
-        link: 'https://flutter.dev/?gclid=Cj0KCQjwtrSLBhCLARIsACh6RmjtHujNS1AIhGk-GQXSfuf8gq-KUuiP0CIjFJEBhg0Q5ZjyIybAew8aAmXMEALw_wcB&gclsrc=aw.ds',
+        link: 'https://flutter.dev/',
       },
       {
         name: 'Laravel',
@@ -59,7 +59,7 @@ export const TECHNOLOGIES: Technology[] = [
     contents: [
       {
         name: 'Apollo Server',
-        link: 'https://www.apollographql.com/docs/apollo-server/#:~:text=Apollo%20Server%20is%20an%20open,use%20data%20from%20any%20source.',
+        link: 'https://www.apollographql.com/docs/apollo-server/',
       },
       { name: 'Node.js', link: 'https://nodejs.org/en/' },
       { name: 'Nest.js', link: 'https://nestjs.com/' },
@@ -90,7 +90,7 @@ export const TECHNOLOGIES: Technology[] = [
       { name: 'Dart', link: 'https://dart.dev/guides' },
       {
         name: 'Kotlin',
-        link: 'https://developer.android.com/kotlin?gclid=Cj0KCQjwtrSLBhCLARIsACh6RmhUfKr2tiXSAp33Ka688qBDNF1CIEs53jGAXBkiMzvxFOsQg8of-FQaAv8eEALw_wcB&gclsrc=aw.ds',
+        link: 'https://developer.android.com/kotlin',
       },
       { name: 'PHP', link: 'https://www.php.net/docs.php' },
       { name: 'Go', link: 'https://golang.org/doc/' },

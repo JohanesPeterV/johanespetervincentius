@@ -26,7 +26,7 @@ export type GalaxyCategory = {
   pitch: number;
 };
 
-export type GalaxyMotion = {
+type GalaxyMotion = {
   yaw: number;
   pitch: number;
   yawVelocity: number;
@@ -39,13 +39,13 @@ export type GalaxyMotion = {
   exploring: boolean;
 };
 
-export type GalaxyPlacement = {
+type GalaxyPlacement = {
   scale: number;
   x: number;
   y: number;
 };
 
-export type GalaxyScreenWrite = {
+type GalaxyScreenWrite = {
   alphas: Float32Array;
   camera: Camera;
   height: number;
@@ -189,7 +189,7 @@ const MAX_ZOOM = 3;
 const FOCUS_ZOOM = 2;
 const WHEEL_ZOOM_RATE = 0.0016;
 
-export const galaxyOrbit = (deltaX: number, deltaY: number): void => {
+const galaxyOrbit = (deltaX: number, deltaY: number): void => {
   const motion = GALAXY_MOTION;
   motion.yaw += deltaX * ORBIT_RATE;
   motion.pitch = MathUtils.clamp(
@@ -210,7 +210,7 @@ export const galaxyZoomBy = (wheelPixels: number): void => {
   );
 };
 
-export const galaxyPinchBy = (distanceRatio: number): void => {
+const galaxyPinchBy = (distanceRatio: number): void => {
   GALAXY_MOTION.zoomTarget = MathUtils.clamp(
     GALAXY_MOTION.zoomTarget * distanceRatio,
     MIN_ZOOM,
@@ -357,7 +357,7 @@ const DESKTOP_DROP_Y = -0.5;
 
 // REASON: the headline is pinned as a top-left hud for this section, so the
 // galaxy claims the screen centre on landscape and drops below it on portrait
-export const galaxyPlacement = (aspect: number): GalaxyPlacement => {
+const galaxyPlacement = (aspect: number): GalaxyPlacement => {
   const blend = MathUtils.clamp(
     (aspect - PORTRAIT_BLEND_START) / PORTRAIT_BLEND_SPAN,
     0,

@@ -124,13 +124,11 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
   const { backgroundColor: baseBackgroundColor, textColor } =
     getFluidThemeColors(theme, resolvedTheme);
 
-  const filledItems = items.filter((item) => item.trim() !== '');
-
   // REASON: plain const re-rolls Math.random on every render — keep positions stable while unrelated input changes rerender the scene
   const { positions, speeds } = useMemo(() => {
     const positionsArray: [number, number, number][] = [];
     const speedsArray: number[] = [];
-    const count = filledItems.length;
+    const count = items.length;
 
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
@@ -143,9 +141,9 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
     }
 
     return { positions: positionsArray, speeds: speedsArray };
-  }, [filledItems.length]);
+  }, [items.length]);
 
-  if (filledItems.length === 0) {
+  if (items.length === 0) {
     return null;
   }
 
@@ -177,7 +175,7 @@ export const AnimatedBackground = ({ items }: AnimatedBackgroundProps) => {
         }}
       >
         <Scene
-          filledItems={filledItems}
+          filledItems={items}
           positions={positions}
           speeds={speeds}
           textColor={textColor}

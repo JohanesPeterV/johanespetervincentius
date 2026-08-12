@@ -64,7 +64,7 @@ export default function DiveOverlay({
           overlayRef.current.veil = element;
         }}
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-10 bg-[#e9edf2] opacity-0"
+        className="pointer-events-none absolute inset-0 z-10 opacity-0"
       />
       <div
         ref={(element) => {

@@ -107,7 +107,7 @@ export const advanceDrive = (
   return resolved;
 };
 
-export type WorkLockInput = {
+type WorkLockInput = {
   target: number;
   progress: number;
   step: number;

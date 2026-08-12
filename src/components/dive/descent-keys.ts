@@ -1,6 +1,6 @@
 // REASON: the descent curve is a hand-tuned data table - keeping it beside
 // the sampling logic pushes descent.ts past the 500 LOC ceiling
-export type RawDescentKey = {
+type RawDescentKey = {
   at: number;
   position: [number, number, number];
   look: [number, number, number];

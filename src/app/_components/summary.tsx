@@ -1,6 +1,6 @@
 import Links from '@/components/links';
 
-const TECHNOLOGIES = [
+const BUILT_WITH = [
   {
     name: 'Next.js',
     url: 'https://github.com/vercel/next.js',
@@ -53,7 +53,7 @@ export function Summary() {
             Built With
           </h3>
           <div className="grid grid-cols-3 gap-2">
-            {TECHNOLOGIES.map((tech) => (
+            {BUILT_WITH.map((tech) => (
               <a
                 key={tech.name}
                 href={tech.url}

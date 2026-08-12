@@ -52,7 +52,7 @@ const isThemeMode = (
   return resolvedTheme === 'light' || resolvedTheme === 'dark';
 };
 
-export const getThemeMode = (resolvedTheme: string | undefined): ThemeMode => {
+const getThemeMode = (resolvedTheme: string | undefined): ThemeMode => {
   if (isThemeMode(resolvedTheme)) {
     return resolvedTheme;
   }
@@ -60,7 +60,7 @@ export const getThemeMode = (resolvedTheme: string | undefined): ThemeMode => {
   return 'dark';
 };
 
-export const getBaseColor = (themeName: BaseColor['name']) => {
+const getBaseColor = (themeName: BaseColor['name']) => {
   return (
     baseColors.find(({ name }) => name === themeName) ?? DEFAULT_BASE_COLOR
   );
@@ -80,7 +80,7 @@ export const getThemeColorValues = (
   };
 };
 
-export const getThemeHexColor = (hsl: string): string => {
+const getThemeHexColor = (hsl: string): string => {
   return `#${hslCssToHex(hsl).toString(16).padStart(6, '0')}`;
 };
 

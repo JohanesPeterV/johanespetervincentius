@@ -8,15 +8,15 @@ export default function TechnologySection(props: {
   return (
     <div className="flex flex-col h-full">
       <h2 className="text-lg sm:text-xl font-semibold mb-3">{props.title}</h2>
-      <div
-        className="flex-1"
-        role="list"
-        aria-label={`${props.title} technologies`}
-      >
-        <div className="grid grid-cols-2 gap-2">
-          {props.contents.map((content, index) => (
+      <div className="flex-1">
+        <div
+          className="grid grid-cols-2 gap-2"
+          role="list"
+          aria-label={`${props.title} technologies`}
+        >
+          {props.contents.map((content) => (
             <a
-              key={index}
+              key={content.name}
               href={content.link}
               target="_blank"
               rel="noopener noreferrer"
@@ -27,7 +27,6 @@ export default function TechnologySection(props: {
                 'border border-transparent hover:border-primary/20',
                 'focus:outline-none focus:ring-2 focus:ring-primary/50',
               )}
-              tabIndex={0}
               role="listitem"
               aria-label={`Visit ${content.name} documentation`}
             >
