@@ -44,9 +44,18 @@ export default function HomeBackground() {
     fluidColor,
     densityDissipation: 0.98,
     blend: 0,
-    velocityDissipation: isLowPerformanceDevice ? 0.95 : 0.98,
-    pressure: isLowPerformanceDevice ? 0.7 : 0.8,
+    velocityDissipation: 0.98,
+    pressure: 0.8,
   });
+
+  if (isLowPerformanceDevice) {
+    return (
+      <div
+        className="fixed inset-0 z-[-10]"
+        style={{ backgroundColor: baseBackgroundColor }}
+      />
+    );
+  }
 
   return (
     <div
@@ -65,11 +74,11 @@ export default function HomeBackground() {
           pointerEvents: 'auto',
         }}
         camera={{ fov: 75, near: 0.1, far: 1000, position: [0, 0, 5] }}
-        dpr={isLowPerformanceDevice ? 1 : 2}
+        dpr={2}
         performance={{ min: 0.5 }}
       >
         <pointLight position={[5, 5, 5]} intensity={200} />
-        <EffectComposer enabled={!isLowPerformanceDevice}>
+        <EffectComposer>
           <Fluid {...getFluidSettings()} />
         </EffectComposer>
       </Canvas>
