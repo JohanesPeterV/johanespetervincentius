@@ -1,6 +1,5 @@
+import { SITE_URL } from '@/lib/site';
 import { MetadataRoute } from 'next';
-
-const SITE_URL = 'https://johanespetervincentius.my.id';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

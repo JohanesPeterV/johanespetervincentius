@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/components/theme-provider';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { SITE_URL } from '@/lib/site';
 import { DEFAULT_BASE_COLOR } from '@/registry/registry-base-colors';
 import type { Metadata, Viewport } from 'next';
 import { Inter, Poppins } from 'next/font/google';
@@ -36,7 +37,6 @@ const configureViewportSettings = (): Viewport => ({
 
 export const viewport = configureViewportSettings();
 
-const SITE_URL = 'https://johanespetervincentius.my.id';
 const FULL_NAME = 'Johanes Peter Vincentius';
 
 const configureMetadata = (): Metadata => ({
@@ -72,20 +72,11 @@ const configureMetadata = (): Metadata => ({
     siteName: FULL_NAME,
     title: `${FULL_NAME} - Software Engineer & Full Stack Developer`,
     description: `${FULL_NAME} is a Software Engineer and Full Stack Developer. View portfolio, projects, and professional experience.`,
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: FULL_NAME,
-      },
-    ],
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: `${FULL_NAME} - Software Engineer`,
     description: `Software Engineer and Full Stack Developer. React, Next.js, TypeScript.`,
-    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -114,7 +105,6 @@ const getJsonLd = () => ({
   name: FULL_NAME,
   alternateName: ['Johanes Peter', 'Johanes Vincentius', 'Peter Vincentius'],
   url: SITE_URL,
-  image: `${SITE_URL}/og-image.png`,
   jobTitle: 'Software Engineer',
   description:
     'Software Engineer and Full Stack Developer specializing in React, Next.js, and TypeScript',
@@ -142,11 +132,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-          crossOrigin="anonymous"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(getJsonLd()) }}
