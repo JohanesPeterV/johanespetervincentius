@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 interface PickerState {
   items: string[];
@@ -35,9 +35,21 @@ const RandomPickerContent = () => {
   const searchParams = useSearchParams();
 
   const [state, setState] = useState<PickerState>(INITIAL_PICKER_STATE);
+  const spinIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const filledItems = state.items.filter((item) => item.trim() !== '');
   const hasItems = filledItems.length > 0;
+
+  const stopSpin = () => {
+    if (spinIntervalRef.current !== null) {
+      clearInterval(spinIntervalRef.current);
+      spinIntervalRef.current = null;
+    }
+  };
+
+  // REASON: the pick animation interval outlives its click handler — without
+  // this cleanup it keeps firing setState for up to 1.5s after unmount
+  useEffect(() => stopSpin, []);
 
   // REASON: URL search params must be read client-side — SSR has no access to query string
   useEffect(() => {
@@ -48,7 +60,7 @@ const RandomPickerContent = () => {
     const itemsParam = searchParams.get('items');
     if (itemsParam) {
       try {
-        const decodedItems = JSON.parse(decodeURIComponent(itemsParam));
+        const decodedItems = JSON.parse(itemsParam);
         if (Array.isArray(decodedItems) && decodedItems.length > 0) {
           setState((prev) => ({
             ...prev,
@@ -119,12 +131,12 @@ const RandomPickerContent = () => {
   };
 
   const handleClearAll = () => {
-    setState({
-      ...state,
+    setState((prev) => ({
+      ...prev,
       items: [''],
       pickedItem: '',
       isEditing: true,
-    });
+    }));
     router.replace('/utils/random-picker', { scroll: false });
   };
 
@@ -136,7 +148,13 @@ const RandomPickerContent = () => {
   };
 
   const handleEditList = () => {
-    setState((prev) => ({ ...prev, isEditing: true, pickedItem: '' }));
+    stopSpin();
+    setState((prev) => ({
+      ...prev,
+      isEditing: true,
+      pickedItem: '',
+      isAnimating: false,
+    }));
   };
 
   const handlePickOne = () => {
@@ -147,13 +165,13 @@ const RandomPickerContent = () => {
     setState((prev) => ({ ...prev, isAnimating: true, pickedItem: '' }));
 
     let count = 0;
-    const interval = setInterval(() => {
+    spinIntervalRef.current = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * filledItems.length);
       setState((prev) => ({ ...prev, pickedItem: filledItems[randomIndex] }));
       count++;
 
       if (count >= 15) {
-        clearInterval(interval);
+        stopSpin();
         const finalIndex = Math.floor(Math.random() * filledItems.length);
         setState((prev) => ({
           ...prev,
