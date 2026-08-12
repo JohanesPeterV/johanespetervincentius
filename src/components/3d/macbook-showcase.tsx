@@ -1,25 +1,25 @@
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Html, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { ReactElement, useRef, useState } from 'react';
+import { ReactElement, RefObject, useRef } from 'react';
 import * as THREE from 'three';
 
 type MacbookShowcaseParams = {
   children: ReactElement;
 };
 
+type MouseOffset = { x: number; y: number };
+
 export default function MacbookShowcase({ children }: MacbookShowcaseParams) {
-  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const mouseOffsetRef = useRef<MouseOffset>({ x: 0, y: 0 });
 
   function handleMouseMove(event: React.PointerEvent) {
     const { clientX, clientY } = event;
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
 
-    setMouseOffset({
-      x: (clientX - centerX) * 0.0002,
-      y: (clientY - centerY) * 0.0002,
-    });
+    mouseOffsetRef.current.x = (clientX - centerX) * 0.0002;
+    mouseOffsetRef.current.y = (clientY - centerY) * 0.0002;
   }
   return (
     <Canvas
@@ -35,7 +35,7 @@ export default function MacbookShowcase({ children }: MacbookShowcaseParams) {
       dpr={[1, 2]}
     >
       <pointLight intensity={75} position={[0, 8, -4]} />
-      <MacModel mouseOffset={mouseOffset}>{children}</MacModel>
+      <MacModel mouseOffsetRef={mouseOffsetRef}>{children}</MacModel>
       <OrbitControls
         enablePan={false}
         enableZoom={false}
@@ -50,10 +50,10 @@ export default function MacbookShowcase({ children }: MacbookShowcaseParams) {
 
 type MacModelProps = {
   children: ReactElement;
-  mouseOffset: { x: number; y: number };
+  mouseOffsetRef: RefObject<MouseOffset>;
 };
 
-function MacModel({ children, mouseOffset }: MacModelProps) {
+function MacModel({ children, mouseOffsetRef }: MacModelProps) {
   const { nodes, materials } = useGLTF('/models/mac-transformed.glb');
   const group = useRef<THREE.Group>(null);
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -72,13 +72,13 @@ function MacModel({ children, mouseOffset }: MacModelProps) {
 
     group.current.rotation.x = THREE.MathUtils.lerp(
       group.current.rotation.x,
-      Math.cos(t * 0.3) * 0.05 + 0.2 + mouseOffset.y,
+      Math.cos(t * 0.3) * 0.05 + 0.2 + mouseOffsetRef.current.y,
       0.05,
     );
 
     group.current.rotation.y = THREE.MathUtils.lerp(
       group.current.rotation.y,
-      Math.sin(t * 0.2) * 0.05 + mouseOffset.x,
+      Math.sin(t * 0.2) * 0.05 + mouseOffsetRef.current.x,
       0.05,
     );
   });
