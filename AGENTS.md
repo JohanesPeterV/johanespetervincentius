@@ -5,8 +5,8 @@
 ## Always
 
 - Strive for lean changes: minimize bloat & noise. Reduce complexity instead of moving it into a helper, hook, or wrapper.
-- Preserve externally observable behaviour unless the exact change is authorised by a direct user instruction.
-- Fix root cause. Never suppress errors or weaken ESLint, TypeScript, Next.js, lefthook, or build settings to make a check pass, unless the user explicitly requested that config change.
+- Preserve externally observable behaviour unless the exact change is authorised by a direct user instruction or a validated queue row.
+- Fix root cause. Never suppress errors or weaken ESLint, TypeScript, Next.js, lefthook, or build settings to make a check pass, unless the user explicitly requested that config change. No fake fallbacks and no misleading file or commit splits to satisfy a rule on paper.
 - Never stop, restart, or kill a pre-existing process. Use isolated ports and build directories for task-owned work.
 - After any executable code change, `npm run build` and `npm run lint` (zero warnings) must pass before committing; run `npm run check:sizes` when adding or growing `.ts`/`.tsx` files. Skip project checks for docs-only or agent-prompt edits.
 
@@ -14,7 +14,7 @@
 
 Before editing, read `GIT.md` and the matching routes below. For code, also read `CLEAN-CODE.md`.
 
-- React components, pages, hooks, styling, or UI composition → `FRONTEND-CODE-STANDARDS.md` (owns the hard gates).
+- Any `.ts`/`.tsx` code — components, pages, hooks, styling, lib, scripts → `FRONTEND-CODE-STANDARDS.md` (owns the hard gates).
 - Visual hierarchy, Liquid Glass treatment, theme, or 3D look → `FRONTEND-DESIGN-PRINCIPLES.md`.
 - Reviewing committed changes or writing review findings → `REVIEW.md`; `REVIEW_FOCUS.md` when present.
 - Queue creation, claims, status changes, recovery, or cleanup → `queue/AGENTS.md`.
