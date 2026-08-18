@@ -1,6 +1,6 @@
 # Clean Code Defaults
 
-Hard constraints live in `CLAUDE.md` / `AGENTS.md`, `FRONTEND-CODE-STANDARDS.md`, and `GIT.md`. This file is not a hard gate — it answers a different question: when multiple valid solutions exist, which one fits this codebase best?
+Hard constraints live in `FRONTEND-CODE-STANDARDS.md` and `GIT.md`. This file is not a hard gate — it answers a different question: when multiple valid solutions exist, which one fits this codebase best?
 
 Rules produce correct code. The concepts below produce composed, plug-and-play code that the next engineer can scan and trust in 10 seconds.
 

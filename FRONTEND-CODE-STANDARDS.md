@@ -1,6 +1,6 @@
 # Frontend Code Standards
 
-`CLAUDE.md` / `AGENTS.md` is the hard-gate summary; this file is the source of truth for React, route pages, component APIs, hooks, local file organisation, and how design tokens are applied in code.
+This file is the source of truth for the hard gates and for React, route pages, component APIs, hooks, local file organisation, and how design tokens are applied in code.
 
 The goal is not smaller code for its own sake. The goal is frontend code a reviewer can scan, trust, and safely change without reconstructing hidden state.
 
@@ -15,6 +15,10 @@ The goal is not smaller code for its own sake. The goal is frontend code a revie
 
 ## Hard Gates
 
+- No `any`, `unknown`, `as`, `@ts-ignore`, `@ts-expect-error`, or `as unknown as X` in production code. See `Exemptions`.
+- No `void` operator and no boolean parameters.
+- No braceless `if`, `else`, `for`, or `while`, and no nested ternaries.
+- No comments except `// REASON:` explaining a non-obvious decision.
 - No `useEffect`, `useMemo`, or `useCallback` unless this file's hook exception is met.
 - Max `300` LOC per `.tsx` file and max `500` LOC per `.ts` file.
 - Max `3 useState` calls per component or hook.

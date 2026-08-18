@@ -1,10 +1,10 @@
 # Review Rules
 
-Use this file for automated and explicit reviews. `AGENTS.md` owns the hard gates, optional `REVIEW_FOCUS.md` supplies current priority, and relevant feature documents own local intent.
+Use this file for automated and explicit reviews. `FRONTEND-CODE-STANDARDS.md` owns the hard gates, optional `REVIEW_FOCUS.md` supplies current priority, and relevant feature documents own local intent.
 
 ## Candidate Scope
 
-- Review committed source on `dev` only. Never include uncommitted files in the review range.
+- Review committed source on the working branch — usually `main`, sometimes `dev`. Never include uncommitted files in the review range.
 - Walk first-parent commits after the automation-memory watermark in chronological order. Select one coherent range that represents one route, feature, or implementation concern.
 - Ignore commits containing only queue files, agent rules, review policy, documentation, formatting, generated files, or automation memory. Review a mixed commit when it also contains substantive source or build-configuration changes.
 - Defer a candidate without advancing its watermark when its source paths are dirty or owned by an active task.

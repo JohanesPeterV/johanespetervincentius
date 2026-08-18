@@ -10,6 +10,7 @@ If you modified, created, deleted, or renamed any file, the task is not done unt
 - Split unrelated outcomes into separate commits. Do not batch unrelated work into one commit.
 - Use conventional commit subjects such as `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, and `style:`.
 - Include the commit hash and commit message in the final response.
+- Work lands directly on the current branch — usually `main`, sometimes `dev`. There is no merge or PR workflow; just commit in place.
 
 ## Commit Sequence
 
