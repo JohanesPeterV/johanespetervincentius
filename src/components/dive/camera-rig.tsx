@@ -27,6 +27,7 @@ import {
   narrativeStoneY,
   rushFov,
   seamBoost,
+  seamTransitionProgress,
   stoneSectionOpacity,
   techSectionOpacity,
   wrapProgress,
@@ -39,6 +40,7 @@ import { applyOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
+import DiveDissolveEffect from './dive-dissolve';
 import DivePostprocessing from './dive-postprocessing';
 import { GALAXY_NODES, writeGalaxyScreens } from './skill-galaxy';
 
@@ -97,6 +99,7 @@ export default function CameraRig({
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
   const [sunMesh, setSunMesh] = useState<SunMesh | null>(null);
+  const [dissolve] = useState(() => new DiveDissolveEffect(palette.foreground));
   const frameRef = useRef<DescentFrame | null>(null);
   if (frameRef.current === null) {
     frameRef.current = createDescentFrame();
@@ -144,10 +147,9 @@ export default function CameraRig({
       frame.look[1] - parallax.y * 0.16,
       frame.look[2],
     );
-    const transitionZone = Math.min(
-      1,
-      seamBoost(progress) + finaleBoost(progress),
-    );
+    const seam = seamBoost(progress);
+    dissolve.setTransition(seamTransitionProgress(progress), seam);
+    const transitionZone = Math.min(1, seam + finaleBoost(progress));
     const targetRoll =
       Math.max(-0.003, Math.min(0.003, -driveStep * 0.035)) * transitionZone;
     rollRef.current = MathUtils.damp(
@@ -274,7 +276,11 @@ export default function CameraRig({
         />
       </mesh>
       {sunMesh && gpuTier >= 2 ? (
-        <DivePostprocessing aberrationRef={aberrationRef} sun={sunMesh} />
+        <DivePostprocessing
+          aberrationRef={aberrationRef}
+          dissolve={dissolve}
+          sun={sunMesh}
+        />
       ) : null}
     </>
   );

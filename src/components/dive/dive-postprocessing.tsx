@@ -14,20 +14,25 @@ import type { ChromaticAberrationEffect } from 'postprocessing';
 import { memo, RefObject } from 'react';
 import { Mesh, Vector2 } from 'three';
 
+import DiveDissolveEffect from './dive-dissolve';
+
 const ABERRATION_OFFSET = new Vector2();
 
 type DivePostprocessingParams = {
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
+  dissolve: DiveDissolveEffect;
   sun: Mesh;
 };
 
 const DivePostprocessing = memo(function DivePostprocessing({
   aberrationRef,
+  dissolve,
   sun,
 }: DivePostprocessingParams) {
   return (
     <EffectComposer multisampling={0}>
       <SMAA />
+      <primitive object={dissolve} />
       <Bloom intensity={0.3} luminanceThreshold={0.88} mipmapBlur />
       <GodRays
         sun={sun}

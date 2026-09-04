@@ -178,6 +178,12 @@ const transitionBoost = (
 export const seamBoost = (progress: number): number =>
   transitionBoost(progress, SEAM_CENTER, SEAM_SPAN);
 
+export const seamTransitionProgress = (progress: number): number =>
+  Math.max(
+    0,
+    Math.min(1, (progress - SEAM_CENTER + SEAM_SPAN) / (SEAM_SPAN * 2)),
+  );
+
 export const finaleBoost = (progress: number): number =>
   transitionBoost(progress, FINALE_CENTER, FINALE_SPAN);
 
