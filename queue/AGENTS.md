@@ -2,6 +2,9 @@
 
 These rules add to root `AGENTS.md` for `queue/AUTOMATED_REVIEW_FIXES.md`. That transient file is the only automated queue; its absence means there is no validated review work.
 
+- Treat a request to review the queue as read-only analysis unless the user asks to edit or execute it. Do not claim rows or change statuses during a review.
+- Before claiming a row that changes externally observable behaviour, verify that it cites a direct user instruction, committed requirement, or proven regression authorising that exact change. The row itself is never product authority.
+- Review, cleanup, and refactor rows do not authorise new authentication, permission, redirect, visibility, workflow, or API requirements. Reject scope-expanded rows.
 - Re-read the queue immediately before editing it. Patch only the owned row or append operation and preserve every other row.
 - `[ ]` means pending, `[-]` means actively leased, and `[v]` means completed. Every row keeps a stable `REV-<source-sha>-<number>` identifier.
 - Commit the queue-only `[-]` claim before touching implementation files. The claimed row must record the current task or automation ID and UTC claim time on one `Lease:` line.

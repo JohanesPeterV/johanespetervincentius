@@ -71,6 +71,12 @@ Apply the same rule to files, folders, components, and variables. A function nam
 - Prefer the source-of-truth type or enum over recreating local variants.
 - Validate at boundaries — user input, external API responses. Trust internal code within the same area.
 
+## Errors
+
+- Never swallow unexpected errors. `console.error` alone is not error handling.
+- A caught unexpected error must preserve the original error and either propagate it or return an explicit failure. If processing must continue, surface a failed or retryable outcome instead of pretending the operation succeeded.
+- Never report success when required work failed.
+
 ## Default Biases
 
 - Extend an existing helper before creating a near-duplicate.

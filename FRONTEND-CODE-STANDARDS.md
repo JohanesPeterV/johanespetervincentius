@@ -101,7 +101,7 @@ Required response: one component or hook owns one concern; components accept onl
 
 ## File Organisation
 
-- Search before creating a new helper, hook, utility, or component; extend an existing near-fit before duplicating.
+- Before creating a helper, hook, utility, or component, search its name and concept in `src/lib`, `src/hooks`, `src/components`, and the relevant route's `_components`. Import an exact match or extend a near-fit; never add a sibling copy.
 - If you find duplication in a file you are already touching, remove it there.
 - Prefer extraction by identity, not by file length.
 - Keep files used only inside one concern inside that concern.

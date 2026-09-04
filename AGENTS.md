@@ -4,10 +4,15 @@
 
 ## Always
 
-- Strive for lean changes: minimize bloat & noise. Reduce complexity instead of moving it into a helper, hook, or wrapper.
-- Preserve externally observable behaviour unless the exact change is authorised by a direct user instruction or a validated queue row.
-- Fix root cause. Never suppress errors or weaken ESLint, TypeScript, Next.js, lefthook, or build settings to make a check pass, unless the user explicitly requested that config change. No fake fallbacks and no misleading file or commit splits to satisfy a rule on paper.
+- If you modify, create, delete, or rename any file, the task is not done until your files are committed successfully.
+- Before editing code, locate the responsible behaviour and its architectural owner. Fix the underlying system rule there; do not turn the reported symptom or example into a local patch.
+- Prefer leaner code shapes and one authoritative source of truth for each behaviour or fact. Lean describes the final design, not minimal effort or the smallest diff.
+- For bug reports, trace the code first; open a browser or logs only for runtime evidence the code cannot give.
+- Preserve externally observable behaviour unless the exact change is authorised by a direct user instruction.
+- Never infer changes to authentication, permissions, or data visibility; if authority is unclear, stop and ask.
+- Never suppress errors or weaken ESLint, TypeScript, Next.js, lefthook, or build settings to make a check pass unless the user explicitly requested that config change. No fake fallbacks or misleading file or commit splits to satisfy a rule on paper.
 - Never stop, restart, or kill a pre-existing process. Use isolated ports and build directories for task-owned work.
+- Never create a Git worktree unless the user explicitly requests one.
 - After any executable code change, `npm run build` and `npm run lint` (zero warnings) must pass before committing; run `npm run check:sizes` when adding or growing `.ts`/`.tsx` files. Skip project checks for docs-only or agent-prompt edits.
 
 ## Task Routing
