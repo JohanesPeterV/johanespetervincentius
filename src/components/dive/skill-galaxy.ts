@@ -11,6 +11,8 @@ import {
 import { TECHNOLOGIES } from '@/app/_components/technologies/technologies';
 
 import { TECH_STONE, narrativeStoneY } from './descent';
+import type { MotionMode } from './descent';
+import { cullGalaxyLabels } from './galaxy-labels';
 
 export type GalaxyNode = {
   label: string;
@@ -299,8 +301,20 @@ export const galaxyRelease = (): void => {
   motion.zoomTarget = 1;
 };
 
-export const advanceGalaxy = (delta: number): void => {
+export const advanceGalaxy = (delta: number, motionMode: MotionMode): void => {
   const motion = GALAXY_MOTION;
+  if (motionMode === 'reduced') {
+    motion.yawVelocity = 0;
+    motion.pitchVelocity = 0;
+    motion.zoom = motion.zoomTarget;
+    motion.focusBlend = motion.focus === null ? 0 : 1;
+    if (motion.focus !== null) {
+      const target = GALAXY_CATEGORIES[motion.focus];
+      motion.yaw = target.yaw;
+      motion.pitch = target.pitch;
+    }
+    return;
+  }
   if (!motion.exploring) {
     motion.yaw += IDLE_SPIN_RATE * delta;
   }
@@ -462,6 +476,15 @@ export const writeGalaxyScreens = (write: GalaxyScreenWrite): void => {
     if (motion.hovered === index) {
       alpha = 1;
     }
+    if (
+      write.width < 768 &&
+      node.kind === 'skill' &&
+      node.category !== motion.focus &&
+      motion.hovered !== index
+    ) {
+      alpha = 0;
+    }
     write.alphas[index] = alpha;
   });
+  cullGalaxyLabels(GALAXY_NODES, write);
 };

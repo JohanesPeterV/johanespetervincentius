@@ -1,17 +1,19 @@
 'use client';
 
-import { AdaptiveDpr, useDetectGPU } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
-import { RefObject, Suspense, useEffect, useRef, useState } from 'react';
+import { ReactNode, Suspense, useEffect, useRef, useState } from 'react';
 
-import CameraRig, { DiveStage, PointerState } from './camera-rig';
-import { resetWorkMotion, workLockedDelta } from './camera-motion';
-import CoffeeWorld from './coffee-world';
+import { useMediaQuery } from '@/hooks/use-media-query';
+
+import type { PointerState } from './camera-rig';
+import { driveInputDelta, resetWorkMotion } from './camera-motion';
+import type { DriveMotion } from './camera-motion';
+import DiveCanvas from './dive-canvas';
 import {
   DIVE_START,
   TOUCH_SENSITIVITY,
   WHEEL_SENSITIVITY,
   sectionStepDelta,
+  wrapProgress,
 } from './descent';
 import { DIVE_PALETTE } from './dive-palette';
 import DiveOverlay from './dive-overlay';
@@ -26,11 +28,6 @@ import {
   galaxyZoomBy,
   resetGalaxy,
 } from './skill-galaxy';
-import SkillGalaxyScene from './skill-galaxy-scene';
-
-type LoadedSignalParams = {
-  stageRef: RefObject<DiveStage>;
-};
 
 type PointerDrag = {
   id: number | null;
@@ -40,16 +37,6 @@ type PointerDrag = {
 const LINE_DELTA_MODE = 1;
 const PAGE_DELTA_MODE = 2;
 const LINE_HEIGHT_PX = 16;
-
-const getCanvasDpr = (tier: number): number => {
-  if (tier >= 3) {
-    return 1.5;
-  }
-  if (tier >= 2) {
-    return 1.25;
-  }
-  return 1;
-};
 
 const normalizeWheelDelta = (
   event: React.WheelEvent<HTMLDivElement>,
@@ -64,22 +51,18 @@ const normalizeWheelDelta = (
   return pixels;
 };
 
-const LoadedSignal = ({ stageRef }: LoadedSignalParams) => {
-  // REASON: Suspense resolution is only observable from a mounted child, so
-  // scroll stays disabled until the world assets are in the scene
-  useEffect(() => {
-    stageRef.current = 'live';
-  }, [stageRef]);
-  return null;
-};
-
-export default function DiveScene() {
-  const targetRef = useRef(DIVE_START);
+export default function DiveScene({ children }: { children: ReactNode }) {
+  const driveRef = useRef<DriveMotion>({
+    current: DIVE_START,
+    target: DIVE_START,
+    expectedTarget: Number.NaN,
+    idleTime: 0,
+  });
   const progressRef = useRef(DIVE_START);
   const dragRef = useRef<PointerDrag>({ id: null, y: 0 });
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
-  const stageRef = useRef<DiveStage>('loading');
   const overlayRef = useRef<OverlayNodes>({
+    chapters: [],
     sections: [],
     skillLayer: null,
     skillRail: [],
@@ -90,14 +73,15 @@ export default function DiveScene() {
   });
   const modeRef = useRef<DiveMode>('dive');
   const [mode, setMode] = useState<DiveMode>('dive');
-  const gpu = useDetectGPU();
-  const tier = gpu.tier;
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const motionMode = reducedMotion ? 'reduced' : 'full';
   const palette = DIVE_PALETTE;
 
   const applyDriveDelta = (step: number): void => {
-    targetRef.current += workLockedDelta({
-      target: targetRef.current,
-      progress: progressRef.current,
+    const drive = driveRef.current;
+    drive.target += driveInputDelta({
+      target: drive.target,
+      progress: drive.current,
       step,
       now: performance.now(),
     });
@@ -123,8 +107,13 @@ export default function DiveScene() {
     handleEngage(null);
   };
 
+  const handleNavigate = (center: number): void => {
+    handleRelease();
+    driveRef.current.target += center - wrapProgress(driveRef.current.target);
+  };
+
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
-    if (stageRef.current !== 'live') {
+    if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
       return;
     }
     if (modeRef.current === 'explore') {
@@ -137,9 +126,6 @@ export default function DiveScene() {
   const handlePointerDown = (
     event: React.PointerEvent<HTMLDivElement>,
   ): void => {
-    if (stageRef.current !== 'live') {
-      return;
-    }
     if (event.button !== 0) {
       return;
     }
@@ -203,7 +189,12 @@ export default function DiveScene() {
   // full-screen div is never focused, so an onKeyDown prop would not fire
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (stageRef.current !== 'live') {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest(
+          'input, textarea, select, [contenteditable="true"]',
+        )
+      ) {
         return;
       }
       if (modeRef.current === 'explore') {
@@ -215,10 +206,12 @@ export default function DiveScene() {
         return;
       }
       if (event.key === 'ArrowDown') {
-        applyDriveDelta(sectionStepDelta(targetRef.current, 1));
+        event.preventDefault();
+        applyDriveDelta(sectionStepDelta(driveRef.current.target, 1));
       }
       if (event.key === 'ArrowUp') {
-        applyDriveDelta(sectionStepDelta(targetRef.current, -1));
+        event.preventDefault();
+        applyDriveDelta(sectionStepDelta(driveRef.current.target, -1));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -237,46 +230,25 @@ export default function DiveScene() {
       className="fixed inset-0 touch-none cursor-grab overflow-hidden font-mono active:cursor-grabbing"
       style={{ backgroundColor: palette.background, color: palette.foreground }}
     >
-      <Canvas
-        camera={{ fov: 58, near: 0.2, far: 240, position: [0, 6.6, 16] }}
-        dpr={getCanvasDpr(tier)}
-        gl={{ toneMappingExposure: palette.exposure }}
-        performance={{ min: 0.72, debounce: 350 }}
-      >
-        <AdaptiveDpr />
-        <color attach="background" args={[palette.background]} />
-        <fogExp2 attach="fog" args={[palette.background, palette.fogDensity]} />
-        <Suspense fallback={null}>
-          <CoffeeWorld
-            accentColor={palette.accent}
-            progressRef={progressRef}
-            rockColor={palette.rock}
-            stoneColor={palette.stone}
-          />
-          <LoadedSignal stageRef={stageRef} />
-        </Suspense>
-        <SkillGalaxyScene
-          accentColor={palette.accent}
-          stoneColor={palette.stone}
-          progressRef={progressRef}
-          onEngage={handleEngage}
-        />
-        <CameraRig
-          targetRef={targetRef}
+      <Suspense fallback={null}>
+        <DiveCanvas
+          driveRef={driveRef}
           progressRef={progressRef}
           pointerRef={pointerRef}
           overlayRef={overlayRef}
-          palette={palette}
-          gpuTier={tier}
-          stageRef={stageRef}
+          motionMode={motionMode}
+          onEngage={handleEngage}
         />
-      </Canvas>
+      </Suspense>
       <DiveOverlay
         overlayRef={overlayRef}
         mode={mode}
         onEngage={handleEngage}
         onToggleExplore={handleToggleExplore}
-      />
+        onNavigate={handleNavigate}
+      >
+        {children}
+      </DiveOverlay>
     </div>
   );
 }

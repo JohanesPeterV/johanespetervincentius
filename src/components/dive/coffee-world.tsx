@@ -3,26 +3,37 @@
 import { RefObject } from 'react';
 
 import { worldRise } from './descent';
+import type { MotionMode } from './descent';
+import type { DivePalette } from './dive-palette';
+import DiveAtmosphere from './dive-atmosphere';
 import { NarrativeStones, RisingStones, RisingWorld } from './dive-world';
 
 type CoffeeWorldParams = {
-  accentColor: string;
+  palette: DivePalette;
   progressRef: RefObject<number>;
-  rockColor: string;
-  stoneColor: string;
+  motionMode: MotionMode;
 };
 
 const KEY_LIGHT_COLOR = '#ffb066';
 
 export default function CoffeeWorld({
-  accentColor,
+  palette,
   progressRef,
-  rockColor,
-  stoneColor,
+  motionMode,
 }: CoffeeWorldParams) {
   return (
     <>
-      <ambientLight intensity={0.24} color="#ffe2c4" />
+      <DiveAtmosphere
+        palette={palette}
+        progressRef={progressRef}
+        motionMode={motionMode}
+      />
+      <ambientLight intensity={0.36} color={palette.foreground} />
+      <directionalLight
+        position={[-5, 3, -7]}
+        intensity={2.8}
+        color={palette.accent}
+      />
       <spotLight
         position={[8, 9, 6]}
         intensity={640}
@@ -37,12 +48,13 @@ export default function CoffeeWorld({
         color="#ffbf78"
       />
       <RisingWorld progressRef={progressRef} rise={worldRise}>
-        <RisingStones color={rockColor} />
+        <RisingStones color={palette.rock} />
       </RisingWorld>
       <NarrativeStones
-        accentColor={accentColor}
-        color={stoneColor}
+        accentColor={palette.accent}
+        color={palette.stone}
         progressRef={progressRef}
+        motionMode={motionMode}
       />
     </>
   );

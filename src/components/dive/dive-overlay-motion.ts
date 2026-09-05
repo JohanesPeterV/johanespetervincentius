@@ -6,18 +6,21 @@ import {
   TECH_STONE,
   sectionMotion,
   techSectionOpacity,
+  sectionJumpDelta,
 } from './descent';
+import type { MotionMode } from './descent';
 import { WORK_MOTION, workPull } from './camera-motion';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 
 export type OverlayNodes = {
+  chapters: (HTMLButtonElement | null)[];
   sections: (HTMLDivElement | null)[];
   skillLayer: HTMLDivElement | null;
   skillRail: (HTMLButtonElement | null)[];
   skillWords: (HTMLSpanElement | null)[];
   veil: HTMLDivElement | null;
   workPanels: (HTMLDivElement | null)[];
-  workRail: (HTMLDivElement | null)[];
+  workRail: (HTMLButtonElement | null)[];
 };
 
 export type OverlayFrame = {
@@ -29,6 +32,7 @@ export type OverlayFrame = {
   skillScreens: Vector2[];
   stones: Vector2[];
   width: number;
+  motionMode: MotionMode;
 };
 
 const SKILL_HIDE_THRESHOLD = 0.05;
@@ -74,7 +78,7 @@ const WORK_PULL_NUDGE_PX = 18;
 
 const applyWorkShowcase = (nodes: OverlayNodes): void => {
   const active = WORK_MOTION.job;
-  const mark = (element: HTMLDivElement | null, index: number): void => {
+  const mark = (element: HTMLElement | null, index: number): void => {
     if (!element) {
       return;
     }
@@ -90,14 +94,15 @@ const applyWorkShowcase = (nodes: OverlayNodes): void => {
       return;
     }
     mark(element, index);
-    // REASON: the inline nudge must clear when idle or inactive so the
-    // class-driven enter and exit transitions own the transform again
-    const transform =
+    element.inert = index !== active;
+    // REASON: gesture feedback uses translate independently of the timed
+    // panel swap's transform, so CSS cannot ease every frame of the pull again.
+    const translate =
       index === active && pull !== 0
-        ? `translateY(${(-pull * WORK_PULL_NUDGE_PX).toFixed(2)}px)`
+        ? `0 ${(-pull * WORK_PULL_NUDGE_PX).toFixed(2)}px`
         : '';
-    if (element.style.transform !== transform) {
-      element.style.transform = transform;
+    if (element.style.translate !== translate) {
+      element.style.translate = translate;
     }
   });
 };
@@ -119,25 +124,42 @@ const positionStoneSection = (
 ): void => {
   // REASON: the stone projects to ~120px screen radius, so the gap must stay
   // beyond it or headlines start on top of the sphere
+  if (frame.width < 768) {
+    element.style.transform = `translate3d(24px, ${frame.height * 0.16}px, 0)`;
+    return;
+  }
   const horizontalGap = Math.min(320, Math.max(96, frame.width * 0.16));
   const left = Math.max(
     24,
-    Math.min(frame.width - 24, stone.x + horizontalGap),
+    Math.min(frame.width - 456, stone.x + horizontalGap),
   );
-  element.style.transform = `translate3d(${left}px, ${stone.y}px, 0) translateY(-50%)`;
+  const top = Math.max(
+    frame.height * 0.4,
+    Math.min(frame.height * 0.6, stone.y),
+  );
+  element.style.transform = `translate3d(${left}px, ${top}px, 0) translateY(-50%)`;
 };
 
 export const applyOverlay = (
   nodes: OverlayNodes,
   frame: OverlayFrame,
 ): void => {
+  let activeChapter = 0;
+  let nearestDistance = Infinity;
   DIVE_SECTIONS.forEach((section, index) => {
+    const distance = Math.abs(sectionJumpDelta(frame.progress, section.center));
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      activeChapter = index;
+    }
     const element = nodes.sections[index];
     if (!element) {
       return;
     }
     const motion = sectionMotion(frame.progress, section);
     element.style.opacity = String(motion.opacity);
+    element.style.setProperty('--reveal', String(motion.opacity));
+    element.inert = motion.opacity < 0.1;
     const visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
     if (element.style.visibility !== visibility) {
       element.style.visibility = visibility;
@@ -149,11 +171,25 @@ export const applyOverlay = (
       element.dataset.visible = 'false';
     }
     if (section.placement !== 'stone') {
-      element.style.transform = `translateY(${motion.shift}px)`;
+      const scale = 1 - (1 - motion.opacity) * 0.14;
+      element.style.transform =
+        frame.motionMode === 'reduced'
+          ? ''
+          : `perspective(1000px) translate3d(0, ${motion.shift}px, 0) scale(${scale}) rotateX(${(1 - motion.opacity) * 7}deg)`;
     } else if (section.center === TECH_STONE.center) {
       positionTechHud(element, frame);
     } else {
       positionStoneSection(element, frame, frame.stones[section.stoneIndex]);
+    }
+  });
+  nodes.chapters.forEach((element, index) => {
+    if (!element) {
+      return;
+    }
+    if (index === activeChapter) {
+      element.setAttribute('aria-current', 'step');
+    } else {
+      element.removeAttribute('aria-current');
     }
   });
   applyWorkShowcase(nodes);

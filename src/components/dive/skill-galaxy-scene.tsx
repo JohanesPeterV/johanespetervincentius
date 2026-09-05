@@ -6,6 +6,7 @@ import { RefObject, useRef, useState } from 'react';
 import { Group, InstancedMesh, Object3D } from 'three';
 
 import { techSectionOpacity } from './descent';
+import type { MotionMode } from './descent';
 import {
   GALAXY_LINKS,
   GALAXY_MOTION,
@@ -20,6 +21,7 @@ type SkillGalaxySceneParams = {
   stoneColor: string;
   progressRef: RefObject<number>;
   onEngage: (category: number | null) => void;
+  motionMode: MotionMode;
 };
 
 const HUB_NODE_SCALE = 2.4;
@@ -32,6 +34,7 @@ export default function SkillGalaxyScene({
   stoneColor,
   progressRef,
   onEngage,
+  motionMode,
 }: SkillGalaxySceneParams) {
   const groupRef = useRef<Group>(null);
   const nodesRef = useRef<InstancedMesh>(null);
@@ -81,7 +84,7 @@ export default function SkillGalaxyScene({
     if (!visible) {
       return;
     }
-    advanceGalaxy(delta);
+    advanceGalaxy(Math.min(delta, 0.1), motionMode);
     const scale = writeGalaxyPose(
       progress,
       size.width / size.height,
@@ -98,7 +101,7 @@ export default function SkillGalaxyScene({
       nodes.setMatrixAt(index, nodeHelper.matrix);
     });
     nodes.instanceMatrix.needsUpdate = true;
-  });
+  }, -1);
 
   return (
     <group ref={groupRef} visible={false}>

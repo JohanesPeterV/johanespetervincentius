@@ -42,6 +42,8 @@ type SectionMotion = {
   shift: number;
 };
 
+export type MotionMode = 'full' | 'reduced';
+
 type DescentKey = DescentFrame & { at: number };
 
 export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
@@ -178,12 +180,6 @@ const transitionBoost = (
 export const seamBoost = (progress: number): number =>
   transitionBoost(progress, SEAM_CENTER, SEAM_SPAN);
 
-export const seamTransitionProgress = (progress: number): number =>
-  Math.max(
-    0,
-    Math.min(1, (progress - SEAM_CENTER + SEAM_SPAN) / (SEAM_SPAN * 2)),
-  );
-
 export const finaleBoost = (progress: number): number =>
   transitionBoost(progress, FINALE_CENTER, FINALE_SPAN);
 
@@ -220,6 +216,11 @@ const DWELL_RATE = 2.5;
 
 export const narrativeStoneY = (progress: number, center: number): number => {
   let delta = progress - center;
+  // REASON: the opening spans a full chapter rather than the later 0.6 steps;
+  // the first stone must enter while the hero leaves, not after an empty gap.
+  if (center === WORK_STONE.center && delta < 0) {
+    delta *= 0.5;
+  }
   // REASON: the tech section hosts the skill galaxy - compressing travel
   // inside the dwell holds the galaxy on screen long enough to notice and
   // explore it, then full rise speed resumes at the dwell edges
@@ -285,13 +286,6 @@ export const worldRise = (progress: number): number => {
     smootherstep(0, WORLD_ACCELERATION_SPAN, distance) *
     WORLD_RISE_RATE
   );
-};
-
-const FINALE_SUN_START = 3.55;
-const FINALE_SUN_END = 3.95;
-
-export const finaleSunLift = (progress: number): number => {
-  return smootherstep(FINALE_SUN_START, FINALE_SUN_END, progress);
 };
 
 // REASON: runs every frame from the camera rig - writing into a caller-owned
@@ -362,10 +356,25 @@ export const sectionMotion = (
   const delta = progress - section.center;
   const distance = Math.abs(delta);
   return {
-    opacity: 1 - smootherstep(0.22, 0.52, distance),
-    shift: -delta * 110,
+    opacity: 1 - smootherstep(0.1, 0.54, distance),
+    shift: -delta * 240,
   };
 };
+
+export const sectionTravel = (progress: number): number => {
+  let travel = 1;
+  for (const section of DIVE_SECTIONS) {
+    const distance = Math.abs(
+      wrapProgress(progress - section.center + DIVE_LENGTH / 2) -
+        DIVE_LENGTH / 2,
+    );
+    travel = Math.min(travel, smootherstep(0.08, 0.3, distance));
+  }
+  return travel;
+};
+
+export const sectionJumpDelta = (progress: number, center: number): number =>
+  wrapProgress(center - progress + DIVE_LENGTH / 2) - DIVE_LENGTH / 2;
 
 const SECTION_STEP_EPSILON = 0.05;
 

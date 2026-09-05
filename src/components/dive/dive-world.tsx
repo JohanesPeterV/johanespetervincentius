@@ -5,7 +5,12 @@ import { ReactNode, RefObject, useRef } from 'react';
 import { Color, Group, InstancedMesh, Object3D } from 'three';
 
 import { NARRATIVE_STONES, narrativeStoneY } from './descent';
-import { BlockTransform, buildRisingStones } from './world-layout';
+import type { MotionMode } from './descent';
+import {
+  BlockTransform,
+  buildRisingStones,
+  shapeNarrativeStone,
+} from './world-layout';
 
 const RISING_STONE_BLOCKS = buildRisingStones();
 const narrativeStoneHelper = new Object3D();
@@ -57,7 +62,7 @@ export const RisingStones = ({ color }: RisingStonesParams) => (
     }}
   >
     <dodecahedronGeometry args={[1, 0]} />
-    <meshStandardMaterial color={color} roughness={0.86} metalness={0.04} />
+    <meshStandardMaterial roughness={0.86} metalness={0.04} />
   </instancedMesh>
 );
 
@@ -77,7 +82,7 @@ export const RisingWorld = ({
     if (groupRef.current) {
       groupRef.current.position.y = rise(progressRef.current);
     }
-  });
+  }, -1);
   return <group ref={groupRef}>{children}</group>;
 };
 
@@ -85,12 +90,14 @@ type NarrativeStonesParams = {
   accentColor: string;
   color: string;
   progressRef: RefObject<number>;
+  motionMode: MotionMode;
 };
 
 export const NarrativeStones = ({
   accentColor,
   color,
   progressRef,
+  motionMode,
 }: NarrativeStonesParams) => {
   const meshRef = useRef<InstancedMesh>(null);
   useFrame((state) => {
@@ -99,11 +106,15 @@ export const NarrativeStones = ({
       return;
     }
     const progress = progressRef.current;
-    const idle = Math.sin(state.clock.elapsedTime * 0.4) * 0.08;
+    const idle =
+      motionMode === 'full'
+        ? Math.sin(state.clock.elapsedTime * 0.4) * 0.08
+        : 0;
+    const compact = state.size.width < 768;
     NARRATIVE_STONES.forEach((stone, index) => {
       narrativeStoneHelper.position.set(
-        stone.x,
-        narrativeStoneY(progress, stone.center),
+        compact ? 2.5 : stone.x,
+        narrativeStoneY(progress, stone.center) - (compact ? 3.9 : 0),
         stone.z,
       );
       narrativeStoneHelper.rotation.set(
@@ -111,27 +122,27 @@ export const NarrativeStones = ({
         0.5 + index * 0.55 + progress * 0.22 + idle,
         -0.18 + index * 0.1,
       );
-      const size = (1.26 + index * 0.06) * stone.scale;
+      const size = (1.26 + index * 0.06) * stone.scale * (compact ? 0.55 : 1);
       narrativeStoneHelper.scale.set(size, size * 0.84, size * 0.94);
       narrativeStoneHelper.updateMatrix();
       mesh.setMatrixAt(index, narrativeStoneHelper.matrix);
     });
     mesh.instanceMatrix.needsUpdate = true;
-  });
+  }, -1);
   return (
     <instancedMesh
       ref={meshRef}
       args={[undefined, undefined, NARRATIVE_STONES.length]}
       frustumCulled={false}
     >
-      <icosahedronGeometry args={[1, 1]} />
+      <icosahedronGeometry args={[1, 3]} ref={shapeNarrativeStone} />
       <meshStandardMaterial
         flatShading
         color={color}
-        roughness={0.46}
-        metalness={0.12}
+        roughness={0.56}
+        metalness={0.28}
         emissive={accentColor}
-        emissiveIntensity={0.3}
+        emissiveIntensity={0.035}
       />
     </instancedMesh>
   );

@@ -2,17 +2,14 @@
 
 import { useFrame } from '@react-three/fiber';
 import type { ChromaticAberrationEffect } from 'postprocessing';
-import { RefObject, useRef, useState } from 'react';
+import { RefObject, useRef } from 'react';
 import {
   Color,
   FogExp2,
   MathUtils,
-  Mesh,
-  MeshBasicMaterial,
   PerspectiveCamera,
   PointLight,
   SRGBColorSpace,
-  SphereGeometry,
   Vector2,
   Vector3,
 } from 'three';
@@ -22,25 +19,21 @@ import {
   WORK_STONE,
   aberrationStrength,
   createDescentFrame,
-  finaleBoost,
-  finaleSunLift,
   narrativeStoneY,
   rushFov,
-  seamBoost,
-  seamTransitionProgress,
+  sectionTravel,
   stoneSectionOpacity,
   techSectionOpacity,
   wrapProgress,
   writeDescentFrame,
 } from './descent';
-import type { DescentFrame } from './descent';
+import type { DescentFrame, MotionMode } from './descent';
 import { advanceDrive, applyFinaleCamera } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import { applyOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
-import DiveDissolveEffect from './dive-dissolve';
 import DivePostprocessing from './dive-postprocessing';
 import { GALAXY_NODES, writeGalaxyScreens } from './skill-galaxy';
 
@@ -52,18 +45,19 @@ export type PointerState = {
 export type DiveStage = 'loading' | 'live';
 
 type CameraRigParams = {
-  targetRef: RefObject<number>;
+  driveRef: RefObject<DriveMotion>;
   progressRef: RefObject<number>;
   pointerRef: RefObject<PointerState>;
   overlayRef: RefObject<OverlayNodes>;
   palette: DivePalette;
   gpuTier: number;
   stageRef: RefObject<DiveStage>;
+  motionMode: MotionMode;
 };
 
 const BASELINE_FPS = 60;
 const BASE_FOV = 58;
-const MAX_FRAME_DELTA = 1 / 30;
+const MAX_FRAME_DELTA = 0.1;
 const PARALLAX_DAMPING = 1.7;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
@@ -74,23 +68,16 @@ const SKILL_SCREENS = GALAXY_NODES.map(() => new Vector2());
 const SKILL_ALPHAS = new Float32Array(GALAXY_NODES.length);
 const SKILL_SCALES = new Float32Array(GALAXY_NODES.length);
 
-type SunMesh = Mesh<SphereGeometry, MeshBasicMaterial>;
-
 export default function CameraRig({
-  targetRef,
+  driveRef,
   progressRef,
   pointerRef,
   overlayRef,
   palette,
   gpuTier,
   stageRef,
+  motionMode,
 }: CameraRigParams) {
-  const driveRef = useRef<DriveMotion>({
-    current: 0,
-    target: 0,
-    expectedTarget: Number.NaN,
-    idleTime: 0,
-  });
   const fovRef = useRef(BASE_FOV);
   const rollRef = useRef(0);
   const overlayProgressRef = useRef(Number.NaN);
@@ -98,21 +85,22 @@ export default function CameraRig({
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
-  const [sunMesh, setSunMesh] = useState<SunMesh | null>(null);
-  const [dissolve] = useState(() => new DiveDissolveEffect(palette.foreground));
   const frameRef = useRef<DescentFrame | null>(null);
   if (frameRef.current === null) {
     frameRef.current = createDescentFrame();
   }
   const descentFrame = frameRef.current;
 
-  useFrame(({ camera, scene, performance, size }, delta) => {
+  useFrame(({ camera, scene, performance }, delta) => {
     const frameDelta = Math.min(delta, MAX_FRAME_DELTA);
     const live = stageRef.current === 'live';
     const drive = driveRef.current;
     const previousProgress = drive.current;
     if (live) {
-      targetRef.current = advanceDrive(drive, targetRef.current, frameDelta);
+      advanceDrive(drive, frameDelta);
+      if (motionMode === 'reduced') {
+        drive.current = drive.target;
+      }
     }
     const step = drive.current - previousProgress;
     const driveStep = frameDelta > 0 ? step / (frameDelta * BASELINE_FPS) : 0;
@@ -121,25 +109,33 @@ export default function CameraRig({
     const frame = writeDescentFrame(descentFrame, progress);
     applyDivePalette(frame, palette, progress);
     applyFinaleCamera(frame, progress);
+    if (motionMode === 'reduced') {
+      frame.position[0] = 0;
+      frame.position[1] = 3.5;
+      frame.position[2] = 16;
+      frame.look[0] = 0;
+      frame.look[1] = 2.4;
+      frame.look[2] = 0;
+    }
     if (live && Math.abs(step) > 0.00008) {
       performance.regress();
     }
     const parallax = parallaxRef.current;
     parallax.x = MathUtils.damp(
       parallax.x,
-      pointerRef.current.x,
+      motionMode === 'reduced' ? 0 : pointerRef.current.x,
       PARALLAX_DAMPING,
       frameDelta,
     );
     parallax.y = MathUtils.damp(
       parallax.y,
-      pointerRef.current.y,
+      motionMode === 'reduced' ? 0 : pointerRef.current.y,
       PARALLAX_DAMPING,
       frameDelta,
     );
     camera.position.set(
-      frame.position[0] + parallax.x * 0.14,
-      frame.position[1] - parallax.y * 0.07,
+      frame.position[0] + parallax.x * 0.3,
+      frame.position[1] - parallax.y * 0.15,
       frame.position[2],
     );
     camera.lookAt(
@@ -147,11 +143,10 @@ export default function CameraRig({
       frame.look[1] - parallax.y * 0.16,
       frame.look[2],
     );
-    const seam = seamBoost(progress);
-    dissolve.setTransition(seamTransitionProgress(progress), seam);
-    const transitionZone = Math.min(1, seam + finaleBoost(progress));
+    const transitionZone =
+      motionMode === 'reduced' ? 0 : sectionTravel(progress);
     const targetRoll =
-      Math.max(-0.003, Math.min(0.003, -driveStep * 0.035)) * transitionZone;
+      Math.max(-0.012, Math.min(0.012, -driveStep * 0.12)) * transitionZone;
     rollRef.current = MathUtils.damp(
       rollRef.current,
       targetRoll,
@@ -199,15 +194,13 @@ export default function CameraRig({
     if (glowRef.current) {
       glowRef.current.intensity = frame.glow * 260;
     }
-    if (sunMesh) {
-      const sunLift = finaleSunLift(progress);
-      sunMesh.position.set(0, -7 + sunLift * 34, -6 - sunLift * 16);
-      sunMesh.scale.setScalar(1 + sunLift * 1.6);
-      // REASON: below tier 2 the composer is disabled, so without god rays the
-      // sun mesh renders as a flat grey disc behind the finale headline
-      sunMesh.material.opacity =
-        gpuTier >= 2 ? Math.min(1, sunLift * (0.45 + frame.glow * 1.4)) : 0;
-    }
+    camera.updateMatrixWorld();
+  }, -2);
+
+  // REASON: DOM projection runs after the world and galaxy update, but before
+  // the composer renders, so text and geometry describe the same frame.
+  useFrame(({ camera, size }) => {
+    const progress = progressRef.current;
     NARRATIVE_STONES.forEach((stone, index) => {
       const projection = STONE_PROJECTIONS[index];
       projection
@@ -245,7 +238,7 @@ export default function CameraRig({
       overlayProgressRef.current = progress;
       overlaySizeRef.current.set(size.width, size.height);
       applyOverlay(overlayRef.current, {
-        descent: frame,
+        descent: descentFrame,
         height: size.height,
         progress,
         skillAlphas: SKILL_ALPHAS,
@@ -253,6 +246,7 @@ export default function CameraRig({
         skillScreens: SKILL_SCREENS,
         stones: STONE_SCREENS,
         width: size.width,
+        motionMode,
       });
     }
   });
@@ -266,21 +260,8 @@ export default function CameraRig({
         intensity={0}
         color={palette.accent}
       />
-      <mesh ref={setSunMesh} position={[0, -7, -6]}>
-        <sphereGeometry args={[2.4, 24, 24]} />
-        <meshBasicMaterial
-          color={palette.foreground}
-          transparent
-          opacity={0}
-          depthWrite={false}
-        />
-      </mesh>
-      {sunMesh && gpuTier >= 2 ? (
-        <DivePostprocessing
-          aberrationRef={aberrationRef}
-          dissolve={dissolve}
-          sun={sunMesh}
-        />
+      {gpuTier >= 2 && motionMode === 'full' ? (
+        <DivePostprocessing aberrationRef={aberrationRef} />
       ) : null}
     </>
   );

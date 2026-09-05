@@ -16,8 +16,7 @@ export type DriveMotion = {
   idleTime: number;
 };
 
-const TARGET_FOLLOW_RATE = 4.68;
-const POSITION_FOLLOW_RATE = 9.75;
+const POSITION_FOLLOW_RATE = 7.5;
 const MAX_TARGET_SPEED = 4.5;
 // REASON: unclamped wheel deltas bank whole extra loops on trackpad momentum
 // flicks - the target may never lead the camera by more than ~1.4 sections
@@ -60,11 +59,15 @@ const driftTargetToSection = (
 
 const WORK_PULL_DECAY_RATE = 1.4;
 
-export const advanceDrive = (
-  motion: DriveMotion,
-  target: number,
-  delta: number,
-): number => {
+export const limitDriveTarget = (target: number, progress: number): number => {
+  return MathUtils.clamp(
+    target,
+    progress - MAX_TARGET_LEAD,
+    progress + MAX_TARGET_LEAD,
+  );
+};
+
+export const advanceDrive = (motion: DriveMotion, delta: number): void => {
   // REASON: a sub-threshold scroll leaves the pull hint extended - decaying
   // it here springs the peeked panel back once input stops arriving
   WORK_MOTION.accum = MathUtils.damp(
@@ -76,35 +79,23 @@ export const advanceDrive = (
   if (Math.abs(WORK_MOTION.accum) < 0.004) {
     WORK_MOTION.accum = 0;
   }
-  const lead = MathUtils.clamp(
-    target,
-    motion.current - MAX_TARGET_LEAD,
-    motion.current + MAX_TARGET_LEAD,
-  );
-  const resolved = driftTargetToSection(motion, lead, delta);
-  const followedTarget = MathUtils.damp(
-    motion.target,
-    resolved,
-    TARGET_FOLLOW_RATE,
-    delta,
-  );
-  const maxTargetStep = MAX_TARGET_SPEED * delta;
-  motion.target += MathUtils.clamp(
-    followedTarget - motion.target,
-    -maxTargetStep,
-    maxTargetStep,
-  );
-  motion.current = MathUtils.damp(
+  const resolved = driftTargetToSection(motion, motion.target, delta);
+  motion.target = resolved;
+  const followed = MathUtils.damp(
     motion.current,
-    motion.target,
+    resolved,
     POSITION_FOLLOW_RATE,
     delta,
   );
+  const maxStep = MAX_TARGET_SPEED * delta;
+  motion.current += MathUtils.clamp(
+    followed - motion.current,
+    -maxStep,
+    maxStep,
+  );
   if (Math.abs(resolved - motion.current) < POSITION_EPSILON) {
     motion.current = resolved;
-    motion.target = resolved;
   }
-  return resolved;
 };
 
 type WorkLockInput = {
@@ -112,6 +103,17 @@ type WorkLockInput = {
   progress: number;
   step: number;
   now: number;
+};
+
+export const driveInputDelta = (input: WorkLockInput): number => {
+  const step =
+    limitDriveTarget(input.target + input.step, input.progress) - input.target;
+  // REASON: a captured chapter can lead by more than the wheel limit; another
+  // forward gesture must never be converted into backward motion by that cap.
+  if (Math.sign(step) !== Math.sign(input.step)) {
+    return 0;
+  }
+  return workLockedDelta({ ...input, step });
 };
 
 // REASON: overlay motion reads the active job and pull every frame outside
@@ -124,6 +126,12 @@ export const resetWorkMotion = (): void => {
   WORK_MOTION.accum = 0;
   WORK_MOTION.job = 0;
   WORK_MOTION.swappedAt = 0;
+};
+
+export const selectWorkJob = (index: number): void => {
+  WORK_MOTION.job = MathUtils.clamp(index, 0, WORK_JOBS.length - 1);
+  WORK_MOTION.accum = 0;
+  WORK_MOTION.swappedAt = performance.now();
 };
 
 const WORK_CATCH_HALF = 0.3;
@@ -173,6 +181,12 @@ export const workLockedDelta = ({
   }
   if (Math.abs(wrapProgress(progress) - wrapped) > WORK_SETTLE_EPSILON) {
     WORK_MOTION.accum = 0;
+    if (
+      (step < 0 && WORK_MOTION.job === 0) ||
+      (step > 0 && WORK_MOTION.job === LAST_JOB)
+    ) {
+      return step;
+    }
     return 0;
   }
   if (now - WORK_MOTION.swappedAt < WORK_SWAP_COOLDOWN_MS) {
