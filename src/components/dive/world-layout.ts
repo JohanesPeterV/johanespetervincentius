@@ -18,14 +18,3 @@ export const buildStarField = (count: number): Float32Array => {
   }
   return positions;
 };
-
-export const ORBIT_PATH = (() => {
-  const count = 180;
-  const positions = new Float32Array(count * 3);
-  for (let index = 0; index < count; index++) {
-    const angle = (index / count) * Math.PI * 2;
-    positions[index * 3] = Math.cos(angle);
-    positions[index * 3 + 1] = Math.sin(angle);
-  }
-  return positions;
-})();

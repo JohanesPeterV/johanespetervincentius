@@ -25,7 +25,7 @@ type SkillGalaxySceneParams = {
 };
 
 const HUB_NODE_SCALE = 2.4;
-const HOVER_BOOST = 1.6;
+const HOVER_BOOST = 1.25;
 const CLICK_DRAG_THRESHOLD = 5;
 const nodeHelper = new Object3D();
 
@@ -117,9 +117,9 @@ export default function SkillGalaxyScene({
         <meshStandardMaterial
           color={metalColor}
           emissive={accentColor}
-          emissiveIntensity={0.35}
-          roughness={0.3}
-          metalness={0.35}
+          emissiveIntensity={0.1}
+          roughness={0.6}
+          metalness={0.1}
         />
       </instancedMesh>
       <mesh>
@@ -127,9 +127,9 @@ export default function SkillGalaxyScene({
         <meshStandardMaterial
           color={metalColor}
           emissive={accentColor}
-          emissiveIntensity={0.35}
-          roughness={0.25}
-          metalness={0.4}
+          emissiveIntensity={0.1}
+          roughness={0.6}
+          metalness={0.1}
         />
       </mesh>
       <lineSegments frustumCulled={false}>
@@ -142,7 +142,7 @@ export default function SkillGalaxyScene({
         <lineBasicMaterial
           color={accentColor}
           transparent
-          opacity={0.15}
+          opacity={0.08}
           depthWrite={false}
         />
       </lineSegments>

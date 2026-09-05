@@ -2,18 +2,17 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { ReactNode, RefObject, useRef } from 'react';
-import { Group } from 'three';
+import { Group, Mesh, MeshStandardMaterial } from 'three';
 
 import { PROJECT_STONE, WORK_STONE, narrativeStoneY } from './descent';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import MechanicalKeyboard from './mechanical-keyboard';
 import OrbitalInstrument from './orbital-instrument';
-import { ORBIT_PATH } from './world-layout';
 
 type OrbitalBackdropParams = {
   palette: DivePalette;
-  motionMode: MotionMode;
+  progressRef: RefObject<number>;
 };
 
 type SectionObjectParams = {
@@ -24,49 +23,37 @@ type SectionObjectParams = {
 };
 
 type SectionObjectsParams = OrbitalBackdropParams & {
-  progressRef: RefObject<number>;
+  motionMode: MotionMode;
 };
 
 export const OrbitalBackdrop = ({
   palette,
-  motionMode,
+  progressRef,
 }: OrbitalBackdropParams) => {
-  const orbitRef = useRef<Group>(null);
+  const moonRef = useRef<Mesh>(null);
+  const materialRef = useRef<MeshStandardMaterial>(null);
   const compact = useThree(({ size }) => size.width < 768);
-  useFrame((_, delta) => {
-    if (orbitRef.current && motionMode === 'full') {
-      orbitRef.current.rotation.z += Math.min(delta, 0.1) * 0.012;
+  useFrame(() => {
+    if (moonRef.current && materialRef.current) {
+      const opacity = Math.max(
+        0,
+        Math.min(1, (1.35 - progressRef.current) * 3),
+      );
+      moonRef.current.visible = !compact && opacity > 0;
+      materialRef.current.opacity = opacity;
     }
   }, -1);
   return (
-    <group ref={orbitRef} position={[0, 4, -14]} rotation={[0.3, -0.3, -0.45]}>
-      <lineLoop rotation={[0.8, 0.3, 0]} scale={12}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[ORBIT_PATH, 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color={palette.accent} transparent opacity={0.22} />
-      </lineLoop>
-      <lineLoop rotation={[0.8, 0.3, 0]} scale={12.2}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[ORBIT_PATH, 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color={palette.metal} transparent opacity={0.18} />
-      </lineLoop>
-      <mesh position={[10, 6, -6]} visible={!compact}>
-        <sphereGeometry args={[2.1, 48, 32]} />
-        <meshStandardMaterial
-          color={palette.surface}
-          roughness={0.48}
-          metalness={0.35}
-        />
-      </mesh>
-    </group>
+    <mesh ref={moonRef} position={[11, 8, -18]} visible={!compact}>
+      <sphereGeometry args={[1.15, 48, 32]} />
+      <meshStandardMaterial
+        ref={materialRef}
+        color={palette.metal}
+        roughness={0.85}
+        metalness={0.05}
+        transparent
+      />
+    </mesh>
   );
 };
 
@@ -90,7 +77,7 @@ const SectionObject = ({
     if (motionMode === 'full') {
       elapsedRef.current += Math.min(delta, 0.1);
     }
-    const phase = elapsedRef.current * 0.24;
+    const phase = elapsedRef.current * 0.08;
     group.position.set(
       anchor.x,
       narrativeStoneY(progressRef.current, anchor.center),
@@ -117,7 +104,7 @@ export const SectionObjects = ({
       progressRef={progressRef}
       motionMode={motionMode}
     >
-      <group scale={0.5} rotation={[0.7, -0.2, -0.18]}>
+      <group scale={0.44} rotation={[0.7, -0.2, -0.18]}>
         <MechanicalKeyboard palette={palette} />
       </group>
     </SectionObject>

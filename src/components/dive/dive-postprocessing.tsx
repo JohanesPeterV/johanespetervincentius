@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  Bloom,
-  EffectComposer,
-  SMAA,
-  Vignette,
-} from '@react-three/postprocessing';
+import { EffectComposer, SMAA } from '@react-three/postprocessing';
 import { ChromaticAberrationEffect } from 'postprocessing';
 import { memo, RefObject, useEffect, useState } from 'react';
 import { Vector2 } from 'three';
@@ -51,9 +46,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
       {gpuTier >= 2 ? (
         <>
           <SMAA />
-          <Bloom intensity={0.22} luminanceThreshold={1} mipmapBlur />
           <primitive ref={aberrationRef} object={aberration} />
-          <Vignette offset={0.3} darkness={0.16} />
         </>
       ) : (
         <></>

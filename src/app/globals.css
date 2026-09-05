@@ -113,6 +113,117 @@ body {
 }
 
 @layer components {
+  .appearance-trigger,
+  .appearance-close,
+  .profile-contact {
+    border-radius: 50%;
+    color: hsl(var(--muted-foreground));
+    transition:
+      color 250ms,
+      background-color 250ms;
+  }
+
+  .appearance-trigger:hover,
+  .appearance-close:hover,
+  .profile-contact:hover {
+    color: hsl(var(--foreground));
+    background: hsl(var(--foreground) / 0.035);
+  }
+
+  .appearance-orb {
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    border: 1px solid hsl(var(--foreground) / 0.4);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.3),
+      transparent 70%
+    );
+    box-shadow: inset -6px -2px 0 hsl(var(--foreground) / 0.65);
+    transform: rotate(-25deg);
+    transition: transform 400ms;
+  }
+
+  .appearance-trigger:hover .appearance-orb,
+  .appearance-trigger:focus-visible .appearance-orb {
+    transform: rotate(0deg);
+  }
+
+  .appearance-panel {
+    color: hsl(var(--popover-foreground));
+    background: hsl(var(--popover) / 0.88);
+    border: 1px solid hsl(var(--foreground) / 0.08);
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 40px hsl(var(--foreground) / 0.08);
+    backdrop-filter: blur(24px);
+  }
+
+  .appearance-swatch {
+    border-radius: 50%;
+  }
+
+  .appearance-swatch > span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--swatch-light);
+    opacity: 0.65;
+    transition: opacity 250ms;
+  }
+
+  .dark .appearance-swatch > span {
+    background: var(--swatch-dark);
+  }
+
+  .appearance-swatch:hover > span,
+  .appearance-swatch[aria-pressed='true'] > span {
+    opacity: 1;
+  }
+
+  .appearance-swatch[aria-pressed='true'] > span {
+    outline: 1px solid hsl(var(--foreground) / 0.5);
+    outline-offset: 4px;
+  }
+
+  .appearance-mode {
+    border-radius: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 12px;
+    transition:
+      color 250ms,
+      background-color 250ms;
+  }
+
+  .appearance-mode:hover,
+  .appearance-mode[aria-pressed='true'] {
+    background: hsl(var(--foreground) / 0.06);
+    color: hsl(var(--foreground));
+  }
+
+  .profile-link {
+    border-bottom: 1px solid hsl(var(--foreground) / 0.08);
+    color: hsl(var(--foreground) / 0.8);
+    transition:
+      color 250ms,
+      border-color 250ms;
+  }
+
+  .profile-link:hover {
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.4);
+  }
+
+  .appearance-trigger:focus-visible,
+  .appearance-close:focus-visible,
+  .appearance-swatch:focus-visible,
+  .appearance-mode:focus-visible,
+  .profile-link:focus-visible,
+  .profile-contact:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 4px;
+  }
+
   .dive-employer {
     opacity: 0.45;
     transition: opacity 250ms;
@@ -229,6 +340,16 @@ body {
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .appearance-orb,
+    .appearance-trigger,
+    .appearance-close,
+    .appearance-swatch > span,
+    .appearance-mode,
+    .profile-link,
+    .profile-contact {
+      transition: none;
+    }
+
     .dive-work-panel,
     .dive-employer,
     .project-preview-window,

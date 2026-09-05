@@ -1,7 +1,8 @@
 'use client';
 
-import { SunMoon } from 'lucide-react';
+import { Moon, Sun, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useEffect, useId, useState } from 'react';
 
 import { useConfig } from '@/hooks/use-config';
 import { BaseColor, baseColors } from '@/registry/registry-base-colors';
@@ -21,54 +22,95 @@ const getSwatchStyle = (
 export default function PalettePicker() {
   const [config, setConfig] = useConfig();
   const { resolvedTheme, setTheme } = useTheme();
+  const panelId = useId();
+  const titleId = useId();
+  const [hydrated, setHydrated] = useState(false);
+
+  // REASON: the server cannot read the saved mode. Wait for hydration before
+  // exposing selected mode attributes so the initial markup agrees.
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   return (
-    <div
-      role="group"
-      aria-label="Appearance"
-      className="fixed right-4 top-4 z-30 flex items-center rounded-full border border-border/60 bg-background/65 p-1 shadow-lg ring-1 ring-foreground/5 backdrop-blur-2xl sm:right-7 sm:top-7"
-    >
-      <span
-        aria-hidden
-        className="hidden min-w-20 pl-3 pr-2 text-[0.6rem] uppercase tracking-[0.18em] text-muted-foreground sm:block"
-      >
-        {config.theme}
-      </span>
-      {baseColors.map((baseColor) => {
-        const isSelected = baseColor.name === config.theme;
-
-        return (
-          <button
-            key={baseColor.name}
-            type="button"
-            aria-label={baseColor.label}
-            title={`${baseColor.label} colourway`}
-            aria-pressed={isSelected}
-            onClick={() => {
-              setConfig({ ...config, theme: baseColor.name });
-            }}
-            style={getSwatchStyle(baseColor.activeColor)}
-            className="group flex h-9 w-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-9"
-          >
-            <span
-              className={`h-2.5 w-2.5 rounded-full bg-[--swatch-light] transition-[opacity,transform,box-shadow] duration-300 group-hover:scale-125 group-hover:opacity-100 motion-reduce:transition-none dark:bg-[--swatch-dark] ${
-                isSelected
-                  ? 'scale-110 opacity-100 ring-1 ring-foreground/40 ring-offset-4 ring-offset-background'
-                  : 'opacity-40'
-              }`}
-            />
-          </button>
-        );
-      })}
+    <div className="fixed right-4 top-4 z-30 sm:right-7 sm:top-7">
       <button
         type="button"
-        aria-label="Toggle light/dark mode"
-        title="Toggle light/dark mode"
-        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-        className="ml-1 flex h-9 w-9 items-center justify-center rounded-full border-l border-border/60 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label="Change appearance"
+        title="Change appearance"
+        popoverTarget={panelId}
+        onKeyDown={(event) => event.stopPropagation()}
+        className="appearance-trigger flex h-11 w-11 items-center justify-center"
       >
-        <SunMoon size={15} aria-hidden />
+        <span aria-hidden className="appearance-orb" />
       </button>
+      <div
+        id={panelId}
+        popover="auto"
+        role="dialog"
+        aria-labelledby={titleId}
+        onPointerDown={(event) => event.stopPropagation()}
+        onPointerMove={(event) => event.stopPropagation()}
+        onPointerUp={(event) => event.stopPropagation()}
+        onWheel={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+        className="appearance-panel fixed bottom-auto left-auto right-4 top-[4.75rem] m-0 w-72 max-w-[calc(100vw-2rem)] p-5 sm:right-7 sm:top-[5.5rem]"
+      >
+        <div className="flex items-center justify-between">
+          <h2 id={titleId} className="font-display text-sm font-medium">
+            Appearance
+          </h2>
+          <button
+            type="button"
+            aria-label="Close appearance"
+            popoverTarget={panelId}
+            popoverTargetAction="hide"
+            className="appearance-close -mr-3 flex h-11 w-11 items-center justify-center"
+          >
+            <X size={14} aria-hidden />
+          </button>
+        </div>
+        <div className="mb-2 mt-4 flex items-center justify-between text-xs text-muted-foreground">
+          <span>Colour</span>
+          <span className="capitalize">{config.theme}</span>
+        </div>
+        <div role="group" aria-label="Colour" className="flex justify-between">
+          {baseColors.map((baseColor) => (
+            <button
+              key={baseColor.name}
+              type="button"
+              aria-label={baseColor.label}
+              title={baseColor.label}
+              aria-pressed={baseColor.name === config.theme}
+              onClick={() => setConfig({ ...config, theme: baseColor.name })}
+              style={getSwatchStyle(baseColor.activeColor)}
+              className="appearance-swatch flex h-11 w-8 items-center justify-center"
+            >
+              <span aria-hidden />
+            </button>
+          ))}
+        </div>
+        <div role="group" aria-label="Mode" className="mt-5 flex gap-2">
+          <button
+            type="button"
+            aria-pressed={hydrated && resolvedTheme === 'light'}
+            onClick={() => setTheme('light')}
+            className="appearance-mode flex h-11 flex-1 items-center justify-center gap-2"
+          >
+            <Sun size={14} aria-hidden />
+            Light
+          </button>
+          <button
+            type="button"
+            aria-pressed={hydrated && resolvedTheme === 'dark'}
+            onClick={() => setTheme('dark')}
+            className="appearance-mode flex h-11 flex-1 items-center justify-center gap-2"
+          >
+            <Moon size={14} aria-hidden />
+            Dark
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

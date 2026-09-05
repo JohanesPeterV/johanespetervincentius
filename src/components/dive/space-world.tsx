@@ -22,26 +22,15 @@ export default function SpaceWorld({
 }: SpaceWorldParams) {
   return (
     <>
-      <DiveAtmosphere
-        palette={palette}
-        progressRef={progressRef}
-        motionMode={motionMode}
-        gpuTier={gpuTier}
-      />
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[-4, 8, 8]} intensity={3.2} />
+      <DiveAtmosphere palette={palette} gpuTier={gpuTier} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[-4, 8, 8]} intensity={1.6} />
       <directionalLight
         position={[5, 2, -4]}
-        intensity={4}
+        intensity={0.8}
         color={palette.accent}
       />
-      <pointLight
-        position={[-6, 3, 6]}
-        intensity={90}
-        distance={35}
-        color={palette.accent}
-      />
-      <OrbitalBackdrop palette={palette} motionMode={motionMode} />
+      <OrbitalBackdrop palette={palette} progressRef={progressRef} />
       <SectionObjects
         palette={palette}
         progressRef={progressRef}
