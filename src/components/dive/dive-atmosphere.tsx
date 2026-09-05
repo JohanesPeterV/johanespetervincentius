@@ -1,30 +1,21 @@
 'use client';
 
 import { useFrame } from '@react-three/fiber';
-import { RefObject, useState } from 'react';
-import { AdditiveBlending, Color } from 'three';
+import { RefObject, useEffect, useState } from 'react';
+import { Color } from 'three';
 
 import type { MotionMode } from './descent';
-import { sectionTravel } from './descent';
 import type { DivePalette } from './dive-palette';
-import { createSeededRandom } from './world-layout';
+import { buildStarField } from './world-layout';
 
 type DiveAtmosphereParams = {
   palette: DivePalette;
   progressRef: RefObject<number>;
   motionMode: MotionMode;
+  gpuTier: number;
 };
 
-const DUST_POSITIONS = (() => {
-  const random = createSeededRandom(71);
-  const positions = new Float32Array(220 * 3);
-  for (let index = 0; index < positions.length; index += 3) {
-    positions[index] = (random() - 0.5) * 42;
-    positions[index + 1] = (random() - 0.5) * 60;
-    positions[index + 2] = random() * 38 - 26;
-  }
-  return positions;
-})();
+const STAR_POSITIONS = buildStarField(1100);
 
 const backdropVertex = `
   varying vec2 vUv;
@@ -36,45 +27,44 @@ const backdropVertex = `
 
 const backdropFragment = `
   uniform vec3 uBackground;
-  uniform vec3 uAccent;
-  uniform float uTime;
-  uniform float uTravel;
+  uniform vec3 uStarlight;
   varying vec2 vUv;
   void main() {
-    vec2 p = vUv - vec2(0.6, 0.68);
-    float haze = exp(-length(p * vec2(2.2, 1.3)) * 5.0);
-    float slant = vUv.x + vUv.y * 0.38;
-    float shafts = pow(0.5 + 0.5 * sin(slant * 43.0 + sin(slant * 17.0 + uTime * 0.035)), 12.0);
-    float light = haze * (0.22 + shafts * 0.24) * (1.0 + uTravel * 0.45);
+    vec2 p = vUv - vec2(0.74, 0.65);
+    float glow = exp(-length(p * vec2(2.0, 2.8)) * 7.0) * 0.035;
+    vec2 q = vUv - vec2(0.22, 0.2);
+    glow += exp(-length(q * vec2(3.0, 2.0)) * 8.0) * 0.012;
     float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
-    vec3 color = uBackground + uAccent * light;
-    gl_FragColor = vec4(max(color + (grain - 0.5) / 255.0, 0.0), 1.0);
+    vec3 color = mix(uBackground, uStarlight, glow * 0.22);
+    gl_FragColor = vec4(max(color + (grain - 0.5) / 1800.0, 0.0), 1.0);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }
 `;
 
-const dustVertex = `
+const starVertex = `
   uniform float uTime;
   uniform float uProgress;
+  uniform float uPixelRatio;
   varying float vAlpha;
   void main() {
     vec3 p = position;
-    p.y = mod(p.y + uProgress * 14.0 + uTime * 0.12 + 30.0, 60.0) - 30.0;
+    p.y = mod(p.y + uProgress * 7.0 + uTime * 0.06 + 70.0, 140.0) - 70.0;
     vec4 view = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * view;
-    gl_PointSize = clamp(52.0 / -view.z, 0.8, 3.5);
-    vAlpha = (0.4 + 0.2 * sin(position.x * 3.0 + uTime * 0.4)) * smoothstep(1.0, 5.0, -view.z);
+    float seed = fract(sin(position.x * 12.9898 + position.z) * 43758.5453);
+    gl_PointSize = clamp((0.9 + seed * 1.1) * 34.0 / -view.z, 0.85, 2.6) * uPixelRatio;
+    vAlpha = (0.24 + seed * 0.5) * (0.85 + 0.15 * sin(uTime * 0.35 + seed * 20.0));
   }
 `;
 
-const dustFragment = `
-  uniform vec3 uAccent;
+const starFragment = `
+  uniform vec3 uStarlight;
   varying float vAlpha;
   void main() {
     float radius = length(gl_PointCoord - 0.5) * 2.0;
-    float alpha = (1.0 - smoothstep(0.0, 1.0, radius)) * vAlpha;
-    gl_FragColor = vec4(uAccent * 1.8, alpha);
+    float alpha = (1.0 - smoothstep(0.15, 1.0, radius)) * vAlpha;
+    gl_FragColor = vec4(uStarlight, alpha);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }
@@ -84,26 +74,38 @@ export default function DiveAtmosphere({
   palette,
   progressRef,
   motionMode,
+  gpuTier,
 }: DiveAtmosphereParams) {
   const [uniforms] = useState(() => ({
     uBackground: { value: new Color(palette.background) },
     uAccent: { value: new Color(palette.accent) },
+    uStarlight: { value: new Color(palette.foreground) },
     uTime: { value: 0 },
     uProgress: { value: 0 },
-    uTravel: { value: 0 },
+    uPixelRatio: { value: 1 },
   }));
 
-  useFrame((_, delta) => {
+  // REASON: shader uniforms retain their initial Color objects. Sync theme
+  // changes into those objects without parsing CSS colours on every frame.
+  useEffect(() => {
+    uniforms.uBackground.value.set(palette.background);
+    uniforms.uAccent.value.set(palette.accent);
+    uniforms.uStarlight.value
+      .set(palette.foreground)
+      .lerp(uniforms.uAccent.value, 0.16);
+  }, [palette.background, palette.accent, palette.foreground, uniforms]);
+
+  useFrame(({ gl }, delta) => {
     if (motionMode === 'full') {
       uniforms.uTime.value += Math.min(delta, 0.1);
     }
     uniforms.uProgress.value = progressRef.current;
-    uniforms.uTravel.value = sectionTravel(progressRef.current);
+    uniforms.uPixelRatio.value = gl.getPixelRatio();
   }, -1);
 
   return (
     <>
-      <mesh position={[0, 5, -36]} scale={[100, 70, 1]} renderOrder={-10}>
+      <mesh position={[0, 5, -120]} scale={[320, 260, 1]} renderOrder={-10}>
         <planeGeometry />
         <shaderMaterial
           uniforms={uniforms}
@@ -112,20 +114,21 @@ export default function DiveAtmosphere({
           depthWrite={false}
         />
       </mesh>
-      <points frustumCulled={false} visible={motionMode === 'full'}>
-        <bufferGeometry>
+      <points frustumCulled={false}>
+        <bufferGeometry
+          drawRange={{ start: 0, count: gpuTier < 2 ? 450 : 1100 }}
+        >
           <bufferAttribute
             attach="attributes-position"
-            args={[DUST_POSITIONS, 3]}
+            args={[STAR_POSITIONS, 3]}
           />
         </bufferGeometry>
         <shaderMaterial
           uniforms={uniforms}
-          vertexShader={dustVertex}
-          fragmentShader={dustFragment}
+          vertexShader={starVertex}
+          fragmentShader={starFragment}
           transparent
           depthWrite={false}
-          blending={AdditiveBlending}
         />
       </points>
     </>

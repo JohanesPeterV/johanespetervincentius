@@ -7,12 +7,12 @@ import {
 import { Color, HalfFloatType, Uniform } from 'three';
 import type { Texture, WebGLRenderer, WebGLRenderTarget } from 'three';
 
-import { DIVE_PALETTE } from './dive-palette';
 import { HANDOFF_START } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { heroHandoffFragment } from './hero-handoff-shader';
 
 export default class HeroHandoffEffect extends Effect {
+  readonly ink = new Color();
   private readonly copy = new CopyPass();
   private readonly active = new Uniform(0);
   private readonly progress = new Uniform(0);
@@ -35,7 +35,7 @@ export default class HeroHandoffEffect extends Effect {
     this.uniforms.set('uProgress', this.progress);
     this.uniforms.set('uActive', this.active);
     this.uniforms.set('uAspect', this.aspect);
-    this.uniforms.set('uInk', new Uniform(new Color(DIVE_PALETTE.foreground)));
+    this.uniforms.set('uInk', new Uniform(this.ink));
   }
 
   initialize(renderer: WebGLRenderer): void {

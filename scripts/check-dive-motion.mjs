@@ -6,7 +6,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
-import { CanvasTexture, IcosahedronGeometry, Vector2 } from 'three';
+import { CanvasTexture, Color, Vector2 } from 'three';
 
 const require = createRequire(import.meta.url);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -26,10 +26,15 @@ const load = (filename) => {
       target: ts.ScriptTarget.ES2020,
     },
   }).outputText;
-  const localRequire = (name) =>
-    name.startsWith('.')
-      ? load(resolve(dirname(filename), `${name}.ts`))
-      : require(name);
+  const localRequire = (name) => {
+    if (name.startsWith('@/')) {
+      return load(resolve(root, 'src', `${name.slice(2)}.ts`));
+    }
+    if (name.startsWith('.')) {
+      return load(resolve(dirname(filename), `${name}.ts`));
+    }
+    return require(name);
+  };
   runInNewContext(`(function(require, module, exports) { ${source}\n })`, {
     performance,
   })(localRequire, module, module.exports);
@@ -39,6 +44,10 @@ const load = (filename) => {
 const descent = load(resolve(root, 'src/components/dive/descent.ts'));
 const motion = load(resolve(root, 'src/components/dive/camera-motion.ts'));
 const palette = load(resolve(root, 'src/components/dive/dive-palette.ts'));
+const themes = load(resolve(root, 'src/lib/theme-colors.ts'));
+const { baseColors } = load(
+  resolve(root, 'src/registry/registry-base-colors.ts'),
+);
 const world = load(resolve(root, 'src/components/dive/world-layout.ts'));
 const labels = load(resolve(root, 'src/components/dive/galaxy-labels.ts'));
 const handoff = load(resolve(root, 'src/components/dive/hero-handoff.ts'));
@@ -191,21 +200,77 @@ test('camera path is continuous through chapter handoffs', () => {
 });
 
 test('palette samples preserve the sRGB contract of descent keyframes', () => {
-  assert.ok(Math.abs(palette.DIVE_PALETTE.accentRgb[0] - 208 / 255) < 0.0001);
+  for (const base of baseColors) {
+    for (const mode of ['light', 'dark']) {
+      const theme = themes.getFluidThemeColors(base.name, mode);
+      const resolved = palette.getDivePalette(theme);
+      const encoded = new Color(theme.fluidColor).convertLinearToSRGB();
+      [encoded.r, encoded.g, encoded.b].forEach((channel, index) => {
+        assert.ok(Math.abs(resolved.accentRgb[index] - channel) < 0.005);
+      });
+      const foreground = new Color(resolved.foreground);
+      const background = new Color(resolved.background);
+      const luminance = (color) =>
+        color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+      const values = [luminance(foreground), luminance(background)].sort(
+        (a, b) => a - b,
+      );
+      assert.ok(
+        (values[1] + 0.05) / (values[0] + 0.05) > 7,
+        `${base.name} ${mode} text contrast`,
+      );
+    }
+  }
 });
 
-test('stone shaping stays bounded and stable when a geometry ref reattaches', () => {
-  const geometry = new IcosahedronGeometry(1, 3);
-  world.shapeNarrativeStone(geometry);
-  const before = geometry.getAttribute('position').array.slice();
-  world.shapeNarrativeStone(geometry);
-  const after = geometry.getAttribute('position').array;
-  for (let index = 0; index < after.length; index++) {
-    assert.ok(Math.abs(before[index] - after[index]) < 0.000001);
-    assert.ok(Number.isFinite(after[index]));
-    assert.ok(Math.abs(after[index]) <= 1.120001);
+test('reduced star counts keep the same field and all stars behind the scene', () => {
+  const full = world.buildStarField(1100);
+  const reduced = world.buildStarField(450);
+  assert.deepEqual(full.slice(0, reduced.length), reduced);
+  for (let index = 0; index < full.length; index += 3) {
+    assert.ok(Math.abs(full[index]) <= 75);
+    assert.ok(Math.abs(full[index + 1]) <= 70);
+    assert.ok(full[index + 2] >= -108 && full[index + 2] <= -8);
   }
-  geometry.dispose();
+});
+
+test('changing colourway never introduces a warm cast into neutral surfaces', () => {
+  for (const mode of ['light', 'dark']) {
+    const reference = palette.getDivePalette(
+      themes.getFluidThemeColors('blue', mode),
+    );
+    for (const base of baseColors) {
+      const resolved = palette.getDivePalette(
+        themes.getFluidThemeColors(base.name, mode),
+      );
+      assert.equal(resolved.background, reference.background);
+      assert.equal(resolved.surface, reference.surface);
+      assert.equal(resolved.foreground, reference.foreground);
+      if (mode === 'dark') {
+        const color = new Color(resolved.background);
+        assert.ok(color.b >= color.r && color.b >= color.g);
+      }
+    }
+  }
+});
+
+test('space grading stays finite through every seam for all colourways', () => {
+  for (const base of baseColors) {
+    for (const mode of ['light', 'dark']) {
+      const resolved = palette.getDivePalette(
+        themes.getFluidThemeColors(base.name, mode),
+      );
+      const frame = descent.createDescentFrame();
+      for (let progress = 0; progress < descent.DIVE_LENGTH; progress += 0.01) {
+        descent.writeDescentFrame(frame, progress);
+        palette.applyDivePalette(frame, resolved, progress);
+        assert.ok(frame.fogDensity >= 0 && frame.fogDensity <= 0.006);
+        for (const channel of [...frame.fogColor, ...frame.veilColor]) {
+          assert.ok(Number.isFinite(channel) && channel >= 0 && channel <= 1);
+        }
+      }
+    }
+  }
 });
 
 test('galaxy labels prioritize hovered tools and hide collisions or overflow', () => {

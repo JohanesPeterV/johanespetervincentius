@@ -1,4 +1,5 @@
 import { Color } from 'three';
+import type { getFluidThemeColors } from '@/lib/theme-colors';
 
 import type { DescentFrame } from './descent';
 import { finaleBoost, seamBoost } from './descent';
@@ -13,8 +14,8 @@ export type DivePalette = {
   exposure: number;
   foreground: string;
   fogDensity: number;
-  rock: string;
-  stone: string;
+  metal: string;
+  surface: string;
 };
 
 const toRgbColor = (value: string): RgbColor => {
@@ -22,25 +23,30 @@ const toRgbColor = (value: string): RgbColor => {
   return [color.r, color.g, color.b];
 };
 
-// REASON: the coffee world is hue-locked by design - its warm hue in a
-// cold-dark frame should not react to the base-color theme
-export const DIVE_PALETTE: DivePalette = {
-  accent: '#d08a3e',
-  accentRgb: toRgbColor('#d08a3e'),
-  background: '#0d0805',
-  backgroundRgb: toRgbColor('#0d0805'),
-  exposure: 0.72,
-  foreground: '#f3e7d3',
-  fogDensity: 0.03,
-  rock: '#3f2818',
-  stone: '#b07c46',
+export const getDivePalette = (
+  theme: ReturnType<typeof getFluidThemeColors>,
+): DivePalette => {
+  const accent = new Color(theme.fluidColor);
+  const background = new Color(theme.backgroundColor);
+  const foreground = new Color(theme.textColor);
+  return {
+    accent: accent.getStyle(),
+    accentRgb: toRgbColor(accent.getStyle()),
+    background: background.getStyle(),
+    backgroundRgb: toRgbColor(background.getStyle()),
+    exposure: 0.9,
+    foreground: foreground.getStyle(),
+    fogDensity: 0.003,
+    metal: foreground.clone().lerp(background, 0.28).getStyle(),
+    surface: background.clone().lerp(foreground, 0.025).getStyle(),
+  };
 };
 
 const blendChannel = (from: number, to: number, amount: number): number => {
   return from + (to - from) * amount;
 };
 
-const SEAM_MIST_DENSITY = 0.016;
+const SEAM_MIST_DENSITY = 0.003;
 
 export const applyDivePalette = (
   frame: DescentFrame,
@@ -49,7 +55,7 @@ export const applyDivePalette = (
 ): void => {
   const seam = seamBoost(progress);
   const transition = Math.max(seam, finaleBoost(progress));
-  const accentAmount = 0.08 + transition * 0.3 + frame.glow * 0.2;
+  const accentAmount = transition * 0.025 + frame.glow * 0.01;
 
   frame.fogColor[0] = blendChannel(
     palette.backgroundRgb[0],
@@ -69,11 +75,9 @@ export const applyDivePalette = (
   frame.veilColor[0] = palette.backgroundRgb[0];
   frame.veilColor[1] = palette.backgroundRgb[1];
   frame.veilColor[2] = palette.backgroundRgb[2];
-  // REASON: the shared descent keys flash a bright veil across the seam, which
-  // strobes on this dark grade - the crossing reads as a breath of accent-lit
-  // mist instead, so the veil is muted and fog density carries the handoff
+  // REASON: the compositor owns the hero crossing. A full-screen veil would
+  // obscure its etched edge; a small fog lift carries the later chapter seams.
   frame.veil *= 1 - seam;
-  frame.fogDensity =
-    Math.max(0.014, frame.fogDensity * 0.58) + seam * SEAM_MIST_DENSITY;
+  frame.fogDensity = palette.fogDensity + seam * SEAM_MIST_DENSITY;
   frame.glow = Math.max(frame.glow, transition * 0.16);
 };

@@ -3,6 +3,7 @@
 import { ReactNode, Suspense, useEffect, useRef, useState } from 'react';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
+import PalettePicker from '@/components/theme-buttons/palette-picker';
 
 import type { PointerState } from './camera-rig';
 import { driveInputDelta, resetWorkMotion } from './camera-motion';
@@ -15,7 +16,7 @@ import {
   sectionStepDelta,
   wrapProgress,
 } from './descent';
-import { DIVE_PALETTE } from './dive-palette';
+import { useDivePalette } from './use-dive-palette';
 import DiveOverlay from './dive-overlay';
 import type { DiveMode } from './dive-overlay';
 import type { OverlayNodes } from './dive-overlay-motion';
@@ -92,7 +93,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<DiveMode>('dive');
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const motionMode = reducedMotion ? 'reduced' : 'full';
-  const palette = DIVE_PALETTE;
+  const palette = useDivePalette();
 
   const applyDriveDelta = (step: number): void => {
     const drive = driveRef.current;
@@ -149,10 +150,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     if (event.button !== 0) {
       return;
     }
-    if (
-      event.target instanceof HTMLElement &&
-      event.target.closest('a, button')
-    ) {
+    if (event.target instanceof Element && event.target.closest('a, button')) {
       return;
     }
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -262,6 +260,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     >
       <Suspense fallback={null}>
         <DiveCanvas
+          palette={palette}
           driveRef={driveRef}
           progressRef={progressRef}
           pointerRef={pointerRef}
@@ -271,6 +270,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
           onEngage={handleEngage}
         />
       </Suspense>
+      <PalettePicker />
       <DiveOverlay
         overlayRef={overlayRef}
         mode={mode}

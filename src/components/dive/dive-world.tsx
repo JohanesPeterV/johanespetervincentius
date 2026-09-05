@@ -1,149 +1,132 @@
 'use client';
 
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { ReactNode, RefObject, useRef } from 'react';
-import { Color, Group, InstancedMesh, Object3D } from 'three';
+import { Group } from 'three';
 
-import { NARRATIVE_STONES, narrativeStoneY } from './descent';
+import { PROJECT_STONE, WORK_STONE, narrativeStoneY } from './descent';
 import type { MotionMode } from './descent';
-import {
-  BlockTransform,
-  buildRisingStones,
-  shapeNarrativeStone,
-} from './world-layout';
+import type { DivePalette } from './dive-palette';
+import MechanicalKeyboard from './mechanical-keyboard';
+import OrbitalInstrument from './orbital-instrument';
+import { ORBIT_PATH } from './world-layout';
 
-const RISING_STONE_BLOCKS = buildRisingStones();
-const narrativeStoneHelper = new Object3D();
-
-const applyBlockInstances = (
-  mesh: InstancedMesh | null,
-  blocks: BlockTransform[],
-  baseColor: string,
-): void => {
-  if (!mesh) {
-    return;
-  }
-  const helper = new Object3D();
-  helper.rotation.order = 'YXZ';
-  const tint = new Color();
-  const base = new Color(baseColor);
-  blocks.forEach((block, index) => {
-    helper.position.set(
-      block.position[0],
-      block.position[1],
-      block.position[2],
-    );
-    helper.rotation.set(
-      block.rotation[0],
-      block.rotation[1],
-      block.rotation[2],
-    );
-    helper.scale.set(block.scale[0], block.scale[1], block.scale[2]);
-    helper.updateMatrix();
-    mesh.setMatrixAt(index, helper.matrix);
-    tint.copy(base).multiplyScalar(block.shade);
-    mesh.setColorAt(index, tint);
-  });
-  mesh.instanceMatrix.needsUpdate = true;
-  if (mesh.instanceColor) {
-    mesh.instanceColor.needsUpdate = true;
-  }
+type OrbitalBackdropParams = {
+  palette: DivePalette;
+  motionMode: MotionMode;
 };
 
-type RisingStonesParams = {
-  color: string;
-};
-
-export const RisingStones = ({ color }: RisingStonesParams) => (
-  <instancedMesh
-    args={[undefined, undefined, RISING_STONE_BLOCKS.length]}
-    ref={(mesh) => {
-      applyBlockInstances(mesh, RISING_STONE_BLOCKS, color);
-    }}
-  >
-    <dodecahedronGeometry args={[1, 0]} />
-    <meshStandardMaterial roughness={0.86} metalness={0.04} />
-  </instancedMesh>
-);
-
-type RisingWorldParams = {
+type SectionObjectParams = {
+  anchor: { center: number; x: number; z: number };
   progressRef: RefObject<number>;
-  rise: (progress: number) => number;
+  motionMode: MotionMode;
   children: ReactNode;
 };
 
-export const RisingWorld = ({
-  progressRef,
-  rise,
-  children,
-}: RisingWorldParams) => {
-  const groupRef = useRef<Group>(null);
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.position.y = rise(progressRef.current);
+type SectionObjectsParams = OrbitalBackdropParams & {
+  progressRef: RefObject<number>;
+};
+
+export const OrbitalBackdrop = ({
+  palette,
+  motionMode,
+}: OrbitalBackdropParams) => {
+  const orbitRef = useRef<Group>(null);
+  const compact = useThree(({ size }) => size.width < 768);
+  useFrame((_, delta) => {
+    if (orbitRef.current && motionMode === 'full') {
+      orbitRef.current.rotation.z += Math.min(delta, 0.1) * 0.012;
     }
+  }, -1);
+  return (
+    <group ref={orbitRef} position={[0, 4, -14]} rotation={[0.3, -0.3, -0.45]}>
+      <lineLoop rotation={[0.8, 0.3, 0]} scale={12}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[ORBIT_PATH, 3]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color={palette.accent} transparent opacity={0.22} />
+      </lineLoop>
+      <lineLoop rotation={[0.8, 0.3, 0]} scale={12.2}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[ORBIT_PATH, 3]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color={palette.metal} transparent opacity={0.18} />
+      </lineLoop>
+      <mesh position={[10, 6, -6]} visible={!compact}>
+        <sphereGeometry args={[2.1, 48, 32]} />
+        <meshStandardMaterial
+          color={palette.surface}
+          roughness={0.48}
+          metalness={0.35}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+const SectionObject = ({
+  anchor,
+  progressRef,
+  motionMode,
+  children,
+}: SectionObjectParams) => {
+  const groupRef = useRef<Group>(null);
+  const elapsedRef = useRef(0);
+  useFrame(({ size }, delta) => {
+    const group = groupRef.current;
+    if (!group) {
+      return;
+    }
+    group.visible = size.width >= 768;
+    if (!group.visible) {
+      return;
+    }
+    if (motionMode === 'full') {
+      elapsedRef.current += Math.min(delta, 0.1);
+    }
+    const phase = elapsedRef.current * 0.24;
+    group.position.set(
+      anchor.x,
+      narrativeStoneY(progressRef.current, anchor.center),
+      anchor.z,
+    );
+    group.rotation.set(
+      Math.sin(phase) * 0.06,
+      Math.cos(phase * 0.7) * 0.12,
+      Math.sin(phase * 0.8) * 0.035,
+    );
+    group.scale.setScalar(Math.min(1, (size.width / size.height) * 0.7));
   }, -1);
   return <group ref={groupRef}>{children}</group>;
 };
 
-type NarrativeStonesParams = {
-  accentColor: string;
-  color: string;
-  progressRef: RefObject<number>;
-  motionMode: MotionMode;
-};
-
-export const NarrativeStones = ({
-  accentColor,
-  color,
+export const SectionObjects = ({
+  palette,
   progressRef,
   motionMode,
-}: NarrativeStonesParams) => {
-  const meshRef = useRef<InstancedMesh>(null);
-  useFrame((state) => {
-    const mesh = meshRef.current;
-    if (!mesh) {
-      return;
-    }
-    const progress = progressRef.current;
-    const idle =
-      motionMode === 'full'
-        ? Math.sin(state.clock.elapsedTime * 0.4) * 0.08
-        : 0;
-    const compact = state.size.width < 768;
-    NARRATIVE_STONES.forEach((stone, index) => {
-      narrativeStoneHelper.position.set(
-        compact ? 2.5 : stone.x,
-        narrativeStoneY(progress, stone.center) - (compact ? 3.9 : 0),
-        stone.z,
-      );
-      narrativeStoneHelper.rotation.set(
-        0.2 + index * 0.28 + progress * 0.16,
-        0.5 + index * 0.55 + progress * 0.22 + idle,
-        -0.18 + index * 0.1,
-      );
-      const size = (1.26 + index * 0.06) * stone.scale * (compact ? 0.55 : 1);
-      narrativeStoneHelper.scale.set(size, size * 0.84, size * 0.94);
-      narrativeStoneHelper.updateMatrix();
-      mesh.setMatrixAt(index, narrativeStoneHelper.matrix);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-  }, -1);
-  return (
-    <instancedMesh
-      ref={meshRef}
-      args={[undefined, undefined, NARRATIVE_STONES.length]}
-      frustumCulled={false}
+}: SectionObjectsParams) => (
+  <>
+    <SectionObject
+      anchor={WORK_STONE}
+      progressRef={progressRef}
+      motionMode={motionMode}
     >
-      <icosahedronGeometry args={[1, 3]} ref={shapeNarrativeStone} />
-      <meshStandardMaterial
-        flatShading
-        color={color}
-        roughness={0.56}
-        metalness={0.28}
-        emissive={accentColor}
-        emissiveIntensity={0.035}
-      />
-    </instancedMesh>
-  );
-};
+      <group scale={0.5} rotation={[0.7, -0.2, -0.18]}>
+        <MechanicalKeyboard palette={palette} />
+      </group>
+    </SectionObject>
+    <SectionObject
+      anchor={PROJECT_STONE}
+      progressRef={progressRef}
+      motionMode={motionMode}
+    >
+      <OrbitalInstrument palette={palette} />
+    </SectionObject>
+  </>
+);

@@ -6,14 +6,15 @@ import { RefObject, Suspense, useEffect, useRef } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
 import type { DriveMotion } from './camera-motion';
-import CoffeeWorld from './coffee-world';
+import SpaceWorld from './space-world';
 import type { MotionMode } from './descent';
 import type { OverlayNodes } from './dive-overlay-motion';
-import { DIVE_PALETTE } from './dive-palette';
+import type { DivePalette } from './dive-palette';
 import SkillGalaxyScene from './skill-galaxy-scene';
 import type { HeroHandoff } from './hero-handoff';
 
 type DiveCanvasParams = {
+  palette: DivePalette;
   driveRef: RefObject<DriveMotion>;
   progressRef: RefObject<number>;
   pointerRef: RefObject<PointerState>;
@@ -33,6 +34,7 @@ const LoadedSignal = ({ stageRef }: { stageRef: RefObject<DiveStage> }) => {
 };
 
 export default function DiveCanvas({
+  palette,
   driveRef,
   progressRef,
   pointerRef,
@@ -43,7 +45,6 @@ export default function DiveCanvas({
 }: DiveCanvasParams) {
   const { tier } = useDetectGPU();
   const stageRef = useRef<DiveStage>('loading');
-  const palette = DIVE_PALETTE;
   const dpr = Math.min(1.5, 1 + Math.max(0, tier - 1) * 0.25);
 
   return (
@@ -57,16 +58,17 @@ export default function DiveCanvas({
       <color attach="background" args={[palette.background]} />
       <fogExp2 attach="fog" args={[palette.background, palette.fogDensity]} />
       <Suspense fallback={null}>
-        <CoffeeWorld
+        <SpaceWorld
           palette={palette}
           progressRef={progressRef}
           motionMode={motionMode}
+          gpuTier={tier}
         />
         <LoadedSignal stageRef={stageRef} />
       </Suspense>
       <SkillGalaxyScene
         accentColor={palette.accent}
-        stoneColor={palette.stone}
+        metalColor={palette.metal}
         progressRef={progressRef}
         onEngage={onEngage}
         motionMode={motionMode}

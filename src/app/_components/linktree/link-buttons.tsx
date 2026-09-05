@@ -9,16 +9,16 @@ export default function LinkButtons() {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative flex items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10 hover:shadow-xl"
+          className="group relative flex items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background/25 px-5 py-3 transition-[transform,background-color,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transform-none motion-reduce:transition-none sm:py-4"
         >
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           />
-          <Icon className="absolute left-5 shrink-0 text-2xl text-white/70 transition-colors group-hover:text-white" />
+          <Icon className="absolute left-5 shrink-0 text-xl text-muted-foreground transition-colors group-hover:text-primary" />
           <span className="flex flex-col items-center">
-            <span className="text-sm font-semibold text-white">{label}</span>
-            <span className="text-xs text-white/60">{handle}</span>
+            <span className="text-sm font-medium text-foreground">{label}</span>
+            <span className="text-xs text-muted-foreground">{handle}</span>
           </span>
         </a>
       ))}

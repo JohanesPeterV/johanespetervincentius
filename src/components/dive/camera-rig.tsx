@@ -274,6 +274,7 @@ export default function CameraRig({
       />
       {motionMode === 'full' ? (
         <DivePostprocessing
+          foreground={palette.foreground}
           aberrationRef={aberrationRef}
           handoffRef={handoffRef}
           gpuTier={gpuTier}

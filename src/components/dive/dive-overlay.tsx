@@ -113,7 +113,7 @@ export default function DiveOverlay({
                 overlayRef.current.sections[index] = element;
               }}
               data-section-scroll
-              className="group pointer-events-auto invisible absolute left-0 top-0 flex max-h-[calc(100svh-8rem)] w-[min(27rem,calc(100vw-3rem))] flex-col items-start gap-3 overflow-y-auto overscroll-contain text-left opacity-0 [will-change:transform,opacity] scrollbar-thin"
+              className="group pointer-events-auto invisible absolute left-0 top-0 flex max-h-[calc(100svh-13rem)] w-[min(27rem,calc(100vw-3rem))] flex-col items-start gap-3 overflow-y-auto overscroll-contain text-left opacity-0 [will-change:transform,opacity] scrollbar-thin"
             >
               <span
                 style={dimStyle}
@@ -166,7 +166,7 @@ export default function DiveOverlay({
                 </div>
               ) : null}
               {section.center === TECH_STONE.center ? (
-                <div className="mt-4 flex flex-col items-start gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-4 sm:flex-col sm:items-start sm:gap-2">
                   {GALAXY_CATEGORIES.map((category, categoryIndex) => (
                     <button
                       type="button"
@@ -184,7 +184,7 @@ export default function DiveOverlay({
                   <button
                     type="button"
                     onClick={onToggleExplore}
-                    className="pointer-events-auto mt-3 text-[0.62rem] tracking-[0.3em] opacity-70 transition-opacity hover:opacity-100"
+                    className="pointer-events-auto mt-3 w-full text-left text-[0.62rem] tracking-[0.3em] opacity-70 transition-opacity hover:opacity-100"
                   >
                     {mode === 'explore' ? '✕ EXIT' : '◉ EXPLORE'}
                   </button>

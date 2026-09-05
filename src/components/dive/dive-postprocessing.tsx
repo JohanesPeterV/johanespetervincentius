@@ -3,7 +3,6 @@
 import {
   Bloom,
   EffectComposer,
-  HueSaturation,
   SMAA,
   Vignette,
 } from '@react-three/postprocessing';
@@ -13,23 +12,23 @@ import { Vector2 } from 'three';
 
 import HeroHandoffEffect from './hero-handoff-effect';
 import type { HeroHandoff } from './hero-handoff';
-import DiveContrastEffect from './dive-contrast';
 
 const ABERRATION_OFFSET = new Vector2();
 
 type DivePostprocessingParams = {
+  foreground: string;
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
   handoffRef: RefObject<HeroHandoff>;
   gpuTier: number;
 };
 
 const DivePostprocessing = memo(function DivePostprocessing({
+  foreground,
   aberrationRef,
   handoffRef,
   gpuTier,
 }: DivePostprocessingParams) {
   const [handoff] = useState(() => new HeroHandoffEffect(handoffRef.current));
-  const [contrast] = useState(() => new DiveContrastEffect());
   const [aberration] = useState(
     () =>
       new ChromaticAberrationEffect({
@@ -43,26 +42,23 @@ const DivePostprocessing = memo(function DivePostprocessing({
   useEffect(
     () => () => {
       handoff.dispose();
-      contrast.dispose();
       aberration.dispose();
     },
-    [handoff, contrast, aberration],
+    [handoff, aberration],
   );
   return (
     <EffectComposer multisampling={0}>
       {gpuTier >= 2 ? (
         <>
           <SMAA />
-          <Bloom intensity={0.35} luminanceThreshold={1} mipmapBlur />
+          <Bloom intensity={0.22} luminanceThreshold={1} mipmapBlur />
           <primitive ref={aberrationRef} object={aberration} />
-          <HueSaturation saturation={-0.18} />
-          <primitive object={contrast} />
-          <Vignette offset={0.24} darkness={0.34} />
+          <Vignette offset={0.3} darkness={0.16} />
         </>
       ) : (
         <></>
       )}
-      <primitive object={handoff} />
+      <primitive object={handoff} ink={foreground} />
     </EffectComposer>
   );
 });

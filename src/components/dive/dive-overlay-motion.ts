@@ -125,7 +125,8 @@ const positionTechHud = (
   frame: OverlayFrame,
 ): void => {
   const left = Math.max(24, frame.width * 0.05);
-  element.style.transform = `translate3d(${left}px, ${frame.height * 0.14}px, 0)`;
+  const top = Math.max(104, frame.height * 0.14);
+  element.style.transform = `translate3d(${left}px, ${top}px, 0)`;
 };
 
 const positionStoneSection = (
@@ -133,12 +134,12 @@ const positionStoneSection = (
   frame: OverlayFrame,
   stone: Vector2,
 ): { left: number; top: number; anchor: number } => {
-  // REASON: the stone projects to ~120px screen radius, so the gap must stay
-  // beyond it or headlines start on top of the sphere
+  // REASON: reserve the appearance controls above and chapter navigation below;
+  // anchored copy scrolls within that space instead of covering either control.
   const height = element.offsetHeight;
   const maxTop = frame.height - height - 104;
   if (frame.width < 768) {
-    const top = Math.max(24, Math.min(frame.height * 0.16, maxTop));
+    const top = Math.max(88, Math.min(frame.height * 0.16, maxTop));
     element.style.transform = `translate3d(24px, ${top}px, 0)`;
     return { left: 24, top, anchor: 0 };
   }
@@ -151,7 +152,7 @@ const positionStoneSection = (
     frame.height * 0.4,
     Math.min(frame.height * 0.6, stone.y),
   );
-  const top = Math.max(24, Math.min(center - height / 2, maxTop));
+  const top = Math.max(104, Math.min(center - height / 2, maxTop));
   element.style.transform = `translate3d(${left}px, ${top}px, 0)`;
   return { left, top, anchor: 0 };
 };

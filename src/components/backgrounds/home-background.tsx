@@ -6,35 +6,19 @@ import { useTheme } from 'next-themes';
 
 import { useDetectGPU } from '@react-three/drei';
 import { EffectComposer } from '@react-three/postprocessing';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function HomeBackground() {
   const { resolvedTheme } = useTheme();
   const [{ theme }] = useConfig();
   const [eventSource, setEventSource] = useState<HTMLElement | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const gpu = useDetectGPU();
 
-  const isLowPerformanceDevice = gpu.tier < 2;
-
-  const setupEventSourceAndHardwareAcceleration = () => {
+  // REASON: wait for the browser event source before rendering GPU-dependent
+  // content so the first client render matches the server's static background.
+  useEffect(() => {
     setEventSource(document.body);
-
-    if (containerRef.current) {
-      containerRef.current.style.willChange = 'transform';
-    }
-
-    const currentRef = containerRef.current;
-
-    return () => {
-      if (currentRef) {
-        currentRef.style.willChange = 'auto';
-      }
-    };
-  };
-
-  // REASON: DOM side-effect — sets event source on document.body and enables hardware acceleration
-  useEffect(setupEventSourceAndHardwareAcceleration, []);
+  }, []);
 
   const { backgroundColor: baseBackgroundColor, fluidColor } =
     getFluidThemeColors(theme, resolvedTheme);
@@ -48,7 +32,7 @@ export default function HomeBackground() {
     pressure: 0.8,
   });
 
-  if (isLowPerformanceDevice) {
+  if (!eventSource || gpu.tier < 2) {
     return (
       <div
         className="fixed inset-0 z-[-10]"
@@ -59,15 +43,15 @@ export default function HomeBackground() {
 
   return (
     <div
-      ref={containerRef}
       className="fixed inset-0 z-[-10]"
       style={{
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
+        willChange: 'transform',
       }}
     >
       <Canvas
-        eventSource={eventSource || undefined}
+        eventSource={eventSource}
         style={{
           width: '100%',
           height: '100%',

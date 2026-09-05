@@ -93,7 +93,7 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
         }}
         className="pointer-events-none w-full select-none"
       >
-        <CarouselContent>
+        <CarouselContent className="ml-0">
           <CarouselItem
             aria-label="Original card, 1 of 2"
             className="flex items-center justify-center px-4 sm:px-8"

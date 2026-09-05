@@ -18,7 +18,7 @@ import {
 
 type SkillGalaxySceneParams = {
   accentColor: string;
-  stoneColor: string;
+  metalColor: string;
   progressRef: RefObject<number>;
   onEngage: (category: number | null) => void;
   motionMode: MotionMode;
@@ -31,7 +31,7 @@ const nodeHelper = new Object3D();
 
 export default function SkillGalaxyScene({
   accentColor,
-  stoneColor,
+  metalColor,
   progressRef,
   onEngage,
   motionMode,
@@ -113,24 +113,23 @@ export default function SkillGalaxyScene({
         onPointerOut={handlePointerOut}
         onClick={handleClick}
       >
-        <dodecahedronGeometry args={[0.06, 0]} />
+        <sphereGeometry args={[0.055, 8, 8]} />
         <meshStandardMaterial
-          flatShading
-          color={stoneColor}
+          color={metalColor}
           emissive={accentColor}
-          emissiveIntensity={0.18}
-          roughness={0.85}
-          metalness={0.05}
+          emissiveIntensity={0.35}
+          roughness={0.3}
+          metalness={0.35}
         />
       </instancedMesh>
       <mesh>
-        <icosahedronGeometry args={[0.24, 1]} />
+        <sphereGeometry args={[0.18, 24, 16]} />
         <meshStandardMaterial
-          flatShading
-          color={stoneColor}
+          color={metalColor}
           emissive={accentColor}
           emissiveIntensity={0.35}
-          roughness={0.6}
+          roughness={0.25}
+          metalness={0.4}
         />
       </mesh>
       <lineSegments frustumCulled={false}>
