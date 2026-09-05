@@ -33,11 +33,26 @@ import { useHeroHandoff } from './use-hero-handoff';
 type PointerDrag = {
   id: number | null;
   y: number;
+  scrollTarget: HTMLElement | null;
 };
 
 const LINE_DELTA_MODE = 1;
 const PAGE_DELTA_MODE = 2;
 const LINE_HEIGHT_PX = 16;
+
+const getScrollableSection = (target: EventTarget): HTMLElement | null => {
+  if (!(target instanceof Element)) {
+    return null;
+  }
+  const section = target.closest('[data-section-scroll]');
+  if (
+    section instanceof HTMLElement &&
+    section.scrollHeight > section.clientHeight
+  ) {
+    return section;
+  }
+  return null;
+};
 
 const normalizeWheelDelta = (
   event: React.WheelEvent<HTMLDivElement>,
@@ -60,7 +75,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     idleTime: 0,
   });
   const progressRef = useRef(DIVE_START);
-  const dragRef = useRef<PointerDrag>({ id: null, y: 0 });
+  const dragRef = useRef<PointerDrag>({ id: null, y: 0, scrollTarget: null });
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const overlayRef = useRef<OverlayNodes>({
     chapters: [],
@@ -115,6 +130,9 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   };
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
+    if (getScrollableSection(event.target)) {
+      return;
+    }
     if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
       return;
     }
@@ -142,7 +160,11 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       galaxyPointerDown(event.pointerId, event.clientX, event.clientY);
       return;
     }
-    dragRef.current = { id: event.pointerId, y: event.clientY };
+    dragRef.current = {
+      id: event.pointerId,
+      y: event.clientY,
+      scrollTarget: getScrollableSection(event.target),
+    };
   };
 
   const handlePointerMove = (
@@ -163,7 +185,12 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     if (dragRef.current.id !== event.pointerId) {
       return;
     }
-    applyDriveDelta((dragRef.current.y - event.clientY) * TOUCH_SENSITIVITY);
+    const delta = dragRef.current.y - event.clientY;
+    if (dragRef.current.scrollTarget) {
+      dragRef.current.scrollTarget.scrollTop += delta;
+    } else {
+      applyDriveDelta(delta * TOUCH_SENSITIVITY);
+    }
     dragRef.current.y = event.clientY;
   };
 
@@ -176,6 +203,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     }
     if (dragRef.current.id === event.pointerId) {
       dragRef.current.id = null;
+      dragRef.current.scrollTarget = null;
     }
   };
 

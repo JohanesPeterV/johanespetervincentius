@@ -2,10 +2,17 @@
 
 import { ReactNode, RefObject } from 'react';
 
-import { DIVE_SECTIONS, TECH_STONE, WORK_JOBS, WORK_STONE } from './descent';
+import {
+  DIVE_SECTIONS,
+  PROJECT_STONE,
+  TECH_STONE,
+  WORK_STONE,
+} from './descent';
+import { DiveWorkExperience } from './dive-work-experience';
+import { PomoplanterPreview } from '@/app/_components/projects/pomoplanter-preview';
+import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
-import { selectWorkJob } from './camera-motion';
 
 export type DiveMode = 'dive' | 'explore';
 
@@ -105,7 +112,8 @@ export default function DiveOverlay({
               ref={(element) => {
                 overlayRef.current.sections[index] = element;
               }}
-              className="group invisible absolute left-0 top-0 flex w-[min(27rem,calc(100vw-3rem))] flex-col items-start gap-3 text-left opacity-0 [will-change:transform,opacity]"
+              data-section-scroll
+              className="group pointer-events-auto invisible absolute left-0 top-0 flex max-h-[calc(100svh-8rem)] w-[min(27rem,calc(100vw-3rem))] flex-col items-start gap-3 overflow-y-auto overscroll-contain text-left opacity-0 [will-change:transform,opacity] scrollbar-thin"
             >
               <span
                 style={dimStyle}
@@ -126,56 +134,20 @@ export default function DiveOverlay({
                 {section.subtitle}
               </span>
               {section.center === WORK_STONE.center ? (
-                <div className="mt-2 flex w-full flex-col gap-5">
-                  <div className="flex gap-5 text-sm leading-relaxed sm:flex-col sm:gap-2">
-                    {WORK_JOBS.map((job, jobIndex) => (
-                      <button
-                        type="button"
-                        key={job.label}
-                        data-active="false"
-                        onClick={() => selectWorkJob(jobIndex)}
-                        aria-label={job.label}
-                        ref={(element) => {
-                          overlayRef.current.workRail[jobIndex] = element;
-                        }}
-                        className="pointer-events-auto text-left opacity-30 transition-[opacity,transform] duration-500 hover:opacity-70 data-[active=true]:translate-x-2 data-[active=true]:opacity-90 motion-reduce:transition-none"
-                      >
-                        <span className="sm:hidden">
-                          {String(jobIndex + 1).padStart(2, '0')}
-                        </span>
-                        <span className="hidden sm:inline">{job.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="grid">
-                    {WORK_JOBS.map((job, jobIndex) => (
-                      <div
-                        key={job.label}
-                        data-active="false"
-                        ref={(element) => {
-                          overlayRef.current.workPanels[jobIndex] = element;
-                        }}
-                        className="col-start-1 row-start-1 flex translate-y-5 flex-col gap-4 opacity-0 transition-[opacity,transform] duration-700 [transition-timing-function:cubic-bezier(0.19,1,0.22,1)] data-[active=true]:translate-y-0 data-[active=true]:opacity-100 motion-reduce:transition-none"
-                      >
-                        <p className="text-xs leading-relaxed sm:hidden">
-                          {job.label}
-                        </p>
-                        <p className="text-xs leading-relaxed opacity-60 sm:text-sm">
-                          {job.description}
-                        </p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {job.showcases.map((showcase) => (
-                            <div
-                              key={showcase}
-                              className="flex aspect-video items-center justify-center rounded-md border border-current p-2 text-center text-[0.6rem] leading-snug tracking-[0.08em] opacity-40"
-                            >
-                              {showcase}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <DiveWorkExperience overlayRef={overlayRef} />
+              ) : null}
+              {section.center === PROJECT_STONE.center ? (
+                <div className="dive-project flex w-full flex-col gap-3">
+                  <PomoplanterPreview />
+                  <h3 className="font-display text-2xl">
+                    {POMODORO_PLANTER.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed opacity-75 sm:text-sm">
+                    {POMODORO_PLANTER.description}
+                  </p>
+                  <p className="text-[0.65rem] tracking-wide opacity-50">
+                    {POMODORO_PLANTER.technologies.join(' · ')}
+                  </p>
                 </div>
               ) : null}
               {section.links ? (

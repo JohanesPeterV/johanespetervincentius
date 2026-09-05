@@ -1,5 +1,6 @@
 type WorkExperience = {
   company: string;
+  headline: string;
   positions: {
     name: string;
     workPeriod: string;
@@ -14,98 +15,117 @@ type WorkExperience = {
 export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Smilie',
+    headline: 'From product decisions to production ownership.',
     positions: [
       {
         name: 'Lead Software Engineer',
-        workPeriod: '2025-Present',
-        description: `Own technical direction end-to-end — architecture, database design, deployment, and reliability — across multi-product systems for corporate gifting, digital rewards, and e-commerce. Drive vendor integrations, partner with the Founder on platform strategy, and build AI-assisted workflows that let a lean team ship like a larger one.`,
+        workPeriod: 'Sep 2025 – Present',
+        description:
+          'Lead engineering across corporate gifting, digital rewards, and e-commerce. Partner directly with the Founder to turn product and operational needs into reliable systems.',
       },
     ],
     showcases: [
       {
-        title: 'Corporate Gifting Platform',
-        description: 'Multi-product gifting flows from catalog to fulfilment.',
-      },
-      {
-        title: 'Digital Rewards',
+        title: 'End-to-end ownership',
         description:
-          'Reward issuing and redemption across vendor integrations.',
+          'Architecture, database design, vendor integrations, and production reliability.',
       },
       {
-        title: 'AI-Assisted Workflows',
-        description: 'Internal AI tooling that lets a lean team ship faster.',
+        title: 'Engineering leadership',
+        description:
+          'Onboard engineers and set conventions for code review, testing, and delivery.',
+      },
+      {
+        title: 'AI-assisted delivery',
+        description:
+          'Build development workflows that extend what a lean engineering team can ship.',
       },
     ],
   },
   {
     company: 'TableLink',
+    headline: 'Live venue operations. A stronger engineering foundation.',
     positions: [
       {
         name: 'Full-stack Developer',
-        workPeriod: '2025',
-        description: `Delivered core venue SaaS workflows — QR ordering, dynamic menus, and real-time guest operations — and standardized frontend architecture across Next.js/Vite apps with reusable components and Storybook. Built shared real-time data infrastructure for synchronized live updates while cutting technical debt across a microservices stack.`,
+        workPeriod: 'Feb – Sep 2025',
+        description:
+          'Delivered the workflows venues run on: QR ordering, dynamic menus, and real-time guest operations. Improved the shared architecture behind them so the team could build consistently.',
       },
     ],
     showcases: [
       {
-        title: 'QR Ordering',
-        description: 'Scan-to-order flow with dynamic venue menus.',
+        title: 'Real-time infrastructure',
+        description:
+          'Designed shared data infrastructure for synchronized operational tables and live updates.',
       },
       {
-        title: 'Live Guest Operations',
-        description: 'Real-time updates synchronized across venue devices.',
+        title: 'Consistent frontend architecture',
+        description:
+          'Standardized Next.js and Vite apps with reusable components and Storybook.',
       },
       {
-        title: 'Shared Component Library',
-        description: 'Reusable UI standardized with Storybook.',
+        title: 'Healthier delivery',
+        description:
+          'Reduced debt across services and strengthened code review and release practices.',
       },
     ],
   },
   {
     company: 'Farmio',
+    headline: 'Practical AI, shipped into everyday operations.',
     positions: [
       {
         name: 'Software Engineer',
-        workPeriod: '2023-2024',
-        description: `Shipped one of the team's first LLM-in-production features — a GPT-3.5 + WhatsApp integration that turned free-form chats into structured orders. Built the Agent Portal end-to-end from auth to UI, moved checkout pricing server-side to guarantee price integrity, and standardized i18n across three locales.`,
+        workPeriod: 'Nov 2023 – Nov 2024',
+        description:
+          'Shipped one of the team’s first production LLM features: turning free-form WhatsApp messages into structured orders with GPT-3.5. Established code and review conventions as the team grew.',
       },
     ],
     showcases: [
       {
-        title: 'WhatsApp Order Bot',
-        description: 'GPT-3.5 turns free-form chats into structured orders.',
+        title: 'Zero-to-launch ownership',
+        description:
+          'Designed and built the Agent Portal end to end, from authentication to UI.',
       },
       {
-        title: 'Agent Portal',
-        description: 'Agent-facing portal built end-to-end, auth to UI.',
+        title: 'Price integrity',
+        description:
+          'Moved checkout pricing to the backend for consistent prices across platforms.',
       },
       {
-        title: 'Server-Side Checkout',
-        description: 'Pricing moved server-side to guarantee integrity.',
+        title: 'A maintainable foundation',
+        description:
+          'Consolidated duplicated pages and standardized internationalization across three locales.',
       },
     ],
   },
   {
-    company: 'Software Lab Center, Binus',
+    company: 'BINUS University',
+    headline: 'Building the systems behind the classroom.',
     positions: [
       {
-        name: 'Database Administrator & Teaching Assistant',
-        workPeriod: '2020-2024',
-        description: `Maintained the practicum database serving ~20,000 students per semester and an ASP.NET app used by 161 staff, and built full-stack tools with Next.js and Nest.js for practicum operations. Earlier, taught programming-based classes to 1,700+ students and shipped Vue.js/ASP.NET features for an internal app with 5,293 users.`,
+        name: 'Database Administrator · Developer Intern · Teaching Assistant',
+        workPeriod: 'Aug 2020 – Feb 2024',
+        description:
+          'Worked across teaching, full-stack development, and database administration at the Software Lab Center. Built and maintained the tools supporting daily practicum operations.',
       },
     ],
     showcases: [
       {
-        title: 'Practicum Operations Tools',
-        description: 'Full-stack Next.js and Nest.js internal tooling.',
+        title: '5,293 users',
+        description:
+          'Shipped evaluation and dashboard features for an internal Vue.js and ASP.NET application.',
       },
       {
-        title: 'Practicum Database',
-        description: 'Database serving ~20,000 students per semester.',
+        title: 'Operational reliability',
+        description:
+          'Maintained the practicum database, operational procedures, and ASP.NET staff application.',
       },
       {
-        title: 'Staff Application',
-        description: 'ASP.NET app used daily by 161 staff.',
+        title: 'Full-stack tooling',
+        description:
+          'Developed a Next.js and Nest.js application for internal operations.',
       },
     ],
   },

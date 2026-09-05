@@ -1,7 +1,6 @@
 import ScrollContainer from '@/components/scroll-container';
 import { Title } from '@/components/title';
 import { Card, CardContent } from '@/components/ui/card';
-import { FaRegImage } from 'react-icons/fa';
 import { WORK_EXPERIENCES } from './work-experiences';
 
 export default function WorkExperience() {
@@ -16,7 +15,7 @@ export default function WorkExperience() {
             <div className="space-y-4">
               {WORK_EXPERIENCES.map((workExperience, index) => (
                 <Card
-                  key={index}
+                  key={workExperience.company}
                   className={`bg-opacity-60 backdrop-blur-2xl ${
                     index === 0 ? 'border-primary' : ''
                   }`}
@@ -26,6 +25,9 @@ export default function WorkExperience() {
                       <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">
                         {workExperience.company}
                       </h2>
+                      <p className="text-base sm:text-lg font-medium">
+                        {workExperience.headline}
+                      </p>
                       {workExperience.positions.map((position, innerIndex) => (
                         <div key={innerIndex} className="space-y-2">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
@@ -44,26 +46,18 @@ export default function WorkExperience() {
                           )}
                         </div>
                       ))}
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <ul className="grid gap-4 sm:grid-cols-3">
                         {workExperience.showcases.map((showcase) => (
-                          <figure key={showcase.title} className="space-y-1.5">
-                            <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
-                              <FaRegImage
-                                size={24}
-                                className="text-muted-foreground"
-                              />
-                            </div>
-                            <figcaption>
-                              <p className="text-xs sm:text-sm font-medium">
-                                {showcase.title}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {showcase.description}
-                              </p>
-                            </figcaption>
-                          </figure>
+                          <li key={showcase.title} className="space-y-1.5">
+                            <p className="text-xs sm:text-sm font-medium">
+                              {showcase.title}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {showcase.description}
+                            </p>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
                   </CardContent>
                 </Card>

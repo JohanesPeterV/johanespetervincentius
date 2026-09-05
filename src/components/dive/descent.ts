@@ -1,3 +1,6 @@
+import { WORK_EXPERIENCES } from '@/app/_components/work-experience/work-experiences';
+import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
+
 import { RAW_DESCENT_KEYS } from './descent-keys';
 
 type DiveSectionLink = {
@@ -51,46 +54,9 @@ const TECH_DWELL_HALF = 0.3;
 
 export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
 
-type DiveWorkJob = {
-  label: string;
-  description: string;
-  showcases: string[];
-};
+export const WORK_JOBS = WORK_EXPERIENCES;
 
-export const WORK_JOBS: DiveWorkJob[] = [
-  {
-    label: 'Smilie — Lead Software Engineer · 2025—now',
-    description: `Own technical direction end-to-end — architecture, database design, deployment, and reliability — across multi-product systems for corporate gifting, digital rewards, and e-commerce. Drive vendor integrations, partner with the Founder on platform strategy, and build AI-assisted workflows that let a lean team ship like a larger one.`,
-    showcases: [
-      'Corporate Gifting Platform',
-      'Digital Rewards',
-      'AI-Assisted Workflows',
-    ],
-  },
-  {
-    label: 'TableLink — Full-stack Developer · 2025',
-    description: `Delivered core venue SaaS workflows — QR ordering, dynamic menus, and real-time guest operations — and standardized frontend architecture across Next.js/Vite apps with reusable components and Storybook. Built shared real-time data infrastructure for synchronized live updates while cutting technical debt across a microservices stack.`,
-    showcases: [
-      'QR Ordering',
-      'Live Guest Operations',
-      'Shared Component Library',
-    ],
-  },
-  {
-    label: 'Farmio — Software Engineer · 2023—2024',
-    description: `Shipped one of the team's first LLM-in-production features — a GPT-3.5 + WhatsApp integration that turned free-form chats into structured orders. Built the Agent Portal end-to-end from auth to UI, moved checkout pricing server-side to guarantee price integrity, and standardized i18n across three locales.`,
-    showcases: ['WhatsApp Order Bot', 'Agent Portal', 'Server-Side Checkout'],
-  },
-  {
-    label: 'Software Lab Center, Binus · 2020—2024',
-    description: `Maintained the practicum database serving ~20,000 students per semester and an ASP.NET app used by 161 staff, and built full-stack tools with Next.js and Nest.js for practicum operations. Earlier, taught programming-based classes to 1,700+ students and shipped Vue.js/ASP.NET features for an internal app with 5,293 users.`,
-    showcases: [
-      'Practicum Operations Tools',
-      'Practicum Database',
-      'Staff Application',
-    ],
-  },
-];
+export const PROJECT_STONE = { center: 2.55, x: -1.45, z: 8.4 };
 
 export const DIVE_SECTIONS: DiveSection[] = [
   {
@@ -111,16 +77,14 @@ export const DIVE_SECTIONS: DiveSection[] = [
   {
     tag: '03',
     title: 'Projects',
-    subtitle: 'a few things built',
-    center: 2.55,
+    subtitle: 'From idea to a product you can use.',
     placement: 'stone',
     stoneIndex: 1,
-    x: -1.45,
-    z: 8.4,
+    ...PROJECT_STONE,
     links: [
       {
-        label: 'Pomodoro Planter',
-        href: 'https://pomoplanter.com',
+        label: POMODORO_PLANTER.title,
+        href: POMODORO_PLANTER.link,
       },
       {
         label: 'Simple Helpdesk',

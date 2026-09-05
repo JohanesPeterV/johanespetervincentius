@@ -92,7 +92,13 @@ const applyWorkShowcase = (nodes: OverlayNodes): void => {
       element.dataset.active = value;
     }
   };
-  nodes.workRail.forEach(mark);
+  nodes.workRail.forEach((element, index) => {
+    mark(element, index);
+    const pressed = String(index === active);
+    if (element && element.getAttribute('aria-pressed') !== pressed) {
+      element.setAttribute('aria-pressed', pressed);
+    }
+  });
   const pull = workPull();
   nodes.workPanels.forEach((element, index) => {
     if (!element) {
@@ -129,8 +135,10 @@ const positionStoneSection = (
 ): { left: number; top: number; anchor: number } => {
   // REASON: the stone projects to ~120px screen radius, so the gap must stay
   // beyond it or headlines start on top of the sphere
+  const height = element.offsetHeight;
+  const maxTop = frame.height - height - 104;
   if (frame.width < 768) {
-    const top = frame.height * 0.16;
+    const top = Math.max(24, Math.min(frame.height * 0.16, maxTop));
     element.style.transform = `translate3d(24px, ${top}px, 0)`;
     return { left: 24, top, anchor: 0 };
   }
@@ -139,12 +147,13 @@ const positionStoneSection = (
     24,
     Math.min(frame.width - 456, stone.x + horizontalGap),
   );
-  const top = Math.max(
+  const center = Math.max(
     frame.height * 0.4,
     Math.min(frame.height * 0.6, stone.y),
   );
-  element.style.transform = `translate3d(${left}px, ${top}px, 0) translateY(-50%)`;
-  return { left, top, anchor: 0.5 };
+  const top = Math.max(24, Math.min(center - height / 2, maxTop));
+  element.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+  return { left, top, anchor: 0 };
 };
 
 export const applyOverlay = (

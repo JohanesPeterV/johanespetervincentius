@@ -7,15 +7,29 @@ type Project = {
   image?: string;
 };
 
+export const POMODORO_PLANTER = {
+  title: 'Pomodoro Planter',
+  description:
+    'Turn focused time into a growing garden. A complete product with custom timer cycles, persistent plants, and a timer that syncs across devices when you sign in.',
+  technologies: ['Next.js', 'TypeScript', 'Convex', 'Clerk'],
+  link: 'https://pomoplanter.com',
+  image: '/projects/pomoplanter-morning.webp',
+  screenshots: [
+    {
+      label: 'Morning',
+      src: '/projects/pomoplanter-morning.webp',
+      alt: 'Pomodoro Planter in morning mode, with a focus timer beside a garden of mature tomato plants.',
+    },
+    {
+      label: 'Night',
+      src: '/projects/pomoplanter-night.webp',
+      alt: 'Pomodoro Planter in night mode, with glowing lamps around a garden of mature tomato plants.',
+    },
+  ],
+};
+
 export const projects: Project[] = [
-  {
-    title: 'Pomodoro Planter',
-    description:
-      'A Pomodoro timer that grows a plant for every completed focus session, with custom cycles and a timer that stays live across devices.',
-    technologies: ['Next.js', 'Convex', 'Clerk'],
-    link: 'https://pomoplanter.com',
-    image: '/projects/pomoplanter.webp',
-  },
+  POMODORO_PLANTER,
   {
     title: 'Simple Helpdesk',
     description:
