@@ -169,8 +169,12 @@ export const workLockedDelta = ({
       return 0;
     }
     const next = wrapped + step;
-    if (wrapped <= WORK_ZONE_START && next > WORK_ZONE_START) {
+    // REASON: the handoff previews Work before its scroll lock catches. Choose
+    // the incoming job on approach so revealed copy cannot change mid-wipe.
+    if (wrapped <= WORK_ZONE_START && step > 0) {
       WORK_MOTION.job = 0;
+    }
+    if (wrapped <= WORK_ZONE_START && next > WORK_ZONE_START) {
       return WORK_STONE.center - wrapped;
     }
     if (wrapped >= WORK_ZONE_END && next < WORK_ZONE_END) {

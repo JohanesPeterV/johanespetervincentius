@@ -11,12 +11,14 @@ import type { MotionMode } from './descent';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { DIVE_PALETTE } from './dive-palette';
 import SkillGalaxyScene from './skill-galaxy-scene';
+import type { HeroHandoff } from './hero-handoff';
 
 type DiveCanvasParams = {
   driveRef: RefObject<DriveMotion>;
   progressRef: RefObject<number>;
   pointerRef: RefObject<PointerState>;
   overlayRef: RefObject<OverlayNodes>;
+  handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
   onEngage: (category: number | null) => void;
 };
@@ -35,6 +37,7 @@ export default function DiveCanvas({
   progressRef,
   pointerRef,
   overlayRef,
+  handoffRef,
   motionMode,
   onEngage,
 }: DiveCanvasParams) {
@@ -73,6 +76,7 @@ export default function DiveCanvas({
         progressRef={progressRef}
         pointerRef={pointerRef}
         overlayRef={overlayRef}
+        handoffRef={handoffRef}
         palette={palette}
         gpuTier={tier}
         stageRef={stageRef}

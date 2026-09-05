@@ -43,11 +43,20 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
       return;
     }
     api.scrollTo(cardType - 1);
+    const section = sectionRef.current;
     const handleSelect = (): void => {
       updateCardTypeUrl(api);
+      if (section) {
+        section.dataset.snapshotReady = 'false';
+      }
+    };
+    const handleSettle = (): void => {
+      if (section) {
+        section.dataset.snapshotReady = 'true';
+      }
     };
     api.on('select', handleSelect);
-    const section = sectionRef.current;
+    api.on('settle', handleSettle);
     const handleWheel = (event: globalThis.WheelEvent): void => {
       if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
         return;
@@ -62,6 +71,7 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
     section?.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
       api.off('select', handleSelect);
+      api.off('settle', handleSettle);
       section?.removeEventListener('wheel', handleWheel);
     };
   }, [api, cardType]);
@@ -70,6 +80,7 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
     <section
       ref={sectionRef}
       aria-label="Profile card styles"
+      data-snapshot-ready="true"
       className="pointer-events-none w-full"
     >
       <Carousel

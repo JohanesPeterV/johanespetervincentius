@@ -28,6 +28,7 @@ import {
   galaxyZoomBy,
   resetGalaxy,
 } from './skill-galaxy';
+import { useHeroHandoff } from './use-hero-handoff';
 
 type PointerDrag = {
   id: number | null;
@@ -71,6 +72,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     workPanels: [],
     workRail: [],
   });
+  const { handoffRef, error: handoffError } = useHeroHandoff(overlayRef);
   const modeRef = useRef<DiveMode>('dive');
   const [mode, setMode] = useState<DiveMode>('dive');
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
@@ -236,6 +238,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
           progressRef={progressRef}
           pointerRef={pointerRef}
           overlayRef={overlayRef}
+          handoffRef={handoffRef}
           motionMode={motionMode}
           onEngage={handleEngage}
         />
@@ -249,6 +252,14 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       >
         {children}
       </DiveOverlay>
+      {handoffError ? (
+        <p
+          role="status"
+          className="absolute left-6 right-6 top-4 text-center text-xs"
+        >
+          Transisi sederhana aktif: {handoffError}
+        </p>
+      ) : null}
     </div>
   );
 }

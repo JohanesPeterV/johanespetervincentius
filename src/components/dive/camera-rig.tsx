@@ -36,6 +36,8 @@ import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
 import { GALAXY_NODES, writeGalaxyScreens } from './skill-galaxy';
+import { sampleHeroHandoff } from './hero-handoff';
+import type { HeroHandoff } from './hero-handoff';
 
 export type PointerState = {
   x: number;
@@ -49,6 +51,7 @@ type CameraRigParams = {
   progressRef: RefObject<number>;
   pointerRef: RefObject<PointerState>;
   overlayRef: RefObject<OverlayNodes>;
+  handoffRef: RefObject<HeroHandoff>;
   palette: DivePalette;
   gpuTier: number;
   stageRef: RefObject<DiveStage>;
@@ -73,6 +76,7 @@ export default function CameraRig({
   progressRef,
   pointerRef,
   overlayRef,
+  handoffRef,
   palette,
   gpuTier,
   stageRef,
@@ -104,7 +108,9 @@ export default function CameraRig({
     }
     const step = drive.current - previousProgress;
     const driveStep = frameDelta > 0 ? step / (frameDelta * BASELINE_FPS) : 0;
-    const progress = wrapProgress(drive.current);
+    const handoff = handoffRef.current;
+    handoff.journey = wrapProgress(drive.current);
+    const progress = sampleHeroHandoff(handoff, motionMode);
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
     applyDivePalette(frame, palette, progress);
@@ -200,11 +206,15 @@ export default function CameraRig({
   // REASON: DOM projection runs after the world and galaxy update, but before
   // the composer renders, so text and geometry describe the same frame.
   useFrame(({ camera, size }) => {
-    const progress = progressRef.current;
+    const progress = wrapProgress(driveRef.current.current);
     NARRATIVE_STONES.forEach((stone, index) => {
       const projection = STONE_PROJECTIONS[index];
       projection
-        .set(stone.x, narrativeStoneY(progress, stone.center), stone.z)
+        .set(
+          stone.x,
+          narrativeStoneY(progressRef.current, stone.center),
+          stone.z,
+        )
         .project(camera);
       STONE_SCREENS[index].set(
         ((projection.x + 1) * size.width) / 2,
@@ -232,6 +242,7 @@ export default function CameraRig({
     if (
       progress !== overlayProgressRef.current ||
       sizeChanged ||
+      (handoffRef.current.progress > 0 && handoffRef.current.progress < 1) ||
       techVisible ||
       workVisible
     ) {
@@ -247,6 +258,7 @@ export default function CameraRig({
         stones: STONE_SCREENS,
         width: size.width,
         motionMode,
+        handoff: handoffRef.current,
       });
     }
   });
@@ -260,8 +272,12 @@ export default function CameraRig({
         intensity={0}
         color={palette.accent}
       />
-      {gpuTier >= 2 && motionMode === 'full' ? (
-        <DivePostprocessing aberrationRef={aberrationRef} />
+      {motionMode === 'full' ? (
+        <DivePostprocessing
+          aberrationRef={aberrationRef}
+          handoffRef={handoffRef}
+          gpuTier={gpuTier}
+        />
       ) : null}
     </>
   );

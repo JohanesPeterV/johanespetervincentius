@@ -6,7 +6,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
-import { IcosahedronGeometry, Vector2 } from 'three';
+import { CanvasTexture, IcosahedronGeometry, Vector2 } from 'three';
 
 const require = createRequire(import.meta.url);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,6 +41,7 @@ const motion = load(resolve(root, 'src/components/dive/camera-motion.ts'));
 const palette = load(resolve(root, 'src/components/dive/dive-palette.ts'));
 const world = load(resolve(root, 'src/components/dive/world-layout.ts'));
 const labels = load(resolve(root, 'src/components/dive/galaxy-labels.ts'));
+const handoff = load(resolve(root, 'src/components/dive/hero-handoff.ts'));
 
 const driveFrom = (current) => ({
   current,
@@ -119,6 +120,18 @@ test('scroll catches Work before advancing its jobs', () => {
     now: 1000,
   });
   assert.ok(Math.abs(1.4 + delta - descent.WORK_STONE.center) < 1e-9);
+  assert.equal(motion.WORK_MOTION.job, 0);
+});
+
+test('approaching Work prepares its first job before the handoff reveals copy', () => {
+  motion.resetWorkMotion();
+  motion.WORK_MOTION.job = 2;
+  motion.workLockedDelta({
+    target: 0.95,
+    progress: 0.95,
+    step: 0.35,
+    now: 1000,
+  });
   assert.equal(motion.WORK_MOTION.job, 0);
 });
 
@@ -221,4 +234,84 @@ test('galaxy labels prioritize hovered tools and hide collisions or overflow', (
   assert.equal(alphas[1], 0);
   assert.equal(alphas[2], 1);
   assert.equal(alphas[3], 0);
+});
+
+test('hero handoff progress covers exactly its two endpoints', () => {
+  assert.equal(handoff.heroHandoffProgress(descent.DIVE_START), 0);
+  assert.equal(handoff.heroHandoffProgress(handoff.HANDOFF_START), 0);
+  assert.equal(handoff.heroHandoffProgress(handoff.HANDOFF_END), 1);
+  assert.equal(handoff.heroHandoffProgress(descent.WORK_STONE.center), 1);
+});
+
+test('handoff reveals an already composed Work scene, not the empty current frame', () => {
+  const state = handoff.createHeroHandoff();
+  const texture = new CanvasTexture();
+  state.hero = { texture, width: 1440, height: 900 };
+  state.work = { texture, width: 432, height: 585 };
+  state.sourceReady = true;
+  state.journey = (handoff.HANDOFF_START + handoff.HANDOFF_END) / 2;
+  assert.equal(handoff.sampleHeroHandoff(state, 'full'), handoff.HANDOFF_END);
+  assert.equal(state.compositing, true);
+  assert.ok(Math.abs(state.progress - 0.5) < 1e-9);
+  texture.dispose();
+});
+
+test('late snapshots never switch rendering strategy halfway through a crossing', () => {
+  const state = handoff.createHeroHandoff();
+  state.journey = 1.3;
+  assert.equal(handoff.sampleHeroHandoff(state, 'full'), 1.3);
+  const texture = new CanvasTexture();
+  state.hero = { texture, width: 1440, height: 900 };
+  state.work = { texture, width: 432, height: 585 };
+  state.sourceReady = true;
+  state.journey = 1.5;
+  assert.equal(handoff.sampleHeroHandoff(state, 'full'), 1.5);
+  assert.equal(state.compositing, false);
+  state.journey = descent.DIVE_START;
+  handoff.sampleHeroHandoff(state, 'full');
+  state.journey = 1.3;
+  assert.equal(handoff.sampleHeroHandoff(state, 'full'), handoff.HANDOFF_END);
+  assert.equal(state.compositing, true);
+  texture.dispose();
+});
+
+test('reversal retraces the same handoff without swapping source and destination', () => {
+  const state = handoff.createHeroHandoff();
+  const texture = new CanvasTexture();
+  state.hero = { texture, width: 1440, height: 900 };
+  state.work = { texture, width: 432, height: 585 };
+  state.sourceReady = true;
+  const phases = [1.25, 1.45, 1.6, 1.45, 1.25].map((journey) => {
+    state.journey = journey;
+    assert.equal(handoff.sampleHeroHandoff(state, 'full'), handoff.HANDOFF_END);
+    return state.progress;
+  });
+  assert.equal(phases[0], phases[4]);
+  assert.equal(phases[1], phases[3]);
+  assert.ok(phases[2] > phases[1]);
+  texture.dispose();
+});
+
+test('unprepared, reduced-motion, and later chapters retain the live scene', () => {
+  const state = handoff.createHeroHandoff();
+  state.journey = 1.45;
+  assert.equal(handoff.sampleHeroHandoff(state, 'full'), 1.45);
+  const texture = new CanvasTexture();
+  state.hero = { texture, width: 1440, height: 900 };
+  state.work = { texture, width: 432, height: 585 };
+  state.sourceReady = true;
+  assert.equal(handoff.sampleHeroHandoff(state, 'reduced'), 1.45);
+  assert.equal(state.compositing, false);
+  for (const journey of [
+    handoff.HANDOFF_START,
+    handoff.HANDOFF_END,
+    2.55,
+    3.15,
+    4.05,
+  ]) {
+    state.journey = journey;
+    assert.equal(handoff.sampleHeroHandoff(state, 'full'), journey);
+    assert.equal(state.compositing, false);
+  }
+  texture.dispose();
 });

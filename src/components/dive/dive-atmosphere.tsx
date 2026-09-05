@@ -48,7 +48,7 @@ const backdropFragment = `
     float light = haze * (0.22 + shafts * 0.24) * (1.0 + uTravel * 0.45);
     float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
     vec3 color = uBackground + uAccent * light;
-    gl_FragColor = vec4(color + (grain - 0.5) / 255.0, 1.0);
+    gl_FragColor = vec4(max(color + (grain - 0.5) / 255.0, 0.0), 1.0);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }

@@ -2,8 +2,10 @@ import type { Vector2 } from 'three';
 
 import {
   DIVE_SECTIONS,
+  DIVE_START,
   DescentFrame,
   TECH_STONE,
+  WORK_STONE,
   sectionMotion,
   techSectionOpacity,
   sectionJumpDelta,
@@ -11,6 +13,8 @@ import {
 import type { MotionMode } from './descent';
 import { WORK_MOTION, workPull } from './camera-motion';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
+import { HANDOFF_END, heroHandoffProgress } from './hero-handoff';
+import type { HeroHandoff } from './hero-handoff';
 
 export type OverlayNodes = {
   chapters: (HTMLButtonElement | null)[];
@@ -33,6 +37,7 @@ export type OverlayFrame = {
   stones: Vector2[];
   width: number;
   motionMode: MotionMode;
+  handoff: HeroHandoff;
 };
 
 const SKILL_HIDE_THRESHOLD = 0.05;
@@ -121,12 +126,13 @@ const positionStoneSection = (
   element: HTMLDivElement,
   frame: OverlayFrame,
   stone: Vector2,
-): void => {
+): { left: number; top: number; anchor: number } => {
   // REASON: the stone projects to ~120px screen radius, so the gap must stay
   // beyond it or headlines start on top of the sphere
   if (frame.width < 768) {
-    element.style.transform = `translate3d(24px, ${frame.height * 0.16}px, 0)`;
-    return;
+    const top = frame.height * 0.16;
+    element.style.transform = `translate3d(24px, ${top}px, 0)`;
+    return { left: 24, top, anchor: 0 };
   }
   const horizontalGap = Math.min(320, Math.max(96, frame.width * 0.16));
   const left = Math.max(
@@ -138,6 +144,7 @@ const positionStoneSection = (
     Math.min(frame.height * 0.6, stone.y),
   );
   element.style.transform = `translate3d(${left}px, ${top}px, 0) translateY(-50%)`;
+  return { left, top, anchor: 0.5 };
 };
 
 export const applyOverlay = (
@@ -157,6 +164,19 @@ export const applyOverlay = (
       return;
     }
     const motion = sectionMotion(frame.progress, section);
+    const crossing =
+      frame.progress >= DIVE_START && frame.progress <= HANDOFF_END;
+    if (crossing && section.placement === 'center') {
+      motion.opacity = frame.handoff.compositing
+        ? 0
+        : 1 - heroHandoffProgress(frame.progress);
+      motion.shift = 0;
+    }
+    if (crossing && section.center === WORK_STONE.center) {
+      motion.opacity = frame.handoff.compositing
+        ? 0
+        : heroHandoffProgress(frame.progress);
+    }
     element.style.opacity = String(motion.opacity);
     element.style.setProperty('--reveal', String(motion.opacity));
     element.inert = motion.opacity < 0.1;
@@ -173,13 +193,27 @@ export const applyOverlay = (
     if (section.placement !== 'stone') {
       const scale = 1 - (1 - motion.opacity) * 0.14;
       element.style.transform =
-        frame.motionMode === 'reduced'
+        frame.motionMode === 'reduced' || crossing
           ? ''
           : `perspective(1000px) translate3d(0, ${motion.shift}px, 0) scale(${scale}) rotateX(${(1 - motion.opacity) * 7}deg)`;
     } else if (section.center === TECH_STONE.center) {
       positionTechHud(element, frame);
     } else {
-      positionStoneSection(element, frame, frame.stones[section.stoneIndex]);
+      const position = positionStoneSection(
+        element,
+        frame,
+        frame.stones[section.stoneIndex],
+      );
+      if (section.center === WORK_STONE.center && frame.handoff.work) {
+        const rect = frame.handoff.workRect;
+        const { width, height } = frame.handoff.work;
+        rect.set(
+          position.left / frame.width,
+          1 - (position.top + height * (1 - position.anchor)) / frame.height,
+          width / frame.width,
+          height / frame.height,
+        );
+      }
     }
   });
   nodes.chapters.forEach((element, index) => {
