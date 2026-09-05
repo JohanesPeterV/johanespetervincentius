@@ -32,13 +32,6 @@ const captureSection = async (
     color: style.color,
   });
   clone.style.setProperty('--reveal', '1');
-  // REASON: SVG foreignObject cannot reproduce backdrop/blur-only HTML layers;
-  // the saved WebGL background supplies the atmosphere beneath the card instead.
-  clone
-    .querySelectorAll<HTMLDivElement>('div[aria-hidden="true"]')
-    .forEach((decoration) => {
-      decoration.remove();
-    });
   clone.querySelectorAll<HTMLElement>('[data-active]').forEach((panel) => {
     panel.style.translate = 'none';
     panel.style.transition = 'none';
