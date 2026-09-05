@@ -36,13 +36,14 @@ export default function PalettePicker() {
     <div className="fixed right-4 top-4 z-30 sm:right-7 sm:top-7">
       <button
         type="button"
-        aria-label="Change appearance"
-        title="Change appearance"
+        aria-label="Change theme"
+        title="Change theme"
         popoverTarget={panelId}
         onKeyDown={(event) => event.stopPropagation()}
-        className="appearance-trigger flex h-11 w-11 items-center justify-center"
+        className="appearance-trigger flex h-11 items-center justify-center gap-2 px-3"
       >
         <span aria-hidden className="appearance-orb" />
+        <span className="text-xs">Theme</span>
       </button>
       <div
         id={panelId}

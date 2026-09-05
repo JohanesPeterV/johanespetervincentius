@@ -2,11 +2,11 @@ import Link from 'next/link';
 
 export default function MinimalCard() {
   return (
-    <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-xl px-6 py-6 text-foreground sm:px-10 sm:py-10">
+    <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-xl rounded-[2rem] border border-border/60 bg-background/65 px-6 py-6 text-foreground shadow-2xl ring-1 ring-foreground/5 backdrop-blur-2xl sm:px-10 sm:py-10">
       <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
         Software engineer
       </p>
-      <h2 className="mt-4 max-w-lg font-display text-3xl font-light leading-tight tracking-[-0.04em] sm:text-5xl">
+      <h2 className="mt-4 max-w-lg font-display text-3xl font-medium leading-tight tracking-[-0.04em] sm:text-5xl">
         Johanes Peter Vincentius
       </h2>
       <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground sm:text-base">
@@ -16,13 +16,13 @@ export default function MinimalCard() {
       <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
         <Link
           href="/portfolio"
-          className="profile-link inline-flex h-11 items-center justify-center gap-3 text-sm text-primary"
+          className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
-          View portfolio <span aria-hidden>↗</span>
+          View portfolio
         </Link>
         <a
           href="mailto:johanespeter.jp@gmail.com"
-          className="profile-link inline-flex h-11 items-center justify-center text-sm"
+          className="inline-flex h-11 items-center justify-center rounded-full border border-border bg-background/50 px-5 text-sm font-medium transition-colors hover:bg-muted"
         >
           Get in touch
         </a>

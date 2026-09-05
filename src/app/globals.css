@@ -114,9 +114,8 @@ body {
 
 @layer components {
   .appearance-trigger,
-  .appearance-close,
-  .profile-contact {
-    border-radius: 50%;
+  .appearance-close {
+    border-radius: 999px;
     color: hsl(var(--muted-foreground));
     transition:
       color 250ms,
@@ -124,8 +123,7 @@ body {
   }
 
   .appearance-trigger:hover,
-  .appearance-close:hover,
-  .profile-contact:hover {
+  .appearance-close:hover {
     color: hsl(var(--foreground));
     background: hsl(var(--foreground) / 0.035);
   }
@@ -201,25 +199,10 @@ body {
     color: hsl(var(--foreground));
   }
 
-  .profile-link {
-    border-bottom: 1px solid hsl(var(--foreground) / 0.08);
-    color: hsl(var(--foreground) / 0.8);
-    transition:
-      color 250ms,
-      border-color 250ms;
-  }
-
-  .profile-link:hover {
-    color: hsl(var(--primary));
-    border-color: hsl(var(--primary) / 0.4);
-  }
-
   .appearance-trigger:focus-visible,
   .appearance-close:focus-visible,
   .appearance-swatch:focus-visible,
-  .appearance-mode:focus-visible,
-  .profile-link:focus-visible,
-  .profile-contact:focus-visible {
+  .appearance-mode:focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 4px;
   }
@@ -344,9 +327,7 @@ body {
     .appearance-trigger,
     .appearance-close,
     .appearance-swatch > span,
-    .appearance-mode,
-    .profile-link,
-    .profile-contact {
+    .appearance-mode {
       transition: none;
     }
 

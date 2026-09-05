@@ -273,6 +273,34 @@ test('space grading stays finite through every seam for all colourways', () => {
   }
 });
 
+test('each colourway has a distinct sky glow and celestial material', () => {
+  for (const mode of ['light', 'dark']) {
+    const palettes = baseColors.map((base) =>
+      palette.getDivePalette(themes.getFluidThemeColors(base.name, mode)),
+    );
+    for (const property of ['glow', 'celestial']) {
+      const colours = palettes.map((entry) => entry[property]);
+      assert.equal(new Set(colours).size, baseColors.length);
+      palettes.forEach((entry) => {
+        assert.notEqual(entry[property], entry.background);
+        assert.notEqual(entry[property], entry.metal);
+      });
+    }
+  }
+});
+
+test('warm accents retain cool ambient light instead of a brown sky', () => {
+  for (const mode of ['light', 'dark']) {
+    for (const name of ['red', 'orange', 'yellow']) {
+      const resolved = palette.getDivePalette(
+        themes.getFluidThemeColors(name, mode),
+      );
+      const glow = new Color(resolved.glow);
+      assert.ok(glow.b > glow.r, `${name} ${mode} atmosphere stays cool`);
+    }
+  }
+});
+
 test('galaxy labels prioritize hovered tools and hide collisions or overflow', () => {
   const alphas = new Float32Array([0.9, 0.5, 1, 0.9]);
   labels.cullGalaxyLabels(

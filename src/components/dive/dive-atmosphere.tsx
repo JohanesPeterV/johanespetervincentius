@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react';
 import { Color } from 'three';
 
 import type { DivePalette } from './dive-palette';
+import type { MotionMode } from './descent';
 import { buildStarField } from './world-layout';
 
 type DiveAtmosphereParams = {
   palette: DivePalette;
   gpuTier: number;
+  motionMode: MotionMode;
 };
 
 const STAR_POSITIONS = buildStarField(180);
@@ -24,11 +26,16 @@ const backdropVertex = `
 
 const backdropFragment = `
   uniform vec3 uBackground;
-  uniform vec3 uStarlight;
+  uniform vec3 uGlow;
+  uniform float uTime;
   varying vec2 vUv;
   void main() {
-    float glow = exp(-length((vUv - vec2(0.68, 0.65)) * vec2(2.0, 2.8)) * 6.0);
-    vec3 color = mix(uBackground, uStarlight, glow * 0.006);
+    vec2 drift = vec2(sin(uTime * 0.035), cos(uTime * 0.025)) * 0.012;
+    vec2 upper = (vUv - vec2(0.7, 0.67) + drift) * vec2(3.6, 4.8);
+    vec2 lower = (vUv - vec2(0.25, 0.26) - drift) * vec2(4.8, 5.4);
+    float light = exp(-dot(upper, upper) * 2.0) * 0.12;
+    light += exp(-dot(lower, lower) * 2.0) * 0.06;
+    vec3 color = mix(uBackground, uGlow, light);
     gl_FragColor = vec4(color, 1.0);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
@@ -37,13 +44,14 @@ const backdropFragment = `
 
 const starVertex = `
   uniform float uPixelRatio;
+  uniform float uTime;
   varying float vAlpha;
   void main() {
     vec4 view = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * view;
     float seed = fract(sin(position.x * 12.9898 + position.z) * 43758.5453);
     gl_PointSize = (0.8 + seed * 0.9) * uPixelRatio;
-    vAlpha = 0.16 + seed * 0.24;
+    vAlpha = (0.16 + seed * 0.24) * (0.92 + 0.08 * sin(uTime * 0.3 + seed * 20.0));
   }
 `;
 
@@ -62,10 +70,13 @@ const starFragment = `
 export default function DiveAtmosphere({
   palette,
   gpuTier,
+  motionMode,
 }: DiveAtmosphereParams) {
   const [uniforms] = useState(() => ({
     uBackground: { value: new Color(palette.background) },
     uStarlight: { value: new Color(palette.foreground) },
+    uGlow: { value: new Color(palette.glow) },
+    uTime: { value: 0 },
     uPixelRatio: { value: 1 },
   }));
 
@@ -74,9 +85,13 @@ export default function DiveAtmosphere({
   useEffect(() => {
     uniforms.uBackground.value.set(palette.background);
     uniforms.uStarlight.value.set(palette.foreground);
-  }, [palette.background, palette.foreground, uniforms]);
+    uniforms.uGlow.value.set(palette.glow);
+  }, [palette.background, palette.foreground, palette.glow, uniforms]);
 
-  useFrame(({ gl }) => {
+  useFrame(({ gl }, delta) => {
+    if (motionMode === 'full') {
+      uniforms.uTime.value += Math.min(delta, 0.1);
+    }
     uniforms.uPixelRatio.value = gl.getPixelRatio();
   }, -1);
 

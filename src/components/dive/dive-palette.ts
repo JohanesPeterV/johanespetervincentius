@@ -11,9 +11,11 @@ export type DivePalette = {
   accentRgb: RgbColor;
   background: string;
   backgroundRgb: RgbColor;
+  celestial: string;
   exposure: number;
   foreground: string;
   fogDensity: number;
+  glow: string;
   metal: string;
   surface: string;
 };
@@ -29,14 +31,23 @@ export const getDivePalette = (
   const accent = new Color(theme.fluidColor);
   const background = new Color(theme.backgroundColor);
   const foreground = new Color(theme.textColor);
+  const glow = accent.clone();
+  const { h } = accent.getHSL({ h: 0, s: 0, l: 0 });
+  // REASON: dim red-to-yellow light turns the sky brown. Its cool complement
+  // carries the atmosphere while objects retain the selected accent colour.
+  if (h <= 1 / 6) {
+    glow.offsetHSL(0.5, 0, 0);
+  }
   return {
     accent: accent.getStyle(),
     accentRgb: toRgbColor(accent.getStyle()),
     background: background.getStyle(),
     backgroundRgb: toRgbColor(background.getStyle()),
+    celestial: accent.clone().lerp(foreground, 0.22).getStyle(),
     exposure: 0.9,
     foreground: foreground.getStyle(),
     fogDensity: 0.003,
+    glow: glow.lerp(foreground, 0.18).getStyle(),
     metal: foreground.clone().lerp(background, 0.28).getStyle(),
     surface: background.clone().lerp(foreground, 0.025).getStyle(),
   };

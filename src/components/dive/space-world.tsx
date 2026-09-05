@@ -22,7 +22,11 @@ export default function SpaceWorld({
 }: SpaceWorldParams) {
   return (
     <>
-      <DiveAtmosphere palette={palette} gpuTier={gpuTier} />
+      <DiveAtmosphere
+        palette={palette}
+        gpuTier={gpuTier}
+        motionMode={motionMode}
+      />
       <ambientLight intensity={0.6} />
       <directionalLight position={[-4, 8, 8]} intensity={1.6} />
       <directionalLight
