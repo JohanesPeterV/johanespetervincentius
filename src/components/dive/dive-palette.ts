@@ -11,12 +11,12 @@ export type DivePalette = {
   accentRgb: RgbColor;
   background: string;
   backgroundRgb: RgbColor;
-  celestial: string;
   exposure: number;
   foreground: string;
   fogDensity: number;
   glow: string;
   glowStrength: number;
+  highlight: string;
   metal: string;
   surface: string;
 };
@@ -30,26 +30,29 @@ export const getDivePalette = (
   theme: ReturnType<typeof getFluidThemeColors>,
 ): DivePalette => {
   const accent = new Color(theme.fluidColor);
+  const secondary = new Color(theme.secondaryColor);
   const background = new Color(theme.backgroundColor);
   const foreground = new Color(theme.textColor);
   const glow = accent.clone();
+  const highlight = secondary.clone();
   const { h } = accent.getHSL({ h: 0, s: 0, l: 0 });
-  // REASON: dim red-to-yellow light turns the sky brown. Its cool complement
-  // carries the atmosphere while objects retain the selected accent colour.
-  if (h <= 1 / 6) {
-    glow.offsetHSL(0.5, 0, 0);
+  // REASON: warm light turns the sky brown. Use the pair's cool colour for
+  // atmosphere instead of inventing a third hue outside the colourway.
+  if (h <= 1 / 6 || h >= 11 / 12) {
+    glow.copy(secondary);
+    highlight.copy(accent);
   }
   return {
     accent: accent.getStyle(),
     accentRgb: toRgbColor(accent.getStyle()),
     background: background.getStyle(),
     backgroundRgb: toRgbColor(background.getStyle()),
-    celestial: accent.clone().lerp(foreground, 0.22).getStyle(),
     exposure: 0.9,
     foreground: foreground.getStyle(),
     fogDensity: 0.003,
     glow: glow.lerp(foreground, 0.18).getStyle(),
     glowStrength: theme.mode === 'light' ? 0.48 : 0.12,
+    highlight: highlight.lerp(foreground, 0.22).getStyle(),
     metal: foreground.clone().lerp(background, 0.28).getStyle(),
     surface: background.clone().lerp(foreground, 0.025).getStyle(),
   };

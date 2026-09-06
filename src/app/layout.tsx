@@ -1,6 +1,7 @@
 import { ThemeProvider } from '@/components/theme-provider';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SITE_URL } from '@/lib/site';
+import { DEFAULT_THEME_CSS, getThemeColorValues } from '@/lib/theme-colors';
 import { DEFAULT_BASE_COLOR } from '@/registry/registry-base-colors';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -22,11 +23,15 @@ const configureViewportSettings = (): Viewport => ({
   themeColor: [
     {
       media: '(prefers-color-scheme: light)',
-      color: getCssColor(DEFAULT_BASE_COLOR.activeColor.light),
+      color: getCssColor(
+        getThemeColorValues(DEFAULT_BASE_COLOR.name, 'light').cssVars.primary,
+      ),
     },
     {
       media: '(prefers-color-scheme: dark)',
-      color: getCssColor(DEFAULT_BASE_COLOR.activeColor.dark),
+      color: getCssColor(
+        getThemeColorValues(DEFAULT_BASE_COLOR.name, 'dark').cssVars.primary,
+      ),
     },
   ],
   width: 'device-width',
@@ -131,6 +136,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <style>{DEFAULT_THEME_CSS}</style>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(getJsonLd()) }}

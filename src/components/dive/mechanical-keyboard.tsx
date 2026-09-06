@@ -55,7 +55,7 @@ const placeKeycaps = (
   }
   const transform = new Object3D();
   const base = new Color(palette.metal);
-  const accent = new Color(palette.accent);
+  const accent = new Color(palette.highlight);
   KEYCAPS.forEach((key, index) => {
     transform.position.set(key.x, 0.3, key.z);
     transform.scale.set(key.width, 0.18, UNIT - 0.035);

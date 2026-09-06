@@ -5,19 +5,10 @@ import { useTheme } from 'next-themes';
 import { useEffect, useId, useState } from 'react';
 
 import { useConfig } from '@/hooks/use-config';
-import { BaseColor, baseColors } from '@/registry/registry-base-colors';
-
-type SwatchStyle = React.CSSProperties & {
-  '--swatch-light': string;
-  '--swatch-dark': string;
-};
-
-const getSwatchStyle = (
-  activeColor: BaseColor['activeColor'],
-): SwatchStyle => ({
-  '--swatch-light': `hsl(${activeColor.light})`,
-  '--swatch-dark': `hsl(${activeColor.dark})`,
-});
+import {
+  baseColors,
+  DEFAULT_BASE_COLOR,
+} from '@/registry/registry-base-colors';
 
 export default function PalettePicker() {
   const [config, setConfig] = useConfig();
@@ -25,6 +16,8 @@ export default function PalettePicker() {
   const panelId = useId();
   const titleId = useId();
   const [hydrated, setHydrated] = useState(false);
+  const selected =
+    baseColors.find(({ name }) => name === config.theme) ?? DEFAULT_BASE_COLOR;
 
   // REASON: the server cannot read the saved mode. Wait for hydration before
   // exposing selected mode attributes so the initial markup agrees.
@@ -72,8 +65,8 @@ export default function PalettePicker() {
           </button>
         </div>
         <div className="mb-2 mt-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span>Colour</span>
-          <span className="capitalize">{config.theme}</span>
+          <span>Colourway</span>
+          <span>{selected.label}</span>
         </div>
         <div role="group" aria-label="Colour" className="flex justify-between">
           {baseColors.map((baseColor) => (
@@ -84,10 +77,14 @@ export default function PalettePicker() {
               title={baseColor.label}
               aria-pressed={baseColor.name === config.theme}
               onClick={() => setConfig({ ...config, theme: baseColor.name })}
-              style={getSwatchStyle(baseColor.activeColor)}
               className="appearance-swatch flex h-11 w-8 items-center justify-center"
             >
-              <span aria-hidden />
+              <span
+                aria-hidden
+                style={{
+                  background: `linear-gradient(135deg, hsl(${baseColor.primary}) 60%, hsl(${baseColor.secondary}) 60%)`,
+                }}
+              />
             </button>
           ))}
         </div>

@@ -48,7 +48,7 @@ export const OrbitalBackdrop = ({
       <sphereGeometry args={[1.15, 48, 32]} />
       <meshStandardMaterial
         ref={materialRef}
-        color={palette.celestial}
+        color={palette.highlight}
         emissive={palette.accent}
         emissiveIntensity={0.12}
         roughness={0.85}

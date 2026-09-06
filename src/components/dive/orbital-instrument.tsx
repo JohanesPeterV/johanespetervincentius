@@ -16,7 +16,7 @@ export default function OrbitalInstrument({
       <mesh>
         <sphereGeometry args={[0.65, 48, 32]} />
         <meshStandardMaterial
-          color={palette.celestial}
+          color={palette.highlight}
           emissive={palette.accent}
           emissiveIntensity={0.12}
           metalness={0.05}

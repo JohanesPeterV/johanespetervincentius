@@ -199,6 +199,61 @@ test('camera path is continuous through chapter handoffs', () => {
   }
 });
 
+test('all colourways have two distinct authored hues shared with the scene', () => {
+  for (const base of baseColors) {
+    const difference = Math.abs(
+      parseFloat(base.primary) - parseFloat(base.secondary),
+    );
+    assert.ok(Math.min(difference, 360 - difference) >= 60, base.label);
+    for (const mode of ['light', 'dark']) {
+      const resolved = themes.getFluidThemeColors(base.name, mode);
+      assert.equal(
+        resolved.fluidColor,
+        `#${new Color(`hsl(${base.primary.split(' ').join(',')})`).getHexString()}`,
+      );
+      assert.equal(
+        resolved.secondaryColor,
+        `#${new Color(`hsl(${base.secondary.split(' ').join(',')})`).getHexString()}`,
+      );
+    }
+  }
+});
+
+test('theme text, buttons, links, and hover surfaces meet AA in both modes', () => {
+  const pairs = [
+    ['foreground', 'background'],
+    ['card-foreground', 'card'],
+    ['popover-foreground', 'popover'],
+    ['muted-foreground', 'muted'],
+    ['primary-foreground', 'primary'],
+    ['secondary-foreground', 'secondary'],
+    ['accent-foreground', 'accent'],
+    ['destructive-foreground', 'destructive'],
+    ...['background', 'card', 'muted', 'secondary'].map((surface) => [
+      'primary',
+      surface,
+    ]),
+  ];
+  const luminance = (hsl) => {
+    const color = new Color(`hsl(${hsl.split(' ').join(',')})`);
+    return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+  };
+  for (const base of baseColors) {
+    for (const mode of ['light', 'dark']) {
+      const { cssVars } = themes.getThemeColorValues(base.name, mode);
+      for (const [text, surface] of pairs) {
+        const values = [luminance(cssVars[text]), luminance(cssVars[surface])];
+        const contrast =
+          (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
+        assert.ok(
+          contrast >= 4.5,
+          `${base.name} ${mode}: ${text} on ${surface} = ${contrast}`,
+        );
+      }
+    }
+  }
+});
+
 test('palette samples preserve the sRGB contract of descent keyframes', () => {
   for (const base of baseColors) {
     for (const mode of ['light', 'dark']) {
@@ -278,7 +333,7 @@ test('each colourway has a distinct sky glow and celestial material', () => {
     const palettes = baseColors.map((base) =>
       palette.getDivePalette(themes.getFluidThemeColors(base.name, mode)),
     );
-    for (const property of ['glow', 'celestial']) {
+    for (const property of ['glow', 'highlight']) {
       const colours = palettes.map((entry) => entry[property]);
       assert.equal(new Set(colours).size, baseColors.length);
       palettes.forEach((entry) => {
