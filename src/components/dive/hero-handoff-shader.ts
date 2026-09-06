@@ -48,51 +48,6 @@ vec3 handoffTo(vec2 uv) {
   return handoffOver(texture2D(inputBuffer, uv).rgb, content);
 }
 
-vec3 handoffPrism(vec2 uv) {
-  vec2 aspect = vec2(uAspect, 1.0);
-  vec2 center = vec2(0.52, 0.5);
-  vec2 position = (uv - center) * aspect;
-  float distance = length(position);
-  vec2 direction = position / max(distance, 0.0001) / aspect;
-  float angle = atan(position.y, position.x);
-  float reach = length(max(center, 1.0 - center) * aspect);
-  float radius = mix(-0.1, reach + 0.12, uProgress);
-  float edge = radius - distance;
-  float envelope = smoothstep(0.0, 0.12, uProgress)
-                 * (1.0 - smoothstep(0.84, 1.0, uProgress));
-  float lens = exp(-pow(edge / 0.045, 2.0));
-  vec2 refraction = direction * lens * envelope * 0.018;
-  vec2 fromUv = (uv - 0.5) / (1.0 + uProgress * 0.035) + 0.5 + refraction;
-  vec2 toUv = (uv - 0.5) / (1.0 + (1.0 - uProgress) * 0.025) + 0.5 - refraction * 0.5;
-  vec3 from = handoffFrom(fromUv);
-  vec3 next = handoffTo(toUv);
-
-  // REASON: dispersion belongs to the moving lens only; the rest of the card
-  // keeps its actual colours, and quiet pixels avoid extra texture reads.
-  if (lens > 0.005) {
-    vec2 dispersion = direction * lens * envelope * 0.006;
-    from.r = handoffFrom(fromUv + dispersion).r;
-    from.b = handoffFrom(fromUv - dispersion).b;
-  }
-
-  float reveal = smoothstep(-0.012, 0.018, edge);
-  vec3 color = mix(from, next, reveal);
-  vec3 film = mix(uPaper, uPrism, 0.28 + 0.12 * sin(angle * 2.0 - uProgress * 6.0));
-  color = mix(color, film, lens * envelope * 0.42);
-
-  float shadow = exp(-pow((edge + 0.022) / 0.018, 2.0)) * 0.065;
-  color = mix(color, uInk, shadow * envelope);
-  float rim = exp(-pow(edge / 0.0025, 2.0));
-  float orbit = exp(-pow((edge - 0.028) / 0.0018, 2.0))
-              * pow(0.5 + 0.5 * cos(angle * 2.0 - uProgress * 5.0), 3.0);
-  float glint = pow(max(0.0, cos(angle - 0.65 - uProgress * 1.8)), 36.0)
-              + pow(max(0.0, cos(angle + 2.2 - uProgress * 1.8)), 48.0) * 0.45;
-  glint *= exp(-abs(edge) * 24.0);
-  color = mix(color, uPrism, (rim * 0.18 + orbit * 0.12) * envelope);
-  color += uPaper * (rim * 0.48 + orbit * 0.16 + glint * 0.65) * envelope;
-  return max(color, 0.0);
-}
-
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
   if (uActive < 0.5) {
     outputColor = inputColor;
@@ -100,10 +55,9 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   }
 
   vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
-  if (dot(uPaper, luminance) > dot(uInk, luminance)) {
-    outputColor = vec4(handoffPrism(uv), 1.0);
-    return;
-  }
+  bool lightSurface = dot(uPaper, luminance) > dot(uInk, luminance);
+  // REASON: both modes share the same etched field, zoom, and reveal timing.
+  // Only the material changes with the theme, so scroll and reversal stay identical.
   vec2 p = uv * vec2(uAspect, 1.0);
   float broad = handoffNoise(p * 4.6 + 3.2);
   float medium = handoffNoise(p * 21.0 + broad * 2.8);
@@ -122,6 +76,10 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);
   vec3 etched = from * 0.045 + uInk * lines;
+  if (lightSurface) {
+    vec3 engraving = mix(uInk, uPrism, 0.7);
+    etched = mix(mix(from, uPaper, 0.94), engraving, min(lines * 0.75, 0.88));
+  }
   from = mix(from, etched, proximity * envelope * 0.95);
 
   float aa = max(fwidth(edge) * 1.5, 0.0006);
@@ -129,7 +87,16 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float rim = 1.0 - smoothstep(aa, aa + 0.001, abs(edge));
   float glow = exp(-abs(edge) * 150.0) * 0.08 + exp(-abs(edge) * 48.0) * 0.018;
   vec3 color = mix(from, next, reveal);
-  color += uInk * (rim * (0.16 + clamp(luma * 3.0 + lines, 0.0, 1.0)) + glow) * envelope;
+  if (lightSurface) {
+    float fringe = exp(-abs(edge + 0.012) * 240.0);
+    float sheen = exp(-abs(edge) * 65.0);
+    float glint = pow(0.5 + 0.5 * sin(uv.x * 13.0 + medium * 2.0 - uProgress * 8.0), 8.0);
+    vec3 edgeColor = mix(uPrism, uPaper, 0.3 + medium * 0.25);
+    color = mix(color, edgeColor, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
+    color += uPaper * (rim * 0.22 + fringe * 0.06 + sheen * glint * 0.28) * envelope;
+  } else {
+    color += uInk * (rim * (0.16 + clamp(luma * 3.0 + lines, 0.0, 1.0)) + glow) * envelope;
+  }
   outputColor = vec4(max(color, 0.0), 1.0);
 }
 `;
