@@ -1,6 +1,6 @@
 'use client';
 
-import { Moon, Sun, X } from 'lucide-react';
+import { Monitor, Moon, Sun, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useId, useState } from 'react';
 
@@ -10,9 +10,15 @@ import {
   DEFAULT_BASE_COLOR,
 } from '@/registry/registry-base-colors';
 
+const THEME_MODES = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
+];
+
 export default function PalettePicker() {
   const [config, setConfig] = useConfig();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const panelId = useId();
   const titleId = useId();
   const [hydrated, setHydrated] = useState(false);
@@ -88,25 +94,23 @@ export default function PalettePicker() {
             </button>
           ))}
         </div>
-        <div role="group" aria-label="Mode" className="mt-5 flex gap-2">
-          <button
-            type="button"
-            aria-pressed={hydrated && resolvedTheme === 'light'}
-            onClick={() => setTheme('light')}
-            className="appearance-mode choice-control flex h-11 flex-1 items-center justify-center gap-2"
-          >
-            <Sun size={14} aria-hidden />
-            Light
-          </button>
-          <button
-            type="button"
-            aria-pressed={hydrated && resolvedTheme === 'dark'}
-            onClick={() => setTheme('dark')}
-            className="appearance-mode choice-control flex h-11 flex-1 items-center justify-center gap-2"
-          >
-            <Moon size={14} aria-hidden />
-            Dark
-          </button>
+        <div
+          role="group"
+          aria-label="Mode"
+          className="mt-5 grid grid-cols-3 gap-2"
+        >
+          {THEME_MODES.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={hydrated && theme === value}
+              onClick={() => setTheme(value)}
+              className="appearance-mode choice-control flex h-11 items-center justify-center gap-1.5"
+            >
+              <Icon size={14} aria-hidden />
+              {label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
