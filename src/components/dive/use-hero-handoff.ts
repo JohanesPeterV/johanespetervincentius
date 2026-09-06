@@ -78,7 +78,10 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     let timer = 0;
     let fontCss: Promise<string> | null = null;
     const capture = async (): Promise<void> => {
-      if (content?.getAttribute('data-snapshot-ready') === 'false') {
+      if (
+        content?.getAttribute('data-snapshot-ready') === 'false' ||
+        work.dataset.snapshotReady === 'false'
+      ) {
         return;
       }
       const request = ++revision;
@@ -111,6 +114,10 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
         handoff.hero?.texture.dispose();
         handoff.hero = null;
       }
+      if (work.dataset.snapshotReady === 'false') {
+        handoff.work?.texture.dispose();
+        handoff.work = null;
+      }
       timer = window.setTimeout(capture, 60);
     };
     const observer = new MutationObserver(schedule);
@@ -124,19 +131,21 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     }
     observer.observe(work, {
       attributes: true,
-      attributeFilter: ['data-active'],
+      attributeFilter: ['data-active', 'data-snapshot-ready', 'open'],
       subtree: true,
     });
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'style'],
     });
-    window.addEventListener('resize', schedule);
+    const resizeObserver = new ResizeObserver(schedule);
+    resizeObserver.observe(hero);
+    resizeObserver.observe(work);
     capture();
     return () => {
       disposed = true;
       observer.disconnect();
-      window.removeEventListener('resize', schedule);
+      resizeObserver.disconnect();
       window.clearTimeout(timer);
       handoff.hero?.texture.dispose();
       handoff.work?.texture.dispose();

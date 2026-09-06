@@ -4,10 +4,10 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { ReactNode, RefObject, useRef } from 'react';
 import { Group, Mesh, MeshStandardMaterial } from 'three';
 
-import { PROJECT_STONE, WORK_STONE, narrativeStoneY } from './descent';
+import { PROJECT_STONE, narrativeStoneY } from './descent';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
-import MechanicalKeyboard from './mechanical-keyboard';
+import WorkKeyboardScene from './work-keyboard-scene';
 import OrbitalInstrument from './orbital-instrument';
 
 type OrbitalBackdropParams = {
@@ -102,15 +102,11 @@ export const SectionObjects = ({
   motionMode,
 }: SectionObjectsParams) => (
   <>
-    <SectionObject
-      anchor={WORK_STONE}
+    <WorkKeyboardScene
+      palette={palette}
       progressRef={progressRef}
       motionMode={motionMode}
-    >
-      <group scale={0.44} rotation={[0.7, -0.2, -0.18]}>
-        <MechanicalKeyboard palette={palette} />
-      </group>
-    </SectionObject>
+    />
     <SectionObject
       anchor={PROJECT_STONE}
       progressRef={progressRef}

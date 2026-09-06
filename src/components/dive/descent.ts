@@ -1,4 +1,3 @@
-import { WORK_EXPERIENCES } from '@/app/_components/work-experience/work-experiences';
 import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
 
 import { RAW_DESCENT_KEYS } from './descent-keys';
@@ -54,9 +53,16 @@ const TECH_DWELL_HALF = 0.3;
 
 export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
 
-export const WORK_JOBS = WORK_EXPERIENCES;
-
 export const PROJECT_STONE = { center: 2.55, x: -1.45, z: 8.4 };
+
+export const WORK_SECTION: StoneDiveSection = {
+  tag: '02',
+  title: 'Work\nExperience',
+  subtitle: '2020 — present',
+  placement: 'stone',
+  stoneIndex: 0,
+  ...WORK_STONE,
+};
 
 export const DIVE_SECTIONS: DiveSection[] = [
   {
@@ -66,14 +72,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     center: 0.95,
     placement: 'center',
   },
-  {
-    tag: '02',
-    title: 'Work\nExperience',
-    subtitle: '2020 — present',
-    placement: 'stone',
-    stoneIndex: 0,
-    ...WORK_STONE,
-  },
+  WORK_SECTION,
   {
     tag: '03',
     title: 'Projects',

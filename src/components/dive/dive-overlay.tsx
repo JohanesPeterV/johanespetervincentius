@@ -102,6 +102,17 @@ export default function DiveOverlay({
               </div>
             );
           }
+          if (section.center === WORK_STONE.center) {
+            return (
+              <DiveWorkExperience
+                key={section.tag}
+                sectionRef={(element) => {
+                  overlayRef.current.sections[index] = element;
+                }}
+                onContinue={() => onNavigate(PROJECT_STONE.center)}
+              />
+            );
+          }
           const dimStyle =
             mode === 'explore' && section.center === TECH_STONE.center
               ? { opacity: 0.15 }
@@ -134,9 +145,6 @@ export default function DiveOverlay({
               >
                 {section.subtitle}
               </span>
-              {section.center === WORK_STONE.center ? (
-                <DiveWorkExperience overlayRef={overlayRef} />
-              ) : null}
               {section.center === PROJECT_STONE.center ? (
                 <div className="dive-project flex w-full flex-col gap-3">
                   <PomoplanterPreview />

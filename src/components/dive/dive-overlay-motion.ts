@@ -11,10 +11,10 @@ import {
   sectionJumpDelta,
 } from './descent';
 import type { MotionMode } from './descent';
-import { WORK_MOTION, workPull } from './camera-motion';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 import { HANDOFF_END, heroHandoffProgress } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
+import { getWorkLayout } from './work-story';
 
 export type OverlayNodes = {
   chapters: (HTMLButtonElement | null)[];
@@ -23,8 +23,6 @@ export type OverlayNodes = {
   skillRail: (HTMLButtonElement | null)[];
   skillWords: (HTMLSpanElement | null)[];
   veil: HTMLDivElement | null;
-  workPanels: (HTMLDivElement | null)[];
-  workRail: (HTMLButtonElement | null)[];
 };
 
 export type OverlayFrame = {
@@ -79,45 +77,6 @@ const applyGalaxyLabels = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   });
 };
 
-const WORK_PULL_NUDGE_PX = 18;
-
-const applyWorkShowcase = (nodes: OverlayNodes): void => {
-  const active = WORK_MOTION.job;
-  const mark = (element: HTMLElement | null, index: number): void => {
-    if (!element) {
-      return;
-    }
-    const value = index === active ? 'true' : 'false';
-    if (element.dataset.active !== value) {
-      element.dataset.active = value;
-    }
-  };
-  nodes.workRail.forEach((element, index) => {
-    mark(element, index);
-    const pressed = String(index === active);
-    if (element && element.getAttribute('aria-pressed') !== pressed) {
-      element.setAttribute('aria-pressed', pressed);
-    }
-  });
-  const pull = workPull();
-  nodes.workPanels.forEach((element, index) => {
-    if (!element) {
-      return;
-    }
-    mark(element, index);
-    element.inert = index !== active;
-    // REASON: gesture feedback uses translate independently of the timed
-    // panel swap's transform, so CSS cannot ease every frame of the pull again.
-    const translate =
-      index === active && pull !== 0
-        ? `0 ${(-pull * WORK_PULL_NUDGE_PX).toFixed(2)}px`
-        : '';
-    if (element.style.translate !== translate) {
-      element.style.translate = translate;
-    }
-  });
-};
-
 // REASON: the galaxy claims the screen centre, so this section's copy docks
 // as a hud in the top-left corner instead of chasing its stone
 const positionTechHud = (
@@ -137,6 +96,13 @@ const positionStoneSection = (
   // REASON: reserve the appearance controls above and chapter navigation below;
   // anchored copy scrolls within that space instead of covering either control.
   const height = element.offsetHeight;
+  if (element.dataset.workStory === 'true') {
+    const layout = getWorkLayout(frame.width, frame.height);
+    element.style.width = `${layout.width}px`;
+    element.style.height = `${layout.height}px`;
+    element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;
+    return { left: layout.left, top: layout.top, anchor: 0 };
+  }
   const maxTop = frame.height - height - 104;
   if (frame.width < 768) {
     const top = Math.max(88, Math.min(frame.height * 0.16, maxTop));
@@ -236,7 +202,6 @@ export const applyOverlay = (
       element.removeAttribute('aria-current');
     }
   });
-  applyWorkShowcase(nodes);
   applyGalaxyLabels(nodes, frame);
   if (nodes.veil) {
     nodes.veil.style.opacity = String(frame.descent.veil);

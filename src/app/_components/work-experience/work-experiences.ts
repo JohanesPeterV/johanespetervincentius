@@ -1,5 +1,6 @@
 type WorkExperience = {
   company: string;
+  chapter: string;
   headline: string;
   positions: {
     name: string;
@@ -15,6 +16,7 @@ type WorkExperience = {
 export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Smilie',
+    chapter: 'Taking ownership',
     headline: 'From product decisions to production ownership.',
     positions: [
       {
@@ -44,6 +46,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   },
   {
     company: 'TableLink',
+    chapter: 'Connecting the floor',
     headline: 'Live venue operations. A stronger engineering foundation.',
     positions: [
       {
@@ -73,6 +76,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   },
   {
     company: 'Farmio',
+    chapter: 'Making AI practical',
     headline: 'Practical AI, shipped into everyday operations.',
     positions: [
       {
@@ -102,6 +106,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   },
   {
     company: 'BINUS University',
+    chapter: 'Building the foundations',
     headline: 'Building the systems behind the classroom.',
     positions: [
       {

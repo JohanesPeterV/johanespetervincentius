@@ -1,0 +1,18 @@
+# Space65 Asset Provenance
+
+- Source: user-supplied `Downloads/space65/space65-typing.glb`, imported 2026-09-06.
+- Original industrial design: [Graystudio SPACE65 R3](https://graystudio.site/en/works/space65r3/). This is an unofficial photo-referenced exterior study, not manufacturing CAD or a manufacturer-certified model. Case dimensions are estimated at 330 x 115 mm; electronics are not modeled. The reference photo is not included.
+- Cherry-profile keycap geometry: [Santiago Castelo / endeavoursc](https://github.com/endeavoursc/cherry-mx-keycaps), copyright 2020, MIT. The original notice is reproduced verbatim in `space65-LICENSE.txt` and retained in the GLB metadata. The notice applies to the source keycap CAD; it does not relicense Graystudio's industrial design. No separate license was supplied for the reconstructed case.
+- Delivery: `space65-typing.glb`, 1,023,376 bytes, down from 1,740,928 bytes (41.2%). Temporary tooling only: glTF Transform 4.5.0 and Meshoptimizer 1.2.0, accessor-only `dedup`, then required `EXT_meshopt_compression` with encoder method `QUANTIZE` **without running quantization**. No simplification, vertex filtering, animation resampling, material merging, or texture conversion. Drei's existing bundled Meshopt decoder handles loading; no runtime dependency was added.
+- Preserved: 223 nodes, 67 keycaps, 174 unique meshes, 65,848 unique-mesh triangles (167,597 instantiated scene triangles), 12 materials, and mesh-based white legends. This supplied GLB has no textures. The `Typing` clip lasts 11 seconds with 18 translation channels, 30 strokes and 2.4 mm key travel.
+- Verification: decoded vertex attributes and animation samples match exactly; triangles retain their winding; node transforms and attribution extras are unchanged. Khronos validation reports zero errors and warnings, with two informational notices for the unsupported compression extension and its fallback buffer. A separate decode-and-compare check verifies the compressed payload.
+- Source SHA-256: `86b16148996555fe167c8cf8534ea72baa280bc3e7ffd034a5e884f746a465d3`.
+- Delivery SHA-256: `01698c4f891a315eb921585e3d4ad8dd34bae85066b7c90a4f18570d373c2024`.
+
+## Component Contract
+
+`src/components/dive/space65-keyboard.tsx` exports default `Space65Keyboard`, with required `palette: DivePalette`, `motionMode: MotionMode` and zero-based `chapter: number` props. Chapters 0-3 select four damped product-view orientations; indices outside that range clamp to the nearest pose. No world placement, camera, lights, DOM, Suspense or ErrorBoundary is supplied.
+
+The asset is already Y-up: keycaps face +Y, the spacebar is toward +Z and the number row toward -Z. Its rest bounds are approximately 0.330425 x 0.034500 x 0.116040 metres (X/Y/Z). The component centers those bounds and normalizes X width to 3.3 world units, approximately 3.3 x 0.345 x 1.159 before artistic tilt. Positive X tilt presents the keys to a camera on the +Z side. The parent should not retain the old procedural keyboard's 0.44 scale or extra 0.7-radian tilt.
+
+The component clones the scene and materials, leaving cached geometry and any textures shared. It keeps neutral graphite PBR body tones and white legends, dark-tints Esc/Enter with `palette.accent`, and colors the diffuser/badge LEDs with `palette.accent`/`palette.highlight`. Depth bias protects the fine mesh legends. Neutral parent lighting is needed for the metal finish. Reduced motion restores key rest positions, disables typing and idle drift, and switches chapter poses immediately without easing. Unmount releases the private mixer and cloned materials, never the shared GLB cache.

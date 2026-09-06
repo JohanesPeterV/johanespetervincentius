@@ -43,6 +43,8 @@ const load = (filename) => {
 
 const descent = load(resolve(root, 'src/components/dive/descent.ts'));
 const motion = load(resolve(root, 'src/components/dive/camera-motion.ts'));
+const story = load(resolve(root, 'src/components/dive/work-story.ts'));
+const input = load(resolve(root, 'src/components/dive/dive-input.ts'));
 const palette = load(resolve(root, 'src/components/dive/dive-palette.ts'));
 const themes = load(resolve(root, 'src/lib/theme-colors.ts'));
 const { baseColors } = load(
@@ -98,14 +100,12 @@ test('wheel momentum is bounded across the looping seam', () => {
   assert.ok(Math.abs(motion.limitDriveTarget(2.6, 0.95) - 1.8) < 1e-9);
 });
 
-test('forward input cannot reverse a captured or distant chapter destination', () => {
-  motion.resetWorkMotion();
+test('forward input cannot reverse a distant chapter destination', () => {
   assert.equal(
     motion.driveInputDelta({
       target: 1.95,
       progress: 1.05,
       step: 0.1,
-      now: 1000,
     }),
     0,
   );
@@ -114,70 +114,95 @@ test('forward input cannot reverse a captured or distant chapter destination', (
       target: 3.15,
       progress: 0.95,
       step: 0.1,
-      now: 1000,
     }),
     0,
   );
 });
 
-test('scroll catches Work before advancing its jobs', () => {
-  motion.resetWorkMotion();
-  const delta = motion.workLockedDelta({
-    target: 1.4,
-    progress: 1.4,
-    step: 0.4,
-    now: 1000,
-  });
-  assert.ok(Math.abs(1.4 + delta - descent.WORK_STONE.center) < 1e-9);
-  assert.equal(motion.WORK_MOTION.job, 0);
+test('vertical travel never captures Work or selects an employer', () => {
+  for (const target of [1.4, 1.7, 1.95, 2.1, 2.3, 6.05]) {
+    for (const step of [-0.2, 0.2]) {
+      assert.ok(
+        Math.abs(
+          motion.driveInputDelta({ target, progress: target, step }) - step,
+        ) < 1e-9,
+      );
+    }
+  }
 });
 
-test('approaching Work prepares its first job before the handoff reveals copy', () => {
-  motion.resetWorkMotion();
-  motion.WORK_MOTION.job = 2;
-  motion.workLockedDelta({
-    target: 0.95,
-    progress: 0.95,
-    step: 0.35,
-    now: 1000,
+test('one down-arrow can go straight from Work to Projects', () => {
+  const target = descent.WORK_STONE.center;
+  const delta = motion.driveInputDelta({
+    target,
+    progress: target,
+    step: descent.sectionStepDelta(target, 1),
   });
-  assert.equal(motion.WORK_MOTION.job, 0);
+  assert.equal(target + delta, descent.PROJECT_STONE.center);
 });
 
-test('a reverse gesture can leave Work while it is still arriving', () => {
-  motion.resetWorkMotion();
+test('a reverse gesture can leave Work while it is arriving', () => {
   assert.equal(
-    motion.workLockedDelta({
-      target: 1.95,
-      progress: 1.5,
-      step: -0.1,
-      now: 1000,
-    }),
-    -0.1,
+    motion
+      .driveInputDelta({
+        target: 1.95,
+        progress: 1.5,
+        step: -0.1,
+      })
+      .toFixed(1),
+    '-0.1',
   );
 });
 
-test('one gesture selects one job and its momentum tail is absorbed', () => {
-  motion.resetWorkMotion();
-  const input = { target: 1.95, progress: 1.95, step: 0.2, now: 1000 };
-  assert.equal(motion.workLockedDelta(input), 0);
-  assert.equal(motion.WORK_MOTION.job, 1);
-  assert.equal(motion.workLockedDelta({ ...input, now: 1100 }), 0);
-  assert.equal(motion.WORK_MOTION.job, 1);
-  assert.equal(motion.workLockedDelta({ ...input, now: 1800 }), 0);
-  assert.equal(motion.WORK_MOTION.job, 2);
+test('one horizontal wheel gesture selects one chapter and absorbs its tail', () => {
+  const gesture = { distance: 0, lastAt: 0, consumed: false };
+  assert.equal(story.advanceWorkGesture(gesture, { delta: 24, now: 1000 }), 0);
+  assert.equal(story.advanceWorkGesture(gesture, { delta: 25, now: 1010 }), 1);
+  for (let now = 1020; now <= 1600; now += 10) {
+    assert.equal(story.advanceWorkGesture(gesture, { delta: 80, now }), 0);
+  }
+  assert.equal(
+    story.advanceWorkGesture(gesture, { delta: -60, now: 2000 }),
+    -1,
+  );
 });
 
-test('Work releases travel only after its last job', () => {
-  motion.resetWorkMotion();
-  motion.WORK_MOTION.job = descent.WORK_JOBS.length - 1;
-  const delta = motion.workLockedDelta({
-    target: 1.95,
-    progress: 1.95,
-    step: 0.2,
-    now: 1000,
-  });
-  assert.ok(Math.abs(1.95 + delta - 2.55) < 1e-9);
+test('short horizontal gestures do not accumulate across unrelated swipes', () => {
+  const gesture = { distance: 0, lastAt: 0, consumed: false };
+  assert.equal(story.advanceWorkGesture(gesture, { delta: 30, now: 1000 }), 0);
+  assert.equal(story.advanceWorkGesture(gesture, { delta: 30, now: 1300 }), 0);
+});
+
+test('reading role details releases vertical input at either scroll edge', () => {
+  const section = { scrollHeight: 400, clientHeight: 200, scrollTop: 100 };
+  assert.equal(input.canScrollSection(section, 20), true);
+  assert.equal(input.canScrollSection(section, -20), true);
+  section.scrollTop = 200;
+  assert.equal(input.canScrollSection(section, 20), false);
+  section.scrollTop = 0;
+  assert.equal(input.canScrollSection(section, -20), false);
+  section.scrollHeight = 200;
+  assert.equal(input.canScrollSection(section, 20), false);
+  assert.equal(input.canScrollSection(null, 20), false);
+});
+
+test('work layout reserves mobile reading space and keeps exit controls on screen', () => {
+  for (const [width, height] of [
+    [320, 568],
+    [375, 667],
+    [390, 844],
+    [768, 1024],
+    [1440, 900],
+  ]) {
+    const layout = story.getWorkLayout(width, height);
+    assert.ok(layout.left >= 24);
+    assert.ok(layout.left + layout.width <= width - 24);
+    assert.ok(layout.top + layout.height <= height - 80);
+    assert.ok(layout.height > 250);
+    if (width < 768) {
+      assert.ok(layout.modelY + layout.modelWidth * 0.22 < layout.top);
+    }
+  }
 });
 
 test('chapter composition is at rest at every reading stop', () => {

@@ -6,7 +6,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import PalettePicker from '@/components/theme-buttons/palette-picker';
 
 import type { PointerState } from './camera-rig';
-import { driveInputDelta, resetWorkMotion } from './camera-motion';
+import { driveInputDelta } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import DiveCanvas from './dive-canvas';
 import {
@@ -30,43 +30,12 @@ import {
   resetGalaxy,
 } from './skill-galaxy';
 import { useHeroHandoff } from './use-hero-handoff';
-
-type PointerDrag = {
-  id: number | null;
-  y: number;
-  scrollTarget: HTMLElement | null;
-};
-
-const LINE_DELTA_MODE = 1;
-const PAGE_DELTA_MODE = 2;
-const LINE_HEIGHT_PX = 16;
-
-const getScrollableSection = (target: EventTarget): HTMLElement | null => {
-  if (!(target instanceof Element)) {
-    return null;
-  }
-  const section = target.closest('[data-section-scroll]');
-  if (
-    section instanceof HTMLElement &&
-    section.scrollHeight > section.clientHeight
-  ) {
-    return section;
-  }
-  return null;
-};
-
-const normalizeWheelDelta = (
-  event: React.WheelEvent<HTMLDivElement>,
-): number => {
-  let pixels = event.deltaY;
-  if (event.deltaMode === LINE_DELTA_MODE) {
-    pixels *= LINE_HEIGHT_PX;
-  }
-  if (event.deltaMode === PAGE_DELTA_MODE) {
-    pixels *= window.innerHeight;
-  }
-  return pixels;
-};
+import {
+  canScrollSection,
+  getScrollableSection,
+  normalizeWheelDelta,
+} from './dive-input';
+import type { PointerDrag } from './dive-input';
 
 export default function DiveScene({ children }: { children: ReactNode }) {
   const driveRef = useRef<DriveMotion>({
@@ -76,7 +45,13 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     idleTime: 0,
   });
   const progressRef = useRef(DIVE_START);
-  const dragRef = useRef<PointerDrag>({ id: null, y: 0, scrollTarget: null });
+  const dragRef = useRef<PointerDrag>({
+    id: null,
+    x: 0,
+    y: 0,
+    axis: 'vertical',
+    scrollTarget: null,
+  });
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const overlayRef = useRef<OverlayNodes>({
     chapters: [],
@@ -85,8 +60,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     skillRail: [],
     skillWords: [],
     veil: null,
-    workPanels: [],
-    workRail: [],
   });
   const { handoffRef, error: handoffError } = useHeroHandoff(overlayRef);
   const modeRef = useRef<DiveMode>('dive');
@@ -101,7 +74,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       target: drive.target,
       progress: drive.current,
       step,
-      now: performance.now(),
     });
   };
 
@@ -131,7 +103,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   };
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
-    if (getScrollableSection(event.target)) {
+    if (canScrollSection(getScrollableSection(event.target), event.deltaY)) {
       return;
     }
     if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
@@ -150,17 +122,27 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     if (event.button !== 0) {
       return;
     }
-    if (event.target instanceof Element && event.target.closest('a, button')) {
+    if (
+      event.target instanceof Element &&
+      event.target.closest('a, button, summary')
+    ) {
       return;
     }
-    event.currentTarget.setPointerCapture(event.pointerId);
+    const horizontal =
+      event.target instanceof Element &&
+      event.target.closest('[data-horizontal-gesture]');
+    if (!horizontal) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
     if (modeRef.current === 'explore') {
       galaxyPointerDown(event.pointerId, event.clientX, event.clientY);
       return;
     }
     dragRef.current = {
       id: event.pointerId,
+      x: event.clientX,
       y: event.clientY,
+      axis: horizontal ? 'pending' : 'vertical',
       scrollTarget: getScrollableSection(event.target),
     };
   };
@@ -183,9 +165,20 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     if (dragRef.current.id !== event.pointerId) {
       return;
     }
-    const delta = dragRef.current.y - event.clientY;
-    if (dragRef.current.scrollTarget) {
-      dragRef.current.scrollTarget.scrollTop += delta;
+    const drag = dragRef.current;
+    const delta = drag.y - event.clientY;
+    if (drag.axis === 'pending') {
+      const horizontal = Math.abs(drag.x - event.clientX);
+      if (Math.max(horizontal, Math.abs(delta)) < 6) {
+        return;
+      }
+      drag.axis = horizontal > Math.abs(delta) ? 'horizontal' : 'vertical';
+    }
+    if (drag.axis === 'horizontal') {
+      return;
+    }
+    if (canScrollSection(drag.scrollTarget, delta) && drag.scrollTarget) {
+      drag.scrollTarget.scrollTop += delta;
     } else {
       applyDriveDelta(delta * TOUCH_SENSITIVITY);
     }
@@ -205,12 +198,10 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     }
   };
 
-  // REASON: galaxy and work-lock motion live in module state that survives
-  // React remounts - without this reset a return visit starts zoomed, focused,
-  // or mid-job while the UI reports a fresh dive
+  // REASON: galaxy motion survives React remounts; a return visit must not
+  // inherit an explored camera while the UI reports a fresh dive.
   useEffect(() => {
     resetGalaxy();
-    resetWorkMotion();
   }, []);
 
   // REASON: arrow-key navigation needs window-level key events - the
@@ -231,6 +222,16 @@ export default function DiveScene({ children }: { children: ReactNode }) {
           setMode('dive');
           galaxyRelease();
         }
+        return;
+      }
+      if (
+        (event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
+        event.target instanceof HTMLElement &&
+        canScrollSection(
+          getScrollableSection(event.target),
+          event.key === 'ArrowDown' ? 1 : -1,
+        )
+      ) {
         return;
       }
       if (event.key === 'ArrowDown') {
