@@ -7,6 +7,7 @@ uniform float uProgress;
 uniform float uActive;
 uniform float uAspect;
 uniform vec3 uInk;
+uniform vec3 uPaper;
 
 float handoffHash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -52,14 +53,20 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     return;
   }
 
+  vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
+  bool lightSurface = dot(uPaper, luminance) > dot(uInk, luminance);
   vec2 p = uv * vec2(uAspect, 1.0);
   float broad = handoffNoise(p * 4.6 + 3.2);
   float medium = handoffNoise(p * 21.0 + broad * 2.8);
   float fine = handoffNoise(p * 110.0 + medium * 3.0);
   float field = uv.y + (broad - 0.5) * 0.22 + (medium - 0.5) * 0.075
               + (fine - 0.5) * 0.018 + sin(uv.x * 5.0) * 0.055;
+  if (lightSurface) {
+    field = uv.y + (broad - 0.5) * 0.045 + (medium - 0.5) * 0.004
+          + sin(uv.x * 5.0) * 0.055;
+  }
   float edge = uProgress * 1.5 - 0.25 - field;
-  float proximity = 1.0 - smoothstep(0.0, 0.2, abs(edge));
+  float proximity = 1.0 - smoothstep(0.0, lightSurface ? 0.08 : 0.2, abs(edge));
   float envelope = smoothstep(0.0, 0.06, uProgress) * (1.0 - smoothstep(0.94, 1.0, uProgress));
   vec2 refraction = vec2(medium - 0.5, fine - 0.5) * proximity * 0.0025 * envelope;
   vec2 fromUv = (uv - 0.5) / (1.0 + uProgress * 0.045) + 0.5 + refraction;
@@ -67,9 +74,14 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   vec3 from = handoffFrom(fromUv);
   vec3 next = handoffTo(toUv);
 
-  float luma = dot(from, vec3(0.2126, 0.7152, 0.0722));
+  float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);
   vec3 etched = from * 0.045 + uInk * lines;
+  // REASON: light surfaces need pigment on the active paper colour. The dark
+  // treatment's near-black base and additive ink create a soot band in light mode.
+  if (lightSurface) {
+    etched = mix(mix(from, uPaper, 0.85), uInk, min(lines * 0.22, 0.4));
+  }
   from = mix(from, etched, proximity * envelope * 0.95);
 
   float aa = max(fwidth(edge) * 1.5, 0.0006);
@@ -77,7 +89,11 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float rim = 1.0 - smoothstep(aa, aa + 0.001, abs(edge));
   float glow = exp(-abs(edge) * 150.0) * 0.08 + exp(-abs(edge) * 48.0) * 0.018;
   vec3 color = mix(from, next, reveal);
-  color += uInk * (rim * (0.16 + clamp(luma * 3.0 + lines, 0.0, 1.0)) + glow) * envelope;
+  if (lightSurface) {
+    color = mix(color, uInk, (rim * 0.09 + glow * 0.2) * envelope);
+  } else {
+    color += uInk * (rim * (0.16 + clamp(luma * 3.0 + lines, 0.0, 1.0)) + glow) * envelope;
+  }
   outputColor = vec4(max(color, 0.0), 1.0);
 }
 `;

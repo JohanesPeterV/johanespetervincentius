@@ -11,6 +11,7 @@ import type { HeroHandoff } from './hero-handoff';
 const ABERRATION_OFFSET = new Vector2();
 
 type DivePostprocessingParams = {
+  background: string;
   foreground: string;
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
   handoffRef: RefObject<HeroHandoff>;
@@ -18,6 +19,7 @@ type DivePostprocessingParams = {
 };
 
 const DivePostprocessing = memo(function DivePostprocessing({
+  background,
   foreground,
   aberrationRef,
   handoffRef,
@@ -51,7 +53,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
       ) : (
         <></>
       )}
-      <primitive object={handoff} ink={foreground} />
+      <primitive object={handoff} ink={foreground} paper={background} />
     </EffectComposer>
   );
 });
