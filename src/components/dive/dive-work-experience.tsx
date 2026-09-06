@@ -37,22 +37,24 @@ export const DiveWorkExperience = ({ overlayRef }: DiveWorkExperienceProps) => (
           }}
           className="dive-work-panel col-start-1 row-start-1 flex flex-col gap-3"
         >
-          <p className="text-xs leading-relaxed opacity-60">
+          <p className="type-meta text-muted-foreground">
             {job.positions[0].name}
             <br />
             {job.positions[0].workPeriod}
           </p>
-          <h3 className="font-display text-xl leading-tight sm:text-2xl">
+          <h3 className="font-display text-xl font-medium leading-tight tracking-tight sm:text-2xl">
             {job.headline}
           </h3>
-          <p className="text-xs leading-relaxed opacity-75 sm:text-sm">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {job.positions[0].description}
           </p>
           <ul className="flex flex-col gap-2 text-xs leading-relaxed">
             {job.showcases.map((showcase) => (
               <li key={showcase.title}>
                 <span className="font-semibold">{showcase.title}. </span>
-                <span className="opacity-60">{showcase.description}</span>
+                <span className="text-muted-foreground">
+                  {showcase.description}
+                </span>
               </li>
             ))}
           </ul>

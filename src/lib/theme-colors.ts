@@ -1,4 +1,4 @@
-import { darkenHsl, hslCssToHex } from '@/lib/utils';
+import { hslCssToHex } from '@/lib/utils';
 import {
   BaseColor,
   baseColors,
@@ -41,6 +41,7 @@ type ThemeColorValues = {
 };
 
 type FluidThemeColors = {
+  mode: ThemeMode;
   backgroundColor: string;
   fluidColor: string;
   textColor: string;
@@ -94,9 +95,8 @@ export const getFluidThemeColors = (
   );
 
   return {
-    backgroundColor: getThemeHexColor(
-      darkenHsl(cssVars.background, mode === 'dark' ? 0 : 5),
-    ),
+    mode,
+    backgroundColor: getThemeHexColor(cssVars.background),
     fluidColor: getThemeHexColor(activeColor),
     textColor: getThemeHexColor(cssVars.foreground),
   };

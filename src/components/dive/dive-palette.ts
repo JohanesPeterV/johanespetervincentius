@@ -16,6 +16,7 @@ export type DivePalette = {
   foreground: string;
   fogDensity: number;
   glow: string;
+  glowStrength: number;
   metal: string;
   surface: string;
 };
@@ -48,6 +49,7 @@ export const getDivePalette = (
     foreground: foreground.getStyle(),
     fogDensity: 0.003,
     glow: glow.lerp(foreground, 0.18).getStyle(),
+    glowStrength: theme.mode === 'light' ? 0.48 : 0.12,
     metal: foreground.clone().lerp(background, 0.28).getStyle(),
     surface: background.clone().lerp(foreground, 0.025).getStyle(),
   };

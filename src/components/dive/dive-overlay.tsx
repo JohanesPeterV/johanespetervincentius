@@ -117,19 +117,19 @@ export default function DiveOverlay({
             >
               <span
                 style={dimStyle}
-                className="text-[0.65rem] font-medium tracking-[0.28em] opacity-50 transition-opacity duration-500"
+                className="type-label text-muted-foreground transition-opacity duration-500"
               >
                 {section.tag}
               </span>
               <h2
                 style={dimStyle}
-                className="font-display text-4xl leading-[1.04] tracking-[-0.04em] transition-opacity duration-500 sm:text-6xl motion-reduce:transition-none"
+                className="font-display text-4xl font-medium leading-[1.04] tracking-[-0.045em] transition-opacity duration-500 sm:text-6xl motion-reduce:transition-none"
               >
                 <HeadlineLines title={section.title} />
               </h2>
               <span
                 style={dimStyle}
-                className="text-xs tracking-[0.16em] opacity-50 transition-opacity duration-500"
+                className="type-meta text-muted-foreground transition-opacity duration-500"
               >
                 {section.subtitle}
               </span>
@@ -139,13 +139,13 @@ export default function DiveOverlay({
               {section.center === PROJECT_STONE.center ? (
                 <div className="dive-project flex w-full flex-col gap-3">
                   <PomoplanterPreview />
-                  <h3 className="font-display text-2xl">
+                  <h3 className="font-display text-2xl font-medium tracking-tight">
                     {POMODORO_PLANTER.title}
                   </h3>
                   <p className="text-xs leading-relaxed opacity-75 sm:text-sm">
                     {POMODORO_PLANTER.description}
                   </p>
-                  <p className="text-[0.65rem] tracking-wide opacity-50">
+                  <p className="type-meta text-muted-foreground">
                     {POMODORO_PLANTER.technologies.join(' · ')}
                   </p>
                 </div>
@@ -207,13 +207,13 @@ export default function DiveOverlay({
             ref={(element) => {
               overlayRef.current.chapters[index] = element;
             }}
-            className="flex h-11 w-11 items-center justify-center text-xs tracking-widest opacity-35 transition-opacity hover:opacity-100 aria-[current=step]:opacity-100"
+            className="type-meta flex h-11 w-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100 aria-[current=step]:opacity-100"
           >
             <span className="border-b border-current pb-2">{section.tag}</span>
           </button>
         ))}
       </nav>
-      <div className="pointer-events-none absolute bottom-20 left-6 right-6 text-center text-[0.6rem] tracking-[0.14em] opacity-50 sm:bottom-10 sm:right-60 sm:text-left">
+      <div className="dive-hint type-label pointer-events-none absolute bottom-20 left-6 right-6 text-center text-muted-foreground sm:bottom-10 sm:right-60 sm:text-left">
         {mode === 'explore'
           ? 'drag to orbit · scroll to zoom · click a tool to open its docs · esc to exit'
           : 'Scroll or drag to explore'}

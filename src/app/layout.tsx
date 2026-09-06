@@ -3,18 +3,17 @@ import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SITE_URL } from '@/lib/site';
 import { DEFAULT_BASE_COLOR } from '@/registry/registry-base-colors';
 import type { Metadata, Viewport } from 'next';
-import { Inter, Poppins } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const poppins = Poppins({
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-poppins',
+  variable: '--font-geist-sans',
 });
 
-const inter = Inter({
+const geistMono = Geist_Mono({
   subsets: ['latin'],
-  variable: '--font-display',
+  variable: '--font-geist-mono',
 });
 
 const getCssColor = (value: string) => `hsl(${value})`;
@@ -138,8 +137,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`
-          ${poppins.variable} ${inter.variable} antialiased font-poppins overflow-x-hidden min-h-screen bg-background`}
+        className={`${geist.variable} ${geistMono.variable} min-h-screen overflow-x-hidden bg-background font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

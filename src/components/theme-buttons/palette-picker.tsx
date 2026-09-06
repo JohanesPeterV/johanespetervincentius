@@ -43,7 +43,7 @@ export default function PalettePicker() {
         className="appearance-trigger flex h-11 items-center justify-center gap-2 px-3"
       >
         <span aria-hidden className="appearance-orb" />
-        <span className="text-xs">Theme</span>
+        <span className="type-label">Theme</span>
       </button>
       <div
         id={panelId}

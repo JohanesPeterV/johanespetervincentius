@@ -27,14 +27,15 @@ const backdropVertex = `
 const backdropFragment = `
   uniform vec3 uBackground;
   uniform vec3 uGlow;
+  uniform float uGlowStrength;
   uniform float uTime;
   varying vec2 vUv;
   void main() {
     vec2 drift = vec2(sin(uTime * 0.035), cos(uTime * 0.025)) * 0.012;
     vec2 upper = (vUv - vec2(0.7, 0.67) + drift) * vec2(3.6, 4.8);
     vec2 lower = (vUv - vec2(0.25, 0.26) - drift) * vec2(4.8, 5.4);
-    float light = exp(-dot(upper, upper) * 2.0) * 0.12;
-    light += exp(-dot(lower, lower) * 2.0) * 0.06;
+    float light = exp(-dot(upper, upper) * 2.0) * uGlowStrength;
+    light += exp(-dot(lower, lower) * 2.0) * uGlowStrength * 0.5;
     vec3 color = mix(uBackground, uGlow, light);
     gl_FragColor = vec4(color, 1.0);
     #include <tonemapping_fragment>
@@ -76,6 +77,7 @@ export default function DiveAtmosphere({
     uBackground: { value: new Color(palette.background) },
     uStarlight: { value: new Color(palette.foreground) },
     uGlow: { value: new Color(palette.glow) },
+    uGlowStrength: { value: palette.glowStrength },
     uTime: { value: 0 },
     uPixelRatio: { value: 1 },
   }));
@@ -86,7 +88,14 @@ export default function DiveAtmosphere({
     uniforms.uBackground.value.set(palette.background);
     uniforms.uStarlight.value.set(palette.foreground);
     uniforms.uGlow.value.set(palette.glow);
-  }, [palette.background, palette.foreground, palette.glow, uniforms]);
+    uniforms.uGlowStrength.value = palette.glowStrength;
+  }, [
+    palette.background,
+    palette.foreground,
+    palette.glow,
+    palette.glowStrength,
+    uniforms,
+  ]);
 
   useFrame(({ gl }, delta) => {
     if (motionMode === 'full') {

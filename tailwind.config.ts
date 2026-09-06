@@ -31,8 +31,9 @@ export default {
         glow: 'glow 2s ease-in-out infinite',
       },
       fontFamily: {
-        poppins: ['var(--font-poppins)', 'sans-serif'],
-        display: ['var(--font-display)', 'sans-serif'],
+        sans: ['var(--font-geist-sans)', 'sans-serif'],
+        display: ['var(--font-geist-sans)', 'sans-serif'],
+        mono: ['var(--font-geist-mono)', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
