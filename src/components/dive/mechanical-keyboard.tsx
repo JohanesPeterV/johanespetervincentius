@@ -76,9 +76,10 @@ export default function MechanicalKeyboard({
     <group>
       <RoundedBox args={[5.7, 0.34, 2.08]} radius={0.12} smoothness={3}>
         <meshStandardMaterial
-          color={palette.surface}
-          metalness={0.35}
-          roughness={0.55}
+          color={palette.accent}
+          metalness={0.15}
+          roughness={0.4}
+          toneMapped={false}
         />
       </RoundedBox>
       <RoundedBox
@@ -94,14 +95,19 @@ export default function MechanicalKeyboard({
         ref={(mesh) => placeKeycaps(mesh, palette)}
       >
         <KeycapGeometry attach="geometry" args={[1, 1, 1, 2, 0.12]} />
-        <meshStandardMaterial roughness={0.6} metalness={0.08} />
+        <meshStandardMaterial
+          roughness={0.45}
+          metalness={0.08}
+          toneMapped={false}
+        />
       </instancedMesh>
       <mesh position={[2.73, 0.06, 0]}>
         <boxGeometry args={[0.025, 0.065, 1.3]} />
         <meshStandardMaterial
-          color={palette.accent}
-          emissive={palette.accent}
-          emissiveIntensity={0.25}
+          color={palette.highlight}
+          emissive={palette.highlight}
+          emissiveIntensity={0.08}
+          toneMapped={false}
         />
       </mesh>
       <mesh position={[0, -0.16, 0.99]}>

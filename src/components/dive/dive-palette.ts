@@ -34,13 +34,11 @@ export const getDivePalette = (
   const background = new Color(theme.backgroundColor);
   const foreground = new Color(theme.textColor);
   const glow = accent.clone();
-  const highlight = secondary.clone();
   const { h } = accent.getHSL({ h: 0, s: 0, l: 0 });
   // REASON: warm light turns the sky brown. Use the pair's cool colour for
   // atmosphere instead of inventing a third hue outside the colourway.
   if (h <= 1 / 6 || h >= 11 / 12) {
     glow.copy(secondary);
-    highlight.copy(accent);
   }
   return {
     accent: accent.getStyle(),
@@ -50,9 +48,9 @@ export const getDivePalette = (
     exposure: 0.9,
     foreground: foreground.getStyle(),
     fogDensity: 0.003,
-    glow: glow.lerp(foreground, 0.18).getStyle(),
-    glowStrength: theme.mode === 'light' ? 0.48 : 0.12,
-    highlight: highlight.lerp(foreground, 0.22).getStyle(),
+    glow: glow.getStyle(),
+    glowStrength: theme.mode === 'light' ? 0.12 : 0.035,
+    highlight: secondary.getStyle(),
     metal: foreground.clone().lerp(background, 0.28).getStyle(),
     surface: background.clone().lerp(foreground, 0.025).getStyle(),
   };

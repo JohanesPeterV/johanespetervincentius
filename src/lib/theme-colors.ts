@@ -51,8 +51,8 @@ const getReadableColor = (color: string, backgrounds: string[]): string => {
   const [hue, saturation, lightness] = color.split(' ').map(parseFloat);
   const direction = getLuminance(backgrounds[0]) < 0.5 ? 1 : -1;
 
-  // REASON: primary also colours small links. Adjust only lightness until
-  // contrast exceeds AA, keeping the authored hue and a margin above 4.5:1.
+  // REASON: small coloured text needs its own contrast adjustment. Applying
+  // this to fills would turn cobalt pastel and citron olive.
   for (let step = 0; step <= 100; step += 1) {
     const level = Math.max(0, Math.min(100, lightness + step * direction));
     const candidate = `${hue} ${saturation}% ${level}%`;
@@ -63,6 +63,15 @@ const getReadableColor = (color: string, backgrounds: string[]): string => {
     }
   }
   throw new Error(`Cannot derive a readable theme colour from ${color}`);
+};
+
+const getColorForeground = (color: string): string => {
+  const ink =
+    getContrast(color, neutralSurfaces.light.foreground) >= 4.5
+      ? neutralSurfaces.light.foreground
+      : '0 0% 0%';
+  const paper = neutralSurfaces.light.surface;
+  return getContrast(color, ink) > getContrast(color, paper) ? ink : paper;
 };
 
 const getBaseColor = (themeName: BaseColor['name']): BaseColor => {
@@ -78,11 +87,10 @@ export const getThemeColorValues = (
   const mode: ThemeMode = resolvedTheme === 'light' ? 'light' : 'dark';
   const base = getBaseColor(themeName);
   const neutral = neutralSurfaces[mode];
-  const [hue, saturation] = base.secondary.split(' ').map(parseFloat);
-  const secondary = `${hue} ${saturation * 0.55}% ${mode === 'light' ? 90 : 18}%`;
-  const primary = getReadableColor(base.primary, [neutral.muted, secondary]);
-  const ink = neutralSurfaces.light.foreground;
-  const paper = neutralSurfaces.light.surface;
+  const [hue, saturation] = base.primary.split(' ').map(parseFloat);
+  const accent = `${hue} ${saturation * 0.3}% ${mode === 'light' ? 94 : 18}%`;
+  const primaryText = getReadableColor(base.primary, [neutral.muted, accent]);
+  const destructive = getReadableColor('0 72% 50%', [neutral.muted]);
 
   return {
     mode,
@@ -93,20 +101,20 @@ export const getThemeColorValues = (
       'card-foreground': neutral.foreground,
       popover: neutral.surface,
       'popover-foreground': neutral.foreground,
-      primary,
-      'primary-foreground':
-        getContrast(primary, ink) > getContrast(primary, paper) ? ink : paper,
-      secondary,
-      'secondary-foreground': neutral.foreground,
+      primary: base.primary,
+      'primary-foreground': getColorForeground(base.primary),
+      'primary-text': primaryText,
+      secondary: base.secondary,
+      'secondary-foreground': getColorForeground(base.secondary),
       muted: neutral.muted,
       'muted-foreground': neutral.mutedForeground,
-      accent: secondary,
+      accent,
       'accent-foreground': neutral.foreground,
-      destructive: getReadableColor('0 72% 50%', [neutral.muted]),
-      'destructive-foreground': mode === 'light' ? paper : ink,
+      destructive,
+      'destructive-foreground': getColorForeground(destructive),
       border: neutral.border,
       input: neutral.border,
-      ring: primary,
+      ring: primaryText,
       radius: '0.5rem',
     },
   };

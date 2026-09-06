@@ -27,13 +27,9 @@ export default function SpaceWorld({
         gpuTier={gpuTier}
         motionMode={motionMode}
       />
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[-4, 8, 8]} intensity={1.6} />
-      <directionalLight
-        position={[5, 2, -4]}
-        intensity={0.8}
-        color={palette.accent}
-      />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[-4, 8, 8]} intensity={1.4} />
+      <directionalLight position={[5, 2, -4]} intensity={1} />
       <OrbitalBackdrop palette={palette} progressRef={progressRef} />
       <SectionObjects
         palette={palette}

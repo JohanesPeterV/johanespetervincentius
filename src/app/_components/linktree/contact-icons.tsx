@@ -37,7 +37,7 @@ export default function ContactIcons() {
             aria-label={label}
             target={isExternal ? '_blank' : undefined}
             rel={isExternal ? 'noopener noreferrer' : undefined}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border/60 bg-background/25 text-muted-foreground transition-[transform,color,border-color] hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transform-none motion-reduce:transition-none"
+            className="contact-link flex h-11 w-11 items-center justify-center"
           >
             <Icon className="text-xl" />
           </a>

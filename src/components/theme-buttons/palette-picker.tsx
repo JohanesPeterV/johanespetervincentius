@@ -93,7 +93,7 @@ export default function PalettePicker() {
             type="button"
             aria-pressed={hydrated && resolvedTheme === 'light'}
             onClick={() => setTheme('light')}
-            className="appearance-mode flex h-11 flex-1 items-center justify-center gap-2"
+            className="appearance-mode choice-control flex h-11 flex-1 items-center justify-center gap-2"
           >
             <Sun size={14} aria-hidden />
             Light
@@ -102,7 +102,7 @@ export default function PalettePicker() {
             type="button"
             aria-pressed={hydrated && resolvedTheme === 'dark'}
             onClick={() => setTheme('dark')}
-            className="appearance-mode flex h-11 flex-1 items-center justify-center gap-2"
+            className="appearance-mode choice-control flex h-11 flex-1 items-center justify-center gap-2"
           >
             <Moon size={14} aria-hidden />
             Dark

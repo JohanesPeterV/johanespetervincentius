@@ -1,11 +1,14 @@
 import Link from 'next/link';
 
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function MinimalCard() {
   return (
     <Card className="profile-minimal pointer-events-auto relative z-10 mx-auto w-full max-w-xl p-6 sm:p-10">
-      <p className="type-label text-muted-foreground">Software engineer</p>
+      <p className="identity-tag type-label w-fit px-2 py-1">
+        Software engineer
+      </p>
       <h2 className="mt-4 max-w-lg font-display text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">
         Johanes Peter Vincentius
       </h2>
@@ -14,18 +17,12 @@ export default function MinimalCard() {
       </p>
 
       <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
-        <Link
-          href="/portfolio"
-          className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          View portfolio
-        </Link>
-        <a
-          href="mailto:johanespeter.jp@gmail.com"
-          className="inline-flex h-11 items-center justify-center rounded-full border border-border bg-background/50 px-5 text-sm font-medium transition-colors hover:bg-muted"
-        >
-          Get in touch
-        </a>
+        <Button asChild size="lg" className="h-11">
+          <Link href="/portfolio">View portfolio</Link>
+        </Button>
+        <Button asChild variant="outline" size="lg" className="h-11">
+          <a href="mailto:johanespeter.jp@gmail.com">Get in touch</a>
+        </Button>
       </div>
 
       <nav

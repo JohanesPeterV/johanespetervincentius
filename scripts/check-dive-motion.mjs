@@ -207,6 +207,9 @@ test('all colourways have two distinct authored hues shared with the scene', () 
     assert.ok(Math.min(difference, 360 - difference) >= 60, base.label);
     for (const mode of ['light', 'dark']) {
       const resolved = themes.getFluidThemeColors(base.name, mode);
+      const { cssVars } = themes.getThemeColorValues(base.name, mode);
+      assert.equal(cssVars.primary, base.primary);
+      assert.equal(cssVars.secondary, base.secondary);
       assert.equal(
         resolved.fluidColor,
         `#${new Color(`hsl(${base.primary.split(' ').join(',')})`).getHexString()}`,
@@ -229,8 +232,8 @@ test('theme text, buttons, links, and hover surfaces meet AA in both modes', () 
     ['secondary-foreground', 'secondary'],
     ['accent-foreground', 'accent'],
     ['destructive-foreground', 'destructive'],
-    ...['background', 'card', 'muted', 'secondary'].map((surface) => [
-      'primary',
+    ...['background', 'card', 'muted', 'accent'].map((surface) => [
+      'primary-text',
       surface,
     ]),
   ];
@@ -259,6 +262,10 @@ test('palette samples preserve the sRGB contract of descent keyframes', () => {
     for (const mode of ['light', 'dark']) {
       const theme = themes.getFluidThemeColors(base.name, mode);
       const resolved = palette.getDivePalette(theme);
+      assert.equal(
+        new Color(resolved.highlight).getHexString(),
+        new Color(theme.secondaryColor).getHexString(),
+      );
       const encoded = new Color(theme.fluidColor).convertLinearToSRGB();
       [encoded.r, encoded.g, encoded.b].forEach((channel, index) => {
         assert.ok(Math.abs(resolved.accentRgb[index] - channel) < 0.005);

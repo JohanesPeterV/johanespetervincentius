@@ -47,7 +47,7 @@ export default function CvView() {
           onClick={toggleFullscreen}
         >
           <button
-            className="absolute left-6 top-6 z-10 rounded-full border border-border/60 bg-card/80 p-2 text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-secondary"
+            className="absolute left-6 top-6 z-10 rounded-full border border-border/60 bg-card/80 p-2 text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-accent hover:text-accent-foreground"
             onClick={(e) => {
               e.stopPropagation();
               toggleFullscreen();

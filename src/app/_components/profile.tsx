@@ -6,7 +6,7 @@ export default function Profile() {
       <div
         className={`
           text-transparent bg-gradient-to-r 
-          from-foreground via-primary to-muted-foreground
+          from-foreground via-primary-text to-muted-foreground
           animate-gradient bg-clip-text
           flex flex-col gap-2 sm:gap-3
           text-center sm:text-left

@@ -13,6 +13,7 @@ import { PomoplanterPreview } from '@/app/_components/projects/pomoplanter-previ
 import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
+import { Button } from '@/components/ui/button';
 
 export type DiveMode = 'dive' | 'explore';
 
@@ -113,11 +114,11 @@ export default function DiveOverlay({
                 overlayRef.current.sections[index] = element;
               }}
               data-section-scroll
-              className="group pointer-events-auto invisible absolute left-0 top-0 flex max-h-[calc(100svh-13rem)] w-[min(27rem,calc(100vw-3rem))] flex-col items-start gap-3 overflow-y-auto overscroll-contain text-left opacity-0 [will-change:transform,opacity] scrollbar-thin"
+              className="group pointer-events-auto invisible absolute -m-1 box-content left-0 top-0 flex max-h-[calc(100svh-13rem)] w-[min(27rem,calc(100vw-3rem))] flex-col items-start gap-3 overflow-y-auto overscroll-contain p-1 text-left opacity-0 [will-change:transform,opacity] scrollbar-thin"
             >
               <span
                 style={dimStyle}
-                className="type-label text-muted-foreground transition-opacity duration-500"
+                className="identity-tag type-meta px-2 py-1 transition-opacity duration-500"
               >
                 {section.tag}
               </span>
@@ -151,17 +152,19 @@ export default function DiveOverlay({
                 </div>
               ) : null}
               {section.links ? (
-                <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                  {section.links.map((link) => (
-                    <a
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                  {section.links.map((link, linkIndex) => (
+                    <Button
                       key={link.href}
-                      href={link.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="pointer-events-auto opacity-70 underline-offset-4 transition-opacity hover:opacity-100 hover:underline"
+                      asChild
+                      variant={linkIndex === 0 ? 'default' : 'link'}
+                      size={linkIndex === 0 ? 'lg' : 'sm'}
+                      className="pointer-events-auto h-11"
                     >
-                      {link.label} ↗
-                    </a>
+                      <a href={link.href} target="_blank" rel="noreferrer">
+                        {link.label} ↗
+                      </a>
+                    </Button>
                   ))}
                 </div>
               ) : null}
@@ -176,7 +179,7 @@ export default function DiveOverlay({
                       ref={(element) => {
                         overlayRef.current.skillRail[categoryIndex] = element;
                       }}
-                      className="pointer-events-auto text-left text-xs font-medium tracking-[0.14em] opacity-40 transition-[opacity,transform] duration-500 hover:opacity-80 data-[active=true]:translate-x-2 data-[active=true]:opacity-100"
+                      className="dive-skill choice-control pointer-events-auto min-h-11 px-3 text-left text-xs font-medium tracking-[0.14em]"
                     >
                       {category.name}
                     </button>
@@ -207,9 +210,9 @@ export default function DiveOverlay({
             ref={(element) => {
               overlayRef.current.chapters[index] = element;
             }}
-            className="type-meta flex h-11 w-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100 aria-[current=step]:opacity-100"
+            className="dive-chapter choice-control type-meta flex h-11 w-11 items-center justify-center"
           >
-            <span className="border-b border-current pb-2">{section.tag}</span>
+            {section.tag}
           </button>
         ))}
       </nav>

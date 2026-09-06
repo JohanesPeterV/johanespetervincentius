@@ -10,7 +10,7 @@ type DiveWorkExperienceProps = {
 
 export const DiveWorkExperience = ({ overlayRef }: DiveWorkExperienceProps) => (
   <div className="mt-1 flex w-full flex-col gap-4">
-    <div className="flex flex-wrap gap-x-5" aria-label="Employers">
+    <div className="flex flex-wrap gap-1" aria-label="Employers">
       {WORK_EXPERIENCES.map((job, index) => (
         <button
           type="button"
@@ -21,7 +21,7 @@ export const DiveWorkExperience = ({ overlayRef }: DiveWorkExperienceProps) => (
           ref={(element) => {
             overlayRef.current.workRail[index] = element;
           }}
-          className="dive-employer pointer-events-auto min-h-11 text-left text-xs"
+          className="dive-employer choice-control pointer-events-auto min-h-11 px-3 text-left text-xs"
         >
           {job.company}
         </button>

@@ -40,7 +40,7 @@ export function Summary() {
     <div className="w-full h-full flex items-center justify-center p-8">
       <div className="space-y-8 w-full max-w-xl">
         <div>
-          <h3 className="text-2xl font-medium tracking-tight mb-6 bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent">
+          <h3 className="text-2xl font-medium tracking-tight mb-6 text-primary-text">
             Connect
           </h3>
           <div className="flex justify-center">
@@ -49,7 +49,7 @@ export function Summary() {
         </div>
 
         <div className="pt-8 border-t border-primary/10">
-          <h3 className="text-2xl font-medium tracking-tight mb-6 bg-gradient-to-r from-primary/90 to-primary bg-clip-text text-transparent">
+          <h3 className="text-2xl font-medium tracking-tight mb-6 text-primary-text">
             Built With
           </h3>
           <div className="grid grid-cols-3 gap-2">

@@ -22,15 +22,15 @@ export default function TechnologySection(props: {
               rel="noopener noreferrer"
               className={cn(
                 'block w-full px-2 py-1.5 rounded-lg',
-                'bg-secondary/50 hover:bg-primary/10',
+                'bg-muted/50 hover:bg-accent',
                 'transition-colors duration-200',
                 'border border-transparent hover:border-primary/20',
-                'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                'focus:outline-none focus:ring-2 focus:ring-ring',
               )}
               role="listitem"
               aria-label={`Visit ${content.name} documentation`}
             >
-              <div className="text-xs sm:text-sm text-center text-foreground hover:text-primary transition-colors truncate">
+              <div className="text-xs sm:text-sm text-center text-foreground hover:text-primary-text transition-colors truncate">
                 {content.name}
               </div>
             </a>

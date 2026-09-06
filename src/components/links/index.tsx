@@ -18,11 +18,11 @@ export default function Links({ iconSize = 15, className }: LinkProps) {
           className="transition-transform duration-300 hover:scale-110"
         >
           <Icon
-            className="text-primary transition-colors duration-300 hover:text-foreground hidden sm:block"
+            className="text-primary-text transition-colors duration-300 hover:text-foreground hidden sm:block"
             size={iconSize}
           />
           <Icon
-            className="text-primary transition-colors duration-300 hover:text-foreground sm:hidden block"
+            className="text-primary-text transition-colors duration-300 hover:text-foreground sm:hidden block"
             size={iconSize * 0.75}
           />
         </a>

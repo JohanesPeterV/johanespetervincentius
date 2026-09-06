@@ -54,7 +54,7 @@ export const PomoplanterPreview = () => {
               aria-pressed={activeIndex === index}
               aria-label={`Show ${screenshot.label.toLowerCase()} screenshot`}
               onClick={() => setActiveIndex(index)}
-              className="project-preview-toggle pointer-events-auto min-h-11 px-3"
+              className="project-preview-toggle choice-control pointer-events-auto min-h-11 px-3"
             >
               {screenshot.label}
             </button>

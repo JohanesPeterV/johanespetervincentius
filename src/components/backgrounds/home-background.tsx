@@ -33,17 +33,12 @@ export default function HomeBackground() {
   });
 
   if (!eventSource || gpu.tier < 2) {
-    return (
-      <div
-        className="fixed inset-0 z-[-10]"
-        style={{ backgroundColor: baseBackgroundColor }}
-      />
-    );
+    return <div className="fixed inset-0 z-[-10] bg-background" />;
   }
 
   return (
     <div
-      className="fixed inset-0 z-[-10]"
+      className="fixed inset-0 z-[-10] bg-background"
       style={{
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',

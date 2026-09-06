@@ -11,16 +11,22 @@ export default function OrbitalInstrument({
     <group>
       <mesh rotation={[1.1, 0.25, -0.5]}>
         <torusGeometry args={[1.25, 0.009, 6, 120]} />
-        <meshBasicMaterial color={palette.accent} transparent opacity={0.2} />
+        <meshBasicMaterial
+          color={palette.accent}
+          transparent
+          opacity={0.65}
+          toneMapped={false}
+        />
       </mesh>
       <mesh>
         <sphereGeometry args={[0.65, 48, 32]} />
         <meshStandardMaterial
           color={palette.highlight}
-          emissive={palette.accent}
-          emissiveIntensity={0.12}
-          metalness={0.05}
-          roughness={0.85}
+          emissive={palette.highlight}
+          emissiveIntensity={0.2}
+          metalness={0}
+          roughness={0.6}
+          toneMapped={false}
         />
       </mesh>
     </group>

@@ -49,10 +49,11 @@ export const OrbitalBackdrop = ({
       <meshStandardMaterial
         ref={materialRef}
         color={palette.highlight}
-        emissive={palette.accent}
-        emissiveIntensity={0.12}
-        roughness={0.85}
-        metalness={0.05}
+        emissive={palette.highlight}
+        emissiveIntensity={0.2}
+        roughness={0.6}
+        metalness={0}
+        toneMapped={false}
         transparent
       />
     </mesh>
