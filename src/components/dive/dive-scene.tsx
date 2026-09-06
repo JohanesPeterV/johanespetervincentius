@@ -255,8 +255,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
-      className="fixed inset-0 touch-none cursor-grab overflow-hidden active:cursor-grabbing"
-      style={{ backgroundColor: palette.background, color: palette.foreground }}
+      className="fixed inset-0 touch-none cursor-grab overflow-hidden bg-background text-foreground active:cursor-grabbing"
     >
       <Suspense fallback={null}>
         <DiveCanvas
