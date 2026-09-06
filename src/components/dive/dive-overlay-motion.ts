@@ -12,7 +12,11 @@ import {
 } from './descent';
 import type { MotionMode } from './descent';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
-import { HANDOFF_END, heroHandoffProgress } from './hero-handoff';
+import {
+  HANDOFF_END,
+  heroHandoffProgress,
+  workOverlayOpacity,
+} from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { getWorkLayout } from './work-story';
 
@@ -148,10 +152,8 @@ export const applyOverlay = (
         : 1 - heroHandoffProgress(frame.progress);
       motion.shift = 0;
     }
-    if (crossing && section.center === WORK_STONE.center) {
-      motion.opacity = frame.handoff.compositing
-        ? 0
-        : heroHandoffProgress(frame.progress);
+    if (section.center === WORK_STONE.center) {
+      motion.opacity = workOverlayOpacity(frame.handoff);
     }
     element.style.opacity = String(motion.opacity);
     element.style.setProperty('--reveal', String(motion.opacity));

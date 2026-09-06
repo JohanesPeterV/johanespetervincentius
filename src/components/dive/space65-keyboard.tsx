@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   AnimationMixer,
   Box3,
-  Color,
   Euler,
   Group,
   Material,
@@ -26,6 +25,8 @@ type Space65KeyboardParams = {
   chapter: number;
 };
 
+export const SPACE65_MODEL_URL = '/models/space65-pyga-black.glb';
+
 const CHAPTER_POSES: [number, number, number][] = [
   [0.9, -0.2, -0.12],
   [1.08, 0.26, 0.06],
@@ -38,7 +39,7 @@ export default function Space65Keyboard({
   motionMode,
   chapter,
 }: Space65KeyboardParams) {
-  const { scene, animations } = useGLTF('/models/space65-typing.glb');
+  const { scene, animations } = useGLTF(SPACE65_MODEL_URL);
   const groupRef = useRef<Group>(null);
   const pose =
     CHAPTER_POSES[
@@ -58,24 +59,15 @@ export default function Space65Keyboard({
       }
       const material = source.clone();
       materials.set(source, material);
-      if (material instanceof MeshStandardMaterial) {
-        if (material.name.startsWith('Case ')) {
-          material.color.set('#303237');
-        } else if (material.name.startsWith('Midcase ')) {
-          material.color.set('#484a50');
-        } else if (material.name.startsWith('Plate ')) {
-          material.color.set('#131417');
-        } else if (material.name.startsWith('Badge & weight ')) {
-          material.color.set('#383a40');
-        } else if (material.name.startsWith('Keycaps ')) {
-          material.color.set('#1d1e22');
-        } else if (material.name.startsWith('Legends ')) {
-          // REASON: the mesh legends sit only 12 micrometres above the caps;
-          // depth bias keeps them legible at the world's camera distances.
-          material.polygonOffset = true;
-          material.polygonOffsetFactor = -1;
-          material.polygonOffsetUnits = -1;
-        }
+      if (
+        material instanceof MeshStandardMaterial &&
+        material.name.startsWith('Legends ')
+      ) {
+        // REASON: the inlay meshes sit close to the key shells; depth bias
+        // preserves their legibility at the world's camera distances.
+        material.polygonOffset = true;
+        material.polygonOffsetFactor = -1;
+        material.polygonOffsetUnits = -1;
       }
       return material;
     };
@@ -112,25 +104,16 @@ export default function Space65Keyboard({
   // REASON: theme changes must update instance-owned Three.js materials,
   // not the shared useGLTF cache or freshly allocated materials per frame.
   useEffect(() => {
-    const accent = new Color(palette.accent);
     for (const material of keyboard.materials) {
       if (!(material instanceof MeshStandardMaterial)) {
         continue;
       }
-      if (
-        material.name.startsWith('Keycaps ') &&
-        material.name.includes('accents')
-      ) {
-        // REASON: a dark tint preserves the original white legends even when
-        // the selected colourway's primary is near white.
-        material.color.set('#1d1e22').lerp(accent, 0.14);
-      } else if (material.name.startsWith('LED ')) {
-        const color = material.name.includes('violet badge')
+      if (material.name.startsWith('LED ')) {
+        const color = material.name.includes('violet')
           ? palette.highlight
           : palette.accent;
         material.color.set(color);
         material.emissive.set(color);
-        material.emissiveIntensity = 0.7;
       }
     }
   }, [keyboard, palette.accent, palette.highlight]);

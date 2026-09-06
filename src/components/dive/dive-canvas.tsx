@@ -61,6 +61,7 @@ export default function DiveCanvas({
         <SpaceWorld
           palette={palette}
           progressRef={progressRef}
+          handoffRef={handoffRef}
           motionMode={motionMode}
           gpuTier={tier}
         />

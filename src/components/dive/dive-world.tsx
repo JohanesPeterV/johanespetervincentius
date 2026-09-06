@@ -9,6 +9,7 @@ import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import WorkKeyboardScene from './work-keyboard-scene';
 import OrbitalInstrument from './orbital-instrument';
+import type { HeroHandoff } from './hero-handoff';
 
 type OrbitalBackdropParams = {
   palette: DivePalette;
@@ -23,6 +24,7 @@ type SectionObjectParams = {
 };
 
 type SectionObjectsParams = OrbitalBackdropParams & {
+  handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
 };
 
@@ -99,12 +101,14 @@ const SectionObject = ({
 export const SectionObjects = ({
   palette,
   progressRef,
+  handoffRef,
   motionMode,
 }: SectionObjectsParams) => (
   <>
     <WorkKeyboardScene
       palette={palette}
       progressRef={progressRef}
+      handoffRef={handoffRef}
       motionMode={motionMode}
     />
     <SectionObject

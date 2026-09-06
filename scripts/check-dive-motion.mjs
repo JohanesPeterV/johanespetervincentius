@@ -423,6 +423,44 @@ test('hero handoff progress covers exactly its two endpoints', () => {
   assert.equal(handoff.heroHandoffProgress(descent.WORK_STONE.center), 1);
 });
 
+test('Work artwork and copy share one exit boundary in both scroll directions', () => {
+  const state = handoff.createHeroHandoff();
+  for (const journey of [
+    0.95, 1.45, 1.85, 1.95, 2.2, 2.3, 2.55, 3.15, 4.05, 2.3, 2.2, 1.95,
+  ]) {
+    state.journey = journey;
+    const opacity = handoff.workSectionOpacity(journey);
+    assert.equal(handoff.workOverlayOpacity(state), opacity);
+    if (journey > handoff.HANDOFF_END) {
+      assert.equal(
+        opacity,
+        descent.stoneSectionOpacity(journey, descent.WORK_STONE.center),
+      );
+    }
+    if (journey >= 2.3) {
+      assert.equal(opacity, 0);
+    }
+  }
+});
+
+test('Work DOM status cannot leak over the hero while the incoming model is prepared', () => {
+  const state = handoff.createHeroHandoff();
+  const texture = new CanvasTexture();
+  state.hero = { texture, width: 1440, height: 900 };
+  state.work = { texture, width: 560, height: 608 };
+  state.sourceReady = true;
+  state.journey = 1.45;
+  const visual = handoff.sampleHeroHandoff(state, 'full');
+  assert.equal(handoff.workSectionOpacity(visual), 1);
+  assert.equal(handoff.workOverlayOpacity(state), 0);
+  handoff.sampleHeroHandoff(state, 'reduced');
+  assert.equal(
+    handoff.workOverlayOpacity(state),
+    handoff.heroHandoffProgress(state.journey),
+  );
+  texture.dispose();
+});
+
 test('handoff reveals an already composed Work scene, not the empty current frame', () => {
   const state = handoff.createHeroHandoff();
   const texture = new CanvasTexture();

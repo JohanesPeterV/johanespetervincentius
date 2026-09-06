@@ -1,7 +1,7 @@
 import { Vector4 } from 'three';
 import type { CanvasTexture } from 'three';
 
-import { DIVE_START, WORK_STONE } from './descent';
+import { DIVE_START, WORK_STONE, stoneSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
 
 export type SectionSnapshot = {
@@ -38,6 +38,14 @@ export const heroHandoffProgress = (progress: number): number =>
     0,
     Math.min(1, (progress - HANDOFF_START) / (HANDOFF_END - HANDOFF_START)),
   );
+
+export const workSectionOpacity = (progress: number): number =>
+  progress <= HANDOFF_END
+    ? heroHandoffProgress(progress)
+    : stoneSectionOpacity(progress, WORK_STONE.center);
+
+export const workOverlayOpacity = (handoff: HeroHandoff): number =>
+  handoff.compositing ? 0 : workSectionOpacity(handoff.journey);
 
 export const sampleHeroHandoff = (
   handoff: HeroHandoff,

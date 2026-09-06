@@ -6,10 +6,12 @@ import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import DiveAtmosphere from './dive-atmosphere';
 import { OrbitalBackdrop, SectionObjects } from './dive-world';
+import type { HeroHandoff } from './hero-handoff';
 
 type SpaceWorldParams = {
   palette: DivePalette;
   progressRef: RefObject<number>;
+  handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
   gpuTier: number;
 };
@@ -17,6 +19,7 @@ type SpaceWorldParams = {
 export default function SpaceWorld({
   palette,
   progressRef,
+  handoffRef,
   motionMode,
   gpuTier,
 }: SpaceWorldParams) {
@@ -34,6 +37,7 @@ export default function SpaceWorld({
       <SectionObjects
         palette={palette}
         progressRef={progressRef}
+        handoffRef={handoffRef}
         motionMode={motionMode}
       />
     </>
