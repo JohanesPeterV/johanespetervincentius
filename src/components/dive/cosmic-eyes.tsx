@@ -77,15 +77,26 @@ const eyeVertex = `
 
 const eyeFragment = `
   uniform vec3 uOutline;
-  uniform vec3 uIris;
-  uniform vec3 uSclera;
-  uniform vec3 uPupil;
-  uniform float uBlink;
+  uniform vec3 uColor;
+  uniform vec3 uLight;
+  uniform vec3 uDark;
+  uniform float uCycle;
   varying vec2 vUv;
+
+  vec3 cycleColor(float band) {
+    float color = mod(band, 3.0);
+    if (color < 1.0) {
+      return uDark;
+    }
+    if (color < 2.0) {
+      return uColor;
+    }
+    return uLight;
+  }
 
   void main() {
     vec2 point = (vUv - 0.5) * vec2(2.0, 1.0);
-    float opening = mix(0.015, 0.48, uBlink);
+    float opening = 0.48;
     float lid = opening * (1.0 - pow(abs(point.x), 1.35));
     float slope = opening * 1.35 * pow(abs(point.x), 0.35);
     float edge = (lid - abs(point.y)) / sqrt(1.0 + slope * slope);
@@ -96,11 +107,10 @@ const eyeFragment = `
     }
 
     float interior = smoothstep(0.08 - aa, 0.08 + aa, edge);
-    float radius = length(point);
-    float iris = 1.0 - smoothstep(0.54 - aa, 0.54 + aa, radius);
-    float pupil = 1.0 - smoothstep(0.175 - aa, 0.175 + aa, radius);
-    vec3 inside = mix(uSclera, uIris, iris);
-    inside = mix(inside, uPupil, pupil);
+    float cycle = uCycle - length(point) / 0.44;
+    float band = floor(cycle);
+    float blend = smoothstep(0.0, max(fwidth(cycle), 0.001), fract(cycle));
+    vec3 inside = mix(cycleColor(band - 1.0), cycleColor(band), blend);
     gl_FragColor = vec4(mix(uOutline, inside, interior), coverage);
     #include <colorspace_fragment>
   }
@@ -112,10 +122,10 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
   const [uniforms] = useState(() =>
     EYES.map(() => ({
       uOutline: { value: new Color() },
-      uIris: { value: new Color() },
-      uSclera: { value: new Color() },
-      uPupil: { value: new Color() },
-      uBlink: { value: 1 },
+      uColor: { value: new Color() },
+      uLight: { value: new Color() },
+      uDark: { value: new Color() },
+      uCycle: { value: 0.4 },
     })),
   );
 
@@ -132,11 +142,11 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     const lilac = new Color(palette.highlight).lerp(neutral, 0.45);
     uniforms.forEach((eye, index) => {
       eye.uOutline.value.set(palette.highlight);
-      eye.uIris.value.set(palette.accent);
-      eye.uSclera.value.copy(neutral);
-      eye.uPupil.value.copy(dark).lerp(neutral, 0.012);
+      eye.uColor.value.set(palette.accent);
+      eye.uLight.value.copy(neutral);
+      eye.uDark.value.copy(dark).lerp(neutral, 0.012);
       if (EYES[index].variant === 'violet') {
-        eye.uIris.value.copy(lilac);
+        eye.uColor.value.copy(lilac);
       }
     });
   }, [
@@ -182,15 +192,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       );
       mesh.rotation.set(0, 0, placement.tilt + Math.sin(drift * 0.7) * 0.01);
       mesh.scale.setScalar(Math.min(halfHeight, halfWidth) * placement.size);
-      eye.uBlink.value = 1;
-      if (motionMode === 'full') {
-        const blinkPhase = (time + index * 3.7) % (16 + index * 0.83);
-        eye.uBlink.value = MathUtils.smoothstep(
-          Math.abs(blinkPhase - 0.18),
-          0.015,
-          0.17,
-        );
-      }
+      eye.uCycle.value = (time * 0.48 + index * 0.67 + 0.4) % 3;
     });
   }, -1);
 

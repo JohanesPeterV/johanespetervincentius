@@ -6,7 +6,7 @@ The portfolio has a bold, graphic space identity: black voids, crisp stars and f
 
 The hero and the later chapters inhabit two distinct realities, owned by separate scene groups in `SpaceWorld`:
 
-- World 1: open black space, sparse white stars and sparkles, with only a few small eye glyphs at the periphery. Their large iris fills the height of a pointed almond; the sclera forms small side wedges. Use flat disk colours without glossy catchlights or character-like gaze; keep the space dominant.
+- World 1: open black space, sparse white stars and sparkles, with only a few small eye glyphs at the periphery. Coloured disks emerge from the centre, expand outward, and continuously recycle inside a fixed pointed almond. Use flat disk colours without glossy catchlights, blinking lids, or character-like gaze; keep the space dominant.
 - World 2: a large cropped ringed planet, inclined orbital paths, faceted satellites, and a dense diagonal belt of coloured stellar dust. Eye glyphs belong exclusively to world 1.
 
 Preserve the etched crossing in both directions, including the return loop. The reveal must expose a different composition, not carry the same decoration across a content change.
