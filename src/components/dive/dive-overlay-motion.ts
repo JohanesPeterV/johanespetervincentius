@@ -100,6 +100,8 @@ const positionStoneSection = (
     const layout = getWorkLayout(frame.width, frame.height);
     element.style.width = `${layout.width}px`;
     element.style.height = `${layout.height}px`;
+    element.style.setProperty('--work-art-width', `${layout.artWidth}px`);
+    element.style.setProperty('--work-art-height', `${layout.artHeight}px`);
     element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;
     return { left: layout.left, top: layout.top, anchor: 0 };
   }

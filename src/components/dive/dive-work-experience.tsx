@@ -35,6 +35,7 @@ export const DiveWorkExperience = ({
     watchFocus: false,
   });
   const rootRef = useRef<HTMLDivElement>(null);
+  const continueRef = useRef<HTMLButtonElement>(null);
   const wheelRef = useRef({ distance: 0, lastAt: 0, consumed: false });
   const nextJob = WORK_EXPERIENCES[chapter + 1];
 
@@ -57,11 +58,7 @@ export const DiveWorkExperience = ({
       const selected = carousel.selectedScrollSnap();
       setChapter(selected);
       if (document.activeElement?.closest('.work-shot')) {
-        rootRef.current
-          ?.querySelector<HTMLButtonElement>(
-            `[aria-controls="work-story-${selected}"]`,
-          )
-          ?.focus({ preventScroll: true });
+        continueRef.current?.focus({ preventScroll: true });
       }
       const copy = carousel
         .slideNodes()
@@ -152,24 +149,6 @@ export const DiveWorkExperience = ({
           {WORK_SECTION.subtitle}
         </span>
       </header>
-      <nav
-        className="work-employers mt-5 grid grid-cols-4 gap-1"
-        aria-label="Work chapters"
-      >
-        {WORK_EXPERIENCES.map((job, index) => (
-          <button
-            key={job.company}
-            type="button"
-            aria-pressed={chapter === index}
-            aria-controls={`work-story-${index}`}
-            onClick={() => carousel?.scrollTo(index)}
-            className="choice-control flex min-h-11 min-w-0 flex-col items-start justify-center gap-1 px-2 py-2 text-left"
-          >
-            <span className="work-employer-index type-meta">0{index + 1}</span>
-            <span className="type-label">{job.company}</span>
-          </button>
-        ))}
-      </nav>
       <div className="work-reel-stage relative min-h-0 flex-1">
         <div
           ref={carouselRef}
@@ -182,13 +161,27 @@ export const DiveWorkExperience = ({
             ))}
           </div>
         </div>
+        {nextJob ? (
+          <button
+            type="button"
+            className="work-next-preview absolute right-0 top-0 w-24 text-center"
+            aria-label={`Next story: ${nextJob.company}`}
+            onClick={() => carousel?.scrollNext()}
+          >
+            <span className="work-next-label absolute inset-x-0 flex items-center gap-2">
+              <span className="type-meta text-muted-foreground">UP NEXT</span>
+              <span className="type-label">{nextJob.company}</span>
+              <ArrowRight size={20} aria-hidden />
+            </span>
+          </button>
+        ) : null}
       </div>
       <footer className="flex items-center justify-between gap-3">
         <Button
           variant="ghost"
           size="icon"
           className="h-11 w-11 shrink-0"
-          aria-label="Previous employer"
+          aria-label="Previous story"
           disabled={chapter === 0}
           onClick={() => carousel?.scrollPrev()}
         >
@@ -208,6 +201,7 @@ export const DiveWorkExperience = ({
           </span>
         </span>
         <Button
+          ref={continueRef}
           variant="default"
           size="sm"
           onClick={() => {
@@ -219,7 +213,7 @@ export const DiveWorkExperience = ({
           }}
           className="h-11 gap-2"
         >
-          {nextJob ? `Next: ${nextJob.company}` : 'Projects'}
+          {nextJob ? `Next: ${nextJob.company}` : 'Explore Projects'}
           {nextJob ? <ArrowRight aria-hidden /> : <ArrowDown aria-hidden />}
         </Button>
       </footer>

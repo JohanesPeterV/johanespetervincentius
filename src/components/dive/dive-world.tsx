@@ -7,9 +7,8 @@ import { Group } from 'three';
 import { PROJECT_STONE, narrativeStoneY } from './descent';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
-import WorkKeyboardScene from './work-keyboard-scene';
+import WorkStoryScene from './work-story-scene';
 import OrbitalInstrument from './orbital-instrument';
-import type { HeroHandoff } from './hero-handoff';
 
 type SectionObjectParams = {
   anchor: { center: number; x: number; z: number };
@@ -21,7 +20,6 @@ type SectionObjectParams = {
 type SectionObjectsParams = {
   palette: DivePalette;
   progressRef: RefObject<number>;
-  handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
 };
 
@@ -64,14 +62,12 @@ const SectionObject = ({
 export const SectionObjects = ({
   palette,
   progressRef,
-  handoffRef,
   motionMode,
 }: SectionObjectsParams) => (
   <>
-    <WorkKeyboardScene
+    <WorkStoryScene
       palette={palette}
       progressRef={progressRef}
-      handoffRef={handoffRef}
       motionMode={motionMode}
     />
     <SectionObject

@@ -258,24 +258,52 @@
   }
 
   .work-reel-stage {
-    margin-block: 1.5rem;
+    margin-block: 1rem;
+  }
+
+  .work-shot {
+    grid-template-columns: var(--work-art-width) minmax(0, 1fr);
   }
 
   .work-shot-copy {
-    opacity: calc(0.25 + var(--shot-focus, 0) * 0.75);
-    transform: perspective(1000px)
-      rotateY(calc((1 - var(--shot-focus, 0)) * -7deg))
-      scale(calc(0.96 + var(--shot-focus, 0) * 0.04));
-    transform-origin: left center;
+    margin-right: 108px;
+    opacity: var(--shot-focus, 0);
+    transform: translateY(calc((1 - var(--shot-focus, 0)) * 24px));
   }
 
-  .work-shot-title {
+  .work-story-title {
     max-width: 11ch;
     font-size: clamp(2.5rem, 4.9vw, 5.5rem);
     font-weight: 500;
-    line-height: 0.99;
-    letter-spacing: -0.055em;
+    line-height: 1.04;
+    letter-spacing: -0.045em;
     text-wrap: balance;
+  }
+
+  .work-next-preview {
+    height: 100%;
+    color: hsl(var(--muted-foreground));
+    transition:
+      color 250ms,
+      opacity 250ms;
+  }
+
+  .work-next-label {
+    top: calc(50% + 56px);
+    flex-direction: column;
+  }
+
+  .work-next-preview:hover {
+    color: hsl(var(--primary-text));
+  }
+
+  .work-next-preview:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: -2px;
+  }
+
+  .dive-work-section[data-snapshot-ready='false'] .work-next-preview {
+    opacity: 0;
   }
 
   .work-description {
@@ -283,41 +311,42 @@
     line-height: 1.7;
   }
 
-  @media (max-width: 767px) {
-    .work-shot-title {
-      font-size: 2.5rem;
+  @media (max-width: 767px) and (max-aspect-ratio: 1/1) {
+    .work-shot {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: var(--work-art-height) minmax(0, 1fr);
     }
 
-    .work-reel-stage {
-      margin-block: 1rem;
+    .work-shot-copy {
+      margin-right: 0;
     }
 
-    .work-employer-index {
+    .work-next-preview {
+      height: var(--work-art-height);
+    }
+
+    .work-next-label {
+      top: calc(50% + 28px);
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .work-next-label .type-meta {
       display: none;
-    }
-  }
-
-  @media (max-height: 600px) {
-    .work-shot-title {
-      font-size: 2rem;
     }
   }
 
   @media (max-height: 500px) and (min-aspect-ratio: 1/1) {
-    .work-employers {
-      margin-top: 0.5rem;
-    }
-
-    .work-employer-index {
-      display: none;
-    }
-
-    .work-reel-stage {
-      margin-block: 0.5rem;
-    }
-
-    .work-shot-title {
+    .work-story-title {
       font-size: 1.75rem;
+    }
+
+    .work-next-label {
+      top: calc(50% + 28px);
+    }
+
+    .work-next-label .type-meta {
+      display: none;
     }
   }
 
@@ -405,6 +434,7 @@
       transition: none;
     }
 
+    .work-next-preview,
     .project-preview-window,
     .project-preview-toggle {
       transition: none;

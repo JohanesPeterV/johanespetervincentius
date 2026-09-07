@@ -17,14 +17,17 @@ export const WorkChapter = ({ index, chapter }: WorkChapterProps) => {
       aria-label={`${index + 1} of ${WORK_EXPERIENCES.length}: ${job.company}`}
       aria-hidden={!active}
       inert={!active}
-      className="work-shot relative h-full min-w-0 shrink-0 basis-full"
+      data-active={active}
+      data-artifact={job.artifact}
+      className="work-shot relative grid h-full min-w-0 shrink-0 basis-full"
     >
+      <div className="work-art-space" aria-hidden />
       <div
-        className="work-shot-copy h-full overflow-y-auto overscroll-contain pr-3 scrollbar-thin"
+        className="work-shot-copy min-h-0 overflow-y-auto overscroll-contain pr-3 scrollbar-thin"
         data-section-scroll
       >
         <p className="type-meta text-primary-text">0{index + 1}</p>
-        <h3 className="work-shot-title font-display my-3 md:mb-5 md:mt-4">
+        <h3 className="work-story-title font-display my-4 md:mb-6">
           {job.company}
         </h3>
         {job.positions.map((position) => (

@@ -483,21 +483,44 @@ test('reading role details releases vertical input at either scroll edge', () =>
   assert.equal(input.canScrollSection(null, 20), false);
 });
 
-test('work layout reserves mobile reading space and keeps exit controls on screen', () => {
+test('work story stage stays centered inside safe insets with a right-edge preview', () => {
   for (const [width, height] of [
     [320, 568],
     [375, 667],
     [390, 844],
     [768, 1024],
     [1440, 900],
+    [2560, 1440],
   ]) {
     const layout = story.getWorkLayout(width, height);
     assert.ok(layout.left >= 24);
     assert.ok(layout.left + layout.width <= width - 24);
-    assert.ok(layout.top + layout.height <= height - 80);
+    assert.equal(layout.left * 2 + layout.width, width);
+    assert.ok(layout.width <= 1440);
+    assert.ok(layout.top >= 80);
+    assert.ok(layout.top + layout.height <= height - 88);
     assert.ok(layout.height > 250);
+    assert.ok(layout.modelWidth > 0);
+    assert.ok(layout.modelX - layout.modelWidth / 2 >= layout.left);
+    assert.ok(layout.previewX > layout.modelX + layout.modelWidth / 2);
+    assert.equal(layout.previewX, layout.left + layout.width - 48);
+    assert.ok(layout.previewX <= layout.left + layout.width);
     if (width < 768) {
-      assert.ok(layout.modelY + layout.modelWidth * 0.22 < layout.top);
+      assert.equal(layout.artWidth, 0);
+      assert.ok(layout.artHeight > 0);
+      assert.ok(layout.artHeight < layout.height / 2);
+      assert.ok(layout.modelWidth <= layout.artHeight * 1.1);
+      assert.ok(layout.modelY > layout.top);
+      assert.ok(layout.modelY < layout.top + 36 + layout.artHeight);
+    } else {
+      assert.equal(layout.artHeight, 0);
+      assert.ok(layout.artWidth > 0);
+      assert.ok(layout.artWidth < layout.width / 2);
+      assert.ok(layout.modelWidth < layout.artWidth);
+      assert.ok(layout.modelWidth <= 380);
+      assert.ok(
+        layout.modelX + layout.modelWidth / 2 < layout.left + layout.artWidth,
+      );
     }
   }
 });
@@ -509,18 +532,78 @@ test('chapter composition is at rest at every reading stop', () => {
   }
 });
 
-test('short landscape layouts keep the keyboard beside the reading area', () => {
+test('short landscape stories keep smaller artifacts beside readable copy', () => {
   for (const [width, height] of [
     [667, 375],
     [844, 390],
   ]) {
     const layout = story.getWorkLayout(width, height);
-    assert.ok(layout.left >= width * 0.45);
+    assert.ok(layout.left >= 24);
+    assert.equal(layout.left * 2 + layout.width, width);
     assert.ok(layout.height >= 220);
     assert.ok(layout.top >= 64);
-    assert.ok(layout.top + layout.height <= height - 80);
-    assert.ok(layout.modelX + layout.modelWidth / 2 < layout.left);
+    assert.ok(layout.top + layout.height <= height - 88);
+    assert.equal(layout.artHeight, 0);
+    assert.ok(layout.artWidth > 0);
+    assert.ok(layout.modelWidth > 0);
+    assert.ok(layout.modelWidth < layout.artWidth);
+    assert.ok(layout.modelWidth < layout.height - 96);
+    assert.ok(layout.modelX - layout.modelWidth / 2 >= layout.left);
+    assert.ok(
+      layout.modelX + layout.modelWidth / 2 < layout.left + layout.artWidth,
+    );
+    assert.ok(layout.modelY > layout.top);
+    assert.ok(layout.modelY < layout.top + layout.height);
+    assert.ok(layout.previewX > layout.modelX + layout.modelWidth / 2);
+    assert.ok(layout.previewX <= layout.left + layout.width);
   }
+});
+
+test('the active work artifact leads while its next story remains visibly smaller', () => {
+  const active = story.getWorkArtifactPose(0);
+  const next = story.getWorkArtifactPose(1);
+  assert.equal(active.visible, true);
+  assert.equal(next.visible, true);
+  assert.equal(active.scale, 1);
+  assert.ok(next.scale > 0.2 && next.scale < active.scale / 2);
+  assert.notEqual(next.rotationY, active.rotationY);
+  for (const offset of [-3, -1.1001, -1.1, 1.1, 1.1001, 3]) {
+    assert.equal(story.getWorkArtifactPose(offset).visible, false);
+  }
+  for (const offset of [-1.0999, 1.0999]) {
+    assert.equal(story.getWorkArtifactPose(offset).visible, true);
+  }
+});
+
+test('work artifact transforms remain continuous with finite positive scales', () => {
+  for (let step = -300; step <= 300; step++) {
+    const offset = step / 100;
+    const pose = story.getWorkArtifactPose(offset);
+    const nearby = story.getWorkArtifactPose(offset + 0.0001);
+    assert.ok(pose.scale > 0 && pose.scale <= 1);
+    for (const field of ['scale', 'rotationY', 'rotationZ']) {
+      assert.ok(Number.isFinite(pose[field]));
+      assert.ok(Math.abs(nearby[field] - pose[field]) < 0.001);
+    }
+  }
+});
+
+test('reversing a work swipe retraces both artifacts without residual motion', () => {
+  const positions = [0, 0.15, 0.4, 0.7, 1];
+  const forward = positions.map((position) => [
+    story.getWorkArtifactPose(-position),
+    story.getWorkArtifactPose(1 - position),
+  ]);
+  for (let index = positions.length - 1; index >= 0; index--) {
+    const position = positions[index];
+    assert.deepEqual(story.getWorkArtifactPose(-position), forward[index][0]);
+    assert.deepEqual(
+      story.getWorkArtifactPose(1 - position),
+      forward[index][1],
+    );
+  }
+  assert.equal(forward[0][0].scale, forward.at(-1)[1].scale);
+  assert.equal(forward[0][1].scale, forward.at(-1)[0].scale);
 });
 
 test('camera path is continuous through chapter handoffs', () => {
