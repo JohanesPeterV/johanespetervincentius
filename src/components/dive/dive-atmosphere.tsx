@@ -40,6 +40,8 @@ type DiveAtmosphereParams = {
   interactionRef: RefObject<StarfieldInteraction>;
 };
 
+const FORMATION_PLAYBACK_RATE = 0.25;
+
 export default function DiveAtmosphere({
   reality,
   palette,
@@ -136,7 +138,10 @@ export default function DiveAtmosphere({
       }
     }
     field.burst = interaction.burst;
-    sampleStarfieldTimeline(field.timeline, uniforms.uTime.value);
+    sampleStarfieldTimeline(
+      field.timeline,
+      uniforms.uTime.value * FORMATION_PLAYBACK_RATE,
+    );
     if (field.frame !== field.timeline.from) {
       field.attributes.aFrom.array.set(
         field.layout.frames[field.timeline.from].positions,
