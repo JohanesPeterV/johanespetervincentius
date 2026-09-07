@@ -12,6 +12,9 @@ const getCardType = (value: string | string[] | undefined): CardType => {
   if (selectedValue === '2') {
     return 2;
   }
+  if (selectedValue === '3') {
+    return 3;
+  }
   return 1;
 };
 

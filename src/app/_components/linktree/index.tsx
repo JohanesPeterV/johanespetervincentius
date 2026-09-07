@@ -9,9 +9,16 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 import ClassicCard from './classic-card';
+import LinktreeCard from './linktree-card';
 import MinimalCard from './minimal-card';
 
-export type CardType = 1 | 2;
+export type CardType = 1 | 2 | 3;
+
+const CARDS = [
+  { label: 'Classic card', Card: ClassicCard },
+  { label: 'Minimal card', Card: MinimalCard },
+  { label: 'Linktree card', Card: LinktreeCard },
+];
 
 type LinktreeSectionParams = {
   cardType: CardType;
@@ -105,22 +112,17 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
         className="pointer-events-none min-h-0 w-full select-none overflow-y-auto overscroll-contain scrollbar-thin"
       >
         <CarouselContent className="ml-0">
-          <CarouselItem
-            aria-label="Original card, 1 of 2"
-            aria-hidden={selectedCard !== 0}
-            inert={selectedCard !== 0}
-            className="flex items-start justify-center px-4 sm:px-8"
-          >
-            <ClassicCard />
-          </CarouselItem>
-          <CarouselItem
-            aria-label="Minimal card, 2 of 2"
-            aria-hidden={selectedCard !== 1}
-            inert={selectedCard !== 1}
-            className="flex items-start justify-center px-4 sm:px-8"
-          >
-            <MinimalCard />
-          </CarouselItem>
+          {CARDS.map(({ label, Card }, index) => (
+            <CarouselItem
+              key={label}
+              aria-label={`${label}, ${index + 1} of ${CARDS.length}`}
+              aria-hidden={selectedCard !== index}
+              inert={selectedCard !== index}
+              className="flex items-start justify-center px-4 sm:px-8"
+            >
+              <Card />
+            </CarouselItem>
+          ))}
         </CarouselContent>
       </Carousel>
     </section>

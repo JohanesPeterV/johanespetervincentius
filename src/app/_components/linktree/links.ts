@@ -1,4 +1,11 @@
-import { FaGithub, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import {
+  FaEnvelope,
+  FaGithub,
+  FaInstagram,
+  FaLinkedin,
+  FaLinkedinIn,
+  FaWhatsapp,
+} from 'react-icons/fa';
 import { IconType } from 'react-icons/lib';
 
 export type LinktreeLink = {
@@ -26,5 +33,29 @@ export const LINKTREE_LINKS: LinktreeLink[] = [
     label: 'GitHub',
     handle: 'JohanesPeterV',
     url: 'https://github.com/JohanesPeterV',
+  },
+];
+
+export type ContactIcon = {
+  icon: IconType;
+  label: string;
+  url: string;
+};
+
+export const CONTACT_ICONS: ContactIcon[] = [
+  {
+    icon: FaWhatsapp,
+    label: 'WhatsApp',
+    url: 'https://api.whatsapp.com/send?phone=628118503508',
+  },
+  {
+    icon: FaEnvelope,
+    label: 'Email',
+    url: 'mailto:johanespeter.jp@gmail.com',
+  },
+  {
+    icon: FaLinkedinIn,
+    label: 'LinkedIn',
+    url: 'https://www.linkedin.com/in/johanes-vincentius-714b311a4',
   },
 ];

@@ -97,6 +97,20 @@
     border-color: hsl(var(--primary-text));
   }
 
+  .profile-monogram {
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    background: hsl(var(--card));
+    color: hsl(var(--foreground));
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .dark .profile-monogram {
+    border-color: hsl(var(--foreground) / 0.22);
+    background: hsl(var(--foreground) / 0.035);
+  }
+
   .profile-name {
     max-width: 13ch;
     font-family: var(--font-geist-sans), sans-serif;
