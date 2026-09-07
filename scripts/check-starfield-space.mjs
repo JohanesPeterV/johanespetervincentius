@@ -119,3 +119,58 @@ for (const reality of ['watchers', 'orbital']) {
     assert.ok(nearShift > farShift * 10);
   });
 }
+
+for (const [name, file, factory] of [
+  ['star', 'starfield-geometry', 'createStarGeometry'],
+  ['eye', 'cosmic-eye-geometry', 'createCosmicEyeGeometry'],
+]) {
+  test(`${name}: body is a closed solid with depth and outward winding`, () => {
+    const geometry = load(resolve(root, `src/components/dive/${file}.ts`))[
+      factory
+    ]();
+    const positions = geometry.getAttribute('position');
+    const normals = geometry.getAttribute('normal');
+    const indices = geometry.getIndex();
+    const edges = new Map();
+    const vertices = [];
+    let volume = 0;
+    geometry.computeBoundingBox();
+    assert.ok(geometry.boundingBox.max.z - geometry.boundingBox.min.z > 0.2);
+    for (let index = 0; index < positions.count; index += 1) {
+      const vertex = new Vector3().fromBufferAttribute(positions, index);
+      assert.ok(vertex.toArray().every(Number.isFinite));
+      const normal = new Vector3().fromBufferAttribute(normals, index);
+      assert.ok(Math.abs(normal.length() - 1) < 1e-5);
+      vertices.push(vertex);
+    }
+    const count = indices?.count ?? positions.count;
+    for (let offset = 0; offset < count; offset += 3) {
+      const triangle = [0, 1, 2].map(
+        (corner) => vertices[indices?.getX(offset + corner) ?? offset + corner],
+      );
+      const [a, b, c] = triangle;
+      assert.ok(b.clone().sub(a).cross(c.clone().sub(a)).length() > 1e-9);
+      volume += a.dot(b.clone().cross(c)) / 6;
+      const keys = triangle.map((v) =>
+        v
+          .toArray()
+          .map((n) => n.toFixed(6))
+          .join(','),
+      );
+      keys.forEach((from, corner) => {
+        const to = keys[(corner + 1) % 3];
+        const edge = [from, to].sort().join(':');
+        const entry = edges.get(edge) ?? { count: 0, winding: 0 };
+        entry.count += 1;
+        entry.winding += from < to ? 1 : -1;
+        edges.set(edge, entry);
+      });
+    }
+    assert.ok(volume > 0.01);
+    for (const edge of edges.values()) {
+      assert.equal(edge.count, 2);
+      assert.equal(edge.winding, 0);
+    }
+    geometry.dispose();
+  });
+}

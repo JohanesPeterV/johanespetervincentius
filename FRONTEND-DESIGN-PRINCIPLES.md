@@ -6,12 +6,14 @@ The portfolio has a bold, graphic space identity: black voids, stars with crisp 
 
 The hero and the later chapters inhabit two distinct realities, owned by separate scene groups in `SpaceWorld`:
 
-- World 1: open black space, scattered white and subtly tinted stars, with only a few small eye glyphs at the periphery. Coloured disks emerge from the centre, expand outward, and continuously recycle inside a fixed pointed almond. Use flat disk colours without glossy catchlights, blinking lids, or character-like gaze; keep the space dominant.
+- World 1: open black space, scattered white and subtly tinted stars, with only a few small sculpted eyes at the periphery. Coloured disks emerge from the centre, expand outward, and continuously recycle inside a fixed pointed almond. Use flat disk colours without glossy catchlights, blinking lids, or character-like gaze; keep the space dominant.
 - World 2: a large cropped ringed planet, inclined orbital paths, faceted satellites, and a dense diagonal belt of coloured stellar dust. Eye glyphs belong exclusively to world 1.
 
 Preserve the etched crossing in both directions, including the return loop. The reveal must expose a different composition, not carry the same decoration across a content change.
 
 Use the [Higgsfield Astra starfield](https://higgsfield.ai/gpt-astra) as a reference for the hierarchy of light: many dim pinpoints, fewer visible dots, and bright stars with larger cores and clearly visible circular halos. Colour, size, and glow change with the particle formations and independent twinkling. Each formation defines its appearance alongside its geometry; the shared renderer interpolates both through any number of shapes. Keep halos local to stars and the surrounding void black.
+
+Stars and eyes have actual closed 3D bodies with depth, surface normals, and visible sides. Stars are instanced beveled four-point solids distributed around the observer; their rotation reveals their facets. Their glow uses a surrounding spherical mesh. Eyes have a curved inset face, raised rim, and solid back; outward colour cycles remain on the face as the whole object tilts. Keep formation choreography independent of mesh shape, and scale bodies for narrow screens so foreground stars do not obscure text.
 
 Light mode presents the two realities as an astronomical illustration with suspended miniature objects: neutral white space, graphite particles and orbit lines, and saturated painted accents. World 1 has a sparse hanging moon and planet; world 2 keeps its ringed planet and orbital composition, with selected objects suspended on thin visible strings. Strings attach to the objects and sway around fixed anchors. Use matte directional shading and crisp silhouettes, with subtle grain on the painted surfaces. Preserve the same particle choreography and distortion; light-mode particles read as printed marks rather than luminous bloom.
 

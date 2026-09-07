@@ -1,10 +1,12 @@
 'use client';
 
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import {
-  BufferAttribute,
+  BackSide,
+  IcosahedronGeometry,
+  InstancedBufferAttribute,
   Color,
   DynamicDrawUsage,
   PerspectiveCamera,
@@ -20,12 +22,14 @@ import {
   writeDescentFrame,
 } from './descent';
 import type { MotionMode } from './descent';
-import {
-  buildSpatialStarfield,
-  STARFIELD_REFERENCE_DISTANCE,
-} from './starfield-space';
+import { buildSpatialStarfield } from './starfield-space';
+import { createStarGeometry } from './starfield-geometry';
 import type { StarfieldReality } from './world-layout';
-import { starfieldFragment, starfieldVertex } from './starfield-shader';
+import {
+  starfieldFragment,
+  starfieldHaloFragment,
+  starfieldVertex,
+} from './starfield-shader';
 import {
   createStarfieldTimeline,
   sampleStarfieldTimeline,
@@ -50,9 +54,6 @@ export default function DiveAtmosphere({
   interactionRef,
 }: DiveAtmosphereParams) {
   const aspect = useThree(({ size }) => size.width / size.height);
-  const fromRef = useRef<BufferAttribute>(null);
-  const toRef = useRef<BufferAttribute>(null);
-  const scatterRef = useRef<BufferAttribute>(null);
   const count = reality === 'watchers' ? 2400 : 2800;
   const [field] = useState(() => {
     const layout = buildSpatialStarfield(reality, count, aspect);
@@ -67,26 +68,38 @@ export default function DiveAtmosphere({
       origin,
       aspect,
       timeline: createStarfieldTimeline(layout.frames),
-      from: new Float32Array(layout.frames[0].positions),
-      to: new Float32Array(layout.frames[1 % layout.frames.length].positions),
-      scatter: new Float32Array(layout.scatter),
-      seeds: layout.seeds,
+      body: createStarGeometry(),
+      halo: new IcosahedronGeometry(0.5, 1),
+      attributes: {
+        aFrom: new InstancedBufferAttribute(
+          new Float32Array(layout.frames[0].positions),
+          3,
+        ).setUsage(DynamicDrawUsage),
+        aTo: new InstancedBufferAttribute(
+          new Float32Array(layout.frames[1 % layout.frames.length].positions),
+          3,
+        ).setUsage(DynamicDrawUsage),
+        aScatter: new InstancedBufferAttribute(
+          new Float32Array(layout.scatter),
+          3,
+        ).setUsage(DynamicDrawUsage),
+        aSeed: new InstancedBufferAttribute(layout.seeds, 3),
+      },
       frame: 0,
       burst: 0,
     };
   });
   const [uniforms] = useState(() => ({
     uStarlight: { value: new Color(palette.foreground) },
+    uBackground: { value: new Color(palette.background) },
     uAccent: { value: new Color(palette.accent) },
     uHighlight: { value: new Color(palette.highlight) },
     uAppearanceFrom: { value: new Vector3() },
     uAppearanceTo: { value: new Vector3() },
     uLuminous: { value: Number(palette.mode === 'dark') },
     uTime: { value: 0 },
-    uPixelRatio: { value: 1 },
     uAspect: { value: aspect },
-    uReferenceDistance: { value: STARFIELD_REFERENCE_DISTANCE },
-    uProjectionScale: { value: 1 },
+    uWorldScale: { value: Math.min(aspect, 1) },
     uMorph: { value: 0 },
     uTravel: { value: 0 },
     uPointer: { value: new Vector2() },
@@ -99,26 +112,26 @@ export default function DiveAtmosphere({
   // REASON: palette changes update persistent GPU Color uniforms without parsing colours every frame.
   useEffect(() => {
     uniforms.uStarlight.value.set(palette.foreground);
+    uniforms.uBackground.value.set(palette.background);
     uniforms.uAccent.value.set(palette.accent);
     uniforms.uHighlight.value.set(palette.highlight);
     uniforms.uLuminous.value = Number(palette.mode === 'dark');
   }, [
     palette.accent,
+    palette.background,
     palette.foreground,
     palette.highlight,
     palette.mode,
     uniforms,
   ]);
 
-  useFrame(({ gl, camera, size }, delta) => {
+  useFrame((_state, delta) => {
     if (aspect !== field.aspect) {
       field.layout = buildSpatialStarfield(reality, count, aspect);
       field.aspect = aspect;
       field.frame = -1;
-      field.scatter.set(field.layout.scatter);
-      if (scatterRef.current) {
-        scatterRef.current.needsUpdate = true;
-      }
+      field.attributes.aScatter.array.set(field.layout.scatter);
+      field.attributes.aScatter.needsUpdate = true;
     }
     const step = Math.min(delta, 0.1);
     const interaction = interactionRef.current;
@@ -133,12 +146,14 @@ export default function DiveAtmosphere({
     field.burst = interaction.burst;
     sampleStarfieldTimeline(field.timeline, uniforms.uTime.value);
     if (field.frame !== field.timeline.from) {
-      field.from.set(field.layout.frames[field.timeline.from].positions);
-      field.to.set(field.layout.frames[field.timeline.to].positions);
-      if (fromRef.current && toRef.current) {
-        fromRef.current.needsUpdate = true;
-        toRef.current.needsUpdate = true;
-      }
+      field.attributes.aFrom.array.set(
+        field.layout.frames[field.timeline.from].positions,
+      );
+      field.attributes.aTo.array.set(
+        field.layout.frames[field.timeline.to].positions,
+      );
+      field.attributes.aFrom.needsUpdate = true;
+      field.attributes.aTo.needsUpdate = true;
       field.frame = field.timeline.from;
     }
     uniforms.uMorph.value = field.timeline.morph;
@@ -153,52 +168,51 @@ export default function DiveAtmosphere({
       (interaction.active - uniforms.uPointerStrength.value) *
       (1 - Math.exp(-step * 10));
     uniforms.uInteraction.value = Number(motionMode === 'full');
-    uniforms.uPixelRatio.value = gl.getPixelRatio();
     uniforms.uAspect.value = aspect;
-    uniforms.uProjectionScale.value =
-      (Math.min(size.width, size.height) *
-        camera.projectionMatrix.elements[5]) /
-      1600;
+    uniforms.uWorldScale.value = Math.min(aspect, 1);
   }, -1);
 
+  const instanceCount = gpuTier < 2 ? count / 2 : count;
+
   return (
-    <points
-      name={`starfield-${reality}`}
+    <group
       position={field.origin.position}
       quaternion={field.origin.quaternion}
-      frustumCulled={false}
     >
-      <bufferGeometry
-        drawRange={{ start: 0, count: gpuTier < 2 ? count / 2 : count }}
+      <mesh name={`starfield-${reality}`} frustumCulled={false}>
+        <instancedBufferGeometry
+          index={field.body.index}
+          attributes={{ ...field.body.attributes, ...field.attributes }}
+          instanceCount={instanceCount}
+        />
+        <shaderMaterial
+          uniforms={uniforms}
+          vertexShader={starfieldVertex}
+          fragmentShader={starfieldFragment}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh
+        name={`starfield-halo-${reality}`}
+        frustumCulled={false}
+        visible={palette.mode === 'dark'}
       >
-        <bufferAttribute
-          ref={scatterRef}
-          attach="attributes-position"
-          args={[field.scatter, 3]}
-          usage={DynamicDrawUsage}
+        <instancedBufferGeometry
+          index={field.halo.index}
+          attributes={{ ...field.halo.attributes, ...field.attributes }}
+          instanceCount={instanceCount}
         />
-        <bufferAttribute
-          ref={fromRef}
-          attach="attributes-aFrom"
-          args={[field.from, 3]}
-          usage={DynamicDrawUsage}
+        <shaderMaterial
+          uniforms={uniforms}
+          defines={{ STAR_HALO: 1 }}
+          vertexShader={starfieldVertex}
+          fragmentShader={starfieldHaloFragment}
+          transparent
+          side={BackSide}
+          depthWrite={false}
+          toneMapped={false}
         />
-        <bufferAttribute
-          ref={toRef}
-          attach="attributes-aTo"
-          args={[field.to, 3]}
-          usage={DynamicDrawUsage}
-        />
-        <bufferAttribute attach="attributes-aSeed" args={[field.seeds, 3]} />
-      </bufferGeometry>
-      <shaderMaterial
-        uniforms={uniforms}
-        vertexShader={starfieldVertex}
-        fragmentShader={starfieldFragment}
-        transparent
-        toneMapped={false}
-        depthWrite={false}
-      />
-    </points>
+      </mesh>
+    </group>
   );
 }

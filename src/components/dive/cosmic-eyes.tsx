@@ -4,6 +4,8 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
 import { Color, Group, MathUtils, PerspectiveCamera } from 'three';
 
+import { createCosmicEyeGeometry } from './cosmic-eye-geometry';
+import { cosmicEyeFragment, cosmicEyeVertex } from './cosmic-eye-shader';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 
@@ -67,58 +69,10 @@ const EYES: EyePlacement[] = [
   },
 ];
 
-const eyeVertex = `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const eyeFragment = `
-  uniform vec3 uOutline;
-  uniform vec3 uColor;
-  uniform vec3 uLight;
-  uniform vec3 uDark;
-  uniform float uCycle;
-  varying vec2 vUv;
-
-  vec3 cycleColor(float band) {
-    float color = mod(band, 3.0);
-    if (color < 1.0) {
-      return uDark;
-    }
-    if (color < 2.0) {
-      return uColor;
-    }
-    return uLight;
-  }
-
-  void main() {
-    vec2 point = (vUv - 0.5) * vec2(2.0, 1.0);
-    float opening = 0.48;
-    float lid = opening * (1.0 - pow(abs(point.x), 1.35));
-    float slope = opening * 1.35 * pow(abs(point.x), 0.35);
-    float edge = (lid - abs(point.y)) / sqrt(1.0 + slope * slope);
-    float aa = max(fwidth(edge), 0.001);
-    float coverage = smoothstep(-aa, aa, edge);
-    if (coverage < 0.001) {
-      discard;
-    }
-
-    float interior = smoothstep(0.08 - aa, 0.08 + aa, edge);
-    float cycle = uCycle - length(point) / 0.44;
-    float band = floor(cycle);
-    float blend = smoothstep(0.0, max(fwidth(cycle), 0.001), fract(cycle));
-    vec3 inside = mix(cycleColor(band - 1.0), cycleColor(band), blend);
-    gl_FragColor = vec4(mix(uOutline, inside, interior), coverage);
-    #include <colorspace_fragment>
-  }
-`;
-
 export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
   const groupRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
+  const [geometry] = useState(createCosmicEyeGeometry);
   const [uniforms] = useState(() =>
     EYES.map(() => ({
       uOutline: { value: new Color() },
@@ -129,8 +83,10 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     })),
   );
 
-  // REASON: shader colours are persistent Three.js objects; theme changes
-  // must update them without reparsing CSS colour strings every frame.
+  // REASON: five meshes share this GPU geometry, so its owner must dispose it once on unmount.
+  useEffect(() => () => geometry.dispose(), [geometry]);
+
+  // REASON: persistent Three.js uniforms need theme updates without reparsing CSS colours every frame.
   useEffect(() => {
     const foreground = new Color(palette.foreground);
     const background = new Color(palette.background);
@@ -187,23 +143,29 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
         (y + Math.cos(drift) * 0.006) * halfHeight,
         -placement.depth,
       );
-      mesh.rotation.set(0, 0, placement.tilt + Math.sin(drift * 0.7) * 0.01);
+      mesh.rotation.set(
+        0.24 + Math.sin(drift * 0.7) * 0.14,
+        Math.sin(index * 1.7) * 0.35 + Math.cos(drift * 0.55) * 0.25,
+        placement.tilt + Math.sin(drift * 0.7) * 0.01,
+      );
       mesh.scale.setScalar(Math.min(halfHeight, halfWidth) * placement.size);
       eye.uCycle.value = (time * 0.48 + index * 0.67 + 0.4) % 3;
     });
   }, -1);
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} name="cosmic-eyes">
       {EYES.map((placement, index) => (
-        <mesh key={placement.depth + placement.x} frustumCulled={false}>
-          <planeGeometry args={[2, 1]} />
+        <mesh
+          key={placement.depth + placement.x}
+          name={`cosmic-eye-${index}`}
+          geometry={geometry}
+          frustumCulled={false}
+        >
           <shaderMaterial
             uniforms={uniforms[index]}
-            vertexShader={eyeVertex}
-            fragmentShader={eyeFragment}
-            transparent
-            depthWrite={false}
+            vertexShader={cosmicEyeVertex}
+            fragmentShader={cosmicEyeFragment}
             toneMapped={false}
           />
         </mesh>
