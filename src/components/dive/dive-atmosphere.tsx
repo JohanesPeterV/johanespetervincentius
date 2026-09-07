@@ -7,14 +7,23 @@ import {
   BufferAttribute,
   Color,
   DynamicDrawUsage,
+  PerspectiveCamera,
   Vector2,
   Vector3,
 } from 'three';
 
 import type { DivePalette } from './dive-palette';
-import { sectionTravel } from './descent';
+import {
+  createDescentFrame,
+  DIVE_START,
+  sectionTravel,
+  writeDescentFrame,
+} from './descent';
 import type { MotionMode } from './descent';
-import { buildStarfield } from './world-layout';
+import {
+  buildSpatialStarfield,
+  STARFIELD_REFERENCE_DISTANCE,
+} from './starfield-space';
 import type { StarfieldReality } from './world-layout';
 import { starfieldFragment, starfieldVertex } from './starfield-shader';
 import {
@@ -46,9 +55,16 @@ export default function DiveAtmosphere({
   const scatterRef = useRef<BufferAttribute>(null);
   const count = reality === 'watchers' ? 2400 : 2800;
   const [field] = useState(() => {
-    const layout = buildStarfield(reality, count, aspect);
+    const layout = buildSpatialStarfield(reality, count, aspect);
+    // REASON: the initial observer defines local zero once; following the live
+    // camera would cancel perspective movement and lock the stars to the screen.
+    const frame = writeDescentFrame(createDescentFrame(), DIVE_START);
+    const origin = new PerspectiveCamera();
+    origin.position.fromArray(frame.position);
+    origin.lookAt(...frame.look);
     return {
       layout,
+      origin,
       aspect,
       timeline: createStarfieldTimeline(layout.frames),
       from: new Float32Array(layout.frames[0].positions),
@@ -69,7 +85,8 @@ export default function DiveAtmosphere({
     uTime: { value: 0 },
     uPixelRatio: { value: 1 },
     uAspect: { value: aspect },
-    uViewHeight: { value: 1 },
+    uReferenceDistance: { value: STARFIELD_REFERENCE_DISTANCE },
+    uProjectionScale: { value: 1 },
     uMorph: { value: 0 },
     uTravel: { value: 0 },
     uPointer: { value: new Vector2() },
@@ -93,9 +110,9 @@ export default function DiveAtmosphere({
     uniforms,
   ]);
 
-  useFrame(({ gl, camera }, delta) => {
+  useFrame(({ gl, camera, size }, delta) => {
     if (aspect !== field.aspect) {
-      field.layout = buildStarfield(reality, count, aspect);
+      field.layout = buildSpatialStarfield(reality, count, aspect);
       field.aspect = aspect;
       field.frame = -1;
       field.scatter.set(field.layout.scatter);
@@ -138,11 +155,19 @@ export default function DiveAtmosphere({
     uniforms.uInteraction.value = Number(motionMode === 'full');
     uniforms.uPixelRatio.value = gl.getPixelRatio();
     uniforms.uAspect.value = aspect;
-    uniforms.uViewHeight.value = 64 / camera.projectionMatrix.elements[5];
+    uniforms.uProjectionScale.value =
+      (Math.min(size.width, size.height) *
+        camera.projectionMatrix.elements[5]) /
+      1600;
   }, -1);
 
   return (
-    <points name={`starfield-${reality}`} frustumCulled={false}>
+    <points
+      name={`starfield-${reality}`}
+      position={field.origin.position}
+      quaternion={field.origin.quaternion}
+      frustumCulled={false}
+    >
       <bufferGeometry
         drawRange={{ start: 0, count: gpuTier < 2 ? count / 2 : count }}
       >

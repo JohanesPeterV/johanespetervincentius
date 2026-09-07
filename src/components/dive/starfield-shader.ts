@@ -5,7 +5,8 @@ export const starfieldVertex = `
   uniform vec3 uAppearanceTo;
   uniform float uLuminous;
   uniform float uAspect;
-  uniform float uViewHeight;
+  uniform float uReferenceDistance;
+  uniform float uProjectionScale;
   uniform float uMorph;
   uniform float uTravel;
   uniform vec2 uPointer;
@@ -52,24 +53,30 @@ export const starfieldVertex = `
     point.xy += vec2(
       sin(uTime * 0.18 + aSeed.x * 6.283),
       cos(uTime * 0.14 + aSeed.z * 6.283)
-    ) * 0.022;
-    point.x += sign(point.x) * uTravel * (0.12 + aSeed.z * 0.20) * uAspect;
+    ) * 0.6;
+    point.z += sin(uTime * 0.12 + aSeed.y * 6.283) * 0.8;
+    point.x += sign(point.x) * uTravel * (4.0 + aSeed.z * 7.0);
 
-    float depth = 64.0 + point.z * 18.0;
-    float perspective = 64.0 / depth;
-    vec2 screen = distortPosition(point.xy * perspective);
-    gl_Position = projectionMatrix * vec4(screen * uViewHeight / perspective, -depth, 1.0);
+    vec4 viewPosition = modelViewMatrix * vec4(point, 1.0);
+    float depth = max(0.01, -viewPosition.z);
+    float perspective = uReferenceDistance / depth;
+    gl_Position = projectionMatrix * viewPosition;
+    if (viewPosition.z < -0.2) {
+      vec2 screen = gl_Position.xy / gl_Position.w * vec2(uAspect, 1.0);
+      gl_Position.xy = distortPosition(screen) / vec2(uAspect, 1.0) * gl_Position.w;
+    }
 
     vec3 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
-    vGlow = pow(smoothstep(0.86, 1.0, aSeed.y), 2.0);
+    vGlow = pow(smoothstep(0.90, 1.0, aSeed.y), 2.0);
     float twinkle = 0.64 + 0.36 * (0.5 + 0.5 * sin(
       uTime * (0.8 + aSeed.x * 0.35) + aSeed.z * 6.283
     ));
-    float size = mix(2.4, 5.5, aSeed.y * aSeed.y) + vGlow * 23.0;
+    float size = mix(1.2, 2.8, aSeed.y * aSeed.y) + vGlow * 16.0;
     size *= appearance.x * mix(0.48, 1.0, uLuminous);
     size *= mix(1.0, 0.86 + twinkle * 0.14, vGlow);
-    gl_PointSize = max(1.0, size * perspective) * uPixelRatio;
-    vAlpha = (0.30 + aSeed.y * 0.62) * min(perspective, 1.0) * twinkle;
+    gl_PointSize = max(1.0, min(size * perspective, 56.0) * uProjectionScale) * uPixelRatio;
+    vAlpha = (0.30 + aSeed.y * 0.62) * min(perspective, 1.0) * twinkle
+      * smoothstep(1.0, 6.0, depth);
     vTint = 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283);
     vColorStrength = appearance.z * mix(0.28, 1.0, uLuminous);
     vHalo = appearance.y * twinkle * mix(0.04, 0.55, uLuminous);
