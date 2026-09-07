@@ -1,11 +1,10 @@
 'use client';
 
-import { Monitor, Moon, Shuffle, Sun, X } from 'lucide-react';
+import { Monitor, Moon, SlidersHorizontal, Sun, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useId, useState } from 'react';
 
 import { pickRandomColorway, useConfig } from '@/hooks/use-config';
-import { Button } from '@/components/ui/button';
 import {
   baseColors,
   DEFAULT_BASE_COLOR,
@@ -33,17 +32,29 @@ export default function PalettePicker() {
   }, []);
 
   return (
-    <div className="fixed right-4 top-4 z-30 sm:right-7 sm:top-7">
+    <div className="fixed right-4 top-4 z-30 flex items-center gap-1 sm:right-7 sm:top-7">
       <button
         type="button"
-        aria-label="Change theme"
-        title="Change theme"
-        popoverTarget={panelId}
+        aria-label="Shuffle colourway"
+        title="Shuffle colourway"
+        onClick={() =>
+          setConfig((current) => pickRandomColorway(current.theme))
+        }
         onKeyDown={(event) => event.stopPropagation()}
         className="appearance-trigger flex h-11 items-center justify-center gap-2 px-3"
       >
         <span aria-hidden className="appearance-orb" />
-        <span className="type-label">Theme</span>
+        <span className="type-label">Shuffle</span>
+      </button>
+      <button
+        type="button"
+        aria-label="Appearance settings"
+        title="Appearance settings"
+        popoverTarget={panelId}
+        onKeyDown={(event) => event.stopPropagation()}
+        className="appearance-trigger flex h-11 w-11 items-center justify-center"
+      >
+        <SlidersHorizontal size={16} aria-hidden />
       </button>
       <div
         id={panelId}
@@ -100,23 +111,9 @@ export default function PalettePicker() {
               </button>
             ))}
           </div>
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <p className="type-meta text-muted-foreground">
-              Your colour is saved.
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-11"
-              onClick={() =>
-                setConfig((current) => pickRandomColorway(current.theme))
-              }
-            >
-              <Shuffle aria-hidden />
-              Shuffle
-            </Button>
-          </div>
+          <p className="type-meta mt-2 text-muted-foreground">
+            Your colour is saved.
+          </p>
           <div
             role="group"
             aria-label="Mode"
