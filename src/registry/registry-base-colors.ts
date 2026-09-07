@@ -1,5 +1,13 @@
 export type BaseColor = {
-  name: 'red' | 'rose' | 'orange' | 'green' | 'blue' | 'yellow' | 'violet';
+  name:
+    | 'red'
+    | 'rose'
+    | 'orange'
+    | 'green'
+    | 'blue'
+    | 'cobalt'
+    | 'yellow'
+    | 'violet';
   label: string;
   primary: string;
   secondary: string;
@@ -40,6 +48,12 @@ export const baseColors: BaseColor[] = [
     secondary: '274 48% 74%',
   },
   DEFAULT_BASE_COLOR,
+  {
+    name: 'cobalt',
+    label: 'Cobalt & Lemon',
+    primary: '226 80% 54%',
+    secondary: '51 94% 68%',
+  },
   {
     name: 'yellow',
     label: 'Citron & Iris',
