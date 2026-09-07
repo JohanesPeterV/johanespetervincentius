@@ -32,6 +32,7 @@ const updateCardTypeUrl = (api: CarouselApi): void => {
 
 export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
   const [api, setApi] = useState<CarouselApi>();
+  const [selectedCard, setSelectedCard] = useState(cardType - 1);
   const sectionRef = useRef<HTMLElement>(null);
 
   // REASON: Embla exposes selection only after mount, and the horizontal
@@ -45,9 +46,16 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
     api.scrollTo(cardType - 1);
     const section = sectionRef.current;
     const handleSelect = (): void => {
+      setSelectedCard(api.selectedScrollSnap());
       updateCardTypeUrl(api);
       if (section) {
         section.dataset.snapshotReady = 'false';
+        const content = section.querySelector<HTMLElement>(
+          '[data-section-scroll]',
+        );
+        if (content) {
+          content.scrollTop = 0;
+        }
       }
     };
     const handleSettle = (): void => {
@@ -57,6 +65,7 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
     };
     api.on('select', handleSelect);
     api.on('settle', handleSettle);
+    setSelectedCard(api.selectedScrollSnap());
     const handleWheel = (event: globalThis.WheelEvent): void => {
       if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
         return;
@@ -81,8 +90,26 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
       ref={sectionRef}
       aria-label="Profile card styles"
       data-snapshot-ready="true"
-      className="pointer-events-none w-full"
+      className="pointer-events-none flex max-h-[calc(100svh-10rem)] w-full flex-col"
     >
+      <div
+        role="group"
+        aria-label="Profile views"
+        className="pointer-events-auto mx-auto flex w-fit shrink-0 items-center gap-1"
+      >
+        {['Full profile', 'Quick intro'].map((label, index) => (
+          <button
+            key={label}
+            type="button"
+            aria-pressed={selectedCard === index}
+            aria-controls={`profile-view-${index}`}
+            onClick={() => api?.scrollTo(index)}
+            className="choice-control appearance-mode min-h-11 px-4"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <Carousel
         setApi={setApi}
         opts={{
@@ -91,18 +118,26 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
           skipSnaps: false,
           startIndex: cardType - 1,
         }}
-        className="pointer-events-none w-full select-none"
+        data-section-scroll
+        data-horizontal-gesture
+        className="pointer-events-none min-h-0 w-full select-none overflow-y-auto overscroll-contain scrollbar-thin"
       >
         <CarouselContent className="ml-0">
           <CarouselItem
+            id="profile-view-0"
             aria-label="Original card, 1 of 2"
-            className="flex items-center justify-center px-4 sm:px-8"
+            aria-hidden={selectedCard !== 0}
+            inert={selectedCard !== 0}
+            className="flex items-start justify-center px-4 sm:px-8"
           >
             <ClassicCard />
           </CarouselItem>
           <CarouselItem
+            id="profile-view-1"
             aria-label="Minimal card, 2 of 2"
-            className="flex items-center justify-center px-4 sm:px-8"
+            aria-hidden={selectedCard !== 1}
+            inert={selectedCard !== 1}
+            className="flex items-start justify-center px-4 sm:px-8"
           >
             <MinimalCard />
           </CarouselItem>

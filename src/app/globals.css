@@ -240,23 +240,11 @@
   }
 
   .dive-work-section {
-    --shot-peek: 112px;
-    --shot-gap: 32px;
     will-change: transform, opacity;
   }
 
-  .work-shot {
-    flex-basis: calc(100% - var(--shot-peek));
-    margin-inline-end: var(--shot-gap);
-  }
-
   .work-reel-stage {
-    margin-top: 1.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .work-reel-utilities {
-    display: flex;
+    margin-block: 1.5rem;
   }
 
   .work-shot-copy {
@@ -276,149 +264,21 @@
     text-wrap: balance;
   }
 
-  .work-shot-preview {
-    width: calc(var(--shot-peek) - var(--shot-gap));
-    overflow: hidden;
-    border-left: 1px solid hsl(var(--border));
-    padding: 1rem 0 0 1rem;
-    color: hsl(var(--muted-foreground));
-    opacity: var(--shot-preview, 1);
-    transition:
-      color 300ms,
-      border-color 300ms,
-      transform 400ms;
-  }
-
-  .work-shot[data-active='true'] .work-shot-preview {
-    pointer-events: none;
-  }
-
-  .work-preview-company {
-    font-size: clamp(2.5rem, 3.4vw, 4rem);
-    line-height: 1.05;
-    letter-spacing: -0.045em;
-    white-space: nowrap;
-  }
-
-  .work-preview-arrow {
-    width: 2.5rem;
-    height: 2.5rem;
-    border: 1px solid hsl(var(--border));
-    border-radius: 50%;
-    color: hsl(var(--foreground));
-    background: hsl(var(--background));
-    transition:
-      color 250ms,
-      background-color 250ms,
-      border-color 250ms;
-  }
-
-  .work-shot-preview:hover {
-    color: hsl(var(--foreground));
-    border-color: hsl(var(--primary));
-    transform: translateX(-3px);
-  }
-
-  .work-shot-preview:hover .work-preview-arrow {
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-    border-color: hsl(var(--primary));
-  }
-
-  .work-shot-preview:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: -2px;
-  }
-
-  .work-outro-preview {
-    opacity: var(--reel-end, 0);
-  }
-
-  .work-timeline::before,
-  .work-timeline::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 1px;
-  }
-
-  .work-timeline::before {
-    width: 100%;
-    background: hsl(var(--border));
-  }
-
-  .work-timeline::after {
-    width: var(--reel-fill, 0%);
-    background: hsl(var(--primary));
-  }
-
-  .work-timeline-stop {
-    color: hsl(var(--muted-foreground));
-    transition: color 250ms;
-  }
-
-  .work-timeline-stop::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 0;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: hsl(var(--muted-foreground));
-  }
-
-  .work-timeline-stop[aria-pressed='true'] {
-    color: hsl(var(--primary-text));
-  }
-
-  .work-timeline-stop[aria-pressed='true']::before {
-    background: hsl(var(--primary));
-  }
-
-  .work-timeline-stop:hover {
-    color: hsl(var(--foreground));
-  }
-
-  .work-timeline-stop:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-  }
-
   .work-description {
     font-size: 0.875rem;
     line-height: 1.7;
   }
 
   @media (max-width: 767px) {
-    .dive-work-section {
-      --shot-peek: 64px;
-      --shot-gap: 16px;
-    }
-
     .work-shot-title {
       font-size: 2.5rem;
     }
 
     .work-reel-stage {
-      margin-block: 1.25rem;
+      margin-block: 1rem;
     }
 
-    .work-shot-preview {
-      padding-left: 8px;
-    }
-
-    .work-preview-company {
-      font-size: 2rem;
-    }
-
-    .work-preview-arrow {
-      width: 2rem;
-      height: 2rem;
-    }
-
-    .work-timeline-index {
+    .work-employer-index {
       display: none;
     }
   }
@@ -430,47 +290,20 @@
   }
 
   @media (max-height: 500px) and (min-aspect-ratio: 1/1) {
+    .work-employers {
+      margin-top: 0.5rem;
+    }
+
+    .work-employer-index {
+      display: none;
+    }
+
     .work-reel-stage {
-      margin-block: 0.75rem;
+      margin-block: 0.5rem;
     }
 
     .work-shot-title {
       font-size: 1.75rem;
-    }
-
-    .work-reel-footer {
-      display: flex;
-      align-items: end;
-      gap: 0.5rem;
-    }
-
-    .work-timeline {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .work-timeline-stop .type-label {
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .work-timeline-index,
-    .work-reel-utilities > button:first-child {
-      display: none;
-    }
-
-    .work-reel-count {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-    }
-
-    .work-reel-utilities {
-      display: contents;
     }
   }
 
@@ -558,9 +391,6 @@
       transition: none;
     }
 
-    .work-shot-preview,
-    .work-preview-arrow,
-    .work-timeline-stop,
     .project-preview-window,
     .project-preview-toggle {
       transition: none;
@@ -572,8 +402,7 @@
       transform: none;
     }
 
-    .work-shot-copy,
-    .work-shot-preview:hover {
+    .work-shot-copy {
       transform: none;
     }
   }

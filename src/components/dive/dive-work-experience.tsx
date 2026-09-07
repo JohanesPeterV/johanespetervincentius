@@ -2,7 +2,7 @@
 
 import useEmblaCarousel from 'embla-carousel-react';
 import { useAtom } from 'jotai';
-import { ArrowDown, ArrowLeft } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 import { WORK_EXPERIENCES } from '@/app/_components/work-experience/work-experiences';
@@ -36,8 +36,9 @@ export const DiveWorkExperience = ({
   });
   const rootRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef({ distance: 0, lastAt: 0, consumed: false });
+  const nextJob = WORK_EXPERIENCES[chapter + 1];
 
-  // REASON: Embla's continuous position drives the shot, copy and timeline
+  // REASON: Embla's continuous position drives the shot and copy
   // without React renders per frame; the selected snap owns reading/focus state.
   useEffect(() => {
     if (!carousel) {
@@ -47,22 +48,9 @@ export const DiveWorkExperience = ({
       const progress = Math.max(0, Math.min(1, carousel.scrollProgress()));
       const position = progress * (WORK_EXPERIENCES.length - 1);
       workStoryPosition.current = position;
-      rootRef.current?.style.setProperty('--reel-progress', String(progress));
-      rootRef.current?.style.setProperty(
-        '--reel-fill',
-        `${(position / WORK_EXPERIENCES.length) * 100}%`,
-      );
-      rootRef.current?.style.setProperty(
-        '--reel-end',
-        String(Math.max(0, position - (WORK_EXPERIENCES.length - 2))),
-      );
       carousel.slideNodes().forEach((slide, index) => {
         const focus = Math.max(0, 1 - Math.abs(position - index));
         slide.style.setProperty('--shot-focus', String(focus));
-        slide.style.setProperty(
-          '--shot-preview',
-          String(Math.max(0, 1 - focus * 2)),
-        );
       });
     };
     const handleSelect = (): void => {
@@ -164,6 +152,24 @@ export const DiveWorkExperience = ({
           {WORK_SECTION.subtitle}
         </span>
       </header>
+      <nav
+        className="work-employers mt-5 grid grid-cols-4 gap-1"
+        aria-label="Work chapters"
+      >
+        {WORK_EXPERIENCES.map((job, index) => (
+          <button
+            key={job.company}
+            type="button"
+            aria-pressed={chapter === index}
+            aria-controls={`work-story-${index}`}
+            onClick={() => carousel?.scrollTo(index)}
+            className="choice-control flex min-h-11 min-w-0 flex-col items-start justify-center gap-1 px-2 py-2 text-left"
+          >
+            <span className="work-employer-index type-meta">0{index + 1}</span>
+            <span className="type-label">{job.company}</span>
+          </button>
+        ))}
+      </nav>
       <div className="work-reel-stage relative min-h-0 flex-1">
         <div
           ref={carouselRef}
@@ -172,87 +178,50 @@ export const DiveWorkExperience = ({
         >
           <div className="flex h-full">
             {WORK_EXPERIENCES.map((job, index) => (
-              <WorkChapter
-                key={job.company}
-                index={index}
-                chapter={chapter}
-                onSelect={(index) => carousel?.scrollTo(index)}
-              />
+              <WorkChapter key={job.company} index={index} chapter={chapter} />
             ))}
           </div>
         </div>
-        {chapter === WORK_EXPERIENCES.length - 1 ? (
-          <button
-            type="button"
-            className="work-outro-preview work-shot-preview absolute inset-y-0 right-0 flex flex-col items-start text-left"
-            onClick={onContinue}
-            aria-label="Continue to Projects"
-          >
-            <span className="type-meta mb-8 text-muted-foreground">NEXT</span>
-            <span className="work-preview-company font-display">Projects</span>
-            <span className="work-preview-arrow mt-6 flex items-center justify-center">
-              <ArrowDown size={20} aria-hidden />
-            </span>
-          </button>
-        ) : null}
       </div>
-      <footer className="work-reel-footer">
-        <nav
-          className="work-timeline relative grid"
-          style={{
-            gridTemplateColumns: `repeat(${WORK_EXPERIENCES.length}, minmax(0, 1fr))`,
-          }}
-          aria-label="Work chapters"
+      <footer className="flex items-center justify-between gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 shrink-0"
+          aria-label="Previous employer"
+          disabled={chapter === 0}
+          onClick={() => carousel?.scrollPrev()}
         >
-          {WORK_EXPERIENCES.map((job, index) => (
-            <button
-              key={job.company}
-              type="button"
-              aria-pressed={chapter === index}
-              aria-controls={`work-story-${index}`}
-              onClick={() => carousel?.scrollTo(index)}
-              className="work-timeline-stop relative flex min-h-11 flex-col items-start gap-1 pb-2 pr-2 pt-3 text-left"
-            >
-              <span className="work-timeline-index type-meta">
-                0{index + 1}
-              </span>
-              <span className="type-label">{job.company}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="work-reel-utilities mt-1 items-center justify-between gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11"
-            aria-label="Previous employer"
-            disabled={chapter === 0}
-            onClick={() => carousel?.scrollPrev()}
-          >
-            <ArrowLeft size={17} />
-          </Button>
-          <span
-            className="work-reel-count type-meta text-muted-foreground"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <span aria-hidden>
-              0{chapter + 1} / 0{WORK_EXPERIENCES.length}
-            </span>
-            <span className="sr-only">
-              {WORK_EXPERIENCES[chapter].company}, chapter {chapter + 1} of{' '}
-              {WORK_EXPERIENCES.length}
-            </span>
+          <ArrowLeft size={17} aria-hidden />
+        </Button>
+        <span
+          className="type-meta shrink-0 whitespace-nowrap text-muted-foreground [@media(max-width:360px)]:sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <span aria-hidden>
+            0{chapter + 1} / 0{WORK_EXPERIENCES.length}
           </span>
-          <Button
-            variant="link"
-            size="sm"
-            onClick={onContinue}
-            className="h-11 gap-2"
-          >
-            Projects <ArrowDown size={15} />
-          </Button>
-        </div>
+          <span className="sr-only">
+            {WORK_EXPERIENCES[chapter].company}, chapter {chapter + 1} of{' '}
+            {WORK_EXPERIENCES.length}
+          </span>
+        </span>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => {
+            if (nextJob) {
+              carousel?.scrollNext();
+            } else {
+              onContinue();
+            }
+          }}
+          className="h-11 gap-2"
+        >
+          {nextJob ? `Next: ${nextJob.company}` : 'Projects'}
+          {nextJob ? <ArrowRight aria-hidden /> : <ArrowDown aria-hidden />}
+        </Button>
       </footer>
     </div>
   );
