@@ -12,6 +12,7 @@ import OrbitalReality from './orbital-reality';
 import { SectionObjects } from './dive-world';
 import { HANDOFF_END, HANDOFF_START } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
+import { useStarfieldInteraction } from './use-starfield-interaction';
 
 type SpaceWorldParams = {
   palette: DivePalette;
@@ -30,6 +31,7 @@ export default function SpaceWorld({
 }: SpaceWorldParams) {
   const firstWorldRef = useRef<Group>(null);
   const secondWorldRef = useRef<Group>(null);
+  const interactionRef = useStarfieldInteraction();
 
   useFrame(() => {
     // REASON: the compositor renders the incoming endpoint while retaining
@@ -53,6 +55,8 @@ export default function SpaceWorld({
       <group ref={firstWorldRef} name="world-1">
         <DiveAtmosphere
           reality="watchers"
+          progressRef={progressRef}
+          interactionRef={interactionRef}
           palette={palette}
           gpuTier={gpuTier}
           motionMode={motionMode}
@@ -62,6 +66,8 @@ export default function SpaceWorld({
       <group ref={secondWorldRef} name="world-2" visible={false}>
         <DiveAtmosphere
           reality="orbital"
+          progressRef={progressRef}
+          interactionRef={interactionRef}
           palette={palette}
           gpuTier={gpuTier}
           motionMode={motionMode}

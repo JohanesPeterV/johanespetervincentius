@@ -251,6 +251,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
 
   return (
     <div
+      data-dive-scene
       onWheel={handleWheel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

@@ -1,119 +1,157 @@
 'use client';
 
-import { useFrame } from '@react-three/fiber';
-import { useEffect, useState } from 'react';
-import { Color } from 'three';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
+import { BufferAttribute, Color, DynamicDrawUsage, Vector2 } from 'three';
 
 import type { DivePalette } from './dive-palette';
+import { sectionTravel } from './descent';
 import type { MotionMode } from './descent';
-import { buildOrbitalField, buildStarField } from './world-layout';
+import { buildStarfield } from './world-layout';
+import type { StarfieldReality } from './world-layout';
+import { starfieldFragment, starfieldVertex } from './starfield-shader';
+import {
+  createStarfieldTimeline,
+  sampleStarfieldTimeline,
+} from './starfield-timeline';
+import type { StarfieldInteraction } from './use-starfield-interaction';
 
 type DiveAtmosphereParams = {
-  reality: 'watchers' | 'orbital';
+  reality: StarfieldReality;
   palette: DivePalette;
   gpuTier: number;
   motionMode: MotionMode;
+  progressRef: RefObject<number>;
+  interactionRef: RefObject<StarfieldInteraction>;
 };
-
-const STAR_POSITIONS = buildStarField(900);
-const ORBITAL_POSITIONS = buildOrbitalField(1800);
-
-const starVertex = `
-  uniform float uPixelRatio;
-  uniform float uTime;
-  uniform float uOrbital;
-  varying float vAlpha;
-  varying float vGlow;
-  varying float vTint;
-  void main() {
-    vec4 view = modelViewMatrix * vec4(position, 1.0);
-    gl_Position = projectionMatrix * view;
-    float seed = fract(sin(position.x * 12.9898 + position.z) * 43758.5453);
-    float depth = clamp(62.0 / max(24.0, -view.z), 0.45, 1.65);
-    vGlow = pow(seed, 14.0);
-    float size = mix(2.2, 11.0, vGlow);
-    size *= mix(1.0, 0.7, uOrbital);
-    gl_PointSize = max(1.0, size * depth) * uPixelRatio;
-    float phase = fract(seed * 31.7);
-    float twinkle = 0.87 + 0.13 * sin(uTime * (0.4 + phase * 0.6) + phase * 40.0);
-    vAlpha = (0.24 + seed * 0.66) * min(depth, 1.0) * twinkle;
-    vTint = phase;
-  }
-`;
-
-const starFragment = `
-  uniform vec3 uStarlight;
-  uniform vec3 uAccent;
-  uniform vec3 uHighlight;
-  uniform float uOrbital;
-  varying float vAlpha;
-  varying float vGlow;
-  varying float vTint;
-  void main() {
-    float radius = length(gl_PointCoord - 0.5);
-    float coreRadius = mix(0.24, 0.105, vGlow);
-    float aa = max(fwidth(radius) * 0.5, 0.015);
-    float core = 1.0 - smoothstep(coreRadius - aa, coreRadius + aa, radius);
-    float halo = exp(-radius * radius * 22.0) * (1.0 - smoothstep(0.35, 0.5, radius));
-    float alpha = (core + halo * vGlow * 0.38) * vAlpha;
-    vec3 dust = mix(uAccent, uHighlight, step(0.5, vTint));
-    vec3 starlight = mix(uStarlight, dust, 0.12 + vTint * 0.18);
-    gl_FragColor = vec4(mix(starlight, dust, uOrbital), min(alpha, 1.0));
-    #include <colorspace_fragment>
-  }
-`;
 
 export default function DiveAtmosphere({
   reality,
   palette,
   gpuTier,
   motionMode,
+  progressRef,
+  interactionRef,
 }: DiveAtmosphereParams) {
+  const aspect = useThree(({ size }) => size.width / size.height);
+  const fromRef = useRef<BufferAttribute>(null);
+  const toRef = useRef<BufferAttribute>(null);
+  const scatterRef = useRef<BufferAttribute>(null);
+  const count = reality === 'watchers' ? 2400 : 2800;
+  const [field] = useState(() => {
+    const layout = buildStarfield(reality, count, aspect);
+    return {
+      layout,
+      aspect,
+      timeline: createStarfieldTimeline(layout.frames),
+      from: new Float32Array(layout.frames[0].positions),
+      to: new Float32Array(layout.frames[1 % layout.frames.length].positions),
+      scatter: new Float32Array(layout.scatter),
+      seeds: layout.seeds,
+      frame: 0,
+      burst: 0,
+    };
+  });
   const [uniforms] = useState(() => ({
     uStarlight: { value: new Color(palette.foreground) },
     uAccent: { value: new Color(palette.accent) },
     uHighlight: { value: new Color(palette.highlight) },
-    uOrbital: { value: Number(reality === 'orbital') },
+    uTintStrength: { value: reality === 'orbital' ? 0.9 : 0 },
+    uPointScale: { value: reality === 'orbital' ? 0.76 : 1 },
     uTime: { value: 0 },
     uPixelRatio: { value: 1 },
+    uAspect: { value: aspect },
+    uViewHeight: { value: 1 },
+    uMorph: { value: 0 },
+    uTravel: { value: 0 },
+    uPointer: { value: new Vector2() },
+    uPointerStrength: { value: 0 },
+    uBurstOrigin: { value: new Vector2() },
+    uBurstAge: { value: 100 },
+    uInteraction: { value: 1 },
   }));
 
-  // REASON: shader uniforms retain their initial Color object. Sync palette
-  // changes without parsing CSS colours on every animation frame.
+  // REASON: palette changes update persistent GPU Color uniforms without parsing colours every frame.
   useEffect(() => {
     uniforms.uStarlight.value.set(palette.foreground);
     uniforms.uAccent.value.set(palette.accent);
     uniforms.uHighlight.value.set(palette.highlight);
-    uniforms.uOrbital.value = Number(reality === 'orbital');
-  }, [
-    palette.accent,
-    palette.foreground,
-    palette.highlight,
-    reality,
-    uniforms,
-  ]);
+  }, [palette.accent, palette.foreground, palette.highlight, uniforms]);
 
-  useFrame(({ gl }, delta) => {
-    if (motionMode === 'full') {
-      uniforms.uTime.value += Math.min(delta, 0.1);
+  useFrame(({ gl, camera }, delta) => {
+    if (aspect !== field.aspect) {
+      field.layout = buildStarfield(reality, count, aspect);
+      field.aspect = aspect;
+      field.frame = -1;
+      field.scatter.set(field.layout.scatter);
+      if (scatterRef.current) {
+        scatterRef.current.needsUpdate = true;
+      }
     }
+    const step = Math.min(delta, 0.1);
+    const interaction = interactionRef.current;
+    if (motionMode === 'full') {
+      uniforms.uTime.value += step;
+      uniforms.uBurstAge.value += step;
+      if (interaction.burst !== field.burst) {
+        uniforms.uBurstAge.value = 0;
+        uniforms.uBurstOrigin.value.copy(interaction.burstOrigin);
+      }
+    }
+    field.burst = interaction.burst;
+    sampleStarfieldTimeline(field.timeline, uniforms.uTime.value);
+    if (field.frame !== field.timeline.from) {
+      field.from.set(field.layout.frames[field.timeline.from].positions);
+      field.to.set(field.layout.frames[field.timeline.to].positions);
+      if (fromRef.current && toRef.current) {
+        fromRef.current.needsUpdate = true;
+        toRef.current.needsUpdate = true;
+      }
+      field.frame = field.timeline.from;
+    }
+    uniforms.uMorph.value = field.timeline.morph;
+    uniforms.uTravel.value =
+      reality === 'orbital' ? sectionTravel(progressRef.current) : 0;
+    uniforms.uPointer.value.lerp(interaction.pointer, 1 - Math.exp(-step * 16));
+    uniforms.uPointerStrength.value +=
+      (interaction.active - uniforms.uPointerStrength.value) *
+      (1 - Math.exp(-step * 10));
+    uniforms.uInteraction.value = Number(motionMode === 'full');
     uniforms.uPixelRatio.value = gl.getPixelRatio();
+    uniforms.uAspect.value = aspect;
+    uniforms.uViewHeight.value = 64 / camera.projectionMatrix.elements[5];
   }, -1);
 
-  const positions = reality === 'watchers' ? STAR_POSITIONS : ORBITAL_POSITIONS;
-  const count = positions.length / 3;
-
   return (
-    <points frustumCulled={false}>
+    <points name={`starfield-${reality}`} frustumCulled={false}>
       <bufferGeometry
         drawRange={{ start: 0, count: gpuTier < 2 ? count / 2 : count }}
       >
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute
+          ref={scatterRef}
+          attach="attributes-position"
+          args={[field.scatter, 3]}
+          usage={DynamicDrawUsage}
+        />
+        <bufferAttribute
+          ref={fromRef}
+          attach="attributes-aFrom"
+          args={[field.from, 3]}
+          usage={DynamicDrawUsage}
+        />
+        <bufferAttribute
+          ref={toRef}
+          attach="attributes-aTo"
+          args={[field.to, 3]}
+          usage={DynamicDrawUsage}
+        />
+        <bufferAttribute attach="attributes-aSeed" args={[field.seeds, 3]} />
       </bufferGeometry>
       <shaderMaterial
         uniforms={uniforms}
-        vertexShader={starVertex}
-        fragmentShader={starFragment}
+        vertexShader={starfieldVertex}
+        fragmentShader={starfieldFragment}
         transparent
         toneMapped={false}
         depthWrite={false}

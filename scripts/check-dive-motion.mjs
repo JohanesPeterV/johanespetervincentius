@@ -51,6 +51,9 @@ const { baseColors } = load(
   resolve(root, 'src/registry/registry-base-colors.ts'),
 );
 const world = load(resolve(root, 'src/components/dive/world-layout.ts'));
+const starfieldTimeline = load(
+  resolve(root, 'src/components/dive/starfield-timeline.ts'),
+);
 const labels = load(resolve(root, 'src/components/dive/galaxy-labels.ts'));
 const handoff = load(resolve(root, 'src/components/dive/hero-handoff.ts'));
 
@@ -332,14 +335,165 @@ test('palette samples preserve the sRGB contract of descent keyframes', () => {
   }
 });
 
-test('reduced star counts keep the same field and all stars behind the scene', () => {
-  const full = world.buildStarField(1100);
-  const reduced = world.buildStarField(450);
-  assert.deepEqual(full.slice(0, reduced.length), reduced);
-  for (let index = 0; index < full.length; index += 3) {
-    assert.ok(Math.abs(full[index]) <= 75);
-    assert.ok(Math.abs(full[index + 1]) <= 70);
-    assert.ok(full[index + 2] >= -108 && full[index + 2] <= -8);
+test('every configured star shape is reached and every seam stays continuous', () => {
+  for (const count of [1, 2, 3, 4]) {
+    const frames = Array.from({ length: count }, (_, index) => ({
+      hold: index + 1,
+      duration: index + 2,
+    }));
+    const timeline = starfieldTimeline.createStarfieldTimeline(frames);
+    const reached = new Set();
+    let start = 0;
+    for (const [index, frame] of frames.entries()) {
+      starfieldTimeline.sampleStarfieldTimeline(
+        timeline,
+        start + frame.hold / 2,
+      );
+      assert.equal(timeline.from, index);
+      assert.equal(timeline.to, (index + 1) % count);
+      assert.ok(Number.isFinite(timeline.morph));
+      assert.ok(timeline.morph >= 0 && timeline.morph <= 1);
+      if (count > 1) {
+        assert.equal(timeline.morph, 0);
+      }
+      reached.add(timeline.from);
+
+      const end = start + frame.hold + frame.duration;
+      starfieldTimeline.sampleStarfieldTimeline(timeline, end - 0.000001);
+      assert.equal(timeline.from, index);
+      const destination = timeline.to;
+      if (count > 1) {
+        assert.ok(timeline.morph > 0.9999 && timeline.morph <= 1);
+      }
+      starfieldTimeline.sampleStarfieldTimeline(timeline, end);
+      assert.equal(timeline.from, destination);
+      assert.equal(timeline.morph, 0);
+      start = end;
+    }
+    assert.equal(reached.size, count);
+    assert.equal(timeline.from, 0);
+  }
+});
+
+test('star shapes honor unequal holds and transition durations', () => {
+  const timeline = starfieldTimeline.createStarfieldTimeline([
+    { hold: 1, duration: 2 },
+    { hold: 3, duration: 4 },
+    { hold: 2, duration: 1 },
+  ]);
+  for (const [time, shape] of [
+    [0.5, 0],
+    [5, 1],
+    [11, 2],
+  ]) {
+    starfieldTimeline.sampleStarfieldTimeline(timeline, time);
+    assert.equal(timeline.from, shape);
+    assert.equal(timeline.morph, 0);
+  }
+  for (const [time, source, destination] of [
+    [2, 0, 1],
+    [8, 1, 2],
+    [12.5, 2, 0],
+  ]) {
+    starfieldTimeline.sampleStarfieldTimeline(timeline, time);
+    assert.equal(timeline.from, source);
+    assert.equal(timeline.to, destination);
+    assert.ok(timeline.morph > 0 && timeline.morph < 1);
+  }
+});
+
+test('star shape sampling survives long-running tabs and nonsequential samples', () => {
+  const timeline = starfieldTimeline.createStarfieldTimeline([
+    { hold: 1, duration: 2 },
+    { hold: 3, duration: 4 },
+    { hold: 2, duration: 1 },
+  ]);
+  starfieldTimeline.sampleStarfieldTimeline(timeline, 7.5);
+  const expected = {
+    from: timeline.from,
+    to: timeline.to,
+    morph: timeline.morph,
+  };
+  starfieldTimeline.sampleStarfieldTimeline(timeline, 13 * 1000000 + 7.5);
+  assert.equal(timeline.from, expected.from);
+  assert.equal(timeline.to, expected.to);
+  assert.ok(Math.abs(timeline.morph - expected.morph) < 1e-9);
+  starfieldTimeline.sampleStarfieldTimeline(timeline, 0.5);
+  assert.equal(timeline.from, 0);
+  assert.equal(timeline.morph, 0);
+});
+
+test('invalid star shape schedules fail at creation', () => {
+  assert.throws(() => starfieldTimeline.createStarfieldTimeline([]));
+  for (const hold of [-1, NaN, Infinity, -Infinity]) {
+    assert.throws(() =>
+      starfieldTimeline.createStarfieldTimeline([{ hold, duration: 1 }]),
+    );
+  }
+  for (const duration of [0, -1, NaN, Infinity, -Infinity]) {
+    assert.throws(() =>
+      starfieldTimeline.createStarfieldTimeline([{ hold: 1, duration }]),
+    );
+  }
+  assert.doesNotThrow(() =>
+    starfieldTimeline.createStarfieldTimeline([{ hold: 0, duration: 1 }]),
+  );
+});
+
+test('lower GPU star counts preserve particle identities in every formation', () => {
+  for (const reality of ['watchers', 'orbital']) {
+    for (const aspect of [390 / 844, 1440 / 900]) {
+      const full = world.buildStarfield(reality, 1100, aspect);
+      const reduced = world.buildStarfield(reality, 450, aspect);
+      assert.deepEqual(
+        full.frames.map(({ id }) => id),
+        reduced.frames.map(({ id }) => id),
+      );
+      for (const [index, frame] of full.frames.entries()) {
+        const reducedFrame = reduced.frames[index];
+        assert.deepEqual(
+          frame.positions.slice(0, reducedFrame.positions.length),
+          reducedFrame.positions,
+        );
+      }
+      for (const stream of ['seeds', 'scatter']) {
+        assert.equal(full[stream].length / 1100, reduced[stream].length / 450);
+        assert.deepEqual(
+          full[stream].slice(0, reduced[stream].length),
+          reduced[stream],
+        );
+      }
+    }
+  }
+});
+
+test('all authored star formations remain finite and distinct at both viewport shapes', () => {
+  for (const aspect of [390 / 844, 1440 / 900]) {
+    const configurations = [];
+    for (const reality of ['watchers', 'orbital']) {
+      const layout = world.buildStarfield(reality, 400, aspect);
+      assert.ok(layout.frames.length > 1);
+      assert.equal(
+        new Set(layout.frames.map(({ id }) => id)).size,
+        layout.frames.length,
+      );
+      for (const frame of layout.frames) {
+        assert.equal(frame.positions.length, 1200);
+        assert.ok(frame.positions.every(Number.isFinite));
+        assert.ok(Number.isFinite(frame.hold) && frame.hold >= 0);
+        assert.ok(Number.isFinite(frame.duration) && frame.duration > 0);
+      }
+      for (const stream of ['seeds', 'scatter']) {
+        assert.ok(layout[stream].length > 0);
+        assert.ok(layout[stream].every(Number.isFinite));
+      }
+      const signatures = layout.frames.map(({ positions }) =>
+        Array.from(positions).join(','),
+      );
+      assert.equal(new Set(signatures).size, layout.frames.length);
+      configurations.push(signatures.join(';'));
+    }
+    assert.notEqual(configurations[0], configurations[1]);
   }
 });
 

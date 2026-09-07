@@ -1,3 +1,31 @@
+export type StarfieldReality = 'watchers' | 'orbital';
+
+type ShapeGenerator = (
+  index: number,
+  random: () => number,
+  aspect: number,
+) => [number, number];
+
+export type StarfieldShape = {
+  id: string;
+  generate: ShapeGenerator;
+  hold: number;
+  duration: number;
+};
+
+type StarfieldFrame = {
+  id: string;
+  positions: Float32Array;
+  hold: number;
+  duration: number;
+};
+
+type StarfieldLayout = {
+  frames: StarfieldFrame[];
+  seeds: Float32Array;
+  scatter: Float32Array;
+};
+
 export const createSeededRandom = (seed: number): (() => number) => {
   let state = seed;
   return () => {
@@ -8,26 +36,112 @@ export const createSeededRandom = (seed: number): (() => number) => {
   };
 };
 
-export const buildStarField = (count: number): Float32Array => {
-  const random = createSeededRandom(71);
-  const positions = new Float32Array(count * 3);
-  for (let index = 0; index < positions.length; index += 3) {
-    positions[index] = (random() - 0.5) * 150;
-    positions[index + 1] = (random() - 0.5) * 140;
-    positions[index + 2] = -8 - random() * 100;
-  }
-  return positions;
+const scatterStars: ShapeGenerator = (_index, random, aspect) => [
+  (random() - 0.5) * 2.7 * aspect,
+  (random() - 0.5) * 2.5,
+];
+
+const formTwinSpirals: ShapeGenerator = (index, random, aspect) => {
+  const side = index % 2 === 0 ? -1 : 1;
+  const compact = aspect < 0.95;
+  const radius = Math.pow(random(), 0.58);
+  const arm = (index % 3) * ((Math.PI * 2) / 3);
+  const angle = arm + radius * 5.8 + (random() - 0.5) * 0.36;
+  const scale = 0.45 * Math.min(1, aspect * 0.95);
+  const centreY = compact ? side * 0.64 : side * -0.3;
+  return [
+    side * aspect * 0.72 + Math.cos(angle) * radius * scale,
+    centreY + Math.sin(angle) * radius * scale * 0.7,
+  ];
 };
 
-export const buildOrbitalField = (count: number): Float32Array => {
-  const random = createSeededRandom(173);
-  const positions = new Float32Array(count * 3);
-  for (let index = 0; index < positions.length; index += 3) {
-    const x = (random() - 0.5) * 230;
-    const spread = random() + random() + random() - 1.5;
-    positions[index] = x;
-    positions[index + 1] = x * 0.38 + spread * 18;
-    positions[index + 2] = -45 - random() * 100;
+const formOrbitalWave: ShapeGenerator = (index, random, aspect) => {
+  const side = index % 2 === 0 ? -1 : 1;
+  const x = (random() - 0.5) * 2.7;
+  const compact = aspect < 0.95;
+  const height = compact ? 0.72 : 0.56;
+  const amplitude = compact ? 0.08 : 0.18;
+  return [
+    x * aspect,
+    side * height + Math.sin(x * 4.5) * amplitude + (random() - 0.5) * 0.08,
+  ];
+};
+
+const formDustBelt: ShapeGenerator = (_index, random, aspect) => {
+  const x = (random() - 0.5) * 2.7;
+  return [x * aspect, x * 0.46 + (random() - 0.5) * 0.6];
+};
+
+const formTiltedRing: ShapeGenerator = (_index, random, aspect) => {
+  const angle = random() * Math.PI * 2;
+  const radius = 0.8 + random() * 0.25;
+  const x = Math.cos(angle) * radius * aspect * 1.02;
+  const y = Math.sin(angle) * radius * 0.62;
+  return [
+    x * Math.cos(-0.22) - y * Math.sin(-0.22),
+    x * Math.sin(-0.22) + y * Math.cos(-0.22),
+  ];
+};
+
+const formDoubleStream: ShapeGenerator = (index, random, aspect) => {
+  const side = index % 2 === 0 ? -1 : 1;
+  const x = (random() - 0.5) * 2.7;
+  return [
+    x * aspect,
+    x * 0.3 + side * 0.32 + Math.sin(x * 3) * 0.07 + (random() - 0.5) * 0.06,
+  ];
+};
+
+export const STARFIELD_SHAPES: Readonly<
+  Record<StarfieldReality, readonly StarfieldShape[]>
+> = {
+  watchers: [
+    { id: 'scatter', generate: scatterStars, hold: 1.4, duration: 2.4 },
+    { id: 'twin-spirals', generate: formTwinSpirals, hold: 1.4, duration: 2.4 },
+    { id: 'orbital-wave', generate: formOrbitalWave, hold: 1.4, duration: 2.4 },
+  ],
+  orbital: [
+    { id: 'dust-belt', generate: formDustBelt, hold: 1.4, duration: 2.4 },
+    { id: 'tilted-ring', generate: formTiltedRing, hold: 1.4, duration: 2.4 },
+    {
+      id: 'double-stream',
+      generate: formDoubleStream,
+      hold: 1.4,
+      duration: 2.4,
+    },
+  ],
+};
+
+export const buildStarfield = (
+  reality: StarfieldReality,
+  count: number,
+  aspect: number,
+): StarfieldLayout => {
+  const seed = reality === 'watchers' ? 71 : 173;
+  const random = createSeededRandom(seed);
+  const shapes = STARFIELD_SHAPES[reality];
+  const frames = shapes.map(({ id, hold, duration }) => ({
+    id,
+    hold,
+    duration,
+    positions: new Float32Array(count * 3),
+  }));
+  const seeds = new Float32Array(count * 3);
+  const scatter = new Float32Array(count * 3);
+  const scatterGenerator = reality === 'watchers' ? scatterStars : formDustBelt;
+
+  for (let star = 0; star < count; star += 1) {
+    const offset = star * 3;
+    const [x, y] = scatterGenerator(star, random, aspect);
+    const depth = random() * 1.5 - 0.5;
+    scatter.set([x, y, depth], offset);
+    seeds.set([random(), random(), random()], offset);
+    shapes.forEach((shape, frame) => {
+      const shapeRandom = createSeededRandom(seed + star * 37);
+      const [shapeX, shapeY] = shape.generate(star, shapeRandom, aspect);
+      frames[frame].positions.set([shapeX, shapeY, depth], offset);
+    });
   }
-  return positions;
+
+  return { frames, seeds, scatter };
 };
