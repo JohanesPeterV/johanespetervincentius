@@ -123,15 +123,16 @@ export default function OrbitalReality({
     group.translateZ(-58);
     group.scale.set(halfHeight, halfHeight, halfHeight * 0.35);
     if (planetRef.current) {
-      // REASON: work and project copy occupy the right side. Keep the planet
-      // on the left until the tech chapter, then cross above the reading area.
+      // REASON: work and project copy occupy the right side. Cross above the
+      // reading area into a cropped edge, leaving the central skill labels clear.
       const travel = MathUtils.smoothstep(
         progressRef.current,
         PROJECT_STONE.center,
         TECH_STONE.center - 0.2,
       );
       const compact = size.width < 768;
-      const x = compact ? 0.78 : MathUtils.lerp(-0.88, 0.98, travel);
+      const rightEdge = 0.72 + 0.88 / camera.aspect;
+      const x = compact ? 0.78 : MathUtils.lerp(-0.88, rightEdge, travel);
       const y = compact
         ? 1.18
         : MathUtils.lerp(0.65, 0.2, travel) + Math.sin(travel * Math.PI) * 1.15;
