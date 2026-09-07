@@ -209,7 +209,7 @@ export default function DiveOverlay({
       </div>
       <nav
         aria-label="Journey chapters"
-        className="absolute bottom-5 right-5 z-20 flex gap-1 sm:bottom-7 sm:right-8"
+        className="surface-panel absolute bottom-5 right-5 z-20 flex gap-1 p-1 sm:bottom-7 sm:right-8"
       >
         {DIVE_SECTIONS.map((section, index) => (
           <button

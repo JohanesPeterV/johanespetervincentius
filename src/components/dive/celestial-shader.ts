@@ -30,27 +30,6 @@ export const celestialVertex = `
   }
 `;
 
-export const moonFragment = `
-  uniform sampler2D uAlbedo;
-  uniform vec3 uAccent;
-  varying vec3 vNormal;
-  varying vec3 vViewPosition;
-  varying vec2 vUv;
-  ${printInkGlsl}
-  #define USE_BUMPMAP
-  #define vBumpMapUv vUv
-  #include <bumpmap_pars_fragment>
-  void main() {
-    vec3 normal = perturbNormalArb(-vViewPosition, normalize(vNormal), dHdxy_fwd(), 1.0);
-    vec3 albedo = texture2D(uAlbedo, vUv).rgb;
-    float sunlight = max(dot(normal, ${SPACE_KEY_LIGHT_GLSL}), 0.0);
-    vec3 color = albedo * (0.012 + pow(sunlight, 0.8) * 1.65);
-    color += albedo * uAccent * (1.0 - sunlight) * 0.012;
-    gl_FragColor = vec4(printInk(color), 1.0);
-    #include <colorspace_fragment>
-  }
-`;
-
 export const frontierPlanetFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;

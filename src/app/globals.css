@@ -234,6 +234,13 @@
     border-radius: 50%;
   }
 
+  .dive-hint {
+    color: hsl(var(--foreground));
+    text-shadow:
+      0 1px 4px hsl(var(--background)),
+      0 0 12px hsl(var(--background));
+  }
+
   .identity-tag {
     display: inline-flex;
     align-items: center;
