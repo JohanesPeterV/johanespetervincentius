@@ -110,9 +110,12 @@ export const starfieldVertex = `
       gl_Position.xy += (distortPosition(screen) - screen)
         / vec2(uAspect, 1.0) * gl_Position.w;
     }
-    vAlpha = (0.30 + aSeed.y * 0.62) * min(${STARFIELD_REFERENCE_DISTANCE.toFixed(1)} / depth, 1.0) * twinkle
+    float glowAlpha = (0.30 + aSeed.y * 0.62) * min(${STARFIELD_REFERENCE_DISTANCE.toFixed(1)} / depth, 1.0) * twinkle
       * nearFade;
-    vTint = 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283);
+    // REASON: a printed star is a solid mark in one of the two inks; on paper size carries depth, not fade.
+    float inkAlpha = (0.55 + 0.45 * aSeed.y) * (0.85 + 0.15 * twinkle) * nearFade;
+    vAlpha = mix(inkAlpha, glowAlpha, uLuminous);
+    vTint = mix(step(0.5, aSeed.x), 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283), uLuminous);
     vColorStrength = mix(1.0, appearance.z, uLuminous);
     vHalo = appearance.y * twinkle;
   }
@@ -162,7 +165,9 @@ export const starfieldHaloFragment = `
     float glow = pow(facing, 5.0) * 0.32;
     float ring = smoothstep(0.28, 0.36, facing) * (1.0 - smoothstep(0.5, 0.58, facing)) * 0.7;
     float alpha = mix(ring, glow, uLuminous) * vGlow * vHalo * vAlpha;
-    gl_FragColor = vec4(mix(uAccent, uHighlight, vTint), alpha);
+    vec3 glowInk = mix(uAccent, uHighlight, vTint);
+    vec3 ringInk = mix(uHighlight, uAccent, vTint);
+    gl_FragColor = vec4(mix(ringInk, glowInk, uLuminous), alpha);
     #include <colorspace_fragment>
   }
 `;
