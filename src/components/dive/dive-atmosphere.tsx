@@ -56,7 +56,7 @@ const starFragment = `
     float core = 1.0 - smoothstep(coreRadius - aa, coreRadius + aa, radius);
     float halo = exp(-radius * radius * 22.0) * (1.0 - smoothstep(0.35, 0.5, radius));
     float alpha = (core + halo * vGlow * 0.38) * vAlpha;
-    vec3 dust = mix(uAccent, uHighlight, vTint);
+    vec3 dust = mix(uAccent, uHighlight, step(0.5, vTint));
     vec3 starlight = mix(uStarlight, dust, 0.12 + vTint * 0.18);
     gl_FragColor = vec4(mix(starlight, dust, uOrbital), min(alpha, 1.0));
     #include <colorspace_fragment>

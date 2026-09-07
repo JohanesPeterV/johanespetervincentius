@@ -22,10 +22,10 @@ Use the [Higgsfield Astra starfield](https://higgsfield.ai/gpt-astra) as a refer
 
 ## Colour Roles
 
-- Compose with our fashion-derived colourways: use colour theory and relevant fashion references to guide proportion and placement. Account for the pair's hue relationship, lightness and saturation to establish visual emphasis within the existing colour roles. Judge the colours against surrounding neutrals and each other in the rendered composition ([Albers, _Interaction of Color_](https://www.albersfoundation.org/alberses/teaching/interaction-of-color)).
+- Compose with our fashion-derived colourways: use colour theory and relevant fashion references to guide proportion and placement. Either colour may lead the artwork; account for hue relationships, lightness, saturation and surrounding neutrals when deciding visual weight. Judge the pair in the rendered composition ([Albers, _Interaction of Color_](https://www.albersfoundation.org/alberses/teaching/interaction-of-color)).
 - Author only two colours per colourway: primary and secondary. `src/lib/theme-colors.ts` derives readable text and neutral surfaces for both modes.
-- Use primary fills for the main action and selected controls, paired with `primary-foreground`. Use `primary-text` for coloured text or icons on neutral surfaces; its contrast adjustment must not alter the paint colour.
-- Use secondary with `secondary-foreground` for small identity accents and supporting highlights. Keep ordinary surfaces and lower-priority actions neutral so the two colours have room to stand out.
+- In interface controls, use primary fills for the main action and selected controls, paired with `primary-foreground`. Use `primary-text` for coloured text or icons on neutral surfaces; its contrast adjustment must not alter the paint colour.
+- In the UI, use secondary with `secondary-foreground` for identity accents and supporting highlights. Keep ordinary surfaces and lower-priority actions neutral so the two colours have room to stand out.
 - Dark mode is the default: space stays black, stars stay sharp, and the authored colour pair gives objects their electric accents. Avoid diffuse atmospheric gradients, pastel lighting, and large frosted hero panels. Light mode remains available with the same crisp graphic silhouettes on a light neutral ground.
 
 ## Visual Hierarchy

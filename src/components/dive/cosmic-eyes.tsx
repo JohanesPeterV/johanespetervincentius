@@ -18,7 +18,7 @@ type EyePlacement = {
   size: number;
   depth: number;
   tilt: number;
-  variant: 'cyan' | 'violet';
+  variant: 'primary' | 'secondary';
   mobile?: [number, number];
 };
 
@@ -29,7 +29,7 @@ const EYES: EyePlacement[] = [
     size: 0.06,
     depth: 28,
     tilt: -0.025,
-    variant: 'cyan',
+    variant: 'primary',
     mobile: [0.76, 0.58],
   },
   {
@@ -38,7 +38,7 @@ const EYES: EyePlacement[] = [
     size: 0.05,
     depth: 38,
     tilt: -0.02,
-    variant: 'violet',
+    variant: 'secondary',
   },
   {
     x: 0.61,
@@ -46,7 +46,7 @@ const EYES: EyePlacement[] = [
     size: 0.07,
     depth: 32,
     tilt: 0.02,
-    variant: 'violet',
+    variant: 'secondary',
   },
   {
     x: -0.7,
@@ -54,7 +54,7 @@ const EYES: EyePlacement[] = [
     size: 0.066,
     depth: 35,
     tilt: 0.015,
-    variant: 'cyan',
+    variant: 'secondary',
     mobile: [-0.74, -0.58],
   },
   {
@@ -63,7 +63,7 @@ const EYES: EyePlacement[] = [
     size: 0.055,
     depth: 30,
     tilt: -0.015,
-    variant: 'cyan',
+    variant: 'primary',
   },
 ];
 
@@ -139,15 +139,12 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       background.r + background.g + background.b;
     const neutral = foregroundIsLight ? foreground : background;
     const dark = foregroundIsLight ? background : foreground;
-    const lilac = new Color(palette.highlight).lerp(neutral, 0.45);
     uniforms.forEach((eye, index) => {
-      eye.uOutline.value.set(palette.highlight);
-      eye.uColor.value.set(palette.accent);
+      const primaryFill = EYES[index].variant === 'primary';
+      eye.uOutline.value.set(primaryFill ? palette.highlight : palette.accent);
+      eye.uColor.value.set(primaryFill ? palette.accent : palette.highlight);
       eye.uLight.value.copy(neutral);
       eye.uDark.value.copy(dark).lerp(neutral, 0.012);
-      if (EYES[index].variant === 'violet') {
-        eye.uColor.value.copy(lilac);
-      }
     });
   }, [
     palette.accent,

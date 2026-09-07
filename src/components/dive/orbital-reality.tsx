@@ -5,7 +5,7 @@ import { RefObject, useEffect, useRef, useState } from 'react';
 import { Color, DoubleSide, Group, MathUtils, PerspectiveCamera } from 'three';
 
 import type { MotionMode } from './descent';
-import { TECH_STONE, WORK_STONE } from './descent';
+import { PROJECT_STONE, TECH_STONE } from './descent';
 import type { DivePalette } from './dive-palette';
 
 type OrbitalRealityParams = {
@@ -35,9 +35,9 @@ const planetFragment = `
   void main() {
     vec3 normal = normalize(vNormal);
     float latitude = vPosition.y + 0.045 * sin(vPosition.x * 12.0);
-    float band = step(0.52, fract(latitude * 5.5));
-    vec3 color = mix(uAccent, uHighlight, band);
-    float stripe = 1.0 - step(0.045, abs(latitude + 0.06));
+    float band = step(0.76, fract(latitude * 4.0));
+    vec3 color = mix(uHighlight, uAccent, band);
+    float stripe = 1.0 - step(0.012, abs(latitude + 0.06));
     color = mix(color, uForeground, stripe * 0.9);
     float light = dot(normal, normalize(vec3(-0.72, 0.48, 0.5)));
     float shadow = 1.0 - smoothstep(-0.07, -0.035, light);
@@ -60,9 +60,9 @@ const ringFragment = `
     if (gap > 0.5) {
       discard;
     }
-    float bands = step(0.48, fract(radius * 28.0));
-    vec3 color = mix(uAccent, uHighlight, bands);
-    color = mix(color, uForeground, step(0.851, radius) * 0.82);
+    float bands = step(0.76, fract(radius * 18.0));
+    vec3 color = mix(uHighlight, uAccent, bands);
+    color = mix(color, uForeground, step(0.869, radius) * 0.82);
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>
   }
@@ -123,16 +123,18 @@ export default function OrbitalReality({
     group.translateZ(-58);
     group.scale.set(halfHeight, halfHeight, halfHeight * 0.35);
     if (planetRef.current) {
+      // REASON: work and project copy occupy the right side. Keep the planet
+      // on the left until the tech chapter, then cross above the reading area.
       const travel = MathUtils.smoothstep(
         progressRef.current,
-        WORK_STONE.center,
+        PROJECT_STONE.center,
         TECH_STONE.center - 0.2,
       );
       const compact = size.width < 768;
-      const x = compact ? -0.48 : MathUtils.lerp(-0.88, 0.98, travel);
+      const x = compact ? 0.78 : MathUtils.lerp(-0.88, 0.98, travel);
       const y = compact
-        ? 0.94
-        : MathUtils.lerp(0.65, 0.2, travel) + Math.sin(travel * Math.PI) * 0.75;
+        ? 1.18
+        : MathUtils.lerp(0.65, 0.2, travel) + Math.sin(travel * Math.PI) * 1.15;
       planetRef.current.position.set(x * camera.aspect, y, 0);
       planetRef.current.scale.setScalar(compact ? 0.5 : 1);
       planetRef.current.rotation.z = -0.25 + Math.sin(time * 0.06) * 0.025;
