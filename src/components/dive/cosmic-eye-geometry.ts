@@ -6,12 +6,15 @@ type EyeContour = {
   interior: number;
 };
 
+export const COSMIC_EYE_OPENING_RADIUS = 0.84;
+export const COSMIC_EYE_CLOSED_RATIO = 0.025;
+
 const SEGMENTS = 64;
 const CONTOURS: EyeContour[] = [
   { radius: 0.28, depth: 0.13, interior: 1 },
   { radius: 0.56, depth: 0.105, interior: 1 },
   { radius: 0.78, depth: 0.055, interior: 1 },
-  { radius: 0.84, depth: 0.015, interior: 1 },
+  { radius: COSMIC_EYE_OPENING_RADIUS, depth: 0.015, interior: 1 },
   { radius: 0.86, depth: 0.015, interior: 0 },
   { radius: 0.9, depth: 0.16, interior: 0 },
   { radius: 0.96, depth: 0.16, interior: 0 },
@@ -59,5 +62,17 @@ export const createCosmicEyeGeometry = (): BufferGeometry => {
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
+
+  const closedGeometry = geometry.clone();
+  const closedPositions = closedGeometry.getAttribute('position');
+  for (let vertex = 0; vertex < closedPositions.count; vertex += 1) {
+    const opening = 1 - (1 - COSMIC_EYE_CLOSED_RATIO) * interior[vertex];
+    closedPositions.setY(vertex, closedPositions.getY(vertex) * opening);
+  }
+  closedGeometry.computeVertexNormals();
+  geometry.setAttribute('aClosedPosition', closedPositions);
+  geometry.setAttribute('aClosedNormal', closedGeometry.getAttribute('normal'));
+  closedGeometry.dispose();
+
   return geometry;
 };

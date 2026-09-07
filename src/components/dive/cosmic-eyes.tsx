@@ -2,7 +2,7 @@
 
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
-import { Color, Group } from 'three';
+import { Color, Group, MathUtils, Vector3 } from 'three';
 
 import { createCosmicEyeGeometry } from './cosmic-eye-geometry';
 import { cosmicEyeFragment, cosmicEyeVertex } from './cosmic-eye-shader';
@@ -73,6 +73,7 @@ const EYES: EyePlacement[] = [
 export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
   const groupRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
+  const cameraTargetRef = useRef(new Vector3());
   const [origin] = useState(createSpaceOrigin);
   const [geometry] = useState(createCosmicEyeGeometry);
   const [uniforms] = useState(() =>
@@ -82,6 +83,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       uLight: { value: new Color() },
       uDark: { value: new Color() },
       uCycle: { value: 0.4 },
+      uBlink: { value: 0 },
     })),
   );
 
@@ -112,7 +114,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     uniforms,
   ]);
 
-  useFrame(({ size }, delta) => {
+  useFrame(({ camera, size }, delta) => {
     const group = groupRef.current;
     if (!group) {
       return;
@@ -123,6 +125,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     const time = elapsedRef.current;
     const compact = size.width < 768;
     const tangent = Math.tan((58 * Math.PI) / 360);
+    camera.getWorldPosition(cameraTargetRef.current);
     group.children.forEach((mesh, index) => {
       const placement = EYES[index];
       mesh.visible = !compact || placement.mobile !== undefined;
@@ -143,13 +146,14 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
         (y + Math.cos(drift) * 0.006) * halfHeight,
         -placement.depth,
       );
-      mesh.rotation.set(
-        0.24 + Math.sin(drift * 0.7) * 0.14,
-        Math.sin(index * 1.7) * 0.35 + Math.cos(drift * 0.55) * 0.25,
-        placement.tilt + Math.sin(drift * 0.7) * 0.01,
-      );
+      mesh.lookAt(cameraTargetRef.current);
+      mesh.rotateZ(placement.tilt + Math.sin(drift * 0.7) * 0.01);
       mesh.scale.setScalar(Math.min(halfHeight, halfWidth) * placement.size);
       eye.uCycle.value = (time * 0.48 + index * 0.67 + 0.4) % 3;
+      const blinkPhase = (time + 1 + index * 1.73) % (4.8 + index * 0.91);
+      const closing = MathUtils.smoothstep(blinkPhase, 0, 0.085);
+      const reopening = MathUtils.smoothstep(blinkPhase, 0.12, 0.29);
+      eye.uBlink.value = motionMode === 'reduced' ? 0 : closing - reopening;
     });
   }, -1);
 
