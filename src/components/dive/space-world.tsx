@@ -10,7 +10,6 @@ import DiveAtmosphere from './dive-atmosphere';
 import CosmicEyes from './cosmic-eyes';
 import HeroCelestials from './hero-celestials';
 import AsteroidField from './asteroid-field';
-import GalacticCloud from './galactic-cloud';
 import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
 import { SectionObjects } from './dive-world';
@@ -57,11 +56,6 @@ export default function SpaceWorld({
       <directionalLight position={[5, 2, -4]} intensity={1} />
       <group ref={firstWorldRef} name="world-1">
         <directionalLight position={SPACE_KEY_LIGHT} intensity={1.4} />
-        <GalacticCloud
-          palette={palette}
-          motionMode={motionMode}
-          gpuTier={gpuTier}
-        />
         <DiveAtmosphere
           reality="watchers"
           progressRef={progressRef}
