@@ -2,12 +2,13 @@
 
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
-import { Color, Group, MathUtils, PerspectiveCamera } from 'three';
+import { Color, Group } from 'three';
 
 import { createCosmicEyeGeometry } from './cosmic-eye-geometry';
 import { cosmicEyeFragment, cosmicEyeVertex } from './cosmic-eye-shader';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
+import { createSpaceOrigin } from './space-origin';
 
 type CosmicEyesParams = {
   palette: DivePalette;
@@ -43,8 +44,8 @@ const EYES: EyePlacement[] = [
     variant: 'secondary',
   },
   {
-    x: 0.61,
-    y: 0.73,
+    x: 0.14,
+    y: 0.86,
     size: 0.07,
     depth: 32,
     tilt: 0.02,
@@ -72,6 +73,7 @@ const EYES: EyePlacement[] = [
 export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
   const groupRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
+  const [origin] = useState(createSpaceOrigin);
   const [geometry] = useState(createCosmicEyeGeometry);
   const [uniforms] = useState(() =>
     EYES.map(() => ({
@@ -110,9 +112,9 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     uniforms,
   ]);
 
-  useFrame(({ camera, size }, delta) => {
+  useFrame(({ size }, delta) => {
     const group = groupRef.current;
-    if (!group || !(camera instanceof PerspectiveCamera)) {
+    if (!group) {
       return;
     }
     if (motionMode === 'full') {
@@ -120,9 +122,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     }
     const time = elapsedRef.current;
     const compact = size.width < 768;
-    const tangent = Math.tan(MathUtils.degToRad(camera.fov * 0.5));
-    group.position.copy(camera.position);
-    group.quaternion.copy(camera.quaternion);
+    const tangent = Math.tan((58 * Math.PI) / 360);
     group.children.forEach((mesh, index) => {
       const placement = EYES[index];
       mesh.visible = !compact || placement.mobile !== undefined;
@@ -131,7 +131,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       }
       const eye = uniforms[index];
       const halfHeight = tangent * placement.depth;
-      const halfWidth = halfHeight * camera.aspect;
+      const halfWidth = halfHeight * (size.width / size.height);
       const drift = time * 0.08 + index * 1.7;
       let x = placement.x;
       let y = placement.y;
@@ -154,7 +154,12 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
   }, -1);
 
   return (
-    <group ref={groupRef} name="cosmic-eyes">
+    <group
+      ref={groupRef}
+      name="cosmic-eyes"
+      position={origin.position}
+      quaternion={origin.quaternion}
+    >
       {EYES.map((placement, index) => (
         <mesh
           key={placement.depth + placement.x}

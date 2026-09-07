@@ -8,7 +8,10 @@ import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import DiveAtmosphere from './dive-atmosphere';
 import CosmicEyes from './cosmic-eyes';
-import LightCelestials from './light-celestials';
+import HeroCelestials from './hero-celestials';
+import AsteroidField from './asteroid-field';
+import GalacticCloud from './galactic-cloud';
+import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
 import { SectionObjects } from './dive-world';
 import { HANDOFF_END, HANDOFF_START } from './hero-handoff';
@@ -51,9 +54,14 @@ export default function SpaceWorld({
   return (
     <>
       <ambientLight intensity={0.8} />
-      <directionalLight position={[-4, 8, 8]} intensity={1.4} />
       <directionalLight position={[5, 2, -4]} intensity={1} />
       <group ref={firstWorldRef} name="world-1">
+        <directionalLight position={SPACE_KEY_LIGHT} intensity={1.4} />
+        <GalacticCloud
+          palette={palette}
+          motionMode={motionMode}
+          gpuTier={gpuTier}
+        />
         <DiveAtmosphere
           reality="watchers"
           progressRef={progressRef}
@@ -62,20 +70,32 @@ export default function SpaceWorld({
           gpuTier={gpuTier}
           motionMode={motionMode}
         />
-        {palette.mode === 'light' ? (
-          <LightCelestials
-            palette={palette}
-            motionMode={motionMode}
-            gpuTier={gpuTier}
-          />
-        ) : (
+        <HeroCelestials
+          palette={palette}
+          motionMode={motionMode}
+          gpuTier={gpuTier}
+        />
+        <AsteroidField
+          reality="watchers"
+          palette={palette}
+          motionMode={motionMode}
+          gpuTier={gpuTier}
+        />
+        {palette.mode === 'dark' ? (
           <CosmicEyes palette={palette} motionMode={motionMode} />
-        )}
+        ) : null}
       </group>
       <group ref={secondWorldRef} name="world-2" visible={false}>
+        <directionalLight position={[-4, 8, 8]} intensity={1.4} />
         <OrbitalReality
           palette={palette}
           progressRef={progressRef}
+          motionMode={motionMode}
+          gpuTier={gpuTier}
+        />
+        <AsteroidField
+          reality="orbital"
+          palette={palette}
           motionMode={motionMode}
           gpuTier={gpuTier}
         />

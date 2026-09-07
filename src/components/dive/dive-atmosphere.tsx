@@ -9,21 +9,16 @@ import {
   InstancedBufferAttribute,
   Color,
   DynamicDrawUsage,
-  PerspectiveCamera,
   Vector2,
   Vector3,
 } from 'three';
 
 import type { DivePalette } from './dive-palette';
-import {
-  createDescentFrame,
-  DIVE_START,
-  sectionTravel,
-  writeDescentFrame,
-} from './descent';
+import { sectionTravel } from './descent';
 import type { MotionMode } from './descent';
 import { buildSpatialStarfield } from './starfield-space';
 import { createStarGeometry } from './starfield-geometry';
+import { createSpaceOrigin } from './space-origin';
 import type { StarfieldReality } from './world-layout';
 import {
   starfieldFragment,
@@ -59,10 +54,7 @@ export default function DiveAtmosphere({
     const layout = buildSpatialStarfield(reality, count, aspect);
     // REASON: the initial observer defines local zero once; following the live
     // camera would cancel perspective movement and lock the stars to the screen.
-    const frame = writeDescentFrame(createDescentFrame(), DIVE_START);
-    const origin = new PerspectiveCamera();
-    origin.position.fromArray(frame.position);
-    origin.lookAt(...frame.look);
+    const origin = createSpaceOrigin();
     return {
       layout,
       origin,

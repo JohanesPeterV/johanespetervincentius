@@ -6,8 +6,8 @@ The portfolio has a bold, graphic space identity: black voids, stars with crisp 
 
 The hero and the later chapters inhabit two distinct realities, owned by separate scene groups in `SpaceWorld`:
 
-- World 1: open black space, scattered white and subtly tinted stars, with only a few small sculpted eyes at the periphery. Coloured disks emerge from the centre, expand outward, and continuously recycle inside a fixed pointed almond. Use flat disk colours without glossy catchlights, blinking lids, or character-like gaze; keep the space dominant.
-- World 2: a large cropped ringed planet, inclined orbital paths, and faceted satellites, with no stars or stellar dust in either theme. Stars and eye glyphs belong exclusively to world 1.
+- World 1: a turbulent galactic cloud with black dust lanes, a cropped cratered moon nearby, a distant ringless planet, and scattered stars in black space. Keep only a few small sculpted eyes at the periphery. Coloured disks emerge from the centre, expand outward, and continuously recycle inside a fixed pointed almond. Use flat disk colours without glossy catchlights, blinking lids, or character-like gaze; keep the space dominant.
+- World 2: a large cropped ringed planet, inclined orbital paths, an asteroid arc around the lower-left edge, and faceted satellites, with no stars or stellar dust in either theme. Stars and eyes belong exclusively to world 1.
 
 Preserve the etched crossing in both directions, including the return loop. The reveal must expose a different composition, not carry the same decoration across a content change.
 
@@ -15,7 +15,11 @@ Use the [Higgsfield Astra starfield](https://higgsfield.ai/gpt-astra) as a refer
 
 Stars and eyes have actual closed 3D bodies with depth, surface normals, and visible sides. Stars are instanced beveled four-point solids distributed around the observer; their rotation reveals their facets. Their glow uses a surrounding spherical mesh. Eyes have a curved inset face, raised rim, and solid back; outward colour cycles remain on the face as the whole object tilts. Keep formation choreography independent of mesh shape, and scale bodies for narrow screens so foreground stars do not obscure text.
 
-Light mode presents the two realities as an astronomical illustration with suspended miniature objects: neutral white space, graphite particles and orbit lines, and saturated painted accents. World 1 has a sparse hanging moon and planet; world 2 keeps its ringed planet and orbital composition, with selected objects suspended on thin visible strings. Strings attach to the objects and sway around fixed anchors. Use matte directional shading and crisp silhouettes, with subtle grain on the painted surfaces. Preserve the same particle choreography and distortion; light-mode particles read as printed marks rather than luminous bloom.
+Compose one complete scene: a distant light source in the upper right, ragged galactic clouds curving toward it, and a dark foreground moon framing the depth. Build the cloud as a volume with turbulent filaments, luminous knots, and open black channels; avoid a smooth full-screen wash. It drifts slowly behind the stars and follows the active colourway. Celestial landmarks share a directional light and the starfield's initial observer origin, so camera movement reveals their different depths. Small asteroid clusters are secondary accents at the edges. Mobile compositions reposition landmarks and reduce volume sampling and debris count.
+
+Typography and navigation belong inside this environment. The hero uses a strong title and open destination rows with restrained rules, continuous with the later chapters' typographic controls. Keep the reading area dark enough for neutral text; opaque cards must not cut rectangular holes through the scene.
+
+Light mode presents the two realities as an astronomical illustration with suspended miniature objects: neutral white space, graphite particles and orbit lines, and saturated painted accents. World 1 has a sparse hanging moon and planet, with the galactic cloud rendered as a restrained graphite and pigment wash; world 2 keeps its ringed planet and orbital composition, with selected objects suspended on thin visible strings. Strings attach to the objects and sway around fixed anchors. Use matte directional shading and crisp silhouettes, with subtle grain on the painted surfaces. Preserve the same particle choreography and distortion; light-mode particles read as printed marks rather than luminous bloom.
 
 ## Reuse The System
 
@@ -31,7 +35,7 @@ Light mode presents the two realities as an astronomical illustration with suspe
 - A new visitor receives one random colourway, saved in the existing preference store. Keep it stable across reloads and navigation; manual selection and Shuffle replace that saved choice. Shuffle chooses a different pair. Light, Dark, and System remain independent of colourway selection.
 - Reserve solid primary fills for the main action, paired with `primary-foreground`. Selected settings and navigation use a neutral surface with a `primary-text` label and outline. Selection needs a visible shape cue without taking the same visual weight as a call to action.
 - Keep peer destinations and contact icons neutral at rest; primary text and edges provide their hover and focus cues. Use `primary-text` for coloured text or icons on neutral surfaces; its contrast adjustment must not alter the paint colour.
-- Use secondary as a small identity marker beside section labels and as the monogram fill, paired with `secondary-foreground`. Keep label text neutral and readable. Judge the area occupied by each colour across artwork and UI together; do not add a coloured badge wherever colour is available.
+- Use secondary as a small identity marker beside section labels. Keep label text neutral and readable. Judge the area occupied by each colour across artwork and UI together; do not add a coloured badge wherever colour is available.
 - Dark mode is the default: space stays black, stars stay sharp, and the authored colour pair gives objects their electric accents. Avoid diffuse atmospheric gradients, pastel lighting, and large frosted hero panels. Light mode remains available with the same crisp graphic silhouettes on a light neutral ground.
 
 ## Visual Hierarchy

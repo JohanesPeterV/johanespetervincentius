@@ -4,13 +4,11 @@ import ProfileHeader from './profile-header';
 
 export default function ClassicCard() {
   return (
-    <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-md">
-      <div className="relative p-6 sm:p-8">
-        <div className="flex w-full flex-col items-center gap-6">
-          <ProfileHeader />
-          <LinkButtons />
-          <ContactIcons />
-        </div>
+    <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-xl px-4 py-6 sm:px-8 sm:py-8">
+      <div className="flex w-full flex-col items-start gap-7 [@media(max-height:640px)]:gap-3">
+        <ProfileHeader />
+        <LinkButtons />
+        <ContactIcons />
       </div>
     </div>
   );

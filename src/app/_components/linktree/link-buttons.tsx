@@ -1,26 +1,23 @@
+import { ArrowUpRight } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { LINKTREE_LINKS } from './links';
 
 export default function LinkButtons() {
   return (
-    <div className="flex w-full flex-col gap-3">
+    <nav aria-label="Find me online" className="flex w-full flex-col">
       {LINKTREE_LINKS.map(({ icon: Icon, label, handle, url }) => (
-        <Button
-          key={url}
-          asChild
-          variant="outline"
-          size="profile"
-          className="relative"
-        >
+        <Button key={url} asChild variant="destination" size="profile">
           <a href={url} target="_blank" rel="noopener noreferrer">
-            <Icon className="absolute left-5 shrink-0" />
-            <span className="flex flex-col items-center gap-0.5">
+            <Icon aria-hidden />
+            <span className="flex flex-1 flex-col items-start gap-0.5">
               <span>{label}</span>
-              <span className="text-xs font-normal">{handle}</span>
+              <span className="type-meta text-muted-foreground">{handle}</span>
             </span>
+            <ArrowUpRight aria-hidden />
           </a>
         </Button>
       ))}
-    </div>
+    </nav>
   );
 }

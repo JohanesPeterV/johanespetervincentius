@@ -1,6 +1,8 @@
 import { FaEnvelope, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa';
 import { IconType } from 'react-icons/lib';
 
+import { Button } from '@/components/ui/button';
+
 type ContactIcon = {
   icon: IconType;
   label: string;
@@ -27,22 +29,28 @@ const CONTACT_ICONS: ContactIcon[] = [
 
 export default function ContactIcons() {
   return (
-    <div className="flex items-center justify-center gap-5">
+    <nav aria-label="Contact" className="flex items-center gap-3">
       {CONTACT_ICONS.map(({ icon: Icon, label, url }) => {
         const isExternal = url.startsWith('http');
         return (
-          <a
+          <Button
             key={label}
-            href={url}
-            aria-label={label}
-            target={isExternal ? '_blank' : undefined}
-            rel={isExternal ? 'noopener noreferrer' : undefined}
-            className="contact-link flex h-11 w-11 items-center justify-center"
+            asChild
+            variant="destination"
+            size="icon"
+            className="h-11 w-11"
           >
-            <Icon className="text-xl" />
-          </a>
+            <a
+              href={url}
+              aria-label={label}
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+            >
+              <Icon aria-hidden />
+            </a>
+          </Button>
         );
       })}
-    </div>
+    </nav>
   );
 }
