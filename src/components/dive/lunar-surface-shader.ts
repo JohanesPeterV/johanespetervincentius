@@ -34,17 +34,18 @@ export const lunarSurfaceFragment = `
   vec3 surfaceTexture(vec3 point) {
     vec3 weights = pow(abs(normalize(vSurfaceNormal)), vec3(4.0));
     weights /= weights.x + weights.y + weights.z;
-    return texture2D(uRegolith, point.zy).rgb * weights.x
-      + texture2D(uRegolith, point.xz).rgb * weights.y
-      + texture2D(uRegolith, point.xy).rgb * weights.z;
+    return texture2D(uRegolith, point.zy, 1.2).rgb * weights.x
+      + texture2D(uRegolith, point.xz, 1.2).rgb * weights.y
+      + texture2D(uRegolith, point.xy, 1.2).rgb * weights.z;
   }
   void main() {
     vec3 regolith = surfaceTexture(vPosition * 0.26);
-    float detail = dot(regolith, vec3(0.3333)) * 0.075;
+    float detail = dot(regolith, vec3(0.3333)) * 0.012;
     vec3 normal = perturbNormalArb(-vViewPosition, normalize(vNormal),
       vec2(dFdx(detail), dFdy(detail)), 1.0);
     float sunlight = max(dot(normal, ${SPACE_KEY_LIGHT_GLSL}), 0.0);
-    vec3 color = regolith * (0.018 + sunlight * vSunVisibility * 1.8);
+    regolith = mix(vec3(0.13), regolith, 0.3);
+    vec3 color = regolith * (0.055 + sunlight * vSunVisibility * 1.65);
     color += uAccent * regolith * (1.0 - sunlight) * 0.025;
     gl_FragColor = vec4(printInk(color), 1.0);
     #include <colorspace_fragment>

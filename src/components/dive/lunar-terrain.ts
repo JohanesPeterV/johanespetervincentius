@@ -27,31 +27,28 @@ export const LUNAR_SURFACE_TILT: Record<LunarView, number> = {
 const noise = new ImprovedNoise();
 const random = createSeededRandom(1969);
 const craters: Crater[] = [
-  { x: -10, z: -24, radius: 9, depth: 3.2 },
-  { x: 8, z: -17, radius: 4.6, depth: 1.25 },
-  { x: -8, z: -65, radius: 22, depth: 4.6 },
-  { x: -28, z: -68, radius: 10, depth: 2.1 },
-  { x: 41, z: -100, radius: 17, depth: 3 },
-  ...Array.from({ length: 52 }, () => {
+  { x: -12, z: -27, radius: 12, depth: 2 },
+  { x: 19, z: -55, radius: 16, depth: 2.5 },
+  { x: -24, z: -112, radius: 28, depth: 3.4 },
+  ...Array.from({ length: 12 }, () => {
     const distance = 10 + random() * 150;
-    const radius = 0.5 + random() ** 2 * 3.5;
+    const radius = 1 + random() ** 2 * 3;
     return {
       x: (random() - 0.5) * distance * 2.3,
       z: -distance,
       radius,
-      depth: radius * 0.22,
+      depth: radius * 0.1,
     };
   }),
 ];
 
 const terrainHeight = (x: number, z: number): number => {
-  const broad = noise.noise(x * 0.055, z * 0.055, 4.7);
+  const broad = noise.noise(x * 0.035, z * 0.035, 4.7);
   const ridge = z + 91 + Math.sin(x * 0.035) * 14;
-  let height = -1.9 - z * z * 0.00035;
-  height += broad * 1.5;
-  height += noise.noise(x * 0.21, z * 0.21, 2.3) * 0.5;
-  height += noise.noise(x * 0.85, z * 0.85, 8.1) * 0.13;
-  height += Math.exp(-((ridge / 16) ** 2)) * (3 + broad * 4);
+  let height = -2.4 - z * z * 0.00035;
+  height += broad * 0.5;
+  height += noise.noise(x * 0.16, z * 0.16, 2.3) * 0.045;
+  height += Math.exp(-((ridge / 24) ** 2)) * (0.8 + broad * 0.6);
 
   for (const crater of craters) {
     const dx = x - crater.x;
@@ -60,11 +57,11 @@ const terrainHeight = (x: number, z: number): number => {
     if (radius > 1.7) {
       continue;
     }
-    const irregularity = 1 + noise.noise(x * 0.7, z * 0.7, 3.1) * 0.075;
-    const rim = Math.exp(-(((radius * irregularity - 1) / 0.11) ** 2));
+    const irregularity = 1 + noise.noise(x * 0.06, z * 0.06, 3.1) * 0.035;
+    const rim = Math.exp(-(((radius * irregularity - 1) / 0.2) ** 2));
     const interior = Math.min(1, Math.max(0, (1 - radius) / 0.72));
     const bowl = interior * interior * (3 - 2 * interior);
-    height += crater.depth * (rim * 0.24 - bowl);
+    height += crater.depth * (rim * 0.18 - bowl);
   }
   return height;
 };
@@ -72,15 +69,14 @@ const terrainHeight = (x: number, z: number): number => {
 const createRocks = (gpuTier: number): Rock[] => {
   const rockRandom = createSeededRandom(1972);
   return [
-    { x: -4.5, z: -7.8, radius: 0.3 },
-    { x: 7.5, z: -11, radius: 0.48 },
-    { x: -17, z: -36, radius: 0.85 },
-    ...Array.from({ length: gpuTier < 2 ? 40 : 80 }, () => {
+    { x: -5, z: -9, radius: 0.2 },
+    { x: 9, z: -18, radius: 0.28 },
+    ...Array.from({ length: gpuTier < 2 ? 12 : 24 }, () => {
       const distance = 5 + rockRandom() ** 1.5 * 82;
       return {
         x: (rockRandom() - 0.5) * distance * 1.8,
         z: -distance,
-        radius: 0.035 + rockRandom() ** 3 * 0.3,
+        radius: 0.025 + rockRandom() ** 3 * 0.18,
       };
     }),
   ].map((rock) => ({
@@ -101,7 +97,7 @@ const createRockGeometry = (rocks: Rock[]): BufferGeometry => {
       const x = positions.getX(index);
       const y = positions.getY(index);
       const z = positions.getZ(index);
-      const relief = 1 + noise.noise(x * 2.7, y * 2.7, z * 2.7) * 0.4;
+      const relief = 1 + noise.noise(x * 2.7, y * 2.7, z * 2.7) * 0.2;
       positions.setXYZ(
         index,
         rock.x + x * relief * rock.radius,
@@ -136,6 +132,8 @@ export const createLunarTerrain = (
   const positions = geometry.getAttribute('position');
   const uv = geometry.getAttribute('uv');
   const shade = new Float32Array(positions.count);
+  const normals = new Float32Array(positions.count * 3);
+  const normal = new Vector3();
   const rocks = createRocks(gpuTier);
   const light = new Vector3(...SPACE_KEY_LIGHT)
     .applyQuaternion(createSpaceOrigin().quaternion.invert())
@@ -154,13 +152,22 @@ export const createLunarTerrain = (
     const z = 4 - distance;
     const y = terrainHeight(x, z);
     positions.setXYZ(index, x, y, z);
+    // REASON: sample the smooth height field directly so wide perspective cells do not turn crater lighting into visible facets.
+    normal
+      .set(
+        terrainHeight(x - 0.12, z) - terrainHeight(x + 0.12, z),
+        0.24,
+        terrainHeight(x, z - 0.12) - terrainHeight(x, z + 0.12),
+      )
+      .normalize()
+      .toArray(normals, index * 3);
     let occlusion = 0;
     // REASON: static terrain can bake its sunlight visibility once instead of adding a per-frame shadow pass.
     for (const step of [0.4, 0.9, 1.8, 3.5, 7, 14]) {
       const obstruction = terrainHeight(x + light.x * step, z + light.z * step);
       occlusion = Math.max(occlusion, (obstruction - y) / step - light.y);
     }
-    shade[index] = 1 - Math.min(1, occlusion * 8);
+    shade[index] = 1 / (1 + occlusion * 3);
     for (const rock of rocks) {
       const dx = rock.x - x;
       const dy = (rock.y - y) / 0.7;
@@ -168,14 +175,18 @@ export const createLunarTerrain = (
       const along = dx * rockLight.x + dy * rockLight.y + dz * rockLight.z;
       const clearance = dx * dx + dy * dy + dz * dz - along * along;
       if (along > 0 && clearance < rock.radius * rock.radius) {
-        shade[index] = 0;
+        const coverage = Math.max(
+          0,
+          1 - clearance / (rock.radius * rock.radius),
+        );
+        shade[index] *= 1 - Math.min(1, coverage) * 0.45;
       }
     }
   }
 
   geometry.name = 'lunar-crater-terrain';
   geometry.setAttribute('aSunVisibility', new Float32BufferAttribute(shade, 1));
-  geometry.computeVertexNormals();
+  geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
   geometry.computeBoundingSphere();
   return { ground: geometry, rocks: createRockGeometry(rocks) };
 };

@@ -1,10 +1,11 @@
 'use client';
 
-import { useLoader } from '@react-three/fiber';
+import { useLoader, useThree } from '@react-three/fiber';
 import { useEffect, useState } from 'react';
 import { Color, RepeatWrapping, SRGBColorSpace, TextureLoader } from 'three';
 
 import type { DivePalette } from './dive-palette';
+import { createSpaceOrigin } from './space-origin';
 import { createLunarTerrain, LUNAR_SURFACE_TILT } from './lunar-terrain';
 import type { LunarView } from './lunar-terrain';
 import {
@@ -15,14 +16,13 @@ import {
 type LunarSurfaceParams = {
   palette: DivePalette;
   gpuTier: number;
+};
+
+type LunarTerrainParams = LunarSurfaceParams & {
   view: LunarView;
 };
 
-export default function LunarSurface({
-  palette,
-  gpuTier,
-  view,
-}: LunarSurfaceParams) {
+const LunarTerrain = ({ palette, gpuTier, view }: LunarTerrainParams) => {
   const regolith = useLoader(TextureLoader, '/textures/lunar-regolith.jpg');
   const [terrain] = useState(() => createLunarTerrain(gpuTier, view));
   const [uniforms] = useState(() => ({
@@ -81,6 +81,24 @@ export default function LunarSurface({
           />
         </mesh>
       ))}
+    </group>
+  );
+};
+
+export default function LunarSurface({ palette, gpuTier }: LunarSurfaceParams) {
+  const view: LunarView = useThree(({ size }) =>
+    size.width < 768 ? 'compact' : 'wide',
+  );
+  const [origin] = useState(createSpaceOrigin);
+
+  return (
+    <group position={origin.position} quaternion={origin.quaternion}>
+      <LunarTerrain
+        key={view}
+        palette={palette}
+        gpuTier={gpuTier}
+        view={view}
+      />
     </group>
   );
 }

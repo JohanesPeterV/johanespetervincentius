@@ -8,7 +8,7 @@ import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import DiveAtmosphere from './dive-atmosphere';
 import CosmicEyes from './cosmic-eyes';
-import HeroCelestials from './hero-celestials';
+import LunarSurface from './lunar-surface';
 import AsteroidField from './asteroid-field';
 import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
@@ -64,11 +64,7 @@ export default function SpaceWorld({
           gpuTier={gpuTier}
           motionMode={motionMode}
         />
-        <HeroCelestials
-          palette={palette}
-          motionMode={motionMode}
-          gpuTier={gpuTier}
-        />
+        <LunarSurface palette={palette} gpuTier={gpuTier} />
         <AsteroidField
           reality="watchers"
           palette={palette}
