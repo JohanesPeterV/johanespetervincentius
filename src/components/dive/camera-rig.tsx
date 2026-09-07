@@ -85,6 +85,7 @@ export default function CameraRig({
   const fovRef = useRef(BASE_FOV);
   const rollRef = useRef(0);
   const overlayProgressRef = useRef(Number.NaN);
+  const overlayMotionModeRef = useRef(motionMode);
   const overlaySizeRef = useRef(new Vector2());
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
@@ -241,12 +242,14 @@ export default function CameraRig({
     // frozen, so their visible sections still need overlay writes every frame
     if (
       progress !== overlayProgressRef.current ||
+      motionMode !== overlayMotionModeRef.current ||
       sizeChanged ||
       (handoffRef.current.progress > 0 && handoffRef.current.progress < 1) ||
       techVisible ||
       workVisible
     ) {
       overlayProgressRef.current = progress;
+      overlayMotionModeRef.current = motionMode;
       overlaySizeRef.current.set(size.width, size.height);
       applyOverlay(overlayRef.current, {
         descent: descentFrame,

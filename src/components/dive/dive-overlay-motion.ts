@@ -9,6 +9,7 @@ import {
   sectionMotion,
   techSectionOpacity,
   sectionJumpDelta,
+  worldLoopClosure,
 } from './descent';
 import type { MotionMode } from './descent';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
@@ -206,7 +207,14 @@ export const applyOverlay = (
   });
   applyGalaxyLabels(nodes, frame);
   if (nodes.veil) {
-    nodes.veil.style.opacity = String(frame.descent.veil);
+    let opacity = frame.descent.veil;
+    if (frame.progress < DIVE_START || frame.progress > WORK_STONE.center) {
+      opacity = 0;
+      if (frame.motionMode === 'reduced') {
+        opacity = worldLoopClosure(frame.progress);
+      }
+    }
+    nodes.veil.style.opacity = String(opacity);
     nodes.veil.style.backgroundColor = `rgb(${Math.round(
       frame.descent.veilColor[0] * 255,
     )}, ${Math.round(frame.descent.veilColor[1] * 255)}, ${Math.round(

@@ -293,6 +293,22 @@ export const stoneSectionOpacity = (
 };
 
 const TECH_FADE_SPAN = 0.18;
+const HERO_FADE_SPAN = 0.54;
+const LOOP_CLOSED_HALF = 0.06;
+
+export const worldLoopClosure = (progress: number): number => {
+  const wrapped = wrapProgress(progress);
+  // REASON: cross realities only after Tech HTML leaves and before hero HTML
+  // returns. The closed interval covers the camera reset in either direction.
+  const closing = smootherstep(
+    TECH_STONE.center + TECH_DWELL_HALF + TECH_FADE_SPAN,
+    DIVE_LENGTH - LOOP_CLOSED_HALF,
+    wrapped,
+  );
+  const opening =
+    1 - smootherstep(LOOP_CLOSED_HALF, DIVE_START - HERO_FADE_SPAN, wrapped);
+  return Math.max(closing, opening);
+};
 
 export const techSectionOpacity = (progress: number): number => {
   const distance = Math.abs(progress - TECH_STONE.center);
@@ -319,7 +335,7 @@ export const sectionMotion = (
   const delta = progress - section.center;
   const distance = Math.abs(delta);
   return {
-    opacity: 1 - smootherstep(0.1, 0.54, distance),
+    opacity: 1 - smootherstep(0.1, HERO_FADE_SPAN, distance),
     shift: -delta * 240,
   };
 };

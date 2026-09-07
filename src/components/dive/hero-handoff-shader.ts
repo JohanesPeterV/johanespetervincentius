@@ -4,6 +4,7 @@ uniform sampler2D uHeroContent;
 uniform sampler2D uWorkContent;
 uniform vec4 uWorkRect;
 uniform float uProgress;
+uniform float uLoopClosure;
 uniform float uActive;
 uniform float uAspect;
 uniform vec3 uInk;
@@ -49,11 +50,13 @@ vec3 handoffTo(vec2 uv) {
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-  if (uActive < 0.5) {
+  if (uActive < 0.5 && uLoopClosure <= 0.0) {
     outputColor = inputColor;
     return;
   }
 
+  bool looping = uActive < 0.5;
+  float progress = looping ? uLoopClosure : uProgress;
   vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
   bool lightSurface = dot(uPaper, luminance) > dot(uInk, luminance);
   // REASON: both modes share the same etched field, zoom, and reveal timing.
@@ -64,14 +67,14 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float fine = handoffNoise(p * 110.0 + medium * 3.0);
   float field = uv.y + (broad - 0.5) * 0.22 + (medium - 0.5) * 0.075
               + (fine - 0.5) * 0.018 + sin(uv.x * 5.0) * 0.055;
-  float edge = uProgress * 1.5 - 0.25 - field;
+  float edge = progress * 1.5 - 0.25 - field;
   float proximity = 1.0 - smoothstep(0.0, 0.2, abs(edge));
-  float envelope = smoothstep(0.0, 0.06, uProgress) * (1.0 - smoothstep(0.94, 1.0, uProgress));
+  float envelope = smoothstep(0.0, 0.06, progress) * (1.0 - smoothstep(0.94, 1.0, progress));
   vec2 refraction = vec2(medium - 0.5, fine - 0.5) * proximity * 0.0025 * envelope;
-  vec2 fromUv = (uv - 0.5) / (1.0 + uProgress * 0.045) + 0.5 + refraction;
-  vec2 toUv = (uv - 0.5) / (1.0 + (1.0 - uProgress) * 0.055) + 0.5 - refraction;
-  vec3 from = handoffFrom(fromUv);
-  vec3 next = handoffTo(toUv);
+  vec2 fromUv = (uv - 0.5) / (1.0 + progress * 0.045) + 0.5 + refraction;
+  vec2 toUv = (uv - 0.5) / (1.0 + (1.0 - progress) * 0.055) + 0.5 - refraction;
+  vec3 from = looping ? texture2D(inputBuffer, fromUv).rgb : handoffFrom(fromUv);
+  vec3 next = looping ? uPaper : handoffTo(toUv);
 
   float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);
@@ -90,7 +93,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   if (lightSurface) {
     float fringe = exp(-abs(edge + 0.012) * 240.0);
     float sheen = exp(-abs(edge) * 65.0);
-    float glint = pow(0.5 + 0.5 * sin(uv.x * 13.0 + medium * 2.0 - uProgress * 8.0), 8.0);
+    float glint = pow(0.5 + 0.5 * sin(uv.x * 13.0 + medium * 2.0 - progress * 8.0), 8.0);
     vec3 edgeColor = mix(uPrism, uPaper, 0.3 + medium * 0.25);
     color = mix(color, edgeColor, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
     color += uPaper * (rim * 0.22 + fringe * 0.06 + sheen * glint * 0.28) * envelope;
