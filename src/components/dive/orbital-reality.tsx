@@ -55,6 +55,9 @@ export default function OrbitalReality({
     uAccent: { value: new Color(palette.accent) },
     uHighlight: { value: new Color(palette.highlight) },
     uSunlight: { value: new Color(palette.sunlight) },
+    uLitInk: { value: new Color(palette.litInk) },
+    uShadowInk: { value: new Color(palette.shadowInk) },
+    uLuminous: { value: Number(palette.mode === 'dark') },
     uTime: { value: 0 },
     uPlanetRadius: { value: PLANET_RADIUS },
     uRingBounds: { value: new Vector2(...RING_BOUNDS) },
@@ -72,7 +75,18 @@ export default function OrbitalReality({
     uniforms.uAccent.value.set(palette.accent);
     uniforms.uHighlight.value.set(palette.highlight);
     uniforms.uSunlight.value.set(palette.sunlight);
-  }, [palette.accent, palette.highlight, palette.sunlight, uniforms]);
+    uniforms.uLitInk.value.set(palette.litInk);
+    uniforms.uShadowInk.value.set(palette.shadowInk);
+    uniforms.uLuminous.value = Number(palette.mode === 'dark');
+  }, [
+    palette.accent,
+    palette.highlight,
+    palette.litInk,
+    palette.mode,
+    palette.shadowInk,
+    palette.sunlight,
+    uniforms,
+  ]);
 
   useFrame(({ camera, size }, delta) => {
     const group = groupRef.current;

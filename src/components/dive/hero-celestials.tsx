@@ -45,6 +45,9 @@ export default function HeroCelestials({
     uAccent: { value: new Color(palette.accent) },
     uHighlight: { value: new Color(palette.highlight) },
     uSunlight: { value: new Color(palette.sunlight) },
+    uLitInk: { value: new Color(palette.litInk) },
+    uShadowInk: { value: new Color(palette.shadowInk) },
+    uLuminous: { value: Number(palette.mode === 'dark') },
     uAlbedo: { value: albedo },
     bumpMap: { value: heightMap },
     bumpScale: { value: 1.2 },
@@ -66,7 +69,18 @@ export default function HeroCelestials({
     uniforms.uAccent.value.set(palette.accent);
     uniforms.uHighlight.value.set(palette.highlight);
     uniforms.uSunlight.value.set(palette.sunlight);
-  }, [palette.accent, palette.highlight, palette.sunlight, uniforms]);
+    uniforms.uLitInk.value.set(palette.litInk);
+    uniforms.uShadowInk.value.set(palette.shadowInk);
+    uniforms.uLuminous.value = Number(palette.mode === 'dark');
+  }, [
+    palette.accent,
+    palette.highlight,
+    palette.litInk,
+    palette.mode,
+    palette.shadowInk,
+    palette.sunlight,
+    uniforms,
+  ]);
 
   useFrame(({ size }, delta) => {
     if (motionMode === 'full') {

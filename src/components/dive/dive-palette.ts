@@ -16,11 +16,15 @@ export type DivePalette = {
   fogDensity: number;
   glow: string;
   highlight: string;
+  litInk: string;
   metal: string;
-  shadow: string;
+  shadowInk: string;
   sunlight: string;
   surface: string;
 };
+
+const luminance = (color: Color): number =>
+  color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
 
 const toRgbColor = (value: string): RgbColor => {
   const color = new Color(value).convertLinearToSRGB();
@@ -34,10 +38,14 @@ export const getDivePalette = (
   const secondary = new Color(theme.secondaryColor);
   const background = new Color(theme.backgroundColor);
   const foreground = new Color(theme.textColor);
-  // REASON: lit surfaces keep white highlights and black shadows in both modes;
-  // only marks and text flip with the theme.
-  const [sunlight, shadow] =
-    theme.mode === 'dark' ? [foreground, background] : [background, foreground];
+  // REASON: in the dark, surfaces shade from white light to black shadow. On
+  // paper a print has no grey: highlights are paper and shading is remapped to
+  // the two authored colours, the lighter one lit and the darker one in shadow.
+  const sunlight = theme.mode === 'dark' ? foreground : background;
+  const [litInk, shadowInk] =
+    theme.mode === 'dark'
+      ? [foreground, background]
+      : [accent, secondary].sort((a, b) => luminance(b) - luminance(a));
   return {
     mode: theme.mode,
     accent: accent.getStyle(),
@@ -48,8 +56,9 @@ export const getDivePalette = (
     fogDensity: 0,
     glow: secondary.getStyle(),
     highlight: secondary.getStyle(),
+    litInk: litInk.getStyle(),
     metal: foreground.clone().lerp(background, 0.28).getStyle(),
-    shadow: shadow.getStyle(),
+    shadowInk: shadowInk.getStyle(),
     sunlight: sunlight.getStyle(),
     surface: background.clone().lerp(foreground, 0.025).getStyle(),
   };

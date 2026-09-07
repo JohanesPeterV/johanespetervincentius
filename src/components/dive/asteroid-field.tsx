@@ -131,7 +131,10 @@ export default function AsteroidField({
     field.asteroids.forEach((asteroid, index) => {
       color.copy(graphite);
       const pigment = asteroid.tint < 0.5 ? accent : highlight;
-      color.lerp(pigment, 0.08 + asteroid.tint * 0.18);
+      color.lerp(
+        pigment,
+        palette.mode === 'light' ? 0.9 : 0.08 + asteroid.tint * 0.18,
+      );
       mesh.setColorAt(index, color);
     });
     if (mesh.instanceColor) {

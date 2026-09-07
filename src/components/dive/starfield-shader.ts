@@ -113,7 +113,7 @@ export const starfieldVertex = `
     vAlpha = (0.30 + aSeed.y * 0.62) * min(${STARFIELD_REFERENCE_DISTANCE.toFixed(1)} / depth, 1.0) * twinkle
       * nearFade;
     vTint = 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283);
-    vColorStrength = appearance.z * mix(0.28, 1.0, uLuminous);
+    vColorStrength = mix(1.0, appearance.z, uLuminous);
     vHalo = appearance.y * twinkle;
   }
 `;
@@ -138,7 +138,7 @@ export const starfieldFragment = `
     float specular = pow(max(dot(reflect(-light, normal), normalize(-vViewPosition)), 0.0), 24.0);
     vec3 pigment = mix(uAccent, uHighlight, vTint);
     vec3 color = mix(uStarlight, pigment, vColorStrength);
-    color *= 0.28 + diffuse * 0.62 + uLuminous * 0.1;
+    color *= mix(1.0, 0.38 + diffuse * 0.62, uLuminous);
     color += uStarlight * specular * vGlow * uLuminous * 0.3;
     gl_FragColor = vec4(mix(uBackground, color, vAlpha), 1.0);
     #include <colorspace_fragment>

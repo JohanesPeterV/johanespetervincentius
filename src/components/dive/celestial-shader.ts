@@ -1,6 +1,20 @@
 import { celestialNoise } from './celestial-noise';
 import { SPACE_KEY_LIGHT_GLSL } from './space-lighting';
 
+export const printInkGlsl = `
+  uniform float uLuminous;
+  uniform vec3 uSunlight;
+  uniform vec3 uLitInk;
+  uniform vec3 uShadowInk;
+  // REASON: a print has no grey. Shading becomes the two inks with paper highlights.
+  vec3 printInk(vec3 color) {
+    float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    vec3 ink = mix(uShadowInk, uLitInk, smoothstep(0.0, 0.35, luma));
+    ink = mix(ink, uSunlight, smoothstep(0.6, 1.4, luma));
+    return mix(ink, color, uLuminous);
+  }
+`;
+
 export const celestialVertex = `
   varying vec3 vPosition;
   varying vec3 vNormal;
@@ -22,6 +36,7 @@ export const moonFragment = `
   varying vec3 vNormal;
   varying vec3 vViewPosition;
   varying vec2 vUv;
+  ${printInkGlsl}
   #define USE_BUMPMAP
   #define vBumpMapUv vUv
   #include <bumpmap_pars_fragment>
@@ -31,7 +46,7 @@ export const moonFragment = `
     float sunlight = max(dot(normal, ${SPACE_KEY_LIGHT_GLSL}), 0.0);
     vec3 color = albedo * (0.012 + pow(sunlight, 0.8) * 1.65);
     color += albedo * uAccent * (1.0 - sunlight) * 0.012;
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(printInk(color), 1.0);
     #include <colorspace_fragment>
   }
 `;
@@ -39,10 +54,10 @@ export const moonFragment = `
 export const frontierPlanetFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;
-  uniform vec3 uSunlight;
   varying vec3 vPosition;
   varying vec3 vNormal;
   varying vec3 vViewPosition;
+  ${printInkGlsl}
   ${celestialNoise}
   float terrain(vec3 p) {
     float value = 0.0;
@@ -74,7 +89,7 @@ export const frontierPlanetFragment = `
     color += uSunlight * glint * (1.0 - land) * (1.0 - cloudCover) * 0.22;
     float horizon = pow(1.0 - max(dot(normal, view), 0.0), 4.0);
     color += mix(uAccent, uSunlight, 0.3) * horizon * smoothstep(-0.12, 0.45, dot(normal, light)) * 0.55;
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(printInk(color), 1.0);
     #include <colorspace_fragment>
   }
 `;

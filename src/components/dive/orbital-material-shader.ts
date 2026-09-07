@@ -1,15 +1,16 @@
 import { celestialNoise } from './celestial-noise';
+import { printInkGlsl } from './celestial-shader';
 
 const ORBITAL_LIGHT = 'normalize(vec3(-0.62, 0.42, 0.67))';
 
 export const gasGiantFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;
-  uniform vec3 uSunlight;
   uniform float uTime;
   varying vec3 vPosition;
   varying vec3 vNormal;
   varying vec3 vViewPosition;
+  ${printInkGlsl}
   ${celestialNoise}
   float storm(vec2 point, vec2 centre, vec2 extent) {
     vec2 local = (point - centre) / extent;
@@ -39,7 +40,7 @@ export const gasGiantFragment = `
     vec3 color = pigment * (0.009 + day * (0.12 + diffuse * 0.62));
     float atmosphere = pow(1.0 - max(dot(normal, normalize(vViewPosition)), 0.0), 4.5);
     color += mix(uAccent, uSunlight, 0.42) * atmosphere * day * 0.085;
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(printInk(color), 1.0);
     #include <colorspace_fragment>
   }
 `;
@@ -67,7 +68,6 @@ export const orbitalRingVertex = `
 export const particulateRingFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;
-  uniform vec3 uSunlight;
   uniform float uPlanetRadius;
   uniform vec2 uRingBounds;
   varying vec3 vPosition;
@@ -75,6 +75,7 @@ export const particulateRingFragment = `
   varying vec3 vViewPosition;
   varying vec3 vPlanetPosition;
   varying vec3 vPlanetLight;
+  ${printInkGlsl}
   ${celestialNoise}
   void main() {
     float radius = (length(vPosition.xy) - uRingBounds.x) / (uRingBounds.y - uRingBounds.x);
@@ -99,7 +100,7 @@ export const particulateRingFragment = `
     float viewingAngle = abs(dot(normalize(vNormal), normalize(vViewPosition)));
     float opticalDepth = density / max(viewingAngle, 0.3);
     float alpha = 1.0 - exp(-opticalDepth * 1.6);
-    gl_FragColor = vec4(color, alpha);
+    gl_FragColor = vec4(printInk(color), alpha);
     #include <colorspace_fragment>
   }
 `;

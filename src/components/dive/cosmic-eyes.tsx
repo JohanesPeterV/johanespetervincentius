@@ -97,12 +97,12 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       eye.uOutline.value.set(primaryFill ? palette.highlight : palette.accent);
       eye.uColor.value.set(primaryFill ? palette.accent : palette.highlight);
       eye.uLight.value.set(palette.sunlight);
-      eye.uDark.value.set(palette.shadow).lerp(eye.uLight.value, 0.012);
+      eye.uDark.value.set(palette.shadowInk).lerp(eye.uLight.value, 0.012);
     });
   }, [
     palette.accent,
     palette.highlight,
-    palette.shadow,
+    palette.shadowInk,
     palette.sunlight,
     uniforms,
   ]);
