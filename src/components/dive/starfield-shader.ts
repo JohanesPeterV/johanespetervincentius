@@ -110,7 +110,7 @@ export const starfieldVertex = `
       gl_Position.xy += (distortPosition(screen) - screen)
         / vec2(uAspect, 1.0) * gl_Position.w;
     }
-    // REASON: stars retain spatial perspective and facets, but sky depth keeps them behind the lunar ground and planets.
+    // REASON: stars retain spatial perspective and facets while sky depth keeps them behind foreground objects.
     gl_Position.z = mix(gl_Position.w * 0.99995, gl_Position.z, 0.001);
     float glowAlpha = (0.30 + aSeed.y * 0.62) * min(${STARFIELD_REFERENCE_DISTANCE.toFixed(1)} / depth, 1.0) * twinkle
       * nearFade;

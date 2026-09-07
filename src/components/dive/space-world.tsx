@@ -8,7 +8,6 @@ import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import DiveAtmosphere from './dive-atmosphere';
 import CosmicEyes from './cosmic-eyes';
-import LunarSurface from './lunar-surface';
 import AsteroidField from './asteroid-field';
 import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
@@ -64,7 +63,6 @@ export default function SpaceWorld({
           gpuTier={gpuTier}
           motionMode={motionMode}
         />
-        <LunarSurface palette={palette} gpuTier={gpuTier} />
         <AsteroidField
           reality="watchers"
           palette={palette}
