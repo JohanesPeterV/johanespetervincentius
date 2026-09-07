@@ -15,7 +15,7 @@ type DiveAtmosphereParams = {
   motionMode: MotionMode;
 };
 
-const STAR_POSITIONS = buildStarField(650);
+const STAR_POSITIONS = buildStarField(900);
 const ORBITAL_POSITIONS = buildOrbitalField(1800);
 
 const starVertex = `
@@ -23,18 +23,21 @@ const starVertex = `
   uniform float uTime;
   uniform float uOrbital;
   varying float vAlpha;
-  varying float vSparkle;
+  varying float vGlow;
   varying float vTint;
   void main() {
     vec4 view = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * view;
     float seed = fract(sin(position.x * 12.9898 + position.z) * 43758.5453);
-    vSparkle = step(0.955, seed) * (1.0 - uOrbital);
-    float size = mix(1.2 + seed * 2.0, 16.0 + seed * 12.0, vSparkle);
-    size = mix(size, 0.85 + seed * 1.2, uOrbital);
-    gl_PointSize = size * uPixelRatio;
-    vAlpha = (0.5 + seed * 0.5) * (0.9 + 0.1 * sin(uTime * 0.6 + seed * 20.0));
-    vTint = seed;
+    float depth = clamp(62.0 / max(24.0, -view.z), 0.45, 1.65);
+    vGlow = pow(seed, 14.0);
+    float size = mix(2.2, 11.0, vGlow);
+    size *= mix(1.0, 0.7, uOrbital);
+    gl_PointSize = max(1.0, size * depth) * uPixelRatio;
+    float phase = fract(seed * 31.7);
+    float twinkle = 0.87 + 0.13 * sin(uTime * (0.4 + phase * 0.6) + phase * 40.0);
+    vAlpha = (0.24 + seed * 0.66) * min(depth, 1.0) * twinkle;
+    vTint = phase;
   }
 `;
 
@@ -44,17 +47,18 @@ const starFragment = `
   uniform vec3 uHighlight;
   uniform float uOrbital;
   varying float vAlpha;
-  varying float vSparkle;
+  varying float vGlow;
   varying float vTint;
   void main() {
-    vec2 p = abs(gl_PointCoord - 0.5);
-    float point = 1.0 - smoothstep(0.25, 0.48, length(p));
-    float rays = min(p.x / 0.055 + p.y / 0.49, p.y / 0.055 + p.x / 0.49);
-    float sparkle = 1.0 - smoothstep(0.85, 1.05, rays);
-    float core = 1.0 - smoothstep(0.025, 0.09, length(p));
-    float alpha = mix(point, max(sparkle, core), vSparkle) * vAlpha;
+    float radius = length(gl_PointCoord - 0.5);
+    float coreRadius = mix(0.24, 0.105, vGlow);
+    float aa = max(fwidth(radius) * 0.5, 0.015);
+    float core = 1.0 - smoothstep(coreRadius - aa, coreRadius + aa, radius);
+    float halo = exp(-radius * radius * 22.0) * (1.0 - smoothstep(0.35, 0.5, radius));
+    float alpha = (core + halo * vGlow * 0.38) * vAlpha;
     vec3 dust = mix(uAccent, uHighlight, vTint);
-    gl_FragColor = vec4(mix(uStarlight, dust, uOrbital), alpha);
+    vec3 starlight = mix(uStarlight, dust, 0.12 + vTint * 0.18);
+    gl_FragColor = vec4(mix(starlight, dust, uOrbital), min(alpha, 1.0));
     #include <colorspace_fragment>
   }
 `;

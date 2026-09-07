@@ -2,14 +2,16 @@
 
 `FRONTEND-CODE-STANDARDS.md` owns implementation rules. This file owns product and visual design taste for the portfolio.
 
-The portfolio has a bold, graphic space identity: black voids, crisp stars and four-point sparkles, saturated electric accents, and weightless objects. The reference image sets the visual direction; its eye motif is a rare accent, not a repeated theme. Prioritize visual character and contrast over soft, comfortable dashboard styling. Content remains readable and interactive within that world.
+The portfolio has a bold, graphic space identity: black voids, stars with crisp luminous cores, saturated electric accents, and weightless objects. The reference image sets the visual direction; its eye motif is a rare accent, not a repeated theme. Prioritize visual character and contrast over soft, comfortable dashboard styling. Content remains readable and interactive within that world.
 
 The hero and the later chapters inhabit two distinct realities, owned by separate scene groups in `SpaceWorld`:
 
-- World 1: open black space, sparse white stars and sparkles, with only a few small eye glyphs at the periphery. Coloured disks emerge from the centre, expand outward, and continuously recycle inside a fixed pointed almond. Use flat disk colours without glossy catchlights, blinking lids, or character-like gaze; keep the space dominant.
+- World 1: open black space, scattered white and subtly tinted stars, with only a few small eye glyphs at the periphery. Coloured disks emerge from the centre, expand outward, and continuously recycle inside a fixed pointed almond. Use flat disk colours without glossy catchlights, blinking lids, or character-like gaze; keep the space dominant.
 - World 2: a large cropped ringed planet, inclined orbital paths, faceted satellites, and a dense diagonal belt of coloured stellar dust. Eye glyphs belong exclusively to world 1.
 
 Preserve the etched crossing in both directions, including the return loop. The reveal must expose a different composition, not carry the same decoration across a content change.
+
+Use the [Higgsfield Astra starfield](https://higgsfield.ai/gpt-astra) as a reference for the hierarchy of light: many dim pinpoints, fewer visible dots, and rare bright cores with tight circular halos. Size and brightness should convey depth, with restrained independent twinkling. Keep halos local to stars and the surrounding void black.
 
 ## Reuse The System
 
