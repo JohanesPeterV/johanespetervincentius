@@ -92,24 +92,6 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
       data-snapshot-ready="true"
       className="pointer-events-none flex max-h-[calc(100svh-10rem)] w-full flex-col"
     >
-      <div
-        role="group"
-        aria-label="Profile views"
-        className="pointer-events-auto mx-auto flex w-fit shrink-0 items-center gap-1"
-      >
-        {['Full profile', 'Quick intro'].map((label, index) => (
-          <button
-            key={label}
-            type="button"
-            aria-pressed={selectedCard === index}
-            aria-controls={`profile-view-${index}`}
-            onClick={() => api?.scrollTo(index)}
-            className="choice-control appearance-mode min-h-11 px-4"
-          >
-            {label}
-          </button>
-        ))}
-      </div>
       <Carousel
         setApi={setApi}
         opts={{
@@ -124,7 +106,6 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
       >
         <CarouselContent className="ml-0">
           <CarouselItem
-            id="profile-view-0"
             aria-label="Original card, 1 of 2"
             aria-hidden={selectedCard !== 0}
             inert={selectedCard !== 0}
@@ -133,7 +114,6 @@ export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
             <ClassicCard />
           </CarouselItem>
           <CarouselItem
-            id="profile-view-1"
             aria-label="Minimal card, 2 of 2"
             aria-hidden={selectedCard !== 1}
             inert={selectedCard !== 1}
