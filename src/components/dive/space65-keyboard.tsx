@@ -3,6 +3,7 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import {
   AnimationMixer,
   Box3,
@@ -22,29 +23,43 @@ import type { DivePalette } from './dive-palette';
 type Space65KeyboardParams = {
   palette: DivePalette;
   motionMode: MotionMode;
-  chapter: number;
+  chapterRef: RefObject<number>;
 };
 
 export const SPACE65_MODEL_URL = '/models/space65-pyga-black.glb';
 
-const CHAPTER_POSES: [number, number, number][] = [
-  [0.9, -0.2, -0.12],
-  [1.08, 0.26, 0.06],
-  [0.73, -0.38, -0.05],
-  [1.22, 0.08, 0.1],
+// REASON: Smilie hero, TableLink sweep, Farmio Enter-side close-up and BINUS
+// overhead share one track; scale reserves stage width for rotated corners.
+const CHAPTER_POSES = [
+  {
+    rotation: new Quaternion().setFromEuler(new Euler(0.96, -0.26, -0.12)),
+    position: new Vector3(-0.02, 0, 0),
+    scale: 0.86,
+  },
+  {
+    rotation: new Quaternion().setFromEuler(new Euler(1.08, 0.42, 0.06)),
+    position: new Vector3(0.09, 0.03, -0.04),
+    scale: 0.84,
+  },
+  {
+    rotation: new Quaternion().setFromEuler(new Euler(0.65, -0.78, -0.08)),
+    position: new Vector3(-0.03, -0.03, 0.06),
+    scale: 0.96,
+  },
+  {
+    rotation: new Quaternion().setFromEuler(new Euler(1.43, 0.02, 0)),
+    position: new Vector3(0, 0.04, 0),
+    scale: 0.88,
+  },
 ];
 
 export default function Space65Keyboard({
   palette,
   motionMode,
-  chapter,
+  chapterRef,
 }: Space65KeyboardParams) {
   const { scene, animations } = useGLTF(SPACE65_MODEL_URL);
   const groupRef = useRef<Group>(null);
-  const pose =
-    CHAPTER_POSES[
-      MathUtils.clamp(Math.trunc(chapter), 0, CHAPTER_POSES.length - 1)
-    ];
   const [keyboard] = useState(() => {
     const typing = animations.find((clip) => clip.name === 'Typing');
     if (!typing) {
@@ -95,9 +110,6 @@ export default function Space65Keyboard({
       mixer: new AnimationMixer(object),
       typing,
       scale: 3.3 / width,
-      elapsed: 0,
-      poseEuler: new Euler(...pose),
-      targetRotation: new Quaternion(),
     };
   });
 
@@ -145,33 +157,28 @@ export default function Space65Keyboard({
     if (!group) {
       return;
     }
-    const step = Math.min(delta, 0.05);
     if (motionMode === 'full') {
-      keyboard.elapsed += step;
-      keyboard.mixer.update(step);
-    } else {
-      keyboard.elapsed = 0;
+      keyboard.mixer.update(Math.min(delta, 0.05));
     }
-    const phase = keyboard.elapsed * 0.45;
-    keyboard.poseEuler.set(
-      pose[0] + Math.sin(phase) * 0.018,
-      pose[1] + Math.sin(phase * 0.7) * 0.025,
-      pose[2] + Math.sin(phase * 0.6) * 0.008,
+    const progress = MathUtils.clamp(
+      chapterRef.current,
+      0,
+      CHAPTER_POSES.length - 1,
     );
-    keyboard.targetRotation.setFromEuler(keyboard.poseEuler);
-    if (motionMode === 'reduced') {
-      group.quaternion.copy(keyboard.targetRotation);
-    } else {
-      group.quaternion.slerp(
-        keyboard.targetRotation,
-        1 - Math.exp(-3.5 * step),
-      );
-    }
-    group.position.y = Math.sin(phase) * 0.025;
+    const chapter = motionMode === 'reduced' ? Math.round(progress) : progress;
+    const index = Math.floor(chapter);
+    const from = CHAPTER_POSES[index];
+    const to = CHAPTER_POSES[Math.min(index + 1, CHAPTER_POSES.length - 1)];
+    // REASON: easing is spatial, never time-based, so reversing a drag retraces
+    // the same shot immediately; reduced motion samples only a resting pose.
+    const blend = MathUtils.smoothstep(chapter - index, 0, 1);
+    group.quaternion.slerpQuaternions(from.rotation, to.rotation, blend);
+    group.position.lerpVectors(from.position, to.position, blend);
+    group.scale.setScalar(MathUtils.lerp(from.scale, to.scale, blend));
   });
 
   return (
-    <group ref={groupRef} rotation={keyboard.poseEuler} dispose={null}>
+    <group ref={groupRef} dispose={null}>
       <group scale={keyboard.scale}>
         <primitive object={keyboard.object} />
       </group>

@@ -2,15 +2,20 @@
 
 import useEmblaCarousel from 'embla-carousel-react';
 import { useAtom } from 'jotai';
-import { ArrowDown, ArrowLeft, ArrowRight, Plus } from 'lucide-react';
+import { ArrowDown, ArrowLeft } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 import { WORK_EXPERIENCES } from '@/app/_components/work-experience/work-experiences';
 import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { advanceWorkGesture, workChapterAtom } from './work-story';
+import {
+  advanceWorkGesture,
+  workChapterAtom,
+  workStoryPosition,
+} from './work-story';
 import { normalizeWheelDelta } from './dive-input';
 import { WORK_SECTION } from './descent';
+import { WorkChapter } from './work-chapter';
 
 type DiveWorkExperienceProps = {
   sectionRef: (element: HTMLDivElement | null) => void;
@@ -25,46 +30,82 @@ export const DiveWorkExperience = ({
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const [carouselRef, carousel] = useEmblaCarousel({
     align: 'start',
-    duration: reducedMotion ? 0 : 35,
+    containScroll: false,
+    duration: reducedMotion ? 0 : 30,
     watchFocus: false,
-    watchDrag: (_, event) =>
-      !(
-        event.target instanceof Element &&
-        event.target.closest('a, button, summary')
-      ),
   });
   const rootRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef({ distance: 0, lastAt: 0, consumed: false });
 
-  // REASON: Embla owns swipe selection; publish its selected snap to both the
-  // story and 3D scene, and only snapshot the DOM once its motion has settled.
+  // REASON: Embla's continuous position drives the shot, copy and timeline
+  // without React renders per frame; the selected snap owns reading/focus state.
   useEffect(() => {
     if (!carousel) {
       return;
     }
+    const updateShot = (): void => {
+      const progress = Math.max(0, Math.min(1, carousel.scrollProgress()));
+      const position = progress * (WORK_EXPERIENCES.length - 1);
+      workStoryPosition.current = position;
+      rootRef.current?.style.setProperty('--reel-progress', String(progress));
+      rootRef.current?.style.setProperty(
+        '--reel-fill',
+        `${(position / WORK_EXPERIENCES.length) * 100}%`,
+      );
+      rootRef.current?.style.setProperty(
+        '--reel-end',
+        String(Math.max(0, position - (WORK_EXPERIENCES.length - 2))),
+      );
+      carousel.slideNodes().forEach((slide, index) => {
+        const focus = Math.max(0, 1 - Math.abs(position - index));
+        slide.style.setProperty('--shot-focus', String(focus));
+        slide.style.setProperty(
+          '--shot-preview',
+          String(Math.max(0, 1 - focus * 2)),
+        );
+      });
+    };
     const handleSelect = (): void => {
       const selected = carousel.selectedScrollSnap();
       setChapter(selected);
-      carousel.slideNodes()[selected].scrollTop = 0;
+      if (document.activeElement?.closest('.work-shot')) {
+        rootRef.current
+          ?.querySelector<HTMLButtonElement>(
+            `[aria-controls="work-story-${selected}"]`,
+          )
+          ?.focus({ preventScroll: true });
+      }
+      const copy = carousel
+        .slideNodes()
+        [selected].querySelector('[data-section-scroll]');
+      if (copy instanceof HTMLElement) {
+        copy.scrollTop = 0;
+      }
     };
     const handleScroll = (): void => {
+      updateShot();
       if (rootRef.current) {
-        rootRef.current.dataset.snapshotReady = 'false';
+        rootRef.current.dataset.snapshotReady = String(reducedMotion);
       }
     };
     const handleSettle = (): void => {
+      updateShot();
       if (rootRef.current) {
         rootRef.current.dataset.snapshotReady = 'true';
       }
     };
-    handleSelect();
-    carousel.on('select', handleSelect).on('reInit', handleSelect);
+    const handleInit = (): void => {
+      handleSelect();
+      handleSettle();
+    };
+    handleInit();
+    carousel.on('select', handleSelect).on('reInit', handleInit);
     carousel.on('scroll', handleScroll).on('settle', handleSettle);
     return () => {
-      carousel.off('select', handleSelect).off('reInit', handleSelect);
+      carousel.off('select', handleSelect).off('reInit', handleInit);
       carousel.off('scroll', handleScroll).off('settle', handleSettle);
     };
-  }, [carousel, setChapter]);
+  }, [carousel, reducedMotion, setChapter]);
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
     if (
@@ -125,131 +166,95 @@ export const DiveWorkExperience = ({
           {WORK_SECTION.subtitle}
         </span>
       </header>
-      <div
-        className="my-3 grid grid-cols-4 gap-1 md:my-5"
-        aria-label="Choose an employer"
-      >
-        {WORK_EXPERIENCES.map((job, index) => (
+      <div className="work-reel-stage relative min-h-0 flex-1">
+        <div
+          ref={carouselRef}
+          data-horizontal-gesture
+          className="h-full overflow-hidden"
+        >
+          <div className="flex h-full">
+            {WORK_EXPERIENCES.map((job, index) => (
+              <WorkChapter
+                key={job.company}
+                index={index}
+                chapter={chapter}
+                onSelect={(index) => carousel?.scrollTo(index)}
+              />
+            ))}
+          </div>
+        </div>
+        {chapter === WORK_EXPERIENCES.length - 1 ? (
           <button
             type="button"
-            key={job.company}
-            aria-pressed={chapter === index}
-            aria-controls={`work-story-${index}`}
-            onClick={() => carousel?.scrollTo(index)}
-            className="dive-employer choice-control flex min-h-11 flex-col items-start justify-center gap-0.5 px-2 py-2"
+            className="work-outro-preview work-shot-preview absolute inset-y-0 right-0 flex flex-col items-start text-left"
+            onClick={onContinue}
+            aria-label="Continue to Projects"
           >
-            <span className="work-chapter-number type-meta hidden md:block">
-              0{index + 1}
+            <span className="type-meta mb-8 text-muted-foreground">NEXT</span>
+            <span className="work-preview-company font-display">Projects</span>
+            <span className="work-preview-arrow mt-6 flex items-center justify-center">
+              <ArrowDown size={20} aria-hidden />
             </span>
-            <span className="type-label">{job.company}</span>
           </button>
-        ))}
+        ) : null}
       </div>
-      <div
-        ref={carouselRef}
-        data-horizontal-gesture
-        className="min-h-0 flex-1 overflow-hidden"
-      >
-        <div className="flex h-full">
+      <footer className="work-reel-footer">
+        <nav
+          className="work-timeline relative grid"
+          style={{
+            gridTemplateColumns: `repeat(${WORK_EXPERIENCES.length}, minmax(0, 1fr))`,
+          }}
+          aria-label="Work chapters"
+        >
           {WORK_EXPERIENCES.map((job, index) => (
-            <article
+            <button
               key={job.company}
-              id={`work-story-${index}`}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${index + 1} of ${WORK_EXPERIENCES.length}: ${job.company}`}
-              aria-hidden={chapter !== index}
-              inert={chapter !== index}
-              data-active={chapter === index}
-              data-section-scroll
-              className="dive-work-slide min-w-0 shrink-0 grow-0 basis-full overflow-y-auto overscroll-contain pr-2 scrollbar-thin"
+              type="button"
+              aria-pressed={chapter === index}
+              aria-controls={`work-story-${index}`}
+              onClick={() => carousel?.scrollTo(index)}
+              className="work-timeline-stop relative flex min-h-11 flex-col items-start gap-1 pb-2 pr-2 pt-3 text-left"
             >
-              <p className="type-meta mb-2 text-primary-text">{job.chapter}</p>
-              <h3 className="work-company font-display">{job.company}</h3>
-              {job.positions.map((position) => (
-                <p
-                  key={position.name}
-                  className="type-meta mt-2 text-muted-foreground md:mt-3"
-                >
-                  {position.name}
-                  <br />
-                  {position.workPeriod}
-                </p>
-              ))}
-              <h4 className="work-headline font-display mb-3 mt-4 md:mt-6">
-                {job.headline}
-              </h4>
-              <details className="work-details mt-3 md:mt-5">
-                <summary className="choice-control type-label flex min-h-11 cursor-pointer items-center justify-between gap-3 px-2">
-                  Inside the role <Plus size={16} aria-hidden />
-                </summary>
-                {job.positions.map((position) => (
-                  <p
-                    key={position.name}
-                    className="work-description px-2 py-3 text-muted-foreground"
-                  >
-                    {position.description}
-                  </p>
-                ))}
-                <ul className="mt-3 flex flex-col gap-4 px-2 pb-3">
-                  {job.showcases.map((showcase) => (
-                    <li key={showcase.title}>
-                      <h5 className="type-label mb-1">{showcase.title}</h5>
-                      <p className="work-description text-muted-foreground">
-                        {showcase.description}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            </article>
+              <span className="work-timeline-index type-meta">
+                0{index + 1}
+              </span>
+              <span className="type-label">{job.company}</span>
+            </button>
           ))}
-        </div>
-      </div>
-      <footer className="work-story-footer mt-4 flex flex-col gap-3 pt-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-11 w-11"
-              aria-label="Previous employer"
-              disabled={chapter === 0}
-              onClick={() => carousel?.scrollPrev()}
-            >
-              <ArrowLeft size={17} />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-11 w-11"
-              aria-label="Next employer"
-              disabled={chapter === WORK_EXPERIENCES.length - 1}
-              onClick={() => carousel?.scrollNext()}
-            >
-              <ArrowRight size={17} />
-            </Button>
-            <span
-              className="type-meta ml-1 text-muted-foreground"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              <span aria-hidden>
-                0{chapter + 1} / 0{WORK_EXPERIENCES.length}
-              </span>
-              <span className="sr-only">
-                {WORK_EXPERIENCES[chapter].company}, chapter {chapter + 1} of{' '}
-                {WORK_EXPERIENCES.length}
-              </span>
+        </nav>
+        <div className="work-reel-utilities mt-1 items-center justify-between gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11"
+            aria-label="Previous employer"
+            disabled={chapter === 0}
+            onClick={() => carousel?.scrollPrev()}
+          >
+            <ArrowLeft size={17} />
+          </Button>
+          <span
+            className="work-reel-count type-meta text-muted-foreground"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span aria-hidden>
+              0{chapter + 1} / 0{WORK_EXPERIENCES.length}
             </span>
-          </div>
-          <Button variant="ghost" onClick={onContinue} className="h-11 gap-2">
+            <span className="sr-only">
+              {WORK_EXPERIENCES[chapter].company}, chapter {chapter + 1} of{' '}
+              {WORK_EXPERIENCES.length}
+            </span>
+          </span>
+          <Button
+            variant="link"
+            size="sm"
+            onClick={onContinue}
+            className="h-11 gap-2"
+          >
             Projects <ArrowDown size={15} />
           </Button>
         </div>
-        <p className="work-story-hint type-meta text-muted-foreground">
-          Sideways for roles. Down for the next chapter.
-        </p>
       </footer>
     </div>
   );

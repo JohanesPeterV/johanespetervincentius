@@ -2,7 +2,6 @@
 
 import { Html, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useAtomValue } from 'jotai';
 import { Component, Suspense, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { Group, Vector3 } from 'three';
@@ -12,7 +11,7 @@ import { WORK_STONE, narrativeStoneY } from './descent';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import Space65Keyboard, { SPACE65_MODEL_URL } from './space65-keyboard';
-import { getWorkLayout, workChapterAtom } from './work-story';
+import { getWorkLayout, workStoryPosition } from './work-story';
 import { workSectionOpacity, workOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
@@ -66,7 +65,6 @@ export default function WorkKeyboardScene({
   handoffRef,
   motionMode,
 }: WorkKeyboardSceneProps) {
-  const chapter = useAtomValue(workChapterAtom);
   const groupRef = useRef<Group>(null);
   const statusRef = useRef<HTMLDivElement>(null);
   const [point] = useState(() => new Vector3());
@@ -129,7 +127,7 @@ export default function WorkKeyboardScene({
           <Space65Keyboard
             palette={palette}
             motionMode={motionMode}
-            chapter={chapter}
+            chapterRef={workStoryPosition}
           />
         </Suspense>
       </KeyboardBoundary>

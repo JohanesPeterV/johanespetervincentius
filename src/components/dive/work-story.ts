@@ -17,29 +17,32 @@ type WorkLayout = {
 };
 
 export const workChapterAtom = atom(0);
+export const workStoryPosition = { current: 0 };
 
 export const getWorkLayout = (width: number, height: number): WorkLayout => {
-  if (width < 768) {
-    const top = Math.max(196, height * 0.28);
+  if (width < 768 && height >= width) {
+    const top = Math.max(160, height * 0.28);
     return {
       left: 24,
       top,
       width: width - 48,
       height: height - top - 88,
       modelX: width * 0.5,
-      modelY: Math.min(128, height * 0.18),
+      modelY: Math.min(128, height * 0.17),
       modelWidth: Math.min(width * 0.65, 300),
     };
   }
-  const panelHeight = Math.min(608, height - 160);
+  const topInset = height < 500 ? 64 : 80;
+  const availableHeight = height - topInset - 80;
+  const panelHeight = Math.min(608, availableHeight);
   return {
-    left: width * 0.54,
-    top: Math.max(80, (height - panelHeight) / 2),
-    width: Math.min(width * 0.4, 560),
+    left: width * 0.5,
+    top: topInset + (availableHeight - panelHeight) / 2,
+    width: Math.min(width * 0.5 - 24, 760),
     height: panelHeight,
-    modelX: width * 0.275,
+    modelX: width * 0.26,
     modelY: height * 0.46,
-    modelWidth: Math.min(width * 0.4, 650),
+    modelWidth: Math.min(width * 0.39, 680),
   };
 };
 

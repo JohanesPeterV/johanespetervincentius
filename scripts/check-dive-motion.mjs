@@ -212,6 +212,20 @@ test('chapter composition is at rest at every reading stop', () => {
   }
 });
 
+test('short landscape layouts keep the keyboard beside the reading area', () => {
+  for (const [width, height] of [
+    [667, 375],
+    [844, 390],
+  ]) {
+    const layout = story.getWorkLayout(width, height);
+    assert.ok(layout.left >= width * 0.45);
+    assert.ok(layout.height >= 220);
+    assert.ok(layout.top >= 64);
+    assert.ok(layout.top + layout.height <= height - 80);
+    assert.ok(layout.modelX + layout.modelWidth / 2 < layout.left);
+  }
+});
+
 test('camera path is continuous through chapter handoffs', () => {
   const before = descent.createDescentFrame();
   const after = descent.createDescentFrame();
@@ -291,9 +305,17 @@ test('palette samples preserve the sRGB contract of descent keyframes', () => {
         new Color(resolved.highlight).getHexString(),
         new Color(theme.secondaryColor).getHexString(),
       );
-      const encoded = new Color(theme.fluidColor).convertLinearToSRGB();
+      assert.equal(
+        new Color(resolved.accent).getHexString(),
+        new Color(theme.fluidColor).getHexString(),
+      );
+      const encoded = new Color(theme.backgroundColor).convertLinearToSRGB();
+      const frame = descent.createDescentFrame();
+      palette.applyDivePalette(frame, resolved, descent.WORK_STONE.center);
       [encoded.r, encoded.g, encoded.b].forEach((channel, index) => {
-        assert.ok(Math.abs(resolved.accentRgb[index] - channel) < 0.005);
+        assert.ok(Math.abs(resolved.backgroundRgb[index] - channel) < 0.005);
+        assert.ok(Math.abs(frame.fogColor[index] - channel) < 0.005);
+        assert.ok(Math.abs(frame.veilColor[index] - channel) < 0.005);
       });
       const foreground = new Color(resolved.foreground);
       const background = new Color(resolved.background);
