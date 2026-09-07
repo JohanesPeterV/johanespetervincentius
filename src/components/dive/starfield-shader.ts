@@ -26,6 +26,7 @@ export const starfieldVertex = `
   varying float vHalo;
   varying vec3 vNormal;
   varying vec3 vViewPosition;
+  const float STAR_ACCENT_THRESHOLD = 0.933333;
 
   vec2 distortPosition(vec2 point) {
     vec2 pointerDelta = point - vec2(uPointer.x * uAspect, uPointer.y);
@@ -60,7 +61,7 @@ export const starfieldVertex = `
 
   void main() {
     #ifdef STAR_HALO
-      if (aSeed.y < 0.90) {
+      if (aSeed.y < STAR_ACCENT_THRESHOLD) {
         gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
         return;
       }
@@ -83,7 +84,7 @@ export const starfieldVertex = `
     point.x += sin(aSeed.z * 6.283) * uFlow * flowDepth * 0.08;
 
     vec3 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
-    vGlow = pow(smoothstep(0.90, 1.0, aSeed.y), 2.0);
+    vGlow = pow(smoothstep(STAR_ACCENT_THRESHOLD, 1.0, aSeed.y), 2.0);
     float twinkle = 0.64 + 0.36 * (0.5 + 0.5 * sin(
       uTime * (0.8 + aSeed.x * 0.35) + aSeed.z * 6.283
     ));
@@ -97,7 +98,7 @@ export const starfieldVertex = `
     vec3 local = rotation * position * diameter;
     vNormal = normalize(normalMatrix * rotation * normal);
     #ifdef STAR_HALO
-      local = position * diameter * 2.4;
+      local = position * diameter * mix(2.4, 1.44, uLuminous);
       vNormal = normalize(normalMatrix * normal);
     #endif
     local.y *= 1.0 + uFlow * 1.8;
@@ -118,7 +119,7 @@ export const starfieldVertex = `
     float inkAlpha = (0.55 + 0.45 * aSeed.y) * (0.85 + 0.15 * twinkle) * nearFade;
     vAlpha = mix(inkAlpha, glowAlpha, uLuminous);
     vTint = mix(step(0.5, aSeed.x), 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283), uLuminous);
-    vColorStrength = mix(1.0, appearance.z, uLuminous);
+    vColorStrength = mix(1.0, appearance.z * sqrt(vGlow), uLuminous);
     vHalo = appearance.y * twinkle;
   }
 `;

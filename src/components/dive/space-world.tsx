@@ -8,6 +8,7 @@ import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import DiveAtmosphere from './dive-atmosphere';
 import CosmicEyes from './cosmic-eyes';
+import FloatingWorkspace from './floating-workspace';
 import AsteroidField from './asteroid-field';
 import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
@@ -70,6 +71,7 @@ export default function SpaceWorld({
           gpuTier={gpuTier}
         />
         <CosmicEyes palette={palette} motionMode={motionMode} />
+        <FloatingWorkspace palette={palette} motionMode={motionMode} />
       </group>
       <group ref={secondWorldRef} name="world-2" visible={false}>
         <directionalLight position={[-4, 8, 8]} intensity={1.4} />
