@@ -1,6 +1,7 @@
 'use client';
 
 import { EffectComposer, SMAA } from '@react-three/postprocessing';
+import { useThree } from '@react-three/fiber';
 import { ChromaticAberrationEffect } from 'postprocessing';
 import { memo, RefObject, useEffect, useState } from 'react';
 import { Vector2 } from 'three';
@@ -27,7 +28,11 @@ const DivePostprocessing = memo(function DivePostprocessing({
   handoffRef,
   gpuTier,
 }: DivePostprocessingParams) {
-  const [handoff] = useState(() => new HeroHandoffEffect(handoffRef.current));
+  const scene = useThree(({ scene }) => scene);
+  const camera = useThree(({ camera }) => camera);
+  const [handoff] = useState(
+    () => new HeroHandoffEffect(handoffRef.current, scene, camera),
+  );
   const [aberration] = useState(
     () =>
       new ChromaticAberrationEffect({

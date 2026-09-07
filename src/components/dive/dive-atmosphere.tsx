@@ -16,6 +16,8 @@ import {
 import type { DivePalette } from './dive-palette';
 import { sectionTravel } from './descent';
 import type { MotionMode } from './descent';
+import { heroHandoffProgress } from './hero-handoff';
+import type { HeroHandoff } from './hero-handoff';
 import { buildSpatialStarfield } from './starfield-space';
 import { createStarGeometry } from './starfield-geometry';
 import { createSpaceOrigin } from './space-origin';
@@ -37,6 +39,7 @@ type DiveAtmosphereParams = {
   gpuTier: number;
   motionMode: MotionMode;
   progressRef: RefObject<number>;
+  handoffRef: RefObject<HeroHandoff>;
   interactionRef: RefObject<StarfieldInteraction>;
 };
 
@@ -48,6 +51,7 @@ export default function DiveAtmosphere({
   gpuTier,
   motionMode,
   progressRef,
+  handoffRef,
   interactionRef,
 }: DiveAtmosphereParams) {
   const aspect = useThree(({ size }) => size.width / size.height);
@@ -96,6 +100,7 @@ export default function DiveAtmosphere({
     uWorldScale: { value: Math.min(aspect, 1) },
     uMorph: { value: 0 },
     uTravel: { value: 0 },
+    uFlow: { value: 0 },
     uPointer: { value: new Vector2() },
     uPointerStrength: { value: 0 },
     uBurstOrigin: { value: new Vector2() },
@@ -160,6 +165,12 @@ export default function DiveAtmosphere({
     uniforms.uAppearanceTo.value.set(to.size, to.glow, to.tint);
     uniforms.uTravel.value =
       reality === 'orbital' ? sectionTravel(progressRef.current) : 0;
+    const handoff = handoffRef.current;
+    const departure =
+      handoff.crossing === 'loop'
+        ? 1 - handoff.progress
+        : heroHandoffProgress(handoff.journey);
+    uniforms.uFlow.value = motionMode === 'full' ? departure * departure : 0;
     uniforms.uPointer.value.lerp(interaction.pointer, 1 - Math.exp(-step * 16));
     uniforms.uPointerStrength.value +=
       (interaction.active - uniforms.uPointerStrength.value) *

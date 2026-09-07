@@ -6,14 +6,13 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import PalettePicker from '@/components/theme-buttons/palette-picker';
 
 import type { PointerState } from './camera-rig';
-import { driveInputDelta } from './camera-motion';
+import { driveInputDelta, stepDriveToSection } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import DiveCanvas from './dive-canvas';
 import {
   DIVE_START,
   TOUCH_SENSITIVITY,
   WHEEL_SENSITIVITY,
-  sectionStepDelta,
   wrapProgress,
 } from './descent';
 import { useDivePalette } from './use-dive-palette';
@@ -236,11 +235,11 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       }
       if (event.key === 'ArrowDown') {
         event.preventDefault();
-        applyDriveDelta(sectionStepDelta(driveRef.current.target, 1));
+        stepDriveToSection(driveRef.current, 1);
       }
       if (event.key === 'ArrowUp') {
         event.preventDefault();
-        applyDriveDelta(sectionStepDelta(driveRef.current.target, -1));
+        stepDriveToSection(driveRef.current, -1);
       }
     };
     window.addEventListener('keydown', handleKeyDown);

@@ -13,7 +13,7 @@ import AsteroidField from './asteroid-field';
 import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
 import { SectionObjects } from './dive-world';
-import { HANDOFF_END, HANDOFF_START } from './hero-handoff';
+import { worldAtProgress } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { useStarfieldInteraction } from './use-starfield-interaction';
 
@@ -37,11 +37,10 @@ export default function SpaceWorld({
   const interactionRef = useStarfieldInteraction();
 
   useFrame(() => {
-    // REASON: the compositor renders the incoming endpoint while retaining
-    // world 1's saved frame. Visibility follows that rendered progress, so an
+    // REASON: the compositor keeps Hero live on either side of a crossing.
+    // Main-pass visibility follows rendered progress, so an
     // etched edge separates two complete scenes instead of shared decoration.
-    const secondWorld =
-      progressRef.current >= (HANDOFF_START + HANDOFF_END) / 2;
+    const secondWorld = worldAtProgress(progressRef.current) === 'orbital';
     if (firstWorldRef.current) {
       firstWorldRef.current.visible = !secondWorld;
     }
@@ -58,6 +57,7 @@ export default function SpaceWorld({
         <directionalLight position={SPACE_KEY_LIGHT} intensity={1.4} />
         <DiveAtmosphere
           reality="watchers"
+          handoffRef={handoffRef}
           progressRef={progressRef}
           interactionRef={interactionRef}
           palette={palette}

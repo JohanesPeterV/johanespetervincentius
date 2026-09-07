@@ -9,6 +9,7 @@ export const starfieldVertex = `
   uniform float uWorldScale;
   uniform float uMorph;
   uniform float uTravel;
+  uniform float uFlow;
   uniform vec2 uPointer;
   uniform float uPointerStrength;
   uniform vec2 uBurstOrigin;
@@ -77,6 +78,9 @@ export const starfieldVertex = `
     ) * 0.6;
     point.z += sin(uTime * 0.12 + aSeed.y * 6.283) * 0.8;
     point.x += sign(point.x) * uTravel * (4.0 + aSeed.z * 7.0);
+    float flowDepth = max(12.0, abs(point.z));
+    point.y -= uFlow * flowDepth * (0.85 + aSeed.x * 0.65);
+    point.x += sin(aSeed.z * 6.283) * uFlow * flowDepth * 0.08;
 
     vec3 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
     vGlow = pow(smoothstep(0.90, 1.0, aSeed.y), 2.0);
@@ -96,6 +100,7 @@ export const starfieldVertex = `
       local = position * diameter * 2.4;
       vNormal = normalize(normalMatrix * normal);
     #endif
+    local.y *= 1.0 + uFlow * 1.8;
     vec4 viewPosition = center + modelViewMatrix * vec4(local, 0.0);
     vViewPosition = viewPosition.xyz;
     gl_Position = projectionMatrix * viewPosition;

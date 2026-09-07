@@ -1,10 +1,11 @@
 export const heroHandoffFragment = `
-uniform sampler2D uHeroScene;
+uniform sampler2D uSavedScene;
 uniform sampler2D uHeroContent;
 uniform sampler2D uWorkContent;
 uniform vec4 uWorkRect;
 uniform float uProgress;
-uniform float uLoopClosure;
+uniform float uReturning;
+uniform float uSourceIsHero;
 uniform float uActive;
 uniform float uAspect;
 uniform vec3 uInk;
@@ -36,27 +37,31 @@ vec3 handoffOver(vec3 background, vec4 content) {
   return sRGBToLinear(vec4(mix(displayBackground, displayContent, content.a), 1.0)).rgb;
 }
 
-vec3 handoffFrom(vec2 uv) {
-  return handoffOver(texture2D(uHeroScene, uv).rgb, texture2D(uHeroContent, uv));
+vec3 handoffHero(vec2 uv) {
+  vec3 scene = uSourceIsHero > 0.5 ? texture2D(uSavedScene, uv).rgb : texture2D(inputBuffer, uv).rgb;
+  return handoffOver(scene, texture2D(uHeroContent, uv));
 }
 
-vec3 handoffTo(vec2 uv) {
+vec3 handoffOrbital(vec2 uv) {
+  vec3 scene = uSourceIsHero > 0.5 ? texture2D(inputBuffer, uv).rgb : texture2D(uSavedScene, uv).rgb;
+  if (uReturning > 0.5) {
+    return scene;
+  }
   vec2 contentUv = (uv - uWorkRect.xy) / uWorkRect.zw;
   vec4 content = texture2D(uWorkContent, clamp(contentUv, 0.0, 1.0));
   float inside = step(0.0, contentUv.x) * step(contentUv.x, 1.0)
                * step(0.0, contentUv.y) * step(contentUv.y, 1.0);
   content.a *= inside;
-  return handoffOver(texture2D(inputBuffer, uv).rgb, content);
+  return handoffOver(scene, content);
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
-  if (uActive < 0.5 && uLoopClosure <= 0.0) {
+  if (uActive < 0.5) {
     outputColor = inputColor;
     return;
   }
 
-  bool looping = uActive < 0.5;
-  float progress = looping ? uLoopClosure : uProgress;
+  float progress = uProgress;
   vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
   bool lightSurface = dot(uPaper, luminance) > dot(uInk, luminance);
   // REASON: both modes share the same etched field, zoom, and reveal timing.
@@ -73,8 +78,8 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   vec2 refraction = vec2(medium - 0.5, fine - 0.5) * proximity * 0.0025 * envelope;
   vec2 fromUv = (uv - 0.5) / (1.0 + progress * 0.045) + 0.5 + refraction;
   vec2 toUv = (uv - 0.5) / (1.0 + (1.0 - progress) * 0.055) + 0.5 - refraction;
-  vec3 from = looping ? texture2D(inputBuffer, fromUv).rgb : handoffFrom(fromUv);
-  vec3 next = looping ? uPaper : handoffTo(toUv);
+  vec3 from = uReturning > 0.5 ? handoffOrbital(fromUv) : handoffHero(fromUv);
+  vec3 next = uReturning > 0.5 ? handoffHero(toUv) : handoffOrbital(toUv);
 
   float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);

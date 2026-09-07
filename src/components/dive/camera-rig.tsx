@@ -28,7 +28,7 @@ import {
   writeDescentFrame,
 } from './descent';
 import type { DescentFrame, MotionMode } from './descent';
-import { advanceDrive, applyFinaleCamera } from './camera-motion';
+import { advanceDrive } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import { applyOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
@@ -115,7 +115,6 @@ export default function CameraRig({
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
     applyDivePalette(frame, palette, progress);
-    applyFinaleCamera(frame, progress);
     if (motionMode === 'reduced') {
       frame.position[0] = 0;
       frame.position[1] = 3.5;
@@ -151,7 +150,9 @@ export default function CameraRig({
       frame.look[2],
     );
     const transitionZone =
-      motionMode === 'reduced' ? 0 : sectionTravel(progress);
+      motionMode === 'reduced' || handoff.crossing !== null
+        ? 0
+        : sectionTravel(progress);
     const targetRoll =
       Math.max(-0.012, Math.min(0.012, -driveStep * 0.12)) * transitionZone;
     rollRef.current = MathUtils.damp(

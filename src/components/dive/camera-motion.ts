@@ -1,7 +1,12 @@
 import { MathUtils } from 'three';
 
-import type { DescentFrame } from './descent';
-import { nearestSectionDelta } from './descent';
+import {
+  DIVE_LENGTH,
+  DIVE_START,
+  nearestSectionDelta,
+  sectionStepDelta,
+  wrapProgress,
+} from './descent';
 
 export type DriveMotion = {
   current: number;
@@ -18,19 +23,10 @@ type DriveInput = {
 
 const POSITION_FOLLOW_RATE = 7.5;
 const MAX_TARGET_SPEED = 4.5;
-// REASON: unclamped wheel deltas bank whole extra loops on trackpad momentum
-// flicks - the target may never lead the camera by more than ~1.4 sections
-const MAX_TARGET_LEAD = 0.85;
+const BASE_TARGET_LEAD = 0.85;
 const POSITION_EPSILON = 0.0004;
 const SNAP_IDLE_DELAY = 0.4;
 const SNAP_RATE = 2.2;
-const FINALE_LAUNCH_START = 3.48;
-const FINALE_LAUNCH_END = 4.08;
-
-const smootherstep = (value: number): number => {
-  const t = MathUtils.clamp(value, 0, 1);
-  return t * t * t * (t * (t * 6 - 15) + 10);
-};
 
 // REASON: gravity may only engage after true idle - pulling while wheel
 // deltas still arrive turns slow deliberate scrolling into a rubber band
@@ -58,11 +54,12 @@ const driftTargetToSection = (
 };
 
 export const limitDriveTarget = (target: number, progress: number): number => {
-  return MathUtils.clamp(
-    target,
-    progress - MAX_TARGET_LEAD,
-    progress + MAX_TARGET_LEAD,
-  );
+  // REASON: cap momentum without trapping a long loop hop before its snap
+  // midpoint. Ordinary chapter gaps keep the same lead and input sensitivity.
+  const direction = target < progress ? -1 : 1;
+  const nextStop = Math.abs(sectionStepDelta(progress, direction));
+  const lead = Math.max(BASE_TARGET_LEAD, nextStop / 2 + POSITION_EPSILON);
+  return MathUtils.clamp(target, progress - lead, progress + lead);
 };
 
 export const advanceDrive = (motion: DriveMotion, delta: number): void => {
@@ -75,12 +72,18 @@ export const advanceDrive = (motion: DriveMotion, delta: number): void => {
     delta,
   );
   const maxStep = MAX_TARGET_SPEED * delta;
-  motion.current += MathUtils.clamp(
-    followed - motion.current,
-    -maxStep,
-    maxStep,
-  );
-  if (Math.abs(resolved - motion.current) < POSITION_EPSILON) {
+  let step = MathUtils.clamp(followed - motion.current, -maxStep, maxStep);
+  // REASON: opposite world crossings meet at Hero. Sample its reading pose
+  // at least once, even on a slow frame, so the next crossing saves the right world.
+  const direction = Math.sign(step);
+  const toHero = wrapProgress((DIVE_START - motion.current) * direction);
+  const nextHero = toHero < 0.0000001 ? DIVE_LENGTH : toHero;
+  const stopsAtHero = nextHero < Math.abs(step);
+  if (stopsAtHero) {
+    step = nextHero * direction;
+  }
+  motion.current += step;
+  if (!stopsAtHero && Math.abs(resolved - motion.current) < POSITION_EPSILON) {
     motion.current = resolved;
   }
 };
@@ -96,19 +99,11 @@ export const driveInputDelta = (input: DriveInput): number => {
   return step;
 };
 
-export const applyFinaleCamera = (
-  frame: DescentFrame,
-  progress: number,
+export const stepDriveToSection = (
+  motion: DriveMotion,
+  direction: 1 | -1,
 ): void => {
-  const distance =
-    (progress - FINALE_LAUNCH_START) /
-    (FINALE_LAUNCH_END - FINALE_LAUNCH_START);
-  if (distance <= 0) {
-    return;
-  }
-  const eased = smootherstep(distance);
-  frame.position[1] = MathUtils.lerp(3.5, 11.5, eased);
-  frame.position[2] = MathUtils.lerp(16, 21, eased);
-  frame.look[1] = MathUtils.lerp(2.4, 15.5, eased);
-  frame.look[2] = MathUtils.lerp(0, -10, eased);
+  // REASON: chapter commands choose a destination, not a wheel delta. The
+  // longer loop hop must not be truncated by the continuous-input lead cap.
+  motion.target += sectionStepDelta(motion.target, direction);
 };

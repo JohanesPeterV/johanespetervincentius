@@ -9,15 +9,10 @@ import {
   sectionMotion,
   techSectionOpacity,
   sectionJumpDelta,
-  worldLoopClosure,
 } from './descent';
 import type { MotionMode } from './descent';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
-import {
-  HANDOFF_END,
-  heroHandoffProgress,
-  workOverlayOpacity,
-} from './hero-handoff';
+import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { getWorkLayout } from './work-story';
 
@@ -144,37 +139,28 @@ export const applyOverlay = (
     if (!element) {
       return;
     }
-    const motion = sectionMotion(frame.progress, section);
-    const crossing =
-      frame.progress >= DIVE_START && frame.progress <= HANDOFF_END;
-    if (crossing && section.placement === 'center') {
-      motion.opacity = frame.handoff.compositing
-        ? 0
-        : 1 - heroHandoffProgress(frame.progress);
-      motion.shift = 0;
+    let opacity = sectionMotion(frame.progress, section).opacity;
+    if (section.placement === 'center') {
+      opacity = heroOverlayOpacity(frame.handoff);
     }
     if (section.center === WORK_STONE.center) {
-      motion.opacity = workOverlayOpacity(frame.handoff);
+      opacity = workOverlayOpacity(frame.handoff);
     }
-    element.style.opacity = String(motion.opacity);
-    element.style.setProperty('--reveal', String(motion.opacity));
-    element.inert = motion.opacity < 0.1;
-    const visibility = motion.opacity < 0.05 ? 'hidden' : 'visible';
+    element.style.opacity = String(opacity);
+    element.style.setProperty('--reveal', String(opacity));
+    element.inert = opacity < 0.1;
+    const visibility = opacity < 0.05 ? 'hidden' : 'visible';
     if (element.style.visibility !== visibility) {
       element.style.visibility = visibility;
     }
-    if (motion.opacity > 0.4 && element.dataset.visible !== 'true') {
+    if (opacity > 0.4 && element.dataset.visible !== 'true') {
       element.dataset.visible = 'true';
     }
-    if (motion.opacity < 0.05 && element.dataset.visible !== 'false') {
+    if (opacity < 0.05 && element.dataset.visible !== 'false') {
       element.dataset.visible = 'false';
     }
     if (section.placement !== 'stone') {
-      const scale = 1 - (1 - motion.opacity) * 0.14;
-      element.style.transform =
-        frame.motionMode === 'reduced' || crossing
-          ? ''
-          : `perspective(1000px) translate3d(0, ${motion.shift}px, 0) scale(${scale}) rotateX(${(1 - motion.opacity) * 7}deg)`;
+      element.style.transform = '';
     } else if (section.center === TECH_STONE.center) {
       positionTechHud(element, frame);
     } else {
@@ -210,9 +196,6 @@ export const applyOverlay = (
     let opacity = frame.descent.veil;
     if (frame.progress < DIVE_START || frame.progress > WORK_STONE.center) {
       opacity = 0;
-      if (frame.motionMode === 'reduced') {
-        opacity = worldLoopClosure(frame.progress);
-      }
     }
     nodes.veil.style.opacity = String(opacity);
     nodes.veil.style.backgroundColor = `rgb(${Math.round(

@@ -1,8 +1,19 @@
 import { Vector4 } from 'three';
 import type { CanvasTexture } from 'three';
 
-import { DIVE_START, WORK_STONE, stoneSectionOpacity } from './descent';
+import {
+  DIVE_LENGTH,
+  DIVE_START,
+  LOOP_END,
+  LOOP_START,
+  WORK_STONE,
+  stoneSectionOpacity,
+  wrapProgress,
+} from './descent';
 import type { MotionMode } from './descent';
+
+type HandoffWorld = 'hero' | 'orbital';
+type HandoffCrossing = 'work' | 'loop' | null;
 
 export type SectionSnapshot = {
   texture: CanvasTexture;
@@ -14,7 +25,8 @@ export type HeroHandoff = {
   hero: SectionSnapshot | null;
   work: SectionSnapshot | null;
   workRect: Vector4;
-  sourceReady: boolean;
+  sourceWorld: HandoffWorld | null;
+  crossing: HandoffCrossing;
   compositing: boolean;
   progress: number;
   journey: number;
@@ -27,17 +39,53 @@ export const createHeroHandoff = (): HeroHandoff => ({
   hero: null,
   work: null,
   workRect: new Vector4(),
-  sourceReady: false,
+  sourceWorld: null,
+  crossing: null,
   compositing: false,
   progress: 0,
   journey: DIVE_START,
 });
 
+const clampHandoffProgress = (value: number): number => {
+  // REASON: wrapping repeated laps introduces tiny rounding errors; endpoint
+  // frames must still release the compositor and refresh its saved world.
+  if (value < 0.000001) {
+    return 0;
+  }
+  if (value > 0.999999) {
+    return 1;
+  }
+  return value;
+};
+
 export const heroHandoffProgress = (progress: number): number =>
-  Math.max(
-    0,
-    Math.min(1, (progress - HANDOFF_START) / (HANDOFF_END - HANDOFF_START)),
+  clampHandoffProgress(
+    (progress - HANDOFF_START) / (HANDOFF_END - HANDOFF_START),
   );
+
+export const loopHandoffProgress = (progress: number): number => {
+  const wrapped = wrapProgress(progress);
+  const unwrapped =
+    wrapped < (LOOP_START + LOOP_END) / 2 ? wrapped + DIVE_LENGTH : wrapped;
+  return clampHandoffProgress(
+    (unwrapped - LOOP_START) / (DIVE_LENGTH + LOOP_END - LOOP_START),
+  );
+};
+
+export const worldAtProgress = (progress: number): HandoffWorld =>
+  wrapProgress(progress) >= (HANDOFF_START + HANDOFF_END) / 2
+    ? 'orbital'
+    : 'hero';
+
+export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
+  if (handoff.compositing) {
+    return 0;
+  }
+  if (handoff.crossing === 'loop') {
+    return Number(handoff.progress >= 0.5);
+  }
+  return 1 - heroHandoffProgress(handoff.journey);
+};
 
 export const workSectionOpacity = (progress: number): number =>
   progress <= HANDOFF_END
@@ -51,19 +99,36 @@ export const sampleHeroHandoff = (
   handoff: HeroHandoff,
   motionMode: MotionMode,
 ): number => {
-  // REASON: choose the compositor at an endpoint only; an asynchronously
-  // prepared snapshot must not replace a crossfade halfway through a gesture.
-  const entering = handoff.progress === 0 || handoff.progress === 1;
-  handoff.progress = heroHandoffProgress(handoff.journey);
+  const workProgress = heroHandoffProgress(handoff.journey);
+  const loopProgress = loopHandoffProgress(handoff.journey);
+  let crossing: HandoffCrossing = null;
+  if (loopProgress > 0 && loopProgress < 1) {
+    crossing = 'loop';
+  } else if (workProgress > 0 && workProgress < 1) {
+    crossing = 'work';
+  }
+  // REASON: late snapshots must not replace a cut/crossfade midway through a
+  // gesture. The saved outgoing world also stays fixed when input reverses.
+  const entering = crossing !== handoff.crossing;
   handoff.compositing =
+    crossing !== null &&
     motionMode === 'full' &&
-    handoff.sourceReady &&
+    handoff.sourceWorld !== null &&
     handoff.hero !== null &&
-    handoff.work !== null &&
-    (entering || handoff.compositing) &&
-    handoff.progress > 0 &&
-    handoff.progress < 1;
-  // REASON: the incoming world must already contain Work while the outgoing
-  // hero still occupies the screen; a single moving frame cannot reveal it.
-  return handoff.compositing ? HANDOFF_END : handoff.journey;
+    (crossing === 'loop' || handoff.work !== null) &&
+    (entering || handoff.compositing);
+  handoff.crossing = crossing;
+  handoff.progress = crossing === 'loop' ? loopProgress : workProgress;
+  if (handoff.compositing) {
+    // REASON: render the other endpoint behind the etched edge, never the
+    // numeric wrap's resetting camera. The source identity survives reversals.
+    if (handoff.sourceWorld === 'hero') {
+      return crossing === 'loop' ? LOOP_START : HANDOFF_END;
+    }
+    return crossing === 'loop' ? LOOP_END : HANDOFF_START;
+  }
+  if (crossing === 'loop') {
+    return loopProgress < 0.5 ? LOOP_START : LOOP_END;
+  }
+  return handoff.journey;
 };

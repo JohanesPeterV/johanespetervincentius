@@ -235,8 +235,14 @@ export const createDescentFrame = (): DescentFrame => ({
   veilColor: [0, 0, 0],
 });
 
-export const wrapProgress = (value: number): number =>
-  ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
+export const wrapProgress = (value: number): number => {
+  const wrapped = ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
+  // REASON: complete laps can round to just below the end instead of zero;
+  // both sides of the numeric seam must select the same rendered world.
+  return wrapped < 0.000000001 || DIVE_LENGTH - wrapped < 0.000000001
+    ? 0
+    : wrapped;
+};
 
 const WORLD_ENTER_AT = 1.3;
 const WORLD_ACCELERATION_SPAN = 0.38;
@@ -294,21 +300,10 @@ export const stoneSectionOpacity = (
 
 const TECH_FADE_SPAN = 0.18;
 const HERO_FADE_SPAN = 0.54;
-const LOOP_CLOSED_HALF = 0.06;
+const HERO_READING_HALF = 0.1;
 
-export const worldLoopClosure = (progress: number): number => {
-  const wrapped = wrapProgress(progress);
-  // REASON: cross realities only after Tech HTML leaves and before hero HTML
-  // returns. The closed interval covers the camera reset in either direction.
-  const closing = smootherstep(
-    TECH_STONE.center + TECH_DWELL_HALF + TECH_FADE_SPAN,
-    DIVE_LENGTH - LOOP_CLOSED_HALF,
-    wrapped,
-  );
-  const opening =
-    1 - smootherstep(LOOP_CLOSED_HALF, DIVE_START - HERO_FADE_SPAN, wrapped);
-  return Math.max(closing, opening);
-};
+export const LOOP_START = TECH_STONE.center + TECH_DWELL_HALF + TECH_FADE_SPAN;
+export const LOOP_END = DIVE_START - HERO_READING_HALF;
 
 export const techSectionOpacity = (progress: number): number => {
   const distance = Math.abs(progress - TECH_STONE.center);
@@ -335,7 +330,7 @@ export const sectionMotion = (
   const delta = progress - section.center;
   const distance = Math.abs(delta);
   return {
-    opacity: 1 - smootherstep(0.1, HERO_FADE_SPAN, distance),
+    opacity: 1 - smootherstep(HERO_READING_HALF, HERO_FADE_SPAN, distance),
     shift: -delta * 240,
   };
 };
