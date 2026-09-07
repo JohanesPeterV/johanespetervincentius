@@ -2,11 +2,11 @@
 
 `FRONTEND-CODE-STANDARDS.md` owns implementation rules. This file owns product and visual design taste for the portfolio.
 
-The portfolio has a bold, graphic space identity: black voids, crisp stars and four-point sparkles, saturated electric accents, and unmistakable floating eye motifs. Prioritize visual character and contrast over soft, comfortable dashboard styling. Content remains readable and interactive within that world.
+The portfolio has a bold, graphic space identity: black voids, crisp stars and four-point sparkles, saturated electric accents, and weightless objects. The reference image sets the visual direction; its eye motif is a rare accent, not a repeated theme. Prioritize visual character and contrast over soft, comfortable dashboard styling. Content remains readable and interactive within that world.
 
 The hero and the later chapters inhabit two distinct realities, owned by separate scene groups in `SpaceWorld`:
 
-- World 1: open black space, sparse white stars and sparkles, and flat eye glyphs. Their large iris fills the height of a pointed almond; the sclera forms small side wedges. Use cyan, lilac, dark, and white disk variations without glossy catchlights or character-like gaze.
+- World 1: open black space, sparse white stars and sparkles, with only a few small eye glyphs at the periphery. Their large iris fills the height of a pointed almond; the sclera forms small side wedges. Use flat disk colours without glossy catchlights or character-like gaze; keep the space dominant.
 - World 2: a large cropped ringed planet, inclined orbital paths, faceted satellites, and a dense diagonal belt of coloured stellar dust. Eye glyphs belong exclusively to world 1.
 
 Preserve the etched crossing in both directions, including the return loop. The reveal must expose a different composition, not carry the same decoration across a content change.

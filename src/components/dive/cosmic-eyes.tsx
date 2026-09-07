@@ -18,75 +18,27 @@ type EyePlacement = {
   size: number;
   depth: number;
   tilt: number;
-  variant: 'eclipse' | 'cyan' | 'violet' | 'inverted';
+  variant: 'cyan' | 'violet';
   mobile?: [number, number];
 };
 
 const EYES: EyePlacement[] = [
   {
-    x: -0.7,
-    y: 0.74,
-    size: 0.101,
+    x: -0.78,
+    y: 0.66,
+    size: 0.06,
     depth: 28,
     tilt: -0.025,
-    variant: 'eclipse',
-    mobile: [-0.73, 0.74],
-  },
-  { x: -0.34, y: 0.53, size: 0.085, depth: 37, tilt: 0.02, variant: 'cyan' },
-  {
-    x: 0.04,
-    y: 0.76,
-    size: 0.094,
-    depth: 33,
-    tilt: -0.015,
-    variant: 'inverted',
+    variant: 'cyan',
+    mobile: [0.76, 0.58],
   },
   {
-    x: 0.49,
-    y: 0.68,
-    size: 0.09,
-    depth: 25,
-    tilt: 0.01,
-    variant: 'inverted',
-    mobile: [0.74, 0.53],
-  },
-  { x: 0.79, y: 0.84, size: 0.094, depth: 32, tilt: 0.025, variant: 'cyan' },
-  { x: -0.84, y: 0.18, size: 0.092, depth: 35, tilt: -0.01, variant: 'cyan' },
-  {
-    x: -0.61,
-    y: -0.19,
-    size: 0.105,
-    depth: 25,
-    tilt: 0.01,
-    variant: 'eclipse',
-  },
-  { x: 0.68, y: 0.19, size: 0.085, depth: 40, tilt: -0.02, variant: 'cyan' },
-  { x: 0.89, y: -0.18, size: 0.102, depth: 36, tilt: 0.015, variant: 'violet' },
-  {
-    x: -0.72,
-    y: -0.66,
-    size: 0.092,
-    depth: 29,
-    tilt: -0.015,
-    variant: 'violet',
-    mobile: [-0.75, -0.52],
-  },
-  {
-    x: 0.22,
-    y: -0.77,
-    size: 0.098,
-    depth: 31,
-    tilt: 0.015,
-    variant: 'inverted',
-  },
-  {
-    x: 0.68,
-    y: -0.66,
-    size: 0.09,
+    x: 0.76,
+    y: -0.56,
+    size: 0.05,
     depth: 38,
     tilt: -0.02,
-    variant: 'cyan',
-    mobile: [0.75, -0.71],
+    variant: 'violet',
   },
 ];
 
@@ -158,19 +110,8 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       eye.uIris.value.set(palette.accent);
       eye.uSclera.value.copy(neutral);
       eye.uPupil.value.copy(dark).lerp(neutral, 0.012);
-      switch (EYES[index].variant) {
-        case 'eclipse':
-          eye.uSclera.value.set(palette.accent);
-          eye.uIris.value.copy(eye.uPupil.value);
-          eye.uPupil.value.copy(neutral);
-          break;
-        case 'violet':
-          eye.uIris.value.copy(lilac);
-          break;
-        case 'inverted':
-          eye.uSclera.value.copy(lilac);
-          eye.uIris.value.copy(neutral);
-          break;
+      if (EYES[index].variant === 'violet') {
+        eye.uIris.value.copy(lilac);
       }
     });
   }, [
