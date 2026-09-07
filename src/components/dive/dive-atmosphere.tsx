@@ -3,7 +3,13 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
-import { BufferAttribute, Color, DynamicDrawUsage, Vector2 } from 'three';
+import {
+  BufferAttribute,
+  Color,
+  DynamicDrawUsage,
+  Vector2,
+  Vector3,
+} from 'three';
 
 import type { DivePalette } from './dive-palette';
 import { sectionTravel } from './descent';
@@ -57,8 +63,9 @@ export default function DiveAtmosphere({
     uStarlight: { value: new Color(palette.foreground) },
     uAccent: { value: new Color(palette.accent) },
     uHighlight: { value: new Color(palette.highlight) },
-    uTintStrength: { value: reality === 'orbital' ? 0.9 : 0 },
-    uPointScale: { value: reality === 'orbital' ? 0.76 : 1 },
+    uAppearanceFrom: { value: new Vector3() },
+    uAppearanceTo: { value: new Vector3() },
+    uLuminous: { value: Number(palette.mode === 'dark') },
     uTime: { value: 0 },
     uPixelRatio: { value: 1 },
     uAspect: { value: aspect },
@@ -77,7 +84,14 @@ export default function DiveAtmosphere({
     uniforms.uStarlight.value.set(palette.foreground);
     uniforms.uAccent.value.set(palette.accent);
     uniforms.uHighlight.value.set(palette.highlight);
-  }, [palette.accent, palette.foreground, palette.highlight, uniforms]);
+    uniforms.uLuminous.value = Number(palette.mode === 'dark');
+  }, [
+    palette.accent,
+    palette.foreground,
+    palette.highlight,
+    palette.mode,
+    uniforms,
+  ]);
 
   useFrame(({ gl, camera }, delta) => {
     if (aspect !== field.aspect) {
@@ -111,6 +125,10 @@ export default function DiveAtmosphere({
       field.frame = field.timeline.from;
     }
     uniforms.uMorph.value = field.timeline.morph;
+    const from = field.layout.frames[field.timeline.from].appearance;
+    const to = field.layout.frames[field.timeline.to].appearance;
+    uniforms.uAppearanceFrom.value.set(from.size, from.glow, from.tint);
+    uniforms.uAppearanceTo.value.set(to.size, to.glow, to.tint);
     uniforms.uTravel.value =
       reality === 'orbital' ? sectionTravel(progressRef.current) : 0;
     uniforms.uPointer.value.lerp(interaction.pointer, 1 - Math.exp(-step * 16));

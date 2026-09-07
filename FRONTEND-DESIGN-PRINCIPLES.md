@@ -11,7 +11,9 @@ The hero and the later chapters inhabit two distinct realities, owned by separat
 
 Preserve the etched crossing in both directions, including the return loop. The reveal must expose a different composition, not carry the same decoration across a content change.
 
-Use the [Higgsfield Astra starfield](https://higgsfield.ai/gpt-astra) as a reference for the hierarchy of light: many dim pinpoints, fewer visible dots, and rare bright cores with tight circular halos. Size and brightness should convey depth, with restrained independent twinkling. Keep halos local to stars and the surrounding void black.
+Use the [Higgsfield Astra starfield](https://higgsfield.ai/gpt-astra) as a reference for the hierarchy of light: many dim pinpoints, fewer visible dots, and bright stars with larger cores and clearly visible circular halos. Colour, size, and glow change with the particle formations and independent twinkling. Each formation defines its appearance alongside its geometry; the shared renderer interpolates both through any number of shapes. Keep halos local to stars and the surrounding void black.
+
+Light mode presents the two realities as an astronomical illustration with suspended miniature objects: neutral white space, graphite particles and orbit lines, and saturated painted accents. World 1 has a sparse hanging moon and planet; world 2 keeps its ringed planet and orbital composition, with selected objects suspended on thin visible strings. Strings attach to the objects and sway around fixed anchors. Use matte directional shading and crisp silhouettes, with subtle grain on the painted surfaces. Preserve the same particle choreography and distortion; light-mode particles read as printed marks rather than luminous bloom.
 
 ## Reuse The System
 

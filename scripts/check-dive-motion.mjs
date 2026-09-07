@@ -299,6 +299,22 @@ test('theme text, buttons, links, and hover surfaces meet AA in both modes', () 
   }
 });
 
+test('scene mode comes from the resolved theme rather than color brightness', () => {
+  for (const base of baseColors) {
+    for (const mode of ['light', 'dark']) {
+      const theme = themes.getFluidThemeColors(base.name, mode);
+      assert.equal(palette.getDivePalette(theme).mode, theme.mode);
+      assert.equal(
+        palette.getDivePalette({
+          ...theme,
+          backgroundColor: mode === 'light' ? '#000000' : '#ffffff',
+        }).mode,
+        mode,
+      );
+    }
+  }
+});
+
 test('palette samples preserve the sRGB contract of descent keyframes', () => {
   for (const base of baseColors) {
     for (const mode of ['light', 'dark']) {

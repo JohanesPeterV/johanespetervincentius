@@ -7,6 +7,7 @@ import { finaleBoost, seamBoost } from './descent';
 type RgbColor = [number, number, number];
 
 export type DivePalette = {
+  mode: ReturnType<typeof getFluidThemeColors>['mode'];
   accent: string;
   background: string;
   backgroundRgb: RgbColor;
@@ -32,6 +33,7 @@ export const getDivePalette = (
   const background = new Color(theme.backgroundColor);
   const foreground = new Color(theme.textColor);
   return {
+    mode: theme.mode,
     accent: accent.getStyle(),
     background: background.getStyle(),
     backgroundRgb: toRgbColor(background.getStyle()),

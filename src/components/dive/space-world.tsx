@@ -8,6 +8,7 @@ import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import DiveAtmosphere from './dive-atmosphere';
 import CosmicEyes from './cosmic-eyes';
+import LightCelestials from './light-celestials';
 import OrbitalReality from './orbital-reality';
 import { SectionObjects } from './dive-world';
 import { HANDOFF_END, HANDOFF_START } from './hero-handoff';
@@ -61,7 +62,15 @@ export default function SpaceWorld({
           gpuTier={gpuTier}
           motionMode={motionMode}
         />
-        <CosmicEyes palette={palette} motionMode={motionMode} />
+        {palette.mode === 'light' ? (
+          <LightCelestials
+            palette={palette}
+            motionMode={motionMode}
+            gpuTier={gpuTier}
+          />
+        ) : (
+          <CosmicEyes palette={palette} motionMode={motionMode} />
+        )}
       </group>
       <group ref={secondWorldRef} name="world-2" visible={false}>
         <DiveAtmosphere
