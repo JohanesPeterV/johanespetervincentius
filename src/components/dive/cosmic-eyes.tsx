@@ -40,6 +40,31 @@ const EYES: EyePlacement[] = [
     tilt: -0.02,
     variant: 'violet',
   },
+  {
+    x: 0.61,
+    y: 0.73,
+    size: 0.07,
+    depth: 32,
+    tilt: 0.02,
+    variant: 'violet',
+  },
+  {
+    x: -0.7,
+    y: -0.4,
+    size: 0.066,
+    depth: 35,
+    tilt: 0.015,
+    variant: 'cyan',
+    mobile: [-0.74, -0.58],
+  },
+  {
+    x: 0.13,
+    y: -0.76,
+    size: 0.055,
+    depth: 30,
+    tilt: -0.015,
+    variant: 'cyan',
+  },
 ];
 
 const eyeVertex = `
