@@ -5,9 +5,7 @@ import { Button } from '@/components/ui/button';
 export default function MinimalCard() {
   return (
     <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-xl p-6 sm:p-10">
-      <p className="identity-tag type-label w-fit px-2 py-1">
-        Software engineer
-      </p>
+      <p className="identity-tag type-label w-fit py-1">Software engineer</p>
       <h2 className="mt-4 max-w-lg font-display text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">
         Johanes Peter Vincentius
       </h2>

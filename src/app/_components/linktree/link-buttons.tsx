@@ -4,11 +4,11 @@ import { LINKTREE_LINKS } from './links';
 export default function LinkButtons() {
   return (
     <div className="flex w-full flex-col gap-3">
-      {LINKTREE_LINKS.map(({ icon: Icon, label, handle, url }, index) => (
+      {LINKTREE_LINKS.map(({ icon: Icon, label, handle, url }) => (
         <Button
           key={url}
           asChild
-          variant={index === 0 ? 'default' : 'outline'}
+          variant="outline"
           size="profile"
           className="relative"
         >

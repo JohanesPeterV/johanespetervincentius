@@ -129,7 +129,7 @@ export default function DiveOverlay({
             >
               <span
                 style={dimStyle}
-                className="identity-tag type-meta px-2 py-1 transition-opacity duration-500"
+                className="identity-tag type-meta py-1 transition-opacity duration-500"
               >
                 {section.tag}
               </span>

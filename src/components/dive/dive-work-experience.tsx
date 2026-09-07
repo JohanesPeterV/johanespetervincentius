@@ -156,9 +156,7 @@ export const DiveWorkExperience = ({
       className="dive-work-section pointer-events-auto invisible absolute left-0 top-0 flex flex-col text-left opacity-0"
     >
       <header className="flex items-center gap-3">
-        <span className="identity-tag type-meta px-2 py-1">
-          {WORK_SECTION.tag}
-        </span>
+        <span className="identity-tag type-meta py-1">{WORK_SECTION.tag}</span>
         <h2 className="type-meta">
           {WORK_SECTION.title.replace('\n', ' ').toUpperCase()}
         </h2>

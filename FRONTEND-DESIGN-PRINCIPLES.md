@@ -24,8 +24,9 @@ Use the [Higgsfield Astra starfield](https://higgsfield.ai/gpt-astra) as a refer
 
 - Compose with our fashion-derived colourways: use colour theory and relevant fashion references to guide proportion and placement. Either colour may lead the artwork; account for hue relationships, lightness, saturation and surrounding neutrals when deciding visual weight. Judge the pair in the rendered composition ([Albers, _Interaction of Color_](https://www.albersfoundation.org/alberses/teaching/interaction-of-color)).
 - Author only two colours per colourway: primary and secondary. `src/lib/theme-colors.ts` derives readable text and neutral surfaces for both modes.
-- In interface controls, use primary fills for the main action and selected controls, paired with `primary-foreground`. Use `primary-text` for coloured text or icons on neutral surfaces; its contrast adjustment must not alter the paint colour.
-- In the UI, use secondary with `secondary-foreground` for identity accents and supporting highlights. Keep ordinary surfaces and lower-priority actions neutral so the two colours have room to stand out.
+- Reserve solid primary fills for the main action, paired with `primary-foreground`. Selected settings and navigation use a neutral surface with a `primary-text` label and outline. Selection needs a visible shape cue without taking the same visual weight as a call to action.
+- Keep peer destinations and contact icons neutral at rest; primary text and edges provide their hover and focus cues. Use `primary-text` for coloured text or icons on neutral surfaces; its contrast adjustment must not alter the paint colour.
+- Use secondary as a small identity marker beside section labels and as the monogram fill, paired with `secondary-foreground`. Keep label text neutral and readable. Judge the area occupied by each colour across artwork and UI together; do not add a coloured badge wherever colour is available.
 - Dark mode is the default: space stays black, stars stay sharp, and the authored colour pair gives objects their electric accents. Avoid diffuse atmospheric gradients, pastel lighting, and large frosted hero panels. Light mode remains available with the same crisp graphic silhouettes on a light neutral ground.
 
 ## Visual Hierarchy

@@ -1,6 +1,7 @@
 import ScrollContainer from '@/components/scroll-container';
 import { Title } from '@/components/title';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { FaExternalLinkAlt, FaGithub } from 'react-icons/fa';
 import { POMODORO_PLANTER, projects } from './projects';
@@ -28,14 +29,15 @@ export const Projects = () => {
                   <p className="text-xs text-muted-foreground">
                     {POMODORO_PLANTER.technologies.join(' · ')}
                   </p>
-                  <a
-                    href={POMODORO_PLANTER.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="project-live-link inline-flex min-h-11 items-center gap-2"
-                  >
-                    Try Pomodoro Planter <FaExternalLinkAlt size={12} />
-                  </a>
+                  <Button asChild size="lg" className="h-11">
+                    <a
+                      href={POMODORO_PLANTER.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Try Pomodoro Planter <FaExternalLinkAlt />
+                    </a>
+                  </Button>
                 </div>
               </article>
               {projects
@@ -77,16 +79,9 @@ export const Projects = () => {
                           {project.description}
                         </CardContent>
                         {project.technologies && (
-                          <div className="px-4 sm:px-6 pb-3 sm:pb-4 flex flex-wrap gap-1.5 sm:gap-2 mt-auto">
-                            {project.technologies.map((tech) => (
-                              <span
-                                key={tech}
-                                className="px-2 py-1 text-xs bg-primary/10 rounded-full"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
+                          <p className="type-meta mt-auto px-4 pb-3 text-muted-foreground sm:px-6 sm:pb-4">
+                            {project.technologies.join(' · ')}
+                          </p>
                         )}
                       </div>
                     </Card>

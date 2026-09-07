@@ -1,4 +1,5 @@
 import Links from '@/components/links';
+import { Button } from '@/components/ui/button';
 
 const BUILT_WITH = [
   {
@@ -40,29 +41,28 @@ export function Summary() {
     <div className="w-full h-full flex items-center justify-center p-8">
       <div className="space-y-8 w-full max-w-xl">
         <div>
-          <h3 className="text-2xl font-medium tracking-tight mb-6 text-primary-text">
-            Connect
-          </h3>
+          <h3 className="text-2xl font-medium tracking-tight mb-6">Connect</h3>
           <div className="flex justify-center">
-            <Links iconSize={32} className="gap-6" />
+            <Links className="gap-6" />
           </div>
         </div>
 
-        <div className="pt-8 border-t border-primary/10">
-          <h3 className="text-2xl font-medium tracking-tight mb-6 text-primary-text">
+        <div className="pt-8 border-t border-border">
+          <h3 className="text-2xl font-medium tracking-tight mb-6">
             Built With
           </h3>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {BUILT_WITH.map((tech) => (
-              <a
+              <Button
                 key={tech.name}
-                href={tech.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-lg text-sm font-medium text-foreground/80 transition-all hover:scale-105 text-center block"
+                asChild
+                variant="outline"
+                className="h-auto min-h-11 whitespace-normal px-3 text-center"
               >
-                {tech.name}
-              </a>
+                <a href={tech.url} target="_blank" rel="noopener noreferrer">
+                  {tech.name}
+                </a>
+              </Button>
             ))}
           </div>
         </div>
