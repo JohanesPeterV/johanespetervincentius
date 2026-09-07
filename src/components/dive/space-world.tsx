@@ -75,9 +75,7 @@ export default function SpaceWorld({
           motionMode={motionMode}
           gpuTier={gpuTier}
         />
-        {palette.mode === 'dark' ? (
-          <CosmicEyes palette={palette} motionMode={motionMode} />
-        ) : null}
+        <CosmicEyes palette={palette} motionMode={motionMode} />
       </group>
       <group ref={secondWorldRef} name="world-2" visible={false}>
         <directionalLight position={[-4, 8, 8]} intensity={1.4} />
@@ -96,7 +94,6 @@ export default function SpaceWorld({
         <SectionObjects
           palette={palette}
           progressRef={progressRef}
-          handoffRef={handoffRef}
           motionMode={motionMode}
         />
       </group>

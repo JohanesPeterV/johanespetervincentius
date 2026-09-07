@@ -92,25 +92,18 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
 
   // REASON: persistent Three.js uniforms need theme updates without reparsing CSS colours every frame.
   useEffect(() => {
-    const foreground = new Color(palette.foreground);
-    const background = new Color(palette.background);
-    const foregroundIsLight =
-      foreground.r + foreground.g + foreground.b >
-      background.r + background.g + background.b;
-    const neutral = foregroundIsLight ? foreground : background;
-    const dark = foregroundIsLight ? background : foreground;
     uniforms.forEach((eye, index) => {
       const primaryFill = EYES[index].variant === 'primary';
       eye.uOutline.value.set(primaryFill ? palette.highlight : palette.accent);
       eye.uColor.value.set(primaryFill ? palette.accent : palette.highlight);
-      eye.uLight.value.copy(neutral);
-      eye.uDark.value.copy(dark).lerp(neutral, 0.012);
+      eye.uLight.value.set(palette.sunlight);
+      eye.uDark.value.set(palette.shadow).lerp(eye.uLight.value, 0.012);
     });
   }, [
     palette.accent,
-    palette.background,
-    palette.foreground,
     palette.highlight,
+    palette.shadow,
+    palette.sunlight,
     uniforms,
   ]);
 

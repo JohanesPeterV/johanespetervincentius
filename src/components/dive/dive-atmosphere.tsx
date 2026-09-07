@@ -200,11 +200,7 @@ export default function DiveAtmosphere({
           toneMapped={false}
         />
       </mesh>
-      <mesh
-        name={`starfield-halo-${reality}`}
-        frustumCulled={false}
-        visible={palette.mode === 'dark'}
-      >
+      <mesh name={`starfield-halo-${reality}`} frustumCulled={false}>
         <instancedBufferGeometry
           index={field.halo.index}
           attributes={{ ...field.halo.attributes, ...field.attributes }}

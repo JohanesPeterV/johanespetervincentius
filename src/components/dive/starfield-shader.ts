@@ -148,6 +148,7 @@ export const starfieldFragment = `
 export const starfieldHaloFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;
+  uniform float uLuminous;
   varying float vAlpha;
   varying float vGlow;
   varying float vTint;
@@ -157,7 +158,10 @@ export const starfieldHaloFragment = `
 
   void main() {
     float facing = abs(dot(normalize(vNormal), normalize(-vViewPosition)));
-    float alpha = pow(facing, 5.0) * vGlow * vHalo * vAlpha * 0.32;
+    // REASON: a printed halo is a thin ring around the star; glow only exists in the dark.
+    float glow = pow(facing, 5.0) * 0.32;
+    float ring = smoothstep(0.28, 0.36, facing) * (1.0 - smoothstep(0.5, 0.58, facing)) * 0.7;
+    float alpha = mix(ring, glow, uLuminous) * vGlow * vHalo * vAlpha;
     gl_FragColor = vec4(mix(uAccent, uHighlight, vTint), alpha);
     #include <colorspace_fragment>
   }

@@ -17,6 +17,8 @@ export type DivePalette = {
   glow: string;
   highlight: string;
   metal: string;
+  shadow: string;
+  sunlight: string;
   surface: string;
 };
 
@@ -32,6 +34,10 @@ export const getDivePalette = (
   const secondary = new Color(theme.secondaryColor);
   const background = new Color(theme.backgroundColor);
   const foreground = new Color(theme.textColor);
+  // REASON: lit surfaces keep white highlights and black shadows in both modes;
+  // only marks and text flip with the theme.
+  const [sunlight, shadow] =
+    theme.mode === 'dark' ? [foreground, background] : [background, foreground];
   return {
     mode: theme.mode,
     accent: accent.getStyle(),
@@ -43,6 +49,8 @@ export const getDivePalette = (
     glow: secondary.getStyle(),
     highlight: secondary.getStyle(),
     metal: foreground.clone().lerp(background, 0.28).getStyle(),
+    shadow: shadow.getStyle(),
+    sunlight: sunlight.getStyle(),
     surface: background.clone().lerp(foreground, 0.025).getStyle(),
   };
 };

@@ -123,7 +123,7 @@ export default function AsteroidField({
     }
     const graphite = new Color(palette.background).lerp(
       new Color(palette.foreground),
-      palette.mode === 'light' ? 0.43 : 0.25,
+      palette.mode === 'light' ? 0.8 : 0.25,
     );
     const accent = new Color(palette.accent);
     const highlight = new Color(palette.highlight);

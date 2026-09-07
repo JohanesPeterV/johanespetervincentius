@@ -9,14 +9,14 @@ type ThemeMode = 'light' | 'dark';
 
 const neutralSurfaces = {
   light: {
-    // REASON: Latte's base and mantle set light-mode brightness without
-    // importing its accent palette or changing the portfolio's dark surfaces.
-    background: '220 23% 95%',
-    foreground: '224 28% 11%',
+    // REASON: light mode is paper and ink, so the neutrals stay hue-free and
+    // the ground is near white rather than a tinted dashboard grey.
+    background: '0 0% 98%',
+    foreground: '0 0% 9%',
     surface: '0 0% 100%',
-    muted: '220 22% 92%',
-    mutedForeground: '220 12% 37%',
-    border: '220 12% 86%',
+    muted: '0 0% 94%',
+    mutedForeground: '0 0% 38%',
+    border: '0 0% 87%',
   },
   dark: {
     background: '0 0% 0%',

@@ -5,7 +5,7 @@ const ORBITAL_LIGHT = 'normalize(vec3(-0.62, 0.42, 0.67))';
 export const gasGiantFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;
-  uniform vec3 uForeground;
+  uniform vec3 uSunlight;
   uniform float uTime;
   varying vec3 vPosition;
   varying vec3 vNormal;
@@ -31,14 +31,14 @@ export const gasGiantFragment = `
     float fine = sin(latitude * 310.0 + noise(surface * 48.0) * 6.0);
     fine *= 1.0 - smoothstep(0.25, 0.9, fwidth(latitude) * 310.0);
     vec3 pigment = mix(uAccent, uHighlight, broad * 0.7 + ribbons * 0.22);
-    pigment = mix(pigment, uForeground, 0.09 + ribbons * 0.15);
+    pigment = mix(pigment, uSunlight, 0.09 + ribbons * 0.15);
     pigment *= 0.5 + broad * 0.22 + ribbons * 0.22 + fine * 0.065;
     float incidence = dot(normal, ${ORBITAL_LIGHT});
     float day = smoothstep(-0.055, 0.12, incidence);
     float diffuse = pow(max(incidence, 0.0), 0.68);
     vec3 color = pigment * (0.009 + day * (0.12 + diffuse * 0.62));
     float atmosphere = pow(1.0 - max(dot(normal, normalize(vViewPosition)), 0.0), 4.5);
-    color += mix(uAccent, uForeground, 0.42) * atmosphere * day * 0.085;
+    color += mix(uAccent, uSunlight, 0.42) * atmosphere * day * 0.085;
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>
   }
@@ -67,8 +67,7 @@ export const orbitalRingVertex = `
 export const particulateRingFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;
-  uniform vec3 uForeground;
-  uniform float uMatte;
+  uniform vec3 uSunlight;
   uniform float uPlanetRadius;
   uniform vec2 uRingBounds;
   varying vec3 vPosition;
@@ -94,13 +93,12 @@ export const particulateRingFragment = `
     float shadow = 1.0 - smoothstep(uPlanetRadius - 0.012, uPlanetRadius + 0.018, clearance);
     float incidence = abs(dot(normalize(vNormal), ${ORBITAL_LIGHT}));
     vec3 pigment = mix(uAccent, uHighlight, broad * 0.68 + radius * 0.23);
-    pigment = mix(pigment, uForeground, 0.24 + fine * 0.12);
+    pigment = mix(pigment, uSunlight, 0.24 + fine * 0.12);
     vec3 color = pigment * (0.28 + incidence * 0.5) * (0.88 + dust * 0.12);
-    color *= 1.0 - shadow * mix(0.92, 0.32, uMatte);
+    color *= 1.0 - shadow * 0.92;
     float viewingAngle = abs(dot(normalize(vNormal), normalize(vViewPosition)));
     float opticalDepth = density / max(viewingAngle, 0.3);
     float alpha = 1.0 - exp(-opticalDepth * 1.6);
-    alpha = mix(alpha, edge * (1.0 - cassini * 0.85) * (1.0 - gap * 0.6), uMatte);
     gl_FragColor = vec4(color, alpha);
     #include <colorspace_fragment>
   }
