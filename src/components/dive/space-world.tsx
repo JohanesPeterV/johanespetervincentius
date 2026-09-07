@@ -73,14 +73,6 @@ export default function SpaceWorld({
         )}
       </group>
       <group ref={secondWorldRef} name="world-2" visible={false}>
-        <DiveAtmosphere
-          reality="orbital"
-          progressRef={progressRef}
-          interactionRef={interactionRef}
-          palette={palette}
-          gpuTier={gpuTier}
-          motionMode={motionMode}
-        />
         <OrbitalReality
           palette={palette}
           progressRef={progressRef}
