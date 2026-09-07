@@ -41,28 +41,24 @@ export const galacticCloudFragment = `
   }
 
   vec2 cloudDensity(vec3 point) {
-    vec3 wind = vec3(uTime * 0.008, 0.0, uTime * 0.004);
-    vec2 offset = (point.xy - vec2(0.54, 0.64)) * vec2(1.05, 1.3);
-    float radius = length(offset);
-    float angle = atan(offset.y, offset.x) + radius * 0.8;
-    vec3 swirl = vec3(cos(angle) * radius, sin(angle) * radius, point.z);
-    float turbulence = cloudNoise(swirl * vec3(10.0, 10.0, 5.0) + wind);
-    float rim = exp(-pow((radius - 0.51) / 0.28, 2.0));
-    float trail = point.y - 0.58 - sin(point.x * 3.4) * 0.08;
-    float canopy = exp(-pow(trail / 0.25, 2.0));
-    canopy *= 1.0 - smoothstep(0.1, 0.6, point.x);
-    float envelope = max(rim, canopy * 0.7) * exp(-point.z * point.z * 3.0);
+    vec3 wind = vec3(uTime * 0.006, 0.0, uTime * 0.003);
+    float coarse = noise(point * vec3(4.0, 2.0, 2.5) + wind + 7.8);
+    float turbulence = cloudNoise(point * vec3(17.0, 5.0, 5.0) + wind);
+    float spine = point.y - sin(point.x * 2.7) * 0.12 - point.z * 0.14;
+    spine -= exp(-point.x * point.x * 6.0) * 0.55;
+    float width = 0.27 + coarse * 0.22;
+    float envelope = exp(-pow(spine / width, 2.0) - point.z * point.z * 2.2);
     envelope *= 1.0 - smoothstep(0.68, 1.0, abs(point.x));
     envelope *= 1.0 - smoothstep(0.72, 1.0, abs(point.y));
     envelope *= 1.0 - smoothstep(0.72, 1.0, abs(point.z));
-    envelope *= smoothstep(-0.16, 0.24, point.y);
-    float cavity = radius + (turbulence - 0.5) * 0.18 + point.z * 0.08;
-    float opening = smoothstep(0.19, 0.31, cavity);
-    float ridge = max(0.0, turbulence - 0.43) * 5.0;
-    float erosion = noise(point * vec3(12.0, 14.0, 0.7) + 8.7);
-    float density = pow(ridge, 2.5) * envelope * opening;
-    density *= smoothstep(0.24, 0.66, erosion);
-    density += exp(-radius * radius * 28.0 - point.z * point.z * 5.0) * 0.07;
+    float lane = spine + (coarse - 0.5) * 0.17;
+    float split = smoothstep(0.025, 0.15, abs(lane));
+    float ridge = max(0.0, turbulence - 0.46) * 5.5;
+    float erosion = noise(point * vec3(8.0, 6.0, 0.3) + 12.4);
+    float density = pow(ridge, 2.3) * envelope * split;
+    float filament = spine - 0.2 - (coarse - 0.5) * 0.15;
+    density += exp(-pow(filament / 0.065, 2.0)) * ridge * envelope * 0.2;
+    density *= smoothstep(0.23, 0.6, erosion);
     return vec2(density, turbulence);
   }
 
@@ -70,7 +66,7 @@ export const galacticCloudFragment = `
     vec3 ray = normalize(vPosition - uCameraLocal);
     vec3 raySign = mix(vec3(-1.0), vec3(1.0), step(vec3(0.0), ray));
     vec3 inverseRay = raySign / max(abs(ray), vec3(0.00001));
-    vec3 nearPlanes = (vec3(-1.0, -0.16, -1.0) - uCameraLocal) * inverseRay;
+    vec3 nearPlanes = (-vec3(1.0) - uCameraLocal) * inverseRay;
     vec3 farPlanes = (vec3(1.0) - uCameraLocal) * inverseRay;
     vec3 nearBounds = min(nearPlanes, farPlanes);
     vec3 farBounds = max(nearPlanes, farPlanes);
@@ -90,16 +86,14 @@ export const galacticCloudFragment = `
       }
       vec2 cloud = cloudDensity(point);
       float density = cloud.x;
-      float radius = length((point.xy - vec2(0.54, 0.64)) * vec2(1.05, 1.3));
-      float illumination = exp(-pow(radius / 0.4, 2.0));
-      float hue = smoothstep(0.22, 0.85, radius + point.z * 0.3);
+      float hue = 0.5 + sin(point.x * 2.6 + point.z * 0.7) * 0.5;
       vec3 pigment = mix(uAccent, uHighlight, hue);
-      float knot = pow(max(0.0, cloud.y - 0.51) * 4.0, 2.0);
-      vec3 emission = pigment * (0.035 + illumination * 1.1 + knot * 0.2);
-      emission += uForeground * illumination * 0.025;
+      float knot = pow(max(0.0, cloud.y - 0.53) * 4.0, 2.0);
+      vec3 emission = pigment * (0.08 + knot * 0.42);
+      emission += uForeground * knot * 0.035;
       vec3 ink = mix(uForeground, pigment, 0.3);
       vec3 light = mix(ink, emission, uLuminous);
-      float absorption = 1.0 - exp(-density * stepLength * 5.5);
+      float absorption = 1.0 - exp(-density * stepLength * 4.0);
       radiance += (1.0 - opacity) * absorption * light;
       opacity += (1.0 - opacity) * absorption;
       point += ray * stepLength;

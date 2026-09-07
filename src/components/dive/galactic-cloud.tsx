@@ -95,13 +95,13 @@ export default function GalacticCloud({
     }
     const compact = size.width < 768;
     const aspect = size.width / size.height;
-    volume.position.set(0, 0, -145);
-    volume.scale.set(90 * Math.max(aspect, 0.65), 78, 38);
-    volume.rotation.set(0.06, -0.08, 0);
+    volume.position.set(0, compact ? 68 : 57, -175);
+    volume.scale.set(106 * Math.max(aspect, 0.6), 25, 18);
+    volume.rotation.set(0.08, -0.1, 0.2);
     volume.updateWorldMatrix(true, false);
     uniforms.uCameraLocal.value.copy(camera.position);
     volume.worldToLocal(uniforms.uCameraLocal.value);
-    uniforms.uStrength.value = compact ? 0.72 : 1;
+    uniforms.uStrength.value = compact ? 0.8 : 1;
     uniforms.uSteps.value = compact || gpuTier < 2 ? 20 : 32;
     if (motionMode === 'full') {
       uniforms.uTime.value += Math.min(delta, 0.1);

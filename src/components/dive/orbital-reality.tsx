@@ -2,18 +2,27 @@
 
 import { useFrame } from '@react-three/fiber';
 import { RefObject, useEffect, useRef, useState } from 'react';
-import { Color, DoubleSide, Group, MathUtils, PerspectiveCamera } from 'three';
+import {
+  Color,
+  DoubleSide,
+  Euler,
+  Group,
+  MathUtils,
+  Matrix4,
+  PerspectiveCamera,
+  Vector2,
+} from 'three';
 
 import type { MotionMode } from './descent';
 import { PROJECT_STONE, TECH_STONE } from './descent';
 import type { DivePalette } from './dive-palette';
 import SuspendedCelestial from './suspended-celestial';
+import { celestialVertex, paintedPlanetFragment } from './celestial-shader';
 import {
-  celestialVertex,
-  orbitalPlanetFragment,
-  orbitalRingFragment,
-  paintedPlanetFragment,
-} from './celestial-shader';
+  gasGiantFragment,
+  orbitalRingVertex,
+  particulateRingFragment,
+} from './orbital-material-shader';
 
 type OrbitalRealityParams = {
   palette: DivePalette;
@@ -34,6 +43,10 @@ const HANGING_SATELLITES = [
   { ...DEBRIS[1], x: 0.9, y: -0.84 },
 ];
 
+const PLANET_RADIUS = 0.51;
+const RING_BOUNDS: [number, number] = [0.62, 0.88];
+const RING_ROTATION: [number, number, number] = [1.12, 0.16, -0.16];
+
 export default function OrbitalReality({
   palette,
   progressRef,
@@ -50,6 +63,12 @@ export default function OrbitalReality({
     uBackground: { value: new Color(palette.background) },
     uForeground: { value: new Color(palette.foreground) },
     uMatte: { value: Number(palette.mode === 'light') },
+    uTime: { value: 0 },
+    uPlanetRadius: { value: PLANET_RADIUS },
+    uRingBounds: { value: new Vector2(...RING_BOUNDS) },
+    uRingToPlanet: {
+      value: new Matrix4().makeRotationFromEuler(new Euler(...RING_ROTATION)),
+    },
   }));
   const segments = gpuTier < 2 ? 64 : 128;
   const light = palette.mode === 'light';
@@ -81,15 +100,13 @@ export default function OrbitalReality({
       elapsedRef.current += Math.min(delta, 0.1);
     }
     const time = elapsedRef.current;
+    uniforms.uTime.value = time;
     const compact = size.width < 768;
     const halfHeight = Math.tan(MathUtils.degToRad(camera.fov * 0.5)) * 58;
     group.position.copy(camera.position);
     group.quaternion.copy(camera.quaternion);
     group.translateZ(-58);
-    group.scale.set(halfHeight, halfHeight, halfHeight * 0.35);
-    if (light) {
-      group.scale.z = halfHeight;
-    }
+    group.scale.setScalar(halfHeight);
     if (planetRef.current) {
       // REASON: work and project copy occupy the right side. Cross above the
       // reading area into a cropped edge, leaving the central skill labels clear.
@@ -135,21 +152,24 @@ export default function OrbitalReality({
   const planet = (
     <>
       <mesh>
-        <sphereGeometry args={[0.51, segments, segments / 2]} />
+        <sphereGeometry args={[PLANET_RADIUS, segments, segments / 2]} />
         <shaderMaterial
           uniforms={uniforms}
           vertexShader={celestialVertex}
-          fragmentShader={light ? paintedPlanetFragment : orbitalPlanetFragment}
+          fragmentShader={light ? paintedPlanetFragment : gasGiantFragment}
           toneMapped={false}
         />
       </mesh>
-      <mesh rotation={[1.12, 0.16, -0.16]}>
-        <ringGeometry args={[0.62, 0.88, segments]} />
+      <mesh rotation={RING_ROTATION}>
+        <ringGeometry args={[RING_BOUNDS[0], RING_BOUNDS[1], segments]} />
         <shaderMaterial
           uniforms={uniforms}
-          vertexShader={celestialVertex}
-          fragmentShader={orbitalRingFragment}
+          vertexShader={orbitalRingVertex}
+          fragmentShader={particulateRingFragment}
           side={DoubleSide}
+          transparent
+          depthWrite={false}
+          forceSinglePass
           toneMapped={false}
         />
       </mesh>
@@ -162,7 +182,7 @@ export default function OrbitalReality({
         {light ? (
           <SuspendedCelestial
             color={palette.foreground}
-            radius={0.51}
+            radius={PLANET_RADIUS}
             length={2.6}
             phase={0.6}
             motionMode={motionMode}
@@ -178,7 +198,7 @@ export default function OrbitalReality({
         <meshBasicMaterial
           color={palette.highlight}
           transparent
-          opacity={light ? 0.24 : 0.42}
+          opacity={light ? 0.24 : 0.18}
           toneMapped={false}
           fog={false}
         />
@@ -188,7 +208,7 @@ export default function OrbitalReality({
         <meshBasicMaterial
           color={palette.accent}
           transparent
-          opacity={light ? 0.2 : 0.32}
+          opacity={light ? 0.2 : 0.12}
           toneMapped={false}
           fog={false}
         />

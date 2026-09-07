@@ -1,8 +1,14 @@
 'use client';
 
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
-import { Color, Group } from 'three';
+import {
+  Color,
+  Group,
+  RepeatWrapping,
+  SRGBColorSpace,
+  TextureLoader,
+} from 'three';
 
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
@@ -32,6 +38,10 @@ export default function HeroCelestials({
   const planetRef = useRef<Group>(null);
   const distantRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
+  const [albedo, heightMap] = useLoader(TextureLoader, [
+    '/textures/lunar-albedo.jpg',
+    '/textures/lunar-height.jpg',
+  ]);
   const [origin] = useState(createSpaceOrigin);
   const [uniforms] = useState(() => ({
     uAccent: { value: new Color(palette.accent) },
@@ -39,9 +49,22 @@ export default function HeroCelestials({
     uBackground: { value: new Color(palette.background) },
     uForeground: { value: new Color(palette.foreground) },
     uMatte: { value: Number(palette.mode === 'light') },
+    uAlbedo: { value: albedo },
+    bumpMap: { value: heightMap },
+    bumpScale: { value: 1.2 },
   }));
   const segments = gpuTier < 2 ? 48 : 96;
   const light = palette.mode === 'light';
+
+  // REASON: loader-cached colour and height data need different GPU sampling semantics.
+  useEffect(() => {
+    albedo.colorSpace = SRGBColorSpace;
+    for (const texture of [albedo, heightMap]) {
+      texture.wrapS = RepeatWrapping;
+      texture.anisotropy = 4;
+      texture.needsUpdate = true;
+    }
+  }, [albedo, heightMap]);
 
   // REASON: persistent shader colours must follow live palette switches.
   useEffect(() => {
@@ -91,29 +114,29 @@ export default function HeroCelestials({
       moonRef.current.scale.setScalar(height * scale);
       moonRef.current.rotation.set(
         0,
-        light ? 0 : time * 0.015,
+        light ? 1.2 : 1.2 + time * 0.003,
         light ? 0 : -0.24,
       );
     }
     if (planetRef.current) {
       const depth = light ? 58 : 94;
       const height = VIEW_TANGENT * depth;
-      let x = 0.6;
-      let y = compact ? 0.78 : 0.62;
-      let scale = compact ? 0.74 : 1.4;
+      let x = 0.78;
+      let y = compact ? 0.78 : 0.04;
+      let scale = compact ? 0.74 : 1.9;
       if (light) {
         x = 0.76;
         y = compact ? 0.64 : 0.66;
         scale = compact ? 0.64 : 1;
         if (compact && size.height < 650) {
-          x = 0.92;
+          x = 0;
           y = 0.85;
           scale = 0.5;
         }
       }
       planetRef.current.position.set(x * aspect * height, y * height, -depth);
       planetRef.current.scale.setScalar(height * scale);
-      planetRef.current.rotation.set(0.12, light ? 0 : time * 0.025, -0.22);
+      planetRef.current.rotation.set(0.12, light ? 0 : time * 0.008, -0.22);
     }
     if (distantRef.current) {
       const height = VIEW_TANGENT * 120;
