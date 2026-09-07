@@ -1,11 +1,10 @@
 import Link from 'next/link';
 
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export default function MinimalCard() {
   return (
-    <Card className="profile-minimal pointer-events-auto relative z-10 mx-auto w-full max-w-xl p-6 sm:p-10">
+    <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-xl p-6 sm:p-10">
       <p className="identity-tag type-label w-fit px-2 py-1">
         Software engineer
       </p>
@@ -54,6 +53,6 @@ export default function MinimalCard() {
           Instagram ↗
         </a>
       </nav>
-    </Card>
+    </div>
   );
 }

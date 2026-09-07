@@ -19,12 +19,12 @@ const neutralSurfaces = {
     border: '220 12% 86%',
   },
   dark: {
-    background: '224 22% 9%',
-    foreground: '220 16% 92%',
-    surface: '224 20% 11%',
-    muted: '224 18% 15%',
-    mutedForeground: '220 10% 66%',
-    border: '224 14% 21%',
+    background: '0 0% 0%',
+    foreground: '0 0% 98%',
+    surface: '240 10% 4%',
+    muted: '240 8% 8%',
+    mutedForeground: '240 6% 72%',
+    border: '240 8% 24%',
   },
 };
 

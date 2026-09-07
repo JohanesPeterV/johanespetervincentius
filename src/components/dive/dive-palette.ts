@@ -8,14 +8,12 @@ type RgbColor = [number, number, number];
 
 export type DivePalette = {
   accent: string;
-  accentRgb: RgbColor;
   background: string;
   backgroundRgb: RgbColor;
   exposure: number;
   foreground: string;
   fogDensity: number;
   glow: string;
-  glowStrength: number;
   highlight: string;
   metal: string;
   surface: string;
@@ -33,34 +31,19 @@ export const getDivePalette = (
   const secondary = new Color(theme.secondaryColor);
   const background = new Color(theme.backgroundColor);
   const foreground = new Color(theme.textColor);
-  const glow = accent.clone();
-  const { h } = accent.getHSL({ h: 0, s: 0, l: 0 });
-  // REASON: warm light turns the sky brown. Use the pair's cool colour for
-  // atmosphere instead of inventing a third hue outside the colourway.
-  if (h <= 1 / 6 || h >= 11 / 12) {
-    glow.copy(secondary);
-  }
   return {
     accent: accent.getStyle(),
-    accentRgb: toRgbColor(accent.getStyle()),
     background: background.getStyle(),
     backgroundRgb: toRgbColor(background.getStyle()),
     exposure: 0.9,
     foreground: foreground.getStyle(),
-    fogDensity: 0.003,
-    glow: glow.getStyle(),
-    glowStrength: theme.mode === 'light' ? 0.12 : 0.035,
+    fogDensity: 0,
+    glow: secondary.getStyle(),
     highlight: secondary.getStyle(),
     metal: foreground.clone().lerp(background, 0.28).getStyle(),
     surface: background.clone().lerp(foreground, 0.025).getStyle(),
   };
 };
-
-const blendChannel = (from: number, to: number, amount: number): number => {
-  return from + (to - from) * amount;
-};
-
-const SEAM_MIST_DENSITY = 0.003;
 
 export const applyDivePalette = (
   frame: DescentFrame,
@@ -69,29 +52,15 @@ export const applyDivePalette = (
 ): void => {
   const seam = seamBoost(progress);
   const transition = Math.max(seam, finaleBoost(progress));
-  const accentAmount = transition * 0.025 + frame.glow * 0.01;
-
-  frame.fogColor[0] = blendChannel(
-    palette.backgroundRgb[0],
-    palette.accentRgb[0],
-    accentAmount,
-  );
-  frame.fogColor[1] = blendChannel(
-    palette.backgroundRgb[1],
-    palette.accentRgb[1],
-    accentAmount,
-  );
-  frame.fogColor[2] = blendChannel(
-    palette.backgroundRgb[2],
-    palette.accentRgb[2],
-    accentAmount,
-  );
+  frame.fogColor[0] = palette.backgroundRgb[0];
+  frame.fogColor[1] = palette.backgroundRgb[1];
+  frame.fogColor[2] = palette.backgroundRgb[2];
   frame.veilColor[0] = palette.backgroundRgb[0];
   frame.veilColor[1] = palette.backgroundRgb[1];
   frame.veilColor[2] = palette.backgroundRgb[2];
-  // REASON: the compositor owns the hero crossing. A full-screen veil would
-  // obscure its etched edge; a small fog lift carries the later chapter seams.
+  // REASON: the compositor owns the crossing; the sky keeps its clean void
+  // instead of washing the stars and eye silhouettes out with coloured mist.
   frame.veil *= 1 - seam;
-  frame.fogDensity = palette.fogDensity + seam * SEAM_MIST_DENSITY;
+  frame.fogDensity = palette.fogDensity;
   frame.glow = Math.max(frame.glow, transition * 0.16);
 };

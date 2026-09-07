@@ -7,9 +7,9 @@ export type BaseColor = {
 
 export const DEFAULT_BASE_COLOR: BaseColor = {
   name: 'blue',
-  label: 'Cobalt & Butter',
-  primary: '224 72% 55%',
-  secondary: '50 82% 73%',
+  label: 'Cyan & Ultraviolet',
+  primary: '184 100% 65%',
+  secondary: '260 100% 64%',
 };
 
 // REASON: each colourway has just two authored colours. UI contrast, mode

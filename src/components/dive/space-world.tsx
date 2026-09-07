@@ -5,7 +5,8 @@ import type { RefObject } from 'react';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import DiveAtmosphere from './dive-atmosphere';
-import { OrbitalBackdrop, SectionObjects } from './dive-world';
+import CosmicEyes from './cosmic-eyes';
+import { SectionObjects } from './dive-world';
 import type { HeroHandoff } from './hero-handoff';
 
 type SpaceWorldParams = {
@@ -33,7 +34,11 @@ export default function SpaceWorld({
       <ambientLight intensity={0.8} />
       <directionalLight position={[-4, 8, 8]} intensity={1.4} />
       <directionalLight position={[5, 2, -4]} intensity={1} />
-      <OrbitalBackdrop palette={palette} progressRef={progressRef} />
+      <CosmicEyes
+        palette={palette}
+        progressRef={progressRef}
+        motionMode={motionMode}
+      />
       <SectionObjects
         palette={palette}
         progressRef={progressRef}

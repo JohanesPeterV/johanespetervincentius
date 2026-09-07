@@ -1,8 +1,8 @@
 'use client';
 
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { ReactNode, RefObject, useRef } from 'react';
-import { Group, Mesh, MeshStandardMaterial } from 'three';
+import { Group } from 'three';
 
 import { PROJECT_STONE, narrativeStoneY } from './descent';
 import type { MotionMode } from './descent';
@@ -11,11 +11,6 @@ import WorkKeyboardScene from './work-keyboard-scene';
 import OrbitalInstrument from './orbital-instrument';
 import type { HeroHandoff } from './hero-handoff';
 
-type OrbitalBackdropParams = {
-  palette: DivePalette;
-  progressRef: RefObject<number>;
-};
-
 type SectionObjectParams = {
   anchor: { center: number; x: number; z: number };
   progressRef: RefObject<number>;
@@ -23,43 +18,11 @@ type SectionObjectParams = {
   children: ReactNode;
 };
 
-type SectionObjectsParams = OrbitalBackdropParams & {
+type SectionObjectsParams = {
+  palette: DivePalette;
+  progressRef: RefObject<number>;
   handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
-};
-
-export const OrbitalBackdrop = ({
-  palette,
-  progressRef,
-}: OrbitalBackdropParams) => {
-  const moonRef = useRef<Mesh>(null);
-  const materialRef = useRef<MeshStandardMaterial>(null);
-  const compact = useThree(({ size }) => size.width < 768);
-  useFrame(() => {
-    if (moonRef.current && materialRef.current) {
-      const opacity = Math.max(
-        0,
-        Math.min(1, (1.35 - progressRef.current) * 3),
-      );
-      moonRef.current.visible = !compact && opacity > 0;
-      materialRef.current.opacity = opacity;
-    }
-  }, -1);
-  return (
-    <mesh ref={moonRef} position={[11, 8, -18]} visible={!compact}>
-      <sphereGeometry args={[1.15, 48, 32]} />
-      <meshStandardMaterial
-        ref={materialRef}
-        color={palette.highlight}
-        emissive={palette.highlight}
-        emissiveIntensity={0.2}
-        roughness={0.6}
-        metalness={0}
-        toneMapped={false}
-        transparent
-      />
-    </mesh>
-  );
 };
 
 const SectionObject = ({

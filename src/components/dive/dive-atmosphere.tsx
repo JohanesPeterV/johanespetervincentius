@@ -14,56 +14,36 @@ type DiveAtmosphereParams = {
   motionMode: MotionMode;
 };
 
-const STAR_POSITIONS = buildStarField(180);
-
-const backdropVertex = `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const backdropFragment = `
-  uniform vec3 uBackground;
-  uniform vec3 uGlow;
-  uniform float uGlowStrength;
-  uniform float uTime;
-  varying vec2 vUv;
-  void main() {
-    vec2 drift = vec2(sin(uTime * 0.035), cos(uTime * 0.025)) * 0.012;
-    vec2 upper = (vUv - vec2(0.7, 0.67) + drift) * vec2(3.6, 4.8);
-    vec2 lower = (vUv - vec2(0.25, 0.26) - drift) * vec2(4.8, 5.4);
-    float light = exp(-dot(upper, upper) * 2.0) * uGlowStrength;
-    light += exp(-dot(lower, lower) * 2.0) * uGlowStrength * 0.5;
-    vec3 color = mix(uBackground, uGlow, light);
-    gl_FragColor = vec4(color, 1.0);
-    #include <tonemapping_fragment>
-    #include <colorspace_fragment>
-  }
-`;
+const STAR_POSITIONS = buildStarField(900);
 
 const starVertex = `
   uniform float uPixelRatio;
   uniform float uTime;
   varying float vAlpha;
+  varying float vSparkle;
   void main() {
     vec4 view = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * view;
     float seed = fract(sin(position.x * 12.9898 + position.z) * 43758.5453);
-    gl_PointSize = (0.8 + seed * 0.9) * uPixelRatio;
-    vAlpha = (0.16 + seed * 0.24) * (0.92 + 0.08 * sin(uTime * 0.3 + seed * 20.0));
+    vSparkle = step(0.955, seed);
+    float size = mix(1.2 + seed * 2.0, 16.0 + seed * 12.0, vSparkle);
+    gl_PointSize = size * uPixelRatio;
+    vAlpha = (0.5 + seed * 0.5) * (0.9 + 0.1 * sin(uTime * 0.6 + seed * 20.0));
   }
 `;
 
 const starFragment = `
   uniform vec3 uStarlight;
   varying float vAlpha;
+  varying float vSparkle;
   void main() {
-    float radius = length(gl_PointCoord - 0.5) * 2.0;
-    float alpha = (1.0 - smoothstep(0.15, 1.0, radius)) * vAlpha;
+    vec2 p = abs(gl_PointCoord - 0.5);
+    float point = 1.0 - smoothstep(0.25, 0.48, length(p));
+    float rays = min(p.x / 0.055 + p.y / 0.49, p.y / 0.055 + p.x / 0.49);
+    float sparkle = 1.0 - smoothstep(0.85, 1.05, rays);
+    float core = 1.0 - smoothstep(0.025, 0.09, length(p));
+    float alpha = mix(point, max(sparkle, core), vSparkle) * vAlpha;
     gl_FragColor = vec4(uStarlight, alpha);
-    #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }
 `;
@@ -74,28 +54,16 @@ export default function DiveAtmosphere({
   motionMode,
 }: DiveAtmosphereParams) {
   const [uniforms] = useState(() => ({
-    uBackground: { value: new Color(palette.background) },
     uStarlight: { value: new Color(palette.foreground) },
-    uGlow: { value: new Color(palette.glow) },
-    uGlowStrength: { value: palette.glowStrength },
     uTime: { value: 0 },
     uPixelRatio: { value: 1 },
   }));
 
-  // REASON: shader uniforms retain their initial Color objects. Sync theme
-  // changes into those objects without parsing CSS colours on every frame.
+  // REASON: shader uniforms retain their initial Color object. Sync palette
+  // changes without parsing CSS colours on every animation frame.
   useEffect(() => {
-    uniforms.uBackground.value.set(palette.background);
     uniforms.uStarlight.value.set(palette.foreground);
-    uniforms.uGlow.value.set(palette.glow);
-    uniforms.uGlowStrength.value = palette.glowStrength;
-  }, [
-    palette.background,
-    palette.foreground,
-    palette.glow,
-    palette.glowStrength,
-    uniforms,
-  ]);
+  }, [palette.foreground, uniforms]);
 
   useFrame(({ gl }, delta) => {
     if (motionMode === 'full') {
@@ -105,31 +73,21 @@ export default function DiveAtmosphere({
   }, -1);
 
   return (
-    <>
-      <mesh position={[0, 5, -120]} scale={[320, 260, 1]} renderOrder={-10}>
-        <planeGeometry />
-        <shaderMaterial
-          uniforms={uniforms}
-          vertexShader={backdropVertex}
-          fragmentShader={backdropFragment}
-          depthWrite={false}
+    <points frustumCulled={false}>
+      <bufferGeometry drawRange={{ start: 0, count: gpuTier < 2 ? 360 : 900 }}>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[STAR_POSITIONS, 3]}
         />
-      </mesh>
-      <points frustumCulled={false}>
-        <bufferGeometry drawRange={{ start: 0, count: gpuTier < 2 ? 80 : 180 }}>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[STAR_POSITIONS, 3]}
-          />
-        </bufferGeometry>
-        <shaderMaterial
-          uniforms={uniforms}
-          vertexShader={starVertex}
-          fragmentShader={starFragment}
-          transparent
-          depthWrite={false}
-        />
-      </points>
-    </>
+      </bufferGeometry>
+      <shaderMaterial
+        uniforms={uniforms}
+        vertexShader={starVertex}
+        fragmentShader={starFragment}
+        transparent
+        toneMapped={false}
+        depthWrite={false}
+      />
+    </points>
   );
 }
