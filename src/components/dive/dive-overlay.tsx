@@ -14,6 +14,7 @@ import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
 import { Button } from '@/components/ui/button';
+import StarfieldNextButton from './starfield-next-button';
 
 export type DiveMode = 'dive' | 'explore';
 
@@ -99,6 +100,7 @@ export default function DiveOverlay({
                 className="absolute inset-0 flex items-center justify-center [will-change:transform,opacity] [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
               >
                 {children}
+                <StarfieldNextButton />
               </div>
             );
           }
@@ -224,7 +226,7 @@ export default function DiveOverlay({
           </button>
         ))}
       </nav>
-      <div className="dive-hint type-label pointer-events-none absolute bottom-20 left-6 right-6 text-center text-muted-foreground sm:bottom-10 sm:right-60 sm:text-left">
+      <div className="dive-hint type-label pointer-events-none absolute bottom-20 left-6 right-6 text-center text-muted-foreground sm:bottom-10 sm:left-52 sm:right-60 sm:text-left">
         {mode === 'explore'
           ? 'drag to orbit · scroll to zoom · click a tool to open its docs · esc to exit'
           : 'Scroll or drag to explore'}

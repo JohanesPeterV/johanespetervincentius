@@ -1,6 +1,7 @@
 'use client';
 
 import { useFrame, useThree } from '@react-three/fiber';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import {
@@ -28,10 +29,15 @@ import {
   starfieldVertex,
 } from './starfield-shader';
 import {
+  advanceStarfieldTimeline,
   createStarfieldTimeline,
   sampleStarfieldTimeline,
 } from './starfield-timeline';
 import type { StarfieldInteraction } from './use-starfield-interaction';
+import {
+  starfieldRequestAtom,
+  starfieldStatusAtom,
+} from './starfield-controls';
 
 type DiveAtmosphereParams = {
   reality: StarfieldReality;
@@ -43,7 +49,7 @@ type DiveAtmosphereParams = {
   interactionRef: RefObject<StarfieldInteraction>;
 };
 
-const FORMATION_PLAYBACK_RATE = 0.25;
+const FORMATION_HOLD_SCALE = 4;
 
 export default function DiveAtmosphere({
   reality,
@@ -55,6 +61,8 @@ export default function DiveAtmosphere({
   interactionRef,
 }: DiveAtmosphereParams) {
   const aspect = useThree(({ size }) => size.width / size.height);
+  const advanceRequest = useAtomValue(starfieldRequestAtom);
+  const setStatus = useSetAtom(starfieldStatusAtom);
   const count = reality === 'watchers' ? 2400 : 2800;
   const [field] = useState(() => {
     const layout = buildSpatialStarfield(reality, count, aspect);
@@ -65,7 +73,12 @@ export default function DiveAtmosphere({
       layout,
       origin,
       aspect,
-      timeline: createStarfieldTimeline(layout.frames),
+      timeline: createStarfieldTimeline(
+        layout.frames.map(({ hold, duration }) => ({
+          hold: hold * FORMATION_HOLD_SCALE,
+          duration,
+        })),
+      ),
       body: createStarGeometry(),
       halo: new IcosahedronGeometry(0.5, 1),
       attributes: {
@@ -85,6 +98,8 @@ export default function DiveAtmosphere({
       },
       frame: 0,
       burst: 0,
+      request: advanceRequest,
+      status: 'loading',
     };
   });
   const [uniforms] = useState(() => ({
@@ -107,6 +122,14 @@ export default function DiveAtmosphere({
     uBurstAge: { value: 100 },
     uInteraction: { value: 1 },
   }));
+
+  // REASON: the shared DOM control must return to loading when its canvas renderer unmounts.
+  useEffect(() => {
+    return () => {
+      field.status = 'loading';
+      setStatus('loading');
+    };
+  }, [field, setStatus]);
 
   // REASON: palette changes update persistent GPU Color uniforms without parsing colours every frame.
   useEffect(() => {
@@ -143,10 +166,23 @@ export default function DiveAtmosphere({
       }
     }
     field.burst = interaction.burst;
-    sampleStarfieldTimeline(
-      field.timeline,
-      uniforms.uTime.value * FORMATION_PLAYBACK_RATE,
-    );
+    sampleStarfieldTimeline(field.timeline, uniforms.uTime.value);
+    const requested = advanceRequest !== field.request;
+    if (requested) {
+      advanceStarfieldTimeline(
+        field.timeline,
+        motionMode === 'reduced' ? 'instant' : 'animate',
+      );
+      field.request = advanceRequest;
+    }
+    const status =
+      motionMode === 'full' && field.timeline.transitioning
+        ? 'transitioning'
+        : 'ready';
+    if (requested || field.status !== status) {
+      field.status = status;
+      setStatus(status);
+    }
     if (field.frame !== field.timeline.from) {
       field.attributes.aFrom.array.set(
         field.layout.frames[field.timeline.from].positions,

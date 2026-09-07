@@ -733,6 +733,103 @@ test('star shape sampling survives long-running tabs and nonsequential samples',
   assert.equal(timeline.morph, 0);
 });
 
+test('manual star changes skip the wait without slowing the morph or next hold', () => {
+  const timeline = starfieldTimeline.createStarfieldTimeline([
+    { hold: 12.25, duration: 2.4 },
+    { hold: 20.75, duration: 2.4 },
+  ]);
+  const clickedAt = 3.125;
+  starfieldTimeline.sampleStarfieldTimeline(timeline, clickedAt);
+  starfieldTimeline.advanceStarfieldTimeline(timeline, 'animate');
+  starfieldTimeline.sampleStarfieldTimeline(timeline, clickedAt);
+  assert.equal(timeline.from, 0);
+  assert.equal(timeline.to, 1);
+  assert.equal(timeline.morph, 0);
+  assert.equal(timeline.transitioning, true);
+
+  starfieldTimeline.sampleStarfieldTimeline(timeline, clickedAt + 1.2);
+  assert.ok(Math.abs(timeline.morph - 0.5) < 1e-9);
+  const arrivedAt = clickedAt + 2.4;
+  starfieldTimeline.sampleStarfieldTimeline(timeline, arrivedAt);
+  assert.equal(timeline.from, 1);
+  assert.equal(timeline.morph, 0);
+  assert.equal(timeline.transitioning, false);
+  starfieldTimeline.sampleStarfieldTimeline(timeline, arrivedAt + 20.749);
+  assert.equal(timeline.from, 1);
+  assert.equal(timeline.morph, 0);
+  assert.equal(timeline.transitioning, false);
+  starfieldTimeline.sampleStarfieldTimeline(timeline, arrivedAt + 21.95);
+  assert.equal(timeline.to, 0);
+  assert.ok(Math.abs(timeline.morph - 0.5) < 1e-9);
+});
+
+test('repeated star requests cannot restart a morph at or inside its boundary', () => {
+  for (const sampledAt of [12.25 - 1e-10, 12.25, 13.45]) {
+    const timeline = starfieldTimeline.createStarfieldTimeline([
+      { hold: 12.25, duration: 2.4 },
+      { hold: 20.75, duration: 2.4 },
+    ]);
+    starfieldTimeline.sampleStarfieldTimeline(timeline, sampledAt);
+    assert.equal(timeline.transitioning, true);
+    const morph = timeline.morph;
+    for (let request = 0; request < 5; request += 1) {
+      starfieldTimeline.advanceStarfieldTimeline(timeline, 'animate');
+      starfieldTimeline.sampleStarfieldTimeline(timeline, sampledAt);
+      assert.equal(timeline.from, 0);
+      assert.equal(timeline.morph, morph);
+    }
+    starfieldTimeline.sampleStarfieldTimeline(timeline, 14.65);
+    assert.equal(timeline.from, 1);
+    assert.equal(timeline.morph, 0);
+    assert.equal(timeline.transitioning, false);
+  }
+});
+
+test('instant star requests cycle at a frozen fractional time without residual motion', () => {
+  const frames = [
+    { hold: 12.1, duration: 2.4 },
+    { hold: 17.35, duration: 1.9 },
+    { hold: 21.7, duration: 3.1 },
+  ];
+  const timeline = starfieldTimeline.createStarfieldTimeline(frames);
+  const frozenAt = 12.75;
+  starfieldTimeline.sampleStarfieldTimeline(timeline, frozenAt);
+  assert.ok(timeline.morph > 0);
+  for (let request = 1; request <= 256; request += 1) {
+    starfieldTimeline.advanceStarfieldTimeline(timeline, 'instant');
+    const expected = request % frames.length;
+    assert.equal(timeline.from, expected);
+    assert.equal(timeline.to, (expected + 1) % frames.length);
+    assert.equal(timeline.morph, 0);
+    starfieldTimeline.sampleStarfieldTimeline(timeline, frozenAt);
+    assert.equal(timeline.from, expected);
+    assert.equal(timeline.morph, 0);
+    assert.equal(timeline.transitioning, false);
+  }
+  const hold = frames[timeline.from].hold;
+  starfieldTimeline.sampleStarfieldTimeline(timeline, frozenAt + hold - 0.001);
+  assert.equal(timeline.morph, 0);
+  assert.equal(timeline.transitioning, false);
+  starfieldTimeline.sampleStarfieldTimeline(timeline, frozenAt + hold + 0.1);
+  assert.ok(timeline.morph > 0);
+});
+
+test('manual star requests leave single-shape sequences unchanged', () => {
+  for (const elapsed of [0.625, 13.2]) {
+    const timeline = starfieldTimeline.createStarfieldTimeline([
+      { hold: 12, duration: 2.4 },
+    ]);
+    starfieldTimeline.sampleStarfieldTimeline(timeline, elapsed);
+    const before = { ...timeline };
+    for (const motion of ['animate', 'instant']) {
+      starfieldTimeline.advanceStarfieldTimeline(timeline, motion);
+      assert.deepEqual({ ...timeline }, before);
+      starfieldTimeline.sampleStarfieldTimeline(timeline, elapsed);
+      assert.deepEqual({ ...timeline }, before);
+    }
+  }
+});
+
 test('invalid star shape schedules fail at creation', () => {
   assert.throws(() => starfieldTimeline.createStarfieldTimeline([]));
   for (const hold of [-1, NaN, Infinity, -Infinity]) {
