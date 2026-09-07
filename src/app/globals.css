@@ -275,12 +275,6 @@
     transform-origin: left center;
   }
 
-  .work-shot-rule {
-    width: 2rem;
-    height: 1px;
-    background: hsl(var(--border));
-  }
-
   .work-shot-title {
     max-width: 11ch;
     font-size: clamp(2.5rem, 4.9vw, 5.5rem);
@@ -400,35 +394,9 @@
     outline-offset: 2px;
   }
 
-  .work-headline {
-    max-width: 23ch;
-    font-size: clamp(1.35rem, 2.1vw, 1.875rem);
-    font-weight: 500;
-    line-height: 1.2;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
-  }
-
   .work-description {
     font-size: 0.875rem;
     line-height: 1.7;
-  }
-
-  .work-details {
-    border-top: 1px solid hsl(var(--border));
-  }
-
-  .work-details summary {
-    list-style: none;
-    border-radius: var(--radius);
-  }
-
-  .work-details summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .work-details[open] summary svg {
-    transform: rotate(45deg);
   }
 
   @media (max-width: 767px) {
@@ -460,10 +428,6 @@
 
     .work-timeline-index {
       display: none;
-    }
-
-    .work-headline {
-      font-size: 1.375rem;
     }
   }
 

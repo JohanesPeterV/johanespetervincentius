@@ -25,9 +25,6 @@ export default function WorkExperience() {
                       <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">
                         {workExperience.company}
                       </h2>
-                      <p className="text-base sm:text-lg font-medium">
-                        {workExperience.headline}
-                      </p>
                       {workExperience.positions.map((position, innerIndex) => (
                         <div key={innerIndex} className="space-y-2">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">

@@ -1,4 +1,4 @@
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
 import type { SyntheticEvent } from 'react';
 
@@ -40,49 +40,35 @@ export const WorkChapter = ({ index, chapter, onSelect }: WorkChapterProps) => {
         inert={!active}
         aria-hidden={!active}
       >
-        <div className="work-shot-eyebrow flex items-center gap-3">
-          <span className="type-meta text-primary-text">0{index + 1}</span>
-          <span className="work-shot-rule" aria-hidden />
-          <p className="type-label">{job.company}</p>
-        </div>
+        <p className="type-meta text-primary-text">0{index + 1}</p>
         <h3
           ref={titleRef}
           tabIndex={-1}
           className="work-shot-title font-display my-3 md:mb-5 md:mt-4"
         >
-          {job.chapter}
+          {job.company}
         </h3>
         {job.positions.map((position) => (
-          <p key={position.name} className="type-meta text-muted-foreground">
-            {position.name}
-            <br />
-            {position.workPeriod}
-          </p>
-        ))}
-        <h4 className="work-headline font-display mb-4 mt-5">{job.headline}</h4>
-        <details className="work-details mt-4">
-          <summary className="choice-control type-label flex min-h-11 cursor-pointer items-center justify-between gap-3 px-2">
-            Inside the role <Plus size={16} aria-hidden />
-          </summary>
-          {job.positions.map((position) => (
-            <p
-              key={position.name}
-              className="work-description px-2 py-3 text-muted-foreground"
-            >
+          <div key={position.name} className="mb-5">
+            <h4 className="type-label">{position.name}</h4>
+            <p className="type-meta mt-1 text-muted-foreground">
+              {position.workPeriod}
+            </p>
+            <p className="work-description mt-4 text-muted-foreground">
               {position.description}
             </p>
+          </div>
+        ))}
+        <ul className="flex flex-col gap-4 pb-3">
+          {job.showcases.map((showcase) => (
+            <li key={showcase.title}>
+              <h4 className="type-label mb-1">{showcase.title}</h4>
+              <p className="work-description text-muted-foreground">
+                {showcase.description}
+              </p>
+            </li>
           ))}
-          <ul className="mt-3 flex flex-col gap-4 px-2 pb-3">
-            {job.showcases.map((showcase) => (
-              <li key={showcase.title}>
-                <h5 className="type-label mb-1">{showcase.title}</h5>
-                <p className="work-description text-muted-foreground">
-                  {showcase.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </details>
+        </ul>
       </div>
       <button
         type="button"
