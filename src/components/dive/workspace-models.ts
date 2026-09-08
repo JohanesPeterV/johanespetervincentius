@@ -3,6 +3,7 @@ import {
   AnimationMixer,
   Box3,
   Color,
+  FrontSide,
   Group,
   Material,
   Mesh,
@@ -46,6 +47,13 @@ export const createWorkspaceModels = (
     if (material instanceof MeshStandardMaterial) {
       material.envMap = environment.texture;
       material.envMapIntensity = 1.4;
+    }
+    // REASON: the LCD overlays a solid panel by only 0.1 mm. At starfield
+    // distances they share a depth value; bias the front-facing screen layer.
+    if (material.name === 'LCD • powered-off glass') {
+      material.side = FrontSide;
+      material.polygonOffset = true;
+      material.polygonOffsetUnits = -2;
     }
     material.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, uniforms);
