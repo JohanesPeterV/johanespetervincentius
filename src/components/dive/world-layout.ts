@@ -92,7 +92,7 @@ const bowl = (centre: Point, radius: number, width: number): Stroke => ({
   ],
 });
 
-const GLYPH_WIDTH = 0.15;
+const GLYPH_WIDTH = 0.12;
 const BITCOIN_GLYPH: readonly Stroke[] = [
   line([-0.32, -0.64], [-0.32, 0.64], GLYPH_WIDTH),
   line([-0.32, 0.64], [0.04, 0.64], GLYPH_WIDTH),
@@ -100,12 +100,12 @@ const BITCOIN_GLYPH: readonly Stroke[] = [
   line([-0.32, -0.64], [0.08, -0.64], GLYPH_WIDTH),
   bowl([0.04, 0.32], 0.32, GLYPH_WIDTH),
   bowl([0.08, -0.32], 0.32, GLYPH_WIDTH),
-  line([-0.14, 0.64], [-0.14, 0.82], 0.13),
-  line([0.06, 0.64], [0.06, 0.82], 0.13),
-  line([-0.14, -0.64], [-0.14, -0.82], 0.13),
-  line([0.06, -0.64], [0.06, -0.82], 0.13),
+  line([-0.14, 0.64], [-0.14, 0.82], 0.11),
+  line([0.06, 0.64], [0.06, 0.82], 0.11),
+  line([-0.14, -0.64], [-0.14, -0.82], 0.11),
+  line([0.06, -0.64], [0.06, -0.82], 0.11),
 ];
-const BITCOIN_EMBLEM: readonly Stroke[] = [ring(1, 0.1), ...BITCOIN_GLYPH];
+const BITCOIN_EMBLEM: readonly Stroke[] = [ring(1, 0.07), ...BITCOIN_GLYPH];
 
 const sampleStrokes = (
   strokes: readonly Stroke[],
