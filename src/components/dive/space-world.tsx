@@ -12,7 +12,7 @@ import FloatingWorkspace from './floating-workspace';
 import AsteroidField from './asteroid-field';
 import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
-import { SectionObjects } from './dive-world';
+import WorkStoryScene from './work-story-scene';
 import { worldAtProgress } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { useStarfieldInteraction } from './use-starfield-interaction';
@@ -87,7 +87,7 @@ export default function SpaceWorld({
           motionMode={motionMode}
           gpuTier={gpuTier}
         />
-        <SectionObjects
+        <WorkStoryScene
           palette={palette}
           progressRef={progressRef}
           motionMode={motionMode}
