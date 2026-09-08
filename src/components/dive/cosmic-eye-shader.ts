@@ -44,10 +44,18 @@ export const cosmicEyeFragment = `
   }
 
   void main() {
-    float cycle = uCycle - length(vPosition.xy) / 0.44;
+    float pupilRadius = 0.16;
+    float pupilRim = 0.02;
+    float pupilDistance = length(vPosition.xy);
+    float cycle = uCycle - max(pupilDistance - pupilRadius - pupilRim, 0.0) / 0.44;
     float band = floor(cycle);
     float blend = smoothstep(0.0, max(fwidth(cycle), 0.001), fract(cycle));
     vec3 inside = mix(cycleColor(band - 1.0), cycleColor(band), blend);
+    float pupilFeather = max(fwidth(pupilDistance) * 0.5, 0.001);
+    float pupil = 1.0 - smoothstep(pupilRadius - pupilFeather, pupilRadius + pupilFeather, pupilDistance);
+    float pupilOutline = 1.0 - smoothstep(pupilRadius + pupilRim - pupilFeather, pupilRadius + pupilRim + pupilFeather, pupilDistance);
+    inside = mix(inside, uLight, pupilOutline);
+    inside = mix(inside, uDark, pupil);
     float radius = ${COSMIC_EYE_OPENING_RADIUS};
     float aperture = mix(1.0, ${COSMIC_EYE_CLOSED_RATIO}, uBlink);
     float edge = radius * 0.48 * (1.0 - pow(min(abs(vPosition.x) / radius, 1.0), 1.35)) * aperture;
