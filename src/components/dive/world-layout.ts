@@ -15,16 +15,12 @@ type ShapeGenerator = (
 export type StarfieldShape = {
   id: string;
   generate: ShapeGenerator;
-  hold: number;
-  duration: number;
   appearance?: Partial<StarfieldAppearance>;
 };
 
 type StarfieldFrame = {
   id: string;
   positions: Float32Array;
-  hold: number;
-  duration: number;
   appearance: StarfieldAppearance;
 };
 
@@ -149,29 +145,21 @@ export const STARFIELD_SHAPES: Readonly<
     {
       id: 'scatter',
       generate: scatterStars,
-      hold: 1.4,
-      duration: 2.4,
       appearance: { size: 0.9, glow: 0.7, tint: 0.16 },
     },
     {
       id: 'twin-spirals',
       generate: formTwinSpirals,
-      hold: 1.4,
-      duration: 2.4,
       appearance: { size: 1.15, glow: 1.25, tint: 0.94 },
     },
     {
       id: 'orbital-wave',
       generate: formOrbitalWave,
-      hold: 1.4,
-      duration: 2.4,
       appearance: { size: 1, glow: 1, tint: 0.65 },
     },
     {
       id: 'bitcoin',
       generate: formBitcoin,
-      hold: 2.2,
-      duration: 2.4,
       appearance: { size: 1, glow: 0.12, tint: 0.72 },
     },
   ],
@@ -179,22 +167,16 @@ export const STARFIELD_SHAPES: Readonly<
     {
       id: 'dust-belt',
       generate: formDustBelt,
-      hold: 1.4,
-      duration: 2.4,
       appearance: { size: 0.8, glow: 0.8, tint: 0.95 },
     },
     {
       id: 'tilted-ring',
       generate: formTiltedRing,
-      hold: 1.4,
-      duration: 2.4,
       appearance: { size: 1.1, glow: 1.3, tint: 0.45 },
     },
     {
       id: 'double-stream',
       generate: formDoubleStream,
-      hold: 1.4,
-      duration: 2.4,
       appearance: { size: 0.95, glow: 1, tint: 0.82 },
     },
   ],
@@ -208,10 +190,8 @@ export const buildStarfield = (
   const seed = reality === 'watchers' ? 71 : 173;
   const random = createSeededRandom(seed);
   const shapes = STARFIELD_SHAPES[reality];
-  const frames = shapes.map(({ id, hold, duration, appearance }) => ({
+  const frames = shapes.map(({ id, appearance }) => ({
     id,
-    hold,
-    duration,
     appearance: { size: 1, glow: 1, tint: 0.5, ...appearance },
     positions: new Float32Array(count * 3),
   }));

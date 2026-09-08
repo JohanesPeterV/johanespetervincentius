@@ -54,7 +54,7 @@ type DiveAtmosphereParams = {
   children?: ReactNode;
 };
 
-const FORMATION_HOLD_SCALE = 14;
+const FORMATION_TIMING = { hold: 20, morph: 2.4 };
 
 export default function DiveAtmosphere({
   reality,
@@ -80,12 +80,7 @@ export default function DiveAtmosphere({
       layout,
       origin,
       aspect,
-      timeline: createStarfieldTimeline(
-        layout.frames.map(({ hold, duration }) => ({
-          hold: hold * FORMATION_HOLD_SCALE,
-          duration,
-        })),
-      ),
+      timeline: createStarfieldTimeline(layout.frames.length, FORMATION_TIMING),
       body: createStarGeometry(),
       halo: new IcosahedronGeometry(0.5, 1),
       attributes: {

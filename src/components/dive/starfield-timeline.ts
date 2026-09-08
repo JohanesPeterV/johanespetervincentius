@@ -1,11 +1,11 @@
 type StarfieldTiming = {
   hold: number;
-  duration: number;
+  morph: number;
 };
 
 type StarfieldTimeline = {
-  frames: readonly StarfieldTiming[];
-  duration: number;
+  frameCount: number;
+  timing: StarfieldTiming;
   from: number;
   to: number;
   morph: number;
@@ -17,30 +17,25 @@ type StarfieldTimeline = {
 const TIME_EPSILON = 1e-8;
 
 export const createStarfieldTimeline = (
-  frames: readonly StarfieldTiming[],
+  frameCount: number,
+  timing: StarfieldTiming,
 ): StarfieldTimeline => {
-  if (frames.length === 0) {
+  if (frameCount === 0) {
     throw new Error('A starfield sequence needs at least one shape.');
   }
-  let duration = 0;
-  for (const frame of frames) {
-    if (
-      !Number.isFinite(frame.hold) ||
-      frame.hold < 0 ||
-      !Number.isFinite(frame.duration) ||
-      frame.duration <= 0
-    ) {
-      throw new Error(
-        'Starfield holds must be nonnegative and transitions positive.',
-      );
-    }
-    duration += frame.hold + frame.duration;
+  if (
+    !Number.isFinite(timing.hold) ||
+    timing.hold < 0 ||
+    !Number.isFinite(timing.morph) ||
+    timing.morph <= 0
+  ) {
+    throw new Error('Starfield hold must be nonnegative and morph positive.');
   }
   return {
-    frames,
-    duration,
+    frameCount,
+    timing,
     from: 0,
-    to: 1 % frames.length,
+    to: 1 % frameCount,
     morph: 0,
     phase: 0,
     offset: 0,
@@ -52,29 +47,21 @@ export const sampleStarfieldTimeline = (
   timeline: StarfieldTimeline,
   elapsed: number,
 ): void => {
-  let phase =
-    (((elapsed + timeline.offset) % timeline.duration) + timeline.duration) %
-    timeline.duration;
-  // REASON: manual jumps can land a few floating-point bits before a loop boundary.
-  if (timeline.duration - phase < TIME_EPSILON) {
-    phase = 0;
+  const { hold, morph } = timeline.timing;
+  const period = hold + morph;
+  const cycle = period * timeline.frameCount;
+  let time = (((elapsed + timeline.offset) % cycle) + cycle) % cycle;
+  // REASON: manual jumps can land a few floating-point bits before a frame boundary.
+  if (cycle - time < TIME_EPSILON) {
+    time = 0;
   }
-  for (let index = 0; index < timeline.frames.length; index += 1) {
-    const frame = timeline.frames[index];
-    const length = frame.hold + frame.duration;
-    if (phase < length - TIME_EPSILON || index === timeline.frames.length - 1) {
-      timeline.from = index;
-      timeline.to = (index + 1) % timeline.frames.length;
-      timeline.phase = Math.max(0, phase);
-      timeline.transitioning = phase >= frame.hold - TIME_EPSILON;
-      timeline.morph = Math.min(
-        1,
-        Math.max(0, (phase - frame.hold) / frame.duration),
-      );
-      return;
-    }
-    phase -= length;
-  }
+  const index = Math.floor((time + TIME_EPSILON) / period);
+  const phase = Math.max(0, time - index * period);
+  timeline.from = index;
+  timeline.to = (index + 1) % timeline.frameCount;
+  timeline.phase = phase;
+  timeline.transitioning = phase >= hold - TIME_EPSILON;
+  timeline.morph = Math.min(1, Math.max(0, (phase - hold) / morph));
 };
 
 export const advanceStarfieldTimeline = (
@@ -82,23 +69,20 @@ export const advanceStarfieldTimeline = (
   motion: 'animate' | 'instant',
 ): void => {
   if (
-    timeline.frames.length < 2 ||
+    timeline.frameCount < 2 ||
     (motion === 'animate' && timeline.transitioning)
   ) {
     return;
   }
-  const frame = timeline.frames[timeline.from];
-  let destination = frame.hold;
-  if (motion === 'instant') {
-    destination += frame.duration;
-  }
+  const { hold, morph } = timeline.timing;
+  const destination = motion === 'instant' ? hold + morph : hold;
   timeline.offset += destination - timeline.phase;
   timeline.morph = 0;
   timeline.phase = destination;
   timeline.transitioning = true;
   if (motion === 'instant') {
     timeline.from = timeline.to;
-    timeline.to = (timeline.from + 1) % timeline.frames.length;
+    timeline.to = (timeline.from + 1) % timeline.frameCount;
     timeline.phase = 0;
     timeline.transitioning = false;
   }
