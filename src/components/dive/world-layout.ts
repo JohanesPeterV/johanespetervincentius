@@ -45,20 +45,6 @@ const scatterStars: ShapeGenerator = (_index, random, aspect) => [
   (random() - 0.5) * 2.5,
 ];
 
-const formTwinSpirals: ShapeGenerator = (index, random, aspect) => {
-  const side = index % 2 === 0 ? -1 : 1;
-  const compact = aspect < 0.95;
-  const radius = Math.pow(random(), 0.58);
-  const arm = (index % 3) * ((Math.PI * 2) / 3);
-  const angle = arm + radius * 5.8 + (random() - 0.5) * 0.36;
-  const scale = 0.45 * Math.min(1, aspect * 0.95);
-  const centreY = compact ? side * 0.64 : side * -0.3;
-  return [
-    side * aspect * 0.72 + Math.cos(angle) * radius * scale,
-    centreY + Math.sin(angle) * radius * scale * 0.7,
-  ];
-};
-
 const formOrbitalWave: ShapeGenerator = (index, random, aspect) => {
   const side = index % 2 === 0 ? -1 : 1;
   const x = (random() - 0.5) * 2.7;
@@ -146,11 +132,6 @@ export const STARFIELD_SHAPES: Readonly<
       id: 'scatter',
       generate: scatterStars,
       appearance: { size: 0.9, glow: 0.7, tint: 0.16 },
-    },
-    {
-      id: 'twin-spirals',
-      generate: formTwinSpirals,
-      appearance: { size: 1.15, glow: 1.25, tint: 0.94 },
     },
     {
       id: 'orbital-wave',
