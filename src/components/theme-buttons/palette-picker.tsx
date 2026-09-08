@@ -23,39 +23,50 @@ export default function PalettePicker() {
   const titleId = useId();
   const [hydrated, setHydrated] = useState(false);
   const selected =
-    baseColors.find(({ name }) => name === config.theme) ?? DEFAULT_BASE_COLOR;
+    baseColors.find(({ name }) => hydrated && name === config.theme) ??
+    DEFAULT_BASE_COLOR;
 
-  // REASON: the server cannot read the saved mode. Wait for hydration before
-  // exposing selected mode attributes so the initial markup agrees.
+  // REASON: saved appearance can load before a Suspense boundary hydrates.
+  // Keep preference-dependent markup deterministic until this control mounts.
   useEffect(() => {
     setHydrated(true);
   }, []);
 
   return (
-    <div className="fixed right-4 top-4 z-30 flex items-center gap-1 sm:right-7 sm:top-7">
-      <button
-        type="button"
-        aria-label="Shuffle colourway"
-        title="Shuffle colourway"
-        onClick={() =>
-          setConfig((current) => pickRandomColorway(current.theme))
-        }
-        onKeyDown={(event) => event.stopPropagation()}
-        className="appearance-trigger flex h-11 items-center justify-center gap-2 px-3"
-      >
-        <span aria-hidden className="appearance-orb" />
-        <span className="type-label">Shuffle</span>
-      </button>
-      <button
-        type="button"
-        aria-label="Appearance settings"
-        title="Appearance settings"
-        popoverTarget={panelId}
-        onKeyDown={(event) => event.stopPropagation()}
-        className="appearance-trigger flex h-11 w-11 items-center justify-center"
-      >
-        <SlidersHorizontal size={16} aria-hidden />
-      </button>
+    <div className="fixed right-4 top-4 z-30 sm:right-7 sm:top-7">
+      <div className="appearance-control flex items-center p-1">
+        <button
+          type="button"
+          aria-label="Shuffle colourway"
+          title="Shuffle colourway"
+          onClick={() =>
+            setConfig((current) => pickRandomColorway(current.theme))
+          }
+          onKeyDown={(event) => event.stopPropagation()}
+          className="appearance-trigger appearance-shuffle flex h-11 items-center gap-2 pl-0.5 pr-3"
+        >
+          <span aria-hidden className="appearance-dial">
+            <span key={selected.name} className="appearance-orb" />
+          </span>
+          <span className="block w-32 text-left">
+            <span className="type-label block text-foreground">Shuffle</span>
+            <span aria-live="polite" aria-atomic className="type-meta block">
+              {selected.label}
+            </span>
+          </span>
+        </button>
+        <span aria-hidden className="appearance-divider h-5 w-px" />
+        <button
+          type="button"
+          aria-label="Appearance settings"
+          title="Appearance settings"
+          popoverTarget={panelId}
+          onKeyDown={(event) => event.stopPropagation()}
+          className="appearance-trigger flex h-11 w-11 items-center justify-center"
+        >
+          <SlidersHorizontal size={16} aria-hidden />
+        </button>
+      </div>
       <div
         id={panelId}
         popover="auto"
@@ -98,7 +109,7 @@ export default function PalettePicker() {
                 type="button"
                 aria-label={baseColor.label}
                 title={baseColor.label}
-                aria-pressed={baseColor.name === config.theme}
+                aria-pressed={hydrated && baseColor.name === selected.name}
                 onClick={() => setConfig({ theme: baseColor.name })}
                 className="appearance-swatch flex h-11 items-center justify-center"
               >

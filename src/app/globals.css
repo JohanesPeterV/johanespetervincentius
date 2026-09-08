@@ -35,6 +35,15 @@
   }
 }
 
+@keyframes colourTurn {
+  from {
+    transform: rotate(-240deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
 .animate-fade-late {
   animation: fadeInLate 0.8s ease-out 1.7s both;
 }
@@ -144,25 +153,65 @@
     background: hsl(var(--foreground) / 0.035);
   }
 
-  .appearance-orb {
-    width: 21px;
-    height: 21px;
+  .appearance-dial {
+    position: relative;
+    display: block;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
     border-radius: 50%;
-    border: 1px solid hsl(var(--foreground) / 0.4);
+    border: 1px solid hsl(var(--foreground) / 0.24);
+    transition: transform 250ms;
+  }
+
+  .appearance-dial::before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    top: -2px;
+    left: calc(50% - 1px);
+    width: 2px;
+    height: 5px;
+    border-radius: 1px;
+    background: hsl(var(--foreground));
+  }
+
+  .appearance-orb {
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
     background: linear-gradient(
       135deg,
       hsl(var(--primary)) 60%,
       hsl(var(--secondary)) 60%
     );
-    transform: rotate(-25deg);
-    transition: transform 400ms;
+    box-shadow: inset 0 0 0 1px hsl(var(--foreground) / 0.14);
+    animation: colourTurn 600ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .appearance-trigger:hover .appearance-orb,
-  .appearance-trigger:focus-visible .appearance-orb {
-    transform: rotate(0deg);
+  .appearance-orb::after {
+    content: '';
+    position: absolute;
+    inset: 11px;
+    border-radius: 50%;
+    background: hsl(var(--popover));
+    box-shadow: 0 0 0 1px hsl(var(--foreground) / 0.24);
   }
 
+  .appearance-shuffle:hover .appearance-dial,
+  .appearance-shuffle:focus-visible .appearance-dial {
+    transform: rotate(18deg);
+  }
+
+  .appearance-shuffle:active .appearance-dial {
+    transform: rotate(-20deg) scale(0.9);
+  }
+
+  .appearance-divider {
+    background: hsl(var(--border));
+  }
+
+  .appearance-control,
   .appearance-panel {
     color: hsl(var(--popover-foreground));
     background: hsl(var(--popover) / 0.88);
@@ -170,6 +219,10 @@
     border-radius: 1.25rem;
     box-shadow: 0 16px 40px -20px hsl(var(--foreground) / 0.2);
     backdrop-filter: blur(24px);
+  }
+
+  .appearance-control {
+    border-radius: 999px;
   }
 
   .appearance-swatch {
@@ -432,13 +485,21 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .appearance-orb,
+    .appearance-dial,
     .appearance-trigger,
     .appearance-close,
     .appearance-swatch > span,
     .choice-control,
     .contact-link {
       transition: none;
+    }
+
+    .appearance-orb {
+      animation: none;
+    }
+
+    .appearance-shuffle:is(:hover, :focus-visible, :active) .appearance-dial {
+      transform: none;
     }
 
     .work-next-preview,
