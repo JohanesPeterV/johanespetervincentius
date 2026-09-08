@@ -160,21 +160,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       mesh.rotateZ(placement.tilt + Math.sin(drift * 0.7) * 0.01);
       const scale = Math.min(halfHeight, halfWidth) * placement.size;
       mesh.scale.setScalar(scale * (compact ? 1.25 : 1));
-      // REASON: dark and coloured centres linger; the bright disk passes quickly without interrupting expansion.
-      const cycleTime = (time + index * 1.79 + 0.92) % 8;
-      let band = 0;
-      let expansion = cycleTime / 3.2;
-      if (cycleTime >= 7) {
-        band = 2;
-        expansion = cycleTime - 7;
-      } else if (cycleTime >= 3.2) {
-        band = 1;
-        expansion = (cycleTime - 3.2) / 3.8;
-      }
-      const radius =
-        0.38 * MathUtils.smoothstep(expansion, 0, 0.7) +
-        0.62 * MathUtils.smoothstep(expansion, 0.7, 1);
-      eye.uCycle.value = band + radius;
+      eye.uCycle.value = (time * 0.375 + index * 0.67 + 0.4) % 3;
       const blinkInterval = 6.2 + index * 1.13;
       const blinkTime = time + 1 + index * 1.73;
       const blinkPhase = blinkTime % blinkInterval;
