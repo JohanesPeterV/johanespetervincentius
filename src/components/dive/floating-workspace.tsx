@@ -31,7 +31,7 @@ const DEVICES: DevicePlacement[] = [
     path: '/models/workspace/macbook.glb',
     position: [-0.66, 0.28],
     mobile: [-0.22, 0.72],
-    rotation: [0.25, -0.4, -0.12],
+    rotation: [1.05, -0.4, -0.12],
     depth: 26,
     size: 0.22,
   },
