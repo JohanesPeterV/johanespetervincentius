@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import Image from 'next/image';
 
 import { CONTACT_ICONS, LINKTREE_LINKS } from './links';
 
@@ -8,13 +9,16 @@ export default function LinktreeCard() {
     <div className="pointer-events-auto relative z-10 mx-auto w-full max-w-md">
       <Card className="profile-card flex flex-col items-center gap-6 p-6 sm:p-8">
         <div className="flex flex-col items-center gap-5 text-center">
-          <div className="profile-monogram flex h-12 w-12 items-center justify-center">
-            J
-          </div>
+          <Image
+            src="/peter.webp"
+            alt="Portrait of Johanes Peter Vincentius"
+            width={192}
+            height={192}
+            priority
+            className="profile-avatar h-24 w-24 object-cover"
+          />
           <div className="flex flex-col items-center gap-3">
-            <h2 className="text-3xl font-semibold leading-tight tracking-[-0.045em] sm:text-4xl">
-              Johanes Peter Vincentius
-            </h2>
+            <h2 className="profile-card-name">Johanes Peter Vincentius</h2>
             <p className="text-sm text-muted-foreground">
               Building things for the web
             </p>

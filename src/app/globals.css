@@ -106,18 +106,21 @@
     border-color: hsl(var(--primary-text));
   }
 
-  .profile-monogram {
+  .profile-avatar {
     border: 1px solid hsl(var(--border));
-    border-radius: 1rem;
-    background: hsl(var(--card));
-    color: hsl(var(--foreground));
-    font-size: 1.75rem;
-    line-height: 1;
+    border-radius: 1.25rem;
   }
 
-  .dark .profile-monogram {
+  .dark .profile-avatar {
     border-color: hsl(var(--foreground) / 0.22);
-    background: hsl(var(--foreground) / 0.035);
+  }
+
+  .profile-card-name {
+    font-size: clamp(1.125rem, 5.6vw, 1.875rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
   }
 
   .profile-name {
