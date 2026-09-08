@@ -15,9 +15,9 @@ import MinimalCard from './minimal-card';
 export type CardType = 1 | 2 | 3;
 
 const CARDS = [
+  { label: 'Linktree card', Card: LinktreeCard },
   { label: 'Classic card', Card: ClassicCard },
   { label: 'Minimal card', Card: MinimalCard },
-  { label: 'Linktree card', Card: LinktreeCard },
 ];
 
 type LinktreeSectionParams = {
