@@ -78,7 +78,6 @@ export default function SpaceWorld({
         <directionalLight position={[-4, 8, 8]} intensity={1.4} />
         <OrbitalReality
           palette={palette}
-          progressRef={progressRef}
           motionMode={motionMode}
           gpuTier={gpuTier}
         />
