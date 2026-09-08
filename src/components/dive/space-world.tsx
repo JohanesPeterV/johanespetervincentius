@@ -63,7 +63,9 @@ export default function SpaceWorld({
           palette={palette}
           gpuTier={gpuTier}
           motionMode={motionMode}
-        />
+        >
+          <FloatingWorkspace palette={palette} motionMode={motionMode} />
+        </DiveAtmosphere>
         <AsteroidField
           reality="watchers"
           palette={palette}
@@ -71,7 +73,6 @@ export default function SpaceWorld({
           gpuTier={gpuTier}
         />
         <CosmicEyes palette={palette} motionMode={motionMode} />
-        <FloatingWorkspace palette={palette} motionMode={motionMode} />
       </group>
       <group ref={secondWorldRef} name="world-2" visible={false}>
         <directionalLight position={[-4, 8, 8]} intensity={1.4} />

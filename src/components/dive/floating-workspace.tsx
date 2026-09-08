@@ -2,12 +2,11 @@
 
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useEffect, useRef, useState } from 'react';
-import { Group } from 'three';
+import { Suspense, useContext, useEffect, useState } from 'react';
 
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
-import { createSpaceOrigin } from './space-origin';
+import { StarfieldMotionContext } from './starfield-motion';
 import { createWorkspaceModels } from './workspace-models';
 
 type FloatingWorkspaceParams = {
@@ -18,10 +17,8 @@ type FloatingWorkspaceParams = {
 type DevicePlacement = {
   name: string;
   path: string;
-  position: [number, number];
-  mobile: [number, number];
+  anchor: [number, number];
   rotation: [number, number, number];
-  depth: number;
   size: number;
 };
 
@@ -29,38 +26,30 @@ const DEVICES: DevicePlacement[] = [
   {
     name: 'MacBook Pro',
     path: '/models/workspace/macbook.glb',
-    position: [-0.66, 0.28],
-    mobile: [-0.22, 0.72],
+    anchor: [-0.65, 0.67],
     rotation: [1.05, -0.4, -0.12],
-    depth: 26,
-    size: 0.22,
+    size: 1.65,
   },
   {
     name: 'Magic Trackpad',
     path: '/models/workspace/trackpad.glb',
-    position: [0.56, 0.68],
-    mobile: [0.6, 0.74],
+    anchor: [0.65, 0.7],
     rotation: [1.05, 0.1, 0.25],
-    depth: 34,
-    size: 0.17,
+    size: 1.25,
   },
   {
     name: 'Xiaomi A27Ui',
     path: '/models/workspace/monitor.glb',
-    position: [0.72, -0.44],
-    mobile: [-0.68, -0.68],
+    anchor: [0.64, -0.64],
     rotation: [-0.08, -0.25, 0.1],
-    depth: 30,
-    size: 0.22,
+    size: 1.45,
   },
   {
     name: 'SPACE65 PYGA Black',
     path: '/models/workspace/keyboard.glb',
-    position: [-0.52, -0.56],
-    mobile: [0.35, -0.69],
+    anchor: [-0.64, -0.68],
     rotation: [1.02, -0.12, -0.18],
-    depth: 28,
-    size: 0.27,
+    size: 1.65,
   },
 ];
 
@@ -69,9 +58,15 @@ const ASSET_PATHS = DEVICES.map((device) => device.path);
 const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
   const assets = useGLTF(ASSET_PATHS);
   const renderer = useThree(({ gl }) => gl);
-  const groupRef = useRef<Group>(null);
-  const elapsedRef = useRef(0);
-  const [origin] = useState(createSpaceOrigin);
+  const starfield = useContext(StarfieldMotionContext);
+  const [stars] = useState(() => {
+    if (!starfield) {
+      throw new Error(
+        'Floating workspace devices need their parent starfield.',
+      );
+    }
+    return starfield.selectParticles(DEVICES.map(({ anchor }) => anchor));
+  });
   const [workspace, setWorkspace] = useState<ReturnType<
     typeof createWorkspaceModels
   > | null>(null);
@@ -101,30 +96,25 @@ const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
   ]);
 
   useFrame(({ size }, delta) => {
-    if (!workspace || !groupRef.current?.parent?.visible) {
+    if (!workspace || !starfield) {
       return;
     }
     const step = motionMode === 'full' ? Math.min(delta, 0.1) : 0;
-    elapsedRef.current += step;
     const compact = size.width < 768;
+    const time = starfield.time.value;
     workspace.models.forEach(({ object, mixer }, index) => {
       const placement = DEVICES[index];
-      const [x, y] = compact ? placement.mobile : placement.position;
-      const halfHeight = Math.tan((58 * Math.PI) / 360) * placement.depth;
-      const halfWidth = halfHeight * (size.width / size.height);
-      const drift = elapsedRef.current * 0.12 + index * 1.8;
-      object.position.set(
-        (x + Math.sin(drift) * 0.008) * halfWidth,
-        (y + Math.cos(drift * 0.8) * 0.012) * halfHeight,
-        -placement.depth,
-      );
+      const phase = index * 1.8;
+      starfield.sampleParticle(stars[index], object.position);
       object.rotation.set(
-        placement.rotation[0] + Math.sin(drift * 0.6) * 0.06,
-        placement.rotation[1] + Math.cos(drift * 0.7) * 0.1,
-        placement.rotation[2] + Math.sin(drift) * 0.035,
+        placement.rotation[0] + Math.sin(time * 0.27 + phase) * 0.3,
+        placement.rotation[1] + Math.cos(time * 0.23 + phase) * 0.3,
+        placement.rotation[2] + time * (0.12 + index * 0.025),
       );
       object.scale.setScalar(
-        Math.min(halfHeight, halfWidth) * placement.size * (compact ? 1.3 : 1),
+        placement.size *
+          Math.min(size.width / size.height, 1) *
+          (compact ? 1.5 : 1),
       );
       if (motionMode === 'reduced') {
         mixer.setTime(0);
@@ -132,15 +122,10 @@ const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
         mixer.update(step);
       }
     });
-  }, -1);
+  }, -0.5);
 
   return (
-    <group
-      ref={groupRef}
-      name="floating-workspace"
-      position={origin.position}
-      quaternion={origin.quaternion}
-    >
+    <group name="floating-workspace">
       {workspace?.models.map(({ object }, index) => (
         <primitive
           key={DEVICES[index].path}

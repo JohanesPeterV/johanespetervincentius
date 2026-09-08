@@ -3,7 +3,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
-import type { RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import {
   BackSide,
   IcosahedronGeometry,
@@ -22,6 +22,10 @@ import type { HeroHandoff } from './hero-handoff';
 import { buildSpatialStarfield } from './starfield-space';
 import { createStarGeometry } from './starfield-geometry';
 import { createSpaceOrigin } from './space-origin';
+import {
+  createStarfieldMotion,
+  StarfieldMotionContext,
+} from './starfield-motion';
 import type { StarfieldReality } from './world-layout';
 import {
   starfieldFragment,
@@ -47,6 +51,7 @@ type DiveAtmosphereParams = {
   progressRef: RefObject<number>;
   handoffRef: RefObject<HeroHandoff>;
   interactionRef: RefObject<StarfieldInteraction>;
+  children?: ReactNode;
 };
 
 const FORMATION_HOLD_SCALE = 4;
@@ -59,8 +64,10 @@ export default function DiveAtmosphere({
   progressRef,
   handoffRef,
   interactionRef,
+  children,
 }: DiveAtmosphereParams) {
   const aspect = useThree(({ size }) => size.width / size.height);
+  const camera = useThree(({ camera }) => camera);
   const advanceRequest = useAtomValue(starfieldRequestAtom);
   const setStatus = useSetAtom(starfieldStatusAtom);
   const count = reality === 'watchers' ? 2400 : 2800;
@@ -122,6 +129,15 @@ export default function DiveAtmosphere({
     uBurstAge: { value: 100 },
     uInteraction: { value: 1 },
   }));
+  const [motion] = useState(() =>
+    createStarfieldMotion({
+      attributes: field.attributes,
+      uniforms,
+      camera,
+      origin: field.origin,
+      layout: field.layout,
+    }),
+  );
 
   // REASON: the shared DOM control must return to loading when its canvas renderer unmounts.
   useEffect(() => {
@@ -219,40 +235,43 @@ export default function DiveAtmosphere({
   const instanceCount = gpuTier < 2 ? count / 2 : count;
 
   return (
-    <group
-      position={field.origin.position}
-      quaternion={field.origin.quaternion}
-    >
-      <mesh name={`starfield-${reality}`} frustumCulled={false}>
-        <instancedBufferGeometry
-          index={field.body.index}
-          attributes={{ ...field.body.attributes, ...field.attributes }}
-          instanceCount={instanceCount}
-        />
-        <shaderMaterial
-          uniforms={uniforms}
-          vertexShader={starfieldVertex}
-          fragmentShader={starfieldFragment}
-          toneMapped={false}
-        />
-      </mesh>
-      <mesh name={`starfield-halo-${reality}`} frustumCulled={false}>
-        <instancedBufferGeometry
-          index={field.halo.index}
-          attributes={{ ...field.halo.attributes, ...field.attributes }}
-          instanceCount={instanceCount}
-        />
-        <shaderMaterial
-          uniforms={uniforms}
-          defines={{ STAR_HALO: 1 }}
-          vertexShader={starfieldVertex}
-          fragmentShader={starfieldHaloFragment}
-          transparent
-          side={BackSide}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </mesh>
-    </group>
+    <StarfieldMotionContext.Provider value={motion}>
+      <group
+        position={field.origin.position}
+        quaternion={field.origin.quaternion}
+      >
+        <mesh name={`starfield-${reality}`} frustumCulled={false}>
+          <instancedBufferGeometry
+            index={field.body.index}
+            attributes={{ ...field.body.attributes, ...field.attributes }}
+            instanceCount={instanceCount}
+          />
+          <shaderMaterial
+            uniforms={uniforms}
+            vertexShader={starfieldVertex}
+            fragmentShader={starfieldFragment}
+            toneMapped={false}
+          />
+        </mesh>
+        <mesh name={`starfield-halo-${reality}`} frustumCulled={false}>
+          <instancedBufferGeometry
+            index={field.halo.index}
+            attributes={{ ...field.halo.attributes, ...field.attributes }}
+            instanceCount={instanceCount}
+          />
+          <shaderMaterial
+            uniforms={uniforms}
+            defines={{ STAR_HALO: 1 }}
+            vertexShader={starfieldVertex}
+            fragmentShader={starfieldHaloFragment}
+            transparent
+            side={BackSide}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+        {children}
+      </group>
+    </StarfieldMotionContext.Provider>
   );
 }

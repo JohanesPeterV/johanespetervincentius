@@ -26,7 +26,7 @@ Temporary tooling: glTF Transform 4.5.0 and Meshoptimizer 1.2.0. Compatible stat
 | Monitor  | 1,239,468 |         116,334 |              17 |
 | Keyboard | 1,402,832 |         171,652 |             116 |
 
-All four outputs were decoded again and passed Khronos glTF Validator with zero errors and warnings. The runtime uses Drei's bundled Meshopt decoder, normalizes each model by visible width, and provides a shared reflection environment. Dark mode preserves product colours; light mode remaps shading through the scene's existing two-ink shader. Only instance-owned materials, reflection resources, and mixers are disposed. Loader geometry and textures stay cached.
+All four outputs were decoded again and passed Khronos glTF Validator with zero errors and warnings. The runtime uses Drei's bundled Meshopt decoder, normalizes each model by visible width, and provides a shared reflection environment. Devices sample the starfield's live particle buffers and clock for formation changes, drift, pointer/click response, and departure flow. Particle selection considers the authored formations and spacing; small world-space sizes preserve perspective while responsive scaling keeps devices quiet on mobile. Dark mode preserves product colours; light mode remaps shading through the scene's existing two-ink shader. Only instance-owned materials, reflection resources, and mixers are disposed. Loader geometry and textures stay cached.
 
 ## Attribution
 
