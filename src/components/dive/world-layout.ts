@@ -10,7 +10,7 @@ type ShapeGenerator = (
   index: number,
   random: () => number,
   aspect: number,
-) => [number, number];
+) => [x: number, y: number, depth?: number];
 
 export type StarfieldShape = {
   id: string;
@@ -75,6 +75,48 @@ const formOrbitalWave: ShapeGenerator = (index, random, aspect) => {
   ];
 };
 
+const formBitcoin: ShapeGenerator = (index, random, aspect) => {
+  const compact = aspect < 0.95;
+  // REASON: portrait prioritizes the larger glyph; interleaving keeps reduced GPU tiers complete.
+  const part = compact ? 5 + (index % 15) : index % 20;
+  const t = (index * 0.61803398875) % 1;
+  let x = 0;
+  let y = 0;
+  if (part < 5) {
+    const angle = t * Math.PI * 2;
+    x = Math.cos(angle);
+    y = Math.sin(angle);
+  } else if (part < 7) {
+    x = -0.42;
+    y = (t - 0.5) * 1.04;
+  } else if (part < 13) {
+    const side = part % 2 === 0 ? 1 : -1;
+    x = 0.14 + Math.sin(t * Math.PI) * (side === 1 ? 0.4 : 0.46);
+    y = side * 0.26 + Math.cos(t * Math.PI) * 0.26;
+  } else if (part < 16) {
+    x = -0.5 + t * 0.64;
+    y = (part - 14) * 0.52;
+  } else {
+    const side = part < 18 ? -1 : 1;
+    x = part % 2 === 0 ? -0.32 : 0.14;
+    y = side * (0.52 + t * 0.32);
+  }
+  x += (random() - 0.5) * 0.025;
+  y += (random() - 0.5) * 0.025;
+  const scale = compact
+    ? Math.min(0.19, aspect * 0.52)
+    : Math.min(0.36, aspect * 0.23);
+  const centreX = compact ? 0 : aspect * 0.64;
+  const centreY = compact ? 0.78 : 0.12;
+  const tilt = -Math.PI / 12;
+  // REASON: one depth plane prevents perspective spread from separating the emblem's strokes.
+  return [
+    centreX + (x * Math.cos(tilt) - y * Math.sin(tilt)) * scale,
+    centreY + (x * Math.sin(tilt) + y * Math.cos(tilt)) * scale,
+    0,
+  ];
+};
+
 const formDustBelt: ShapeGenerator = (_index, random, aspect) => {
   const x = (random() - 0.5) * 2.7;
   return [x * aspect, x * 0.46 + (random() - 0.5) * 0.6];
@@ -124,6 +166,13 @@ export const STARFIELD_SHAPES: Readonly<
       hold: 1.4,
       duration: 2.4,
       appearance: { size: 1, glow: 1, tint: 0.65 },
+    },
+    {
+      id: 'bitcoin',
+      generate: formBitcoin,
+      hold: 2.2,
+      duration: 2.4,
+      appearance: { size: 1, glow: 0.12, tint: 0.72 },
     },
   ],
   orbital: [
@@ -178,8 +227,12 @@ export const buildStarfield = (
     seeds.set([random(), random(), random()], offset);
     shapes.forEach((shape, frame) => {
       const shapeRandom = createSeededRandom(seed + star * 37);
-      const [shapeX, shapeY] = shape.generate(star, shapeRandom, aspect);
-      frames[frame].positions.set([shapeX, shapeY, depth], offset);
+      const [shapeX, shapeY, shapeDepth = depth] = shape.generate(
+        star,
+        shapeRandom,
+        aspect,
+      );
+      frames[frame].positions.set([shapeX, shapeY, shapeDepth], offset);
     });
   }
 
