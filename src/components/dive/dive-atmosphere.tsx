@@ -54,7 +54,7 @@ type DiveAtmosphereParams = {
   children?: ReactNode;
 };
 
-const FORMATION_HOLD_SCALE = 4;
+const FORMATION_HOLD_SCALE = 5;
 
 export default function DiveAtmosphere({
   reality,
