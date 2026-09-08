@@ -21,52 +21,71 @@ type EyePlacement = {
   size: number;
   depth: number;
   tilt: number;
+  yaw: number;
   variant: 'primary' | 'secondary';
-  mobile?: [number, number];
+  mobile: [number, number];
 };
 
 const EYES: EyePlacement[] = [
   {
     x: -0.78,
     y: 0.66,
-    size: 0.06,
+    size: 0.05,
     depth: 28,
     tilt: -0.025,
+    yaw: 0.18,
     variant: 'primary',
-    mobile: [0.76, 0.58],
+    mobile: [0.8, 0.77],
   },
   {
     x: 0.86,
     y: -0.12,
-    size: 0.05,
-    depth: 38,
+    size: 0.034,
+    depth: 54,
     tilt: -0.02,
+    yaw: -0.22,
     variant: 'secondary',
+    mobile: [0.76, -0.77],
   },
   {
     x: 0.14,
     y: 0.86,
-    size: 0.07,
-    depth: 32,
+    size: 0.074,
+    depth: 25,
     tilt: 0.02,
+    yaw: 0.12,
     variant: 'secondary',
+    mobile: [-0.14, 0.77],
   },
   {
     x: -0.8,
     y: -0.08,
-    size: 0.066,
+    size: 0.052,
     depth: 35,
     tilt: 0.015,
+    yaw: 0.2,
     variant: 'secondary',
-    mobile: [-0.74, 0.76],
+    mobile: [-0.9, -0.25],
   },
   {
     x: -0.4,
     y: 0.85,
-    size: 0.035,
-    depth: 30,
+    size: 0.028,
+    depth: 62,
     tilt: -0.015,
+    yaw: -0.18,
     variant: 'primary',
+    mobile: [-0.76, 0.8],
+  },
+  {
+    x: 0.72,
+    y: 0.52,
+    size: 0.032,
+    depth: 46,
+    tilt: 0.04,
+    yaw: -0.16,
+    variant: 'primary',
+    mobile: [0.92, 0.05],
   },
 ];
 
@@ -87,7 +106,7 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     })),
   );
 
-  // REASON: five meshes share this GPU geometry, so its owner must dispose it once on unmount.
+  // REASON: the eyes share this GPU geometry, so its owner must dispose it once on unmount.
   useEffect(() => () => geometry.dispose(), [geometry]);
 
   // REASON: persistent Three.js uniforms need theme updates without reparsing CSS colours every frame.
@@ -121,17 +140,13 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     camera.getWorldPosition(cameraTargetRef.current);
     group.children.forEach((mesh, index) => {
       const placement = EYES[index];
-      mesh.visible = !compact || placement.mobile !== undefined;
-      if (!mesh.visible) {
-        return;
-      }
       const eye = uniforms[index];
       const halfHeight = tangent * placement.depth;
       const halfWidth = halfHeight * (size.width / size.height);
       const drift = time * 0.08 + index * 1.7;
       let x = placement.x;
       let y = placement.y;
-      if (compact && placement.mobile) {
+      if (compact) {
         [x, y] = placement.mobile;
       }
       mesh.position.set(
@@ -140,13 +155,38 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
         -placement.depth,
       );
       mesh.lookAt(cameraTargetRef.current);
+      mesh.rotateY(placement.yaw + Math.sin(drift * 0.65) * 0.035);
+      mesh.rotateX(-0.12 + Math.cos(drift * 0.5) * 0.025);
       mesh.rotateZ(placement.tilt + Math.sin(drift * 0.7) * 0.01);
-      mesh.scale.setScalar(Math.min(halfHeight, halfWidth) * placement.size);
-      eye.uCycle.value = (time * 0.48 + index * 0.67 + 0.4) % 3;
-      const blinkPhase = (time + 1 + index * 1.73) % (4.8 + index * 0.91);
-      const closing = MathUtils.smoothstep(blinkPhase, 0, 0.085);
-      const reopening = MathUtils.smoothstep(blinkPhase, 0.12, 0.29);
-      eye.uBlink.value = motionMode === 'reduced' ? 0 : closing - reopening;
+      const scale = Math.min(halfHeight, halfWidth) * placement.size;
+      mesh.scale.setScalar(scale * (compact ? 1.25 : 1));
+      // REASON: dark and coloured centres linger; the bright disk passes quickly without interrupting expansion.
+      const cycleTime = (time + index * 1.79 + 0.92) % 8;
+      let band = 0;
+      let expansion = cycleTime / 3.2;
+      if (cycleTime >= 7) {
+        band = 2;
+        expansion = cycleTime - 7;
+      } else if (cycleTime >= 3.2) {
+        band = 1;
+        expansion = (cycleTime - 3.2) / 3.8;
+      }
+      const radius =
+        0.38 * MathUtils.smoothstep(expansion, 0, 0.7) +
+        0.62 * MathUtils.smoothstep(expansion, 0.7, 1);
+      eye.uCycle.value = band + radius;
+      const blinkInterval = 6.2 + index * 1.13;
+      const blinkTime = time + 1 + index * 1.73;
+      const blinkPhase = blinkTime % blinkInterval;
+      let blink =
+        MathUtils.smoothstep(blinkPhase, 0, 0.075) -
+        MathUtils.smoothstep(blinkPhase, 0.11, 0.32);
+      if ((Math.floor(blinkTime / blinkInterval) + index) % 4 === 3) {
+        blink +=
+          MathUtils.smoothstep(blinkPhase, 0.42, 0.49) -
+          MathUtils.smoothstep(blinkPhase, 0.52, 0.76);
+      }
+      eye.uBlink.value = motionMode === 'reduced' ? 0 : blink;
     });
   }, -1);
 

@@ -11,20 +11,20 @@ export const COSMIC_EYE_CLOSED_RATIO = 0.025;
 
 const SEGMENTS = 64;
 const CONTOURS: EyeContour[] = [
-  { radius: 0.28, depth: 0.13, interior: 1 },
-  { radius: 0.56, depth: 0.105, interior: 1 },
-  { radius: 0.78, depth: 0.055, interior: 1 },
-  { radius: COSMIC_EYE_OPENING_RADIUS, depth: 0.015, interior: 1 },
-  { radius: 0.86, depth: 0.015, interior: 0 },
-  { radius: 0.9, depth: 0.16, interior: 0 },
-  { radius: 0.96, depth: 0.16, interior: 0 },
+  { radius: 0.28, depth: 0.095, interior: 1 },
+  { radius: 0.56, depth: 0.07, interior: 1 },
+  { radius: 0.78, depth: 0.03, interior: 1 },
+  { radius: COSMIC_EYE_OPENING_RADIUS, depth: 0, interior: 1 },
+  { radius: 0.86, depth: 0, interior: 0 },
+  { radius: 0.9, depth: 0.22, interior: 0 },
+  { radius: 0.95, depth: 0.22, interior: 0 },
   { radius: 1, depth: 0.08, interior: 0 },
-  { radius: 1, depth: -0.18, interior: 0 },
-  { radius: 0.94, depth: -0.25, interior: 0 },
+  { radius: 1, depth: -0.26, interior: 0 },
+  { radius: 0.94, depth: -0.34, interior: 0 },
 ];
 
 export const createCosmicEyeGeometry = (): BufferGeometry => {
-  const positions = [0, 0, 0.15];
+  const positions = [0, 0, 0.11];
   const interior = [1];
   const indices: number[] = [];
 
@@ -40,7 +40,7 @@ export const createCosmicEyeGeometry = (): BufferGeometry => {
   });
 
   const back = positions.length / 3;
-  positions.push(0, 0, -0.25);
+  positions.push(0, 0, -0.34);
   interior.push(0);
 
   for (let segment = 0; segment < SEGMENTS; segment += 1) {

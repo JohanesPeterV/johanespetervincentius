@@ -59,9 +59,13 @@ export const cosmicEyeFragment = `
     float crease = (1.0 - smoothstep(0.004, 0.018, abs(vPosition.y))) * smoothstep(0.8, 1.0, uBlink);
     crease *= 1.0 - smoothstep(radius * 0.8, radius, abs(vPosition.x));
     pigment = mix(pigment, uDark, crease * 0.8);
-    float light = max(dot(normalize(vNormal), normalize(vec3(-0.6, 0.7, 0.8))), 0.0);
-    float shade = mix(0.24 + light * 0.76, 0.76 + light * 0.24, interior);
-    gl_FragColor = vec4(pigment * shade, 1.0);
+    vec3 normal = normalize(vNormal);
+    float light = max(dot(normal, normalize(vec3(-0.6, 0.7, 0.8))), 0.0);
+    float bevel = smoothstep(0.06, 0.2, vPosition.z);
+    vec3 body = mix(uDark, pigment, 0.18 + light * 0.82);
+    body = mix(body, uLight, pow(light, 10.0) * bevel * 0.28);
+    vec3 face = pigment * (0.94 + light * 0.06);
+    gl_FragColor = vec4(mix(body, face, interior), 1.0);
     #include <colorspace_fragment>
   }
 `;
