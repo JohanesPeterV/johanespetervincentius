@@ -57,40 +57,90 @@ const formOrbitalWave: ShapeGenerator = (index, random, aspect) => {
   ];
 };
 
+type Point = [x: number, y: number];
+
+type Stroke = {
+  weight: number;
+  width: number;
+  point: (t: number) => Point;
+};
+
+const line = (from: Point, to: Point, width: number): Stroke => ({
+  weight: Math.hypot(to[0] - from[0], to[1] - from[1]) * width,
+  width,
+  point: (t) => [
+    from[0] + (to[0] - from[0]) * t,
+    from[1] + (to[1] - from[1]) * t,
+  ],
+});
+
+const ring = (radius: number, width: number): Stroke => ({
+  weight: Math.PI * 2 * radius * width,
+  width,
+  point: (t) => [
+    Math.cos(t * Math.PI * 2) * radius,
+    Math.sin(t * Math.PI * 2) * radius,
+  ],
+});
+
+const bowl = (centre: Point, radius: number, width: number): Stroke => ({
+  weight: Math.PI * radius * width,
+  width,
+  point: (t) => [
+    centre[0] + Math.cos(Math.PI / 2 - t * Math.PI) * radius,
+    centre[1] + Math.sin(Math.PI / 2 - t * Math.PI) * radius,
+  ],
+});
+
+const GLYPH_WIDTH = 0.15;
+const BITCOIN_GLYPH: readonly Stroke[] = [
+  line([-0.32, -0.64], [-0.32, 0.64], GLYPH_WIDTH),
+  line([-0.32, 0.64], [0.04, 0.64], GLYPH_WIDTH),
+  line([-0.32, 0], [0.08, 0], GLYPH_WIDTH),
+  line([-0.32, -0.64], [0.08, -0.64], GLYPH_WIDTH),
+  bowl([0.04, 0.32], 0.32, GLYPH_WIDTH),
+  bowl([0.08, -0.32], 0.32, GLYPH_WIDTH),
+  line([-0.14, 0.64], [-0.14, 0.82], 0.13),
+  line([0.06, 0.64], [0.06, 0.82], 0.13),
+  line([-0.14, -0.64], [-0.14, -0.82], 0.13),
+  line([0.06, -0.64], [0.06, -0.82], 0.13),
+];
+const BITCOIN_EMBLEM: readonly Stroke[] = [ring(1, 0.1), ...BITCOIN_GLYPH];
+
+const sampleStrokes = (
+  strokes: readonly Stroke[],
+  fraction: number,
+  random: () => number,
+): Point => {
+  const total = strokes.reduce((sum, stroke) => sum + stroke.weight, 0);
+  let remaining = fraction * total;
+  let stroke = strokes[strokes.length - 1];
+  for (const candidate of strokes) {
+    if (remaining <= candidate.weight) {
+      stroke = candidate;
+      break;
+    }
+    remaining -= candidate.weight;
+  }
+  const [x, y] = stroke.point(remaining / stroke.weight);
+  return [
+    x + (random() - 0.5) * stroke.width,
+    y + (random() - 0.5) * stroke.width,
+  ];
+};
+
 const formBitcoin: ShapeGenerator = (index, random, aspect) => {
   const compact = aspect < 0.95;
-  // REASON: portrait prioritizes the larger glyph; interleaving keeps reduced GPU tiers complete.
-  const part = compact ? 5 + (index % 15) : index % 20;
-  const t = (index * 0.61803398875) % 1;
-  let x = 0;
-  let y = 0;
-  if (part < 5) {
-    const angle = t * Math.PI * 2;
-    x = Math.cos(angle);
-    y = Math.sin(angle);
-  } else if (part < 7) {
-    x = -0.42;
-    y = (t - 0.5) * 1.04;
-  } else if (part < 13) {
-    const side = part % 2 === 0 ? 1 : -1;
-    x = 0.14 + Math.sin(t * Math.PI) * (side === 1 ? 0.4 : 0.46);
-    y = side * 0.26 + Math.cos(t * Math.PI) * 0.26;
-  } else if (part < 16) {
-    x = -0.5 + t * 0.64;
-    y = (part - 14) * 0.52;
-  } else {
-    const side = part < 18 ? -1 : 1;
-    x = part % 2 === 0 ? -0.32 : 0.14;
-    y = side * (0.52 + t * 0.32);
-  }
-  x += (random() - 0.5) * 0.025;
-  y += (random() - 0.5) * 0.025;
+  // REASON: portrait drops the ring so the glyph keeps enough stars to stay solid.
+  const strokes = compact ? BITCOIN_GLYPH : BITCOIN_EMBLEM;
+  // REASON: golden-ratio spacing fills every stroke evenly at any star count.
+  const [x, y] = sampleStrokes(strokes, (index * 0.61803398875) % 1, random);
   const scale = compact
     ? Math.min(0.19, aspect * 0.52)
     : Math.min(0.36, aspect * 0.23);
   const centreX = compact ? 0 : aspect * 0.64;
   const centreY = compact ? 0.78 : 0.12;
-  const tilt = -Math.PI / 12;
+  const tilt = -Math.PI / 13;
   // REASON: one depth plane prevents perspective spread from separating the emblem's strokes.
   return [
     centreX + (x * Math.cos(tilt) - y * Math.sin(tilt)) * scale,
