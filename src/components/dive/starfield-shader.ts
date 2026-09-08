@@ -151,10 +151,11 @@ export const starfieldFragment = `
   }
 `;
 
+// REASON: glow only exists in the dark, so this pass is dark-mode only and the
+// printed star carries no halo at all.
 export const starfieldHaloFragment = `
   uniform vec3 uAccent;
   uniform vec3 uHighlight;
-  uniform float uLuminous;
   varying float vAlpha;
   varying float vGlow;
   varying float vTint;
@@ -164,13 +165,8 @@ export const starfieldHaloFragment = `
 
   void main() {
     float facing = abs(dot(normalize(vNormal), normalize(-vViewPosition)));
-    // REASON: a printed halo is a thin ring around the star; glow only exists in the dark.
     float glow = pow(facing, 5.0) * 0.32;
-    float ring = smoothstep(0.28, 0.36, facing) * (1.0 - smoothstep(0.5, 0.58, facing)) * 0.7;
-    float alpha = mix(ring, glow, uLuminous) * vGlow * vHalo * vAlpha;
-    vec3 glowInk = mix(uAccent, uHighlight, vTint);
-    vec3 ringInk = mix(uHighlight, uAccent, vTint);
-    gl_FragColor = vec4(mix(ringInk, glowInk, uLuminous), alpha);
+    gl_FragColor = vec4(mix(uAccent, uHighlight, vTint), glow * vGlow * vHalo * vAlpha);
     #include <colorspace_fragment>
   }
 `;

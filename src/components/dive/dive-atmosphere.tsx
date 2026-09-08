@@ -248,23 +248,25 @@ export default function DiveAtmosphere({
             toneMapped={false}
           />
         </mesh>
-        <mesh name={`starfield-halo-${reality}`} frustumCulled={false}>
-          <instancedBufferGeometry
-            index={field.halo.index}
-            attributes={{ ...field.halo.attributes, ...field.attributes }}
-            instanceCount={instanceCount}
-          />
-          <shaderMaterial
-            uniforms={uniforms}
-            defines={{ STAR_HALO: 1 }}
-            vertexShader={starfieldVertex}
-            fragmentShader={starfieldHaloFragment}
-            transparent
-            side={BackSide}
-            depthWrite={false}
-            toneMapped={false}
-          />
-        </mesh>
+        {palette.mode === 'dark' && (
+          <mesh name={`starfield-halo-${reality}`} frustumCulled={false}>
+            <instancedBufferGeometry
+              index={field.halo.index}
+              attributes={{ ...field.halo.attributes, ...field.attributes }}
+              instanceCount={instanceCount}
+            />
+            <shaderMaterial
+              uniforms={uniforms}
+              defines={{ STAR_HALO: 1 }}
+              vertexShader={starfieldVertex}
+              fragmentShader={starfieldHaloFragment}
+              transparent
+              side={BackSide}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </mesh>
+        )}
         {children}
       </group>
     </StarfieldMotionContext.Provider>

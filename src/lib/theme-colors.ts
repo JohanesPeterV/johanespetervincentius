@@ -9,14 +9,16 @@ type ThemeMode = 'light' | 'dark';
 
 const neutralSurfaces = {
   light: {
-    // REASON: light mode is paper and ink, so the neutrals stay hue-free and
-    // the ground is near white rather than a tinted dashboard grey.
-    background: '0 0% 98%',
-    foreground: '0 0% 9%',
+    // REASON: light mode is riso on paper, so the ground is warm off-white
+    // stock rather than screen white. The card surface stays pure white so it
+    // lifts off the sheet, and every other neutral carries the same warmth so
+    // nothing reads cold against it.
+    background: '38 18% 94%',
+    foreground: '30 8% 9%',
     surface: '0 0% 100%',
-    muted: '0 0% 94%',
-    mutedForeground: '0 0% 38%',
-    border: '0 0% 87%',
+    muted: '38 14% 89%',
+    mutedForeground: '38 6% 38%',
+    border: '38 12% 83%',
   },
   dark: {
     background: '0 0% 0%',
@@ -88,7 +90,7 @@ export const getThemeColorValues = (
   const base = getBaseColor(themeName);
   const neutral = neutralSurfaces[mode];
   const [hue, saturation] = base.primary.split(' ').map(parseFloat);
-  const accent = `${hue} ${saturation * 0.3}% ${mode === 'light' ? 94 : 18}%`;
+  const accent = `${hue} ${saturation * 0.3}% ${mode === 'light' ? 89 : 18}%`;
   const primaryText = getReadableColor(base.primary, [neutral.muted, accent]);
   const destructive = getReadableColor('0 72% 50%', [neutral.muted]);
 
