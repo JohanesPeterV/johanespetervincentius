@@ -10,7 +10,7 @@ export default function LinktreeCard() {
       <Card className="profile-card flex flex-col items-center gap-6 p-6 sm:p-8">
         <div className="flex flex-col items-center gap-5 text-center">
           <Image
-            src="/peter.webp"
+            src="/peter2.jpg"
             alt="Portrait of Johanes Peter Vincentius"
             width={192}
             height={192}
