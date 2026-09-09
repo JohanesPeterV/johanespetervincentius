@@ -44,19 +44,13 @@
   }
 }
 
-@keyframes avatarTrace {
-  to {
-    stroke-dashoffset: -100;
-  }
-}
-
-@keyframes avatarSpark {
+@keyframes coffeeSteam {
   0%,
   100% {
-    transform: scale(0.86) rotate(-8deg);
+    transform: translateY(1px) rotate(-1deg);
   }
   50% {
-    transform: scale(1) rotate(8deg);
+    transform: translateY(-2px) rotate(1deg);
   }
 }
 
@@ -132,55 +126,77 @@
   }
 
   .profile-avatar-frame {
+    --coffee-paper: hsl(var(--background));
+    --coffee-foam: color-mix(
+      in srgb,
+      hsl(var(--primary)) 18%,
+      var(--coffee-paper)
+    );
     color: hsl(var(--primary));
+  }
+
+  .dark .profile-avatar-frame {
+    --coffee-paper: hsl(var(--foreground));
   }
 
   .profile-avatar-track {
     stroke: hsl(var(--primary) / 0.3);
   }
 
-  .profile-avatar-primary {
-    stroke: currentColor;
-  }
-
-  .profile-avatar-secondary {
+  .profile-avatar-rim {
     stroke: hsl(var(--secondary));
   }
 
-  .profile-avatar-trace {
-    stroke: currentColor;
-    animation: avatarTrace 12s linear infinite;
-  }
-
-  .profile-avatar-spark {
+  .profile-coffee-steam {
+    fill: var(--coffee-foam);
+    stroke: hsl(var(--secondary) / 0.45);
+    stroke-width: 0.65;
+    stroke-linejoin: round;
     transform-box: fill-box;
     transform-origin: center;
-    animation: avatarSpark 4s ease-in-out infinite;
+    animation: coffeeSteam 5s ease-in-out infinite;
   }
 
-  .profile-avatar-spark-secondary {
+  .profile-coffee-steam-side {
+    animation-delay: -2.5s;
+  }
+
+  .profile-coffee-steam-fold {
+    fill: none;
+    stroke: hsl(var(--secondary) / 0.5);
+    stroke-linecap: round;
+  }
+
+  .profile-coffee-mug {
+    stroke: hsl(var(--background) / 0.7);
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+  }
+
+  .profile-coffee-cup {
+    fill: var(--coffee-paper);
+  }
+
+  .profile-coffee-shade {
     fill: hsl(var(--secondary));
+    fill-opacity: 0.16;
+    stroke: none;
   }
 
-  .profile-avatar-spark-primary {
-    fill: currentColor;
-    animation-delay: -2s;
+  .profile-coffee-emblem {
+    fill: hsl(163 55% 28%);
+    stroke: none;
   }
 
-  .profile-avatar-spark-core {
-    fill: hsl(var(--background));
-    fill-opacity: 0.75;
+  .profile-coffee-drink {
+    fill: color-mix(in srgb, hsl(var(--secondary)) 60%, hsl(var(--background)));
+    stroke: var(--coffee-foam);
   }
 
-  .dark .profile-avatar-primary,
-  .dark .profile-avatar-trace,
-  .dark .profile-avatar-spark-primary {
-    filter: drop-shadow(0 0 3px hsl(var(--primary) / 0.5));
-  }
-
-  .dark .profile-avatar-secondary,
-  .dark .profile-avatar-spark-secondary {
-    filter: drop-shadow(0 0 3px hsl(var(--secondary) / 0.5));
+  .profile-coffee-foam-fold {
+    stroke: var(--coffee-foam);
+    stroke-width: 0.9;
+    stroke-linecap: round;
   }
 
   .profile-card-name {
@@ -771,8 +787,7 @@
     }
 
     .appearance-orb,
-    .profile-avatar-trace,
-    .profile-avatar-spark {
+    .profile-coffee-steam {
       animation: none;
     }
 
