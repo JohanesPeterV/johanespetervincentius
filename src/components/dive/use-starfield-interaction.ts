@@ -7,15 +7,6 @@ import { Vector2 } from 'three';
 export type StarfieldInteraction = {
   pointer: Vector2;
   active: number;
-  burstOrigin: Vector2;
-  burst: number;
-};
-
-type PointerGesture = {
-  id: number;
-  x: number;
-  y: number;
-  distanceSquared: number;
 };
 
 const INTERACTIVE_SELECTOR =
@@ -45,10 +36,7 @@ export const useStarfieldInteraction = (): RefObject<StarfieldInteraction> => {
   const interactionRef = useRef<StarfieldInteraction>({
     pointer: new Vector2(),
     active: 0,
-    burstOrigin: new Vector2(),
-    burst: 0,
   });
-  const gestureRef = useRef<PointerGesture | null>(null);
 
   // REASON: DOM overlays cover the canvas; passive native listeners bridge
   // pointer input into the shader without taking over existing gestures.
@@ -58,62 +46,15 @@ export const useStarfieldInteraction = (): RefObject<StarfieldInteraction> => {
 
     const handleReset = (): void => {
       interaction.active = 0;
-      gestureRef.current = null;
-    };
-
-    const handleScroll = (): void => {
-      gestureRef.current = null;
-    };
-
-    const handlePointerDown = (event: PointerEvent): void => {
-      gestureRef.current = null;
-      if (!event.isPrimary || event.button !== 0 || !isScenePoint(event)) {
-        interaction.active = 0;
-        return;
-      }
-      gestureRef.current = {
-        id: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        distanceSquared: 0,
-      };
     };
 
     const handlePointerMove = (event: PointerEvent): void => {
-      const gesture = gestureRef.current;
-      if (gesture?.id === event.pointerId) {
-        const x = event.clientX - gesture.x;
-        const y = event.clientY - gesture.y;
-        gesture.distanceSquared = Math.max(
-          gesture.distanceSquared,
-          x * x + y * y,
-        );
-      }
       if (event.pointerType !== 'mouse' || !isScenePoint(event)) {
         interaction.active = 0;
         return;
       }
       writePointer(interaction.pointer, event);
       interaction.active = 1;
-    };
-
-    const handlePointerUp = (event: PointerEvent): void => {
-      const gesture = gestureRef.current;
-      if (gesture?.id !== event.pointerId) {
-        return;
-      }
-      gestureRef.current = null;
-      const x = event.clientX - gesture.x;
-      const y = event.clientY - gesture.y;
-      if (
-        event.button !== 0 ||
-        Math.max(gesture.distanceSquared, x * x + y * y) > 36 ||
-        !isScenePoint(event)
-      ) {
-        return;
-      }
-      writePointer(interaction.burstOrigin, event);
-      interaction.burst += 1;
     };
 
     const handlePointerOut = (event: PointerEvent): void => {
@@ -125,24 +66,16 @@ export const useStarfieldInteraction = (): RefObject<StarfieldInteraction> => {
       }
     };
 
-    window.addEventListener('pointerdown', handlePointerDown, options);
     window.addEventListener('pointermove', handlePointerMove, options);
-    window.addEventListener('pointerup', handlePointerUp, options);
     window.addEventListener('pointerout', handlePointerOut, options);
     window.addEventListener('pointercancel', handleReset, options);
     window.addEventListener('blur', handleReset, options);
-    window.addEventListener('wheel', handleScroll, options);
-    window.addEventListener('scroll', handleScroll, options);
     return () => {
       handleReset();
-      window.removeEventListener('pointerdown', handlePointerDown, options);
       window.removeEventListener('pointermove', handlePointerMove, options);
-      window.removeEventListener('pointerup', handlePointerUp, options);
       window.removeEventListener('pointerout', handlePointerOut, options);
       window.removeEventListener('pointercancel', handleReset, options);
       window.removeEventListener('blur', handleReset, options);
-      window.removeEventListener('wheel', handleScroll, options);
-      window.removeEventListener('scroll', handleScroll, options);
     };
   }, []);
 

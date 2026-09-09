@@ -2,8 +2,30 @@ export type PointerDrag = {
   id: number | null;
   x: number;
   y: number;
-  axis: 'pending' | 'horizontal' | 'vertical';
+  axis: 'pending' | 'pending-vertical' | 'horizontal' | 'vertical';
   scrollTarget: HTMLElement | null;
+};
+
+export const dragInputDelta = (
+  drag: PointerDrag,
+  pointer: { clientX: number; clientY: number },
+): number => {
+  const delta = drag.y - pointer.clientY;
+  if (drag.axis === 'pending' || drag.axis === 'pending-vertical') {
+    const horizontal = Math.abs(drag.x - pointer.clientX);
+    if (Math.max(horizontal, Math.abs(delta)) < 6) {
+      return 0;
+    }
+    drag.axis =
+      drag.axis === 'pending' && horizontal > Math.abs(delta)
+        ? 'horizontal'
+        : 'vertical';
+  }
+  if (drag.axis === 'horizontal') {
+    return 0;
+  }
+  drag.y = pointer.clientY;
+  return delta;
 };
 
 export const getScrollableSection = (

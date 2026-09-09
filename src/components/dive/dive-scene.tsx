@@ -31,6 +31,7 @@ import {
 import { useHeroHandoff } from './use-hero-handoff';
 import {
   canScrollSection,
+  dragInputDelta,
   getScrollableSection,
   normalizeWheelDelta,
 } from './dive-input';
@@ -48,7 +49,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     id: null,
     x: 0,
     y: 0,
-    axis: 'vertical',
+    axis: 'pending-vertical',
     scrollTarget: null,
   });
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
@@ -127,21 +128,19 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     ) {
       return;
     }
-    const horizontal =
-      event.target instanceof Element &&
-      event.target.closest('[data-horizontal-gesture]');
-    if (!horizontal) {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
     if (modeRef.current === 'explore') {
+      event.currentTarget.setPointerCapture(event.pointerId);
       galaxyPointerDown(event.pointerId, event.clientX, event.clientY);
       return;
     }
+    const horizontal =
+      event.target instanceof Element &&
+      event.target.closest('[data-horizontal-gesture]');
     dragRef.current = {
       id: event.pointerId,
       x: event.clientX,
       y: event.clientY,
-      axis: horizontal ? 'pending' : 'vertical',
+      axis: horizontal ? 'pending' : 'pending-vertical',
       scrollTarget: getScrollableSection(event.target),
     };
   };
@@ -165,23 +164,19 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       return;
     }
     const drag = dragRef.current;
-    const delta = drag.y - event.clientY;
-    if (drag.axis === 'pending') {
-      const horizontal = Math.abs(drag.x - event.clientX);
-      if (Math.max(horizontal, Math.abs(delta)) < 6) {
-        return;
-      }
-      drag.axis = horizontal > Math.abs(delta) ? 'horizontal' : 'vertical';
-    }
-    if (drag.axis === 'horizontal') {
+    const delta = dragInputDelta(drag, event);
+    if (delta === 0) {
       return;
+    }
+    // REASON: capture only real drags; capturing on press steals the canvas eye click.
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.setPointerCapture(event.pointerId);
     }
     if (canScrollSection(drag.scrollTarget, delta) && drag.scrollTarget) {
       drag.scrollTarget.scrollTop += delta;
     } else {
       applyDriveDelta(delta * TOUCH_SENSITIVITY);
     }
-    dragRef.current.y = event.clientY;
   };
 
   const handlePointerEnd = (

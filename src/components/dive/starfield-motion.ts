@@ -25,8 +25,6 @@ type StarfieldMotionParams = {
     uAspect: { value: number };
     uPointer: { value: Vector2 };
     uPointerStrength: { value: number };
-    uBurstOrigin: { value: Vector2 };
-    uBurstAge: { value: number };
     uInteraction: { value: number };
   };
   camera: Camera;
@@ -149,18 +147,8 @@ export const createStarfieldMotion = ({
       Math.max(pointerDistance, 0.025);
     x += (pointerX * 0.12 - pointerY * 0.085) * pointerInfluence;
     y += (pointerY * 0.12 + pointerX * 0.085) * pointerInfluence;
-    const burstX = x - uniforms.uBurstOrigin.value.x * aspect;
-    const burstY = y - uniforms.uBurstOrigin.value.y;
-    const burstDistance = Math.hypot(burstX, burstY);
-    const age = uniforms.uBurstAge.value;
-    const wave =
-      (Math.exp(-Math.pow((burstDistance - age * 0.75) / 0.12, 2)) *
-        Math.exp(-age * 0.7) *
-        0.3 *
-        uniforms.uInteraction.value) /
-      Math.max(burstDistance, 0.025);
     position
-      .set((x + burstX * wave) / aspect, y + burstY * wave, projected.z)
+      .set(x / aspect, y, projected.z)
       .unproject(camera)
       .applyMatrix4(origin.matrixWorldInverse);
   };

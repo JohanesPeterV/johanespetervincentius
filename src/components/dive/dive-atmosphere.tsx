@@ -99,7 +99,6 @@ export default function DiveAtmosphere({
         aSeed: new InstancedBufferAttribute(layout.seeds, 3),
       },
       frame: 0,
-      burst: 0,
       request: advanceRequest,
       status: 'loading',
     };
@@ -120,8 +119,6 @@ export default function DiveAtmosphere({
     uFlow: { value: 0 },
     uPointer: { value: new Vector2() },
     uPointerStrength: { value: 0 },
-    uBurstOrigin: { value: new Vector2() },
-    uBurstAge: { value: 100 },
     uInteraction: { value: 1 },
   }));
   const [motion] = useState(() =>
@@ -170,13 +167,7 @@ export default function DiveAtmosphere({
     const interaction = interactionRef.current;
     if (motionMode === 'full') {
       uniforms.uTime.value += step;
-      uniforms.uBurstAge.value += step;
-      if (interaction.burst !== field.burst) {
-        uniforms.uBurstAge.value = 0;
-        uniforms.uBurstOrigin.value.copy(interaction.burstOrigin);
-      }
     }
-    field.burst = interaction.burst;
     sampleStarfieldTimeline(field.timeline, uniforms.uTime.value);
     const requested = advanceRequest !== field.request;
     if (requested) {

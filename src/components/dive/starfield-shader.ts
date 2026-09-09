@@ -12,8 +12,6 @@ export const starfieldVertex = `
   uniform float uFlow;
   uniform vec2 uPointer;
   uniform float uPointerStrength;
-  uniform vec2 uBurstOrigin;
-  uniform float uBurstAge;
   uniform float uInteraction;
   attribute vec3 aScatter;
   attribute vec3 aFrom;
@@ -36,13 +34,6 @@ export const starfieldVertex = `
     vec2 curl = vec2(-pointerDirection.y, pointerDirection.x);
     point += (pointerDirection * 0.12 + curl * 0.085)
       * influence * uPointerStrength * uInteraction;
-
-    vec2 burstDelta = point - vec2(uBurstOrigin.x * uAspect, uBurstOrigin.y);
-    float burstDistance = length(burstDelta);
-    vec2 burstDirection = burstDelta / max(burstDistance, 0.025);
-    float waveDistance = burstDistance - uBurstAge * 0.75;
-    float wave = exp(-pow(waveDistance / 0.12, 2.0)) * exp(-uBurstAge * 0.7);
-    point += burstDirection * wave * 0.30 * uInteraction;
     return point;
   }
 
@@ -119,7 +110,7 @@ export const starfieldVertex = `
     float inkAlpha = (0.55 + 0.45 * aSeed.y) * (0.85 + 0.15 * twinkle) * nearFade;
     vAlpha = mix(inkAlpha, glowAlpha, uLuminous);
     vTint = mix(step(0.5, aSeed.x), 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283), uLuminous);
-    vColorStrength = mix(1.0, appearance.z * sqrt(vGlow), uLuminous);
+    vColorStrength = mix(1.0, appearance.z, uLuminous);
     vHalo = appearance.y * twinkle;
   }
 `;
