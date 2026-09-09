@@ -115,29 +115,6 @@
     border-color: hsl(var(--foreground) / 0.22);
   }
 
-  .profile-portrait-themed {
-    opacity: 0;
-    transition: opacity 350ms ease;
-  }
-
-  .profile-portrait-subject {
-    transform: scale(1.65);
-    transform-origin: 50% 20%;
-    mask-image: url('/peter-portrait-mask.png');
-    mask-size: cover;
-    mask-position: center;
-  }
-
-  .profile-avatar[data-themed='true'] .profile-portrait-themed {
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .profile-portrait-themed {
-      transition: none;
-    }
-  }
-
   .profile-card-name {
     font-size: clamp(1.125rem, 5.6vw, 1.875rem);
     font-weight: 600;
