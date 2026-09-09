@@ -44,16 +44,6 @@
   }
 }
 
-@keyframes coffeeSteam {
-  0%,
-  100% {
-    transform: translateY(1px) rotate(-1deg);
-  }
-  50% {
-    transform: translateY(-2px) rotate(1deg);
-  }
-}
-
 .animate-fade-late {
   animation: fadeInLate 0.8s ease-out 1.7s both;
 }
@@ -126,13 +116,7 @@
   }
 
   .profile-avatar-frame {
-    --coffee-crema: hsl(35 58% 78%);
     --coffee-paper: hsl(var(--background));
-    --coffee-foam: color-mix(
-      in srgb,
-      hsl(var(--primary)) 18%,
-      var(--coffee-paper)
-    );
     color: hsl(var(--primary));
   }
 
@@ -144,28 +128,12 @@
     stroke: hsl(var(--primary) / 0.3);
   }
 
-  .profile-avatar-rim {
+  .profile-avatar-rim-primary {
+    stroke: currentColor;
+  }
+
+  .profile-avatar-rim-secondary {
     stroke: hsl(var(--secondary));
-  }
-
-  .profile-coffee-steam {
-    fill: var(--coffee-foam);
-    stroke: hsl(var(--secondary) / 0.45);
-    stroke-width: 0.65;
-    stroke-linejoin: round;
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: coffeeSteam 5s ease-in-out infinite;
-  }
-
-  .profile-coffee-steam-side {
-    animation-delay: -2.5s;
-  }
-
-  .profile-coffee-steam-fold {
-    fill: none;
-    stroke: hsl(var(--secondary) / 0.5);
-    stroke-linecap: round;
   }
 
   .profile-coffee-mug {
@@ -191,13 +159,12 @@
 
   .profile-coffee-drink {
     fill: hsl(24 45% 20%);
-    stroke: var(--coffee-crema);
+    stroke: var(--coffee-paper);
   }
 
-  .profile-coffee-foam-fold {
-    stroke: var(--coffee-crema);
-    stroke-width: 0.9;
-    stroke-linecap: round;
+  .profile-coffee-ice {
+    fill: var(--coffee-paper);
+    fill-opacity: 0.7;
   }
 
   .profile-card-name {
@@ -454,7 +421,7 @@
   }
 
   .work-card.surface-panel,
-  .work-detail.surface-panel {
+  .card-detail.surface-panel {
     background: hsl(var(--card) / 0.97);
     box-shadow:
       inset 0 1px 0 hsl(var(--foreground) / 0.08),
@@ -473,7 +440,7 @@
       opacity 200ms;
   }
 
-  .work-card-slot[data-current='true'] :is(.work-card, .work-detail) {
+  .work-card-slot[data-current='true'] :is(.work-card, .card-detail) {
     border-color: hsl(var(--primary-text));
     border-top-width: 3px;
   }
@@ -527,7 +494,7 @@
     opacity: 0.15;
   }
 
-  .work-detail {
+  .card-detail {
     position: fixed;
     inset: 0;
     width: min(48rem, calc(100% - 3rem));
@@ -541,29 +508,29 @@
     transform-origin: center;
   }
 
-  .work-detail[open] {
+  .card-detail[open] {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
   }
 
-  .work-detail::backdrop {
+  .card-detail::backdrop {
     background: hsl(var(--background) / 0.7);
     backdrop-filter: blur(8px);
   }
 
-  .work-detail-content {
+  .card-detail-content {
     padding-right: 0.5rem;
     padding-bottom: 0.5rem;
     touch-action: pan-y;
   }
 
-  .work-detail-content:focus-visible {
+  .card-detail-content:focus-visible {
     outline: 1px solid hsl(var(--ring));
     outline-offset: -1px;
   }
 
-  .work-detail-title {
+  .card-detail-title {
     font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 500;
     line-height: 1.04;
@@ -787,8 +754,7 @@
       transition: none;
     }
 
-    .appearance-orb,
-    .profile-coffee-steam {
+    .appearance-orb {
       animation: none;
     }
 
