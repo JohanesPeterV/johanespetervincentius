@@ -51,7 +51,9 @@ const load = (filename) => {
 
 const descent = load(resolve(root, 'src/components/dive/descent.ts'));
 const motion = load(resolve(root, 'src/components/dive/camera-motion.ts'));
-const work = load(resolve(root, 'src/components/dive/work-layout.ts'));
+const cardLayout = load(
+  resolve(root, 'src/components/dive/card-section-layout.ts'),
+);
 const input = load(resolve(root, 'src/components/dive/dive-input.ts'));
 const palette = load(resolve(root, 'src/components/dive/dive-palette.ts'));
 const themes = load(resolve(root, 'src/lib/theme-colors.ts'));
@@ -464,7 +466,7 @@ test('reading role details releases vertical input at either scroll edge', () =>
   assert.equal(input.canScrollSection(null, 20), false);
 });
 
-test('work cards stay centered inside the viewport and clear of navigation', () => {
+test('card sections stay centered inside the viewport and clear of navigation', () => {
   for (const [width, height] of [
     [320, 568],
     [375, 667],
@@ -475,7 +477,7 @@ test('work cards stay centered inside the viewport and clear of navigation', () 
     [667, 375],
     [844, 390],
   ]) {
-    const layout = work.getWorkLayout(width, height);
+    const layout = cardLayout.getCardSectionLayout(width, height);
     assert.ok(layout.left >= 24);
     assert.ok(layout.left + layout.width <= width - 24);
     assert.equal(layout.left * 2 + layout.width, width);

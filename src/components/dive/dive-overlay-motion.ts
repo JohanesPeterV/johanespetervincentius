@@ -14,7 +14,7 @@ import type { MotionMode } from './descent';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
-import { getWorkLayout } from './work-layout';
+import { getCardSectionLayout } from './card-section-layout';
 
 export type OverlayNodes = {
   chapters: (HTMLButtonElement | null)[];
@@ -96,8 +96,11 @@ const positionStoneSection = (
   // REASON: reserve the appearance controls above and chapter navigation below;
   // anchored copy scrolls within that space instead of covering either control.
   const height = element.offsetHeight;
-  if (element.dataset.workStory === 'true') {
-    const layout = getWorkLayout(frame.width, frame.height);
+  if (
+    element.dataset.workStory === 'true' ||
+    element.dataset.projectDeck === 'true'
+  ) {
+    const layout = getCardSectionLayout(frame.width, frame.height);
     element.style.width = `${layout.width}px`;
     element.style.height = `${layout.height}px`;
     element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;

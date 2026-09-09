@@ -1,4 +1,4 @@
-type Project = {
+export type Project = {
   title: string;
   description: string;
   technologies: string[];
@@ -45,7 +45,7 @@ export const projects: Project[] = [
     repoLink: 'https://github.com/JohanesPeterV/MyUtangBackend',
   },
   {
-    title: 'Portofolio',
+    title: 'Portfolio',
     description:
       'My current portfolio website built with modern UI components and theming.',
     technologies: ['Next.js', 'shadcn/ui'],

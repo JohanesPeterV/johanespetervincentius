@@ -1,18 +1,10 @@
-import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
-
 import { RAW_DESCENT_KEYS } from './descent-keys';
-
-type DiveSectionLink = {
-  label: string;
-  href: string;
-};
 
 type DiveSectionBase = {
   tag: string;
   title: string;
   subtitle: string;
   center: number;
-  links?: DiveSectionLink[];
 };
 
 type CenterDiveSection = DiveSectionBase & {
@@ -64,6 +56,15 @@ export const WORK_SECTION: StoneDiveSection = {
   ...WORK_STONE,
 };
 
+export const PROJECT_SECTION: StoneDiveSection = {
+  tag: '03',
+  title: 'Projects',
+  subtitle: 'From idea to a product you can use.',
+  placement: 'stone',
+  stoneIndex: 1,
+  ...PROJECT_STONE,
+};
+
 export const DIVE_SECTIONS: DiveSection[] = [
   {
     tag: '01',
@@ -73,32 +74,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     placement: 'center',
   },
   WORK_SECTION,
-  {
-    tag: '03',
-    title: 'Projects',
-    subtitle: 'From idea to a product you can use.',
-    placement: 'stone',
-    stoneIndex: 1,
-    ...PROJECT_STONE,
-    links: [
-      {
-        label: POMODORO_PLANTER.title,
-        href: POMODORO_PLANTER.link,
-      },
-      {
-        label: 'Simple Helpdesk',
-        href: 'https://github.com/JohanesPeterV/simple-helpdesk',
-      },
-      {
-        label: 'MyUtang Backend',
-        href: 'https://github.com/JohanesPeterV/MyUtangBackend',
-      },
-      {
-        label: 'This Portfolio',
-        href: 'https://github.com/JohanesPeterV/johanespetervincentius',
-      },
-    ],
-  },
+  PROJECT_SECTION,
   {
     tag: '04',
     title: 'Tech\nStack',

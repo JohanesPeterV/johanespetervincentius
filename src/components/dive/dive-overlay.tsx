@@ -9,11 +9,9 @@ import {
   WORK_STONE,
 } from './descent';
 import { DiveWorkExperience } from './dive-work-experience';
-import { PomoplanterPreview } from '@/app/_components/projects/pomoplanter-preview';
-import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
+import { DiveProjects } from './dive-projects';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
-import { Button } from '@/components/ui/button';
 
 export type DiveMode = 'dive' | 'explore';
 
@@ -113,6 +111,17 @@ export default function DiveOverlay({
               />
             );
           }
+          if (section.center === PROJECT_STONE.center) {
+            return (
+              <DiveProjects
+                key={section.tag}
+                sectionRef={(element) => {
+                  overlayRef.current.sections[index] = element;
+                }}
+                onContinue={() => onNavigate(TECH_STONE.center)}
+              />
+            );
+          }
           const dimStyle =
             mode === 'explore' && section.center === TECH_STONE.center
               ? { opacity: 0.15 }
@@ -145,37 +154,6 @@ export default function DiveOverlay({
               >
                 {section.subtitle}
               </span>
-              {section.center === PROJECT_STONE.center ? (
-                <div className="dive-project flex w-full flex-col gap-3">
-                  <PomoplanterPreview />
-                  <h3 className="font-display text-2xl font-medium tracking-tight">
-                    {POMODORO_PLANTER.title}
-                  </h3>
-                  <p className="text-xs leading-relaxed opacity-75 sm:text-sm">
-                    {POMODORO_PLANTER.description}
-                  </p>
-                  <p className="type-meta text-muted-foreground">
-                    {POMODORO_PLANTER.technologies.join(' · ')}
-                  </p>
-                </div>
-              ) : null}
-              {section.links ? (
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                  {section.links.map((link, linkIndex) => (
-                    <Button
-                      key={link.href}
-                      asChild
-                      variant={linkIndex === 0 ? 'default' : 'link'}
-                      size={linkIndex === 0 ? 'lg' : 'sm'}
-                      className="pointer-events-auto h-11"
-                    >
-                      <a href={link.href} target="_blank" rel="noreferrer">
-                        {link.label} ↗
-                      </a>
-                    </Button>
-                  ))}
-                </div>
-              ) : null}
               {section.center === TECH_STONE.center ? (
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-4 sm:flex-col sm:items-start sm:gap-2">
                   {GALAXY_CATEGORIES.map((category, categoryIndex) => (
