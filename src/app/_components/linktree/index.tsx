@@ -1,130 +1,33 @@
-'use client';
-
-import {
-  Carousel,
-  type CarouselApi,
-  CarouselContent,
-  CarouselItem,
-} from '@/components/ui/carousel';
-import { useEffect, useRef, useState } from 'react';
-
 import ClassicCard from './classic-card';
 import LinktreeCard from './linktree-card';
 import MinimalCard from './minimal-card';
 
 export type CardType = 1 | 2 | 3;
 
-const CARDS = [
-  { label: 'Linktree card', Card: LinktreeCard },
-  { label: 'Classic card', Card: ClassicCard },
-  { label: 'Minimal card', Card: MinimalCard },
-];
-
 type LinktreeSectionParams = {
   cardType: CardType;
 };
 
-const updateCardTypeUrl = (api: CarouselApi): void => {
-  if (!api) {
-    return;
-  }
-  const selectedCardType = String(api.selectedScrollSnap() + 1);
-  const url = new URL(window.location.href);
-  if (url.searchParams.get('card_type') === selectedCardType) {
-    return;
-  }
-  url.searchParams.set('card_type', selectedCardType);
-  window.history.replaceState(null, '', url);
+const CARDS = {
+  1: LinktreeCard,
+  2: ClassicCard,
+  3: MinimalCard,
 };
 
 export default function LinktreeSection({ cardType }: LinktreeSectionParams) {
-  const [api, setApi] = useState<CarouselApi>();
-  const [selectedCard, setSelectedCard] = useState(cardType - 1);
-  const sectionRef = useRef<HTMLElement>(null);
-
-  // REASON: Embla exposes selection only after mount, and the horizontal
-  // wheel capture needs a native non-passive listener - React's root wheel
-  // listener is passive, so preventDefault cannot stop the browser's
-  // back/forward swipe gesture
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-    api.scrollTo(cardType - 1);
-    const section = sectionRef.current;
-    const handleSelect = (): void => {
-      setSelectedCard(api.selectedScrollSnap());
-      updateCardTypeUrl(api);
-      if (section) {
-        section.dataset.snapshotReady = 'false';
-        const content = section.querySelector<HTMLElement>(
-          '[data-section-scroll]',
-        );
-        if (content) {
-          content.scrollTop = 0;
-        }
-      }
-    };
-    const handleSettle = (): void => {
-      if (section) {
-        section.dataset.snapshotReady = 'true';
-      }
-    };
-    api.on('select', handleSelect);
-    api.on('settle', handleSettle);
-    setSelectedCard(api.selectedScrollSnap());
-    const handleWheel = (event: globalThis.WheelEvent): void => {
-      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
-        return;
-      }
-      event.preventDefault();
-      if (event.deltaX > 0) {
-        api.scrollNext();
-        return;
-      }
-      api.scrollPrev();
-    };
-    section?.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      api.off('select', handleSelect);
-      api.off('settle', handleSettle);
-      section?.removeEventListener('wheel', handleWheel);
-    };
-  }, [api, cardType]);
+  const Card = CARDS[cardType];
 
   return (
     <section
-      ref={sectionRef}
-      aria-label="Profile card styles"
-      data-snapshot-ready="true"
+      aria-label="Profile card"
       className="pointer-events-none flex max-h-[calc(100svh-10rem)] w-full flex-col"
     >
-      <Carousel
-        setApi={setApi}
-        opts={{
-          align: 'center',
-          dragFree: false,
-          skipSnaps: false,
-          startIndex: cardType - 1,
-        }}
+      <div
         data-section-scroll
-        data-horizontal-gesture
-        className="pointer-events-none min-h-0 w-full select-none overflow-y-auto overscroll-contain scrollbar-thin"
+        className="pointer-events-none flex min-h-0 w-full select-none items-start justify-center overflow-y-auto overscroll-contain px-4 scrollbar-thin sm:px-8"
       >
-        <CarouselContent className="ml-0">
-          {CARDS.map(({ label, Card }, index) => (
-            <CarouselItem
-              key={label}
-              aria-label={`${label}, ${index + 1} of ${CARDS.length}`}
-              aria-hidden={selectedCard !== index}
-              inert={selectedCard !== index}
-              className="flex items-start justify-center px-4 sm:px-8"
-            >
-              <Card />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+        <Card />
+      </div>
     </section>
   );
 }

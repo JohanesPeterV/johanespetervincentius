@@ -63,7 +63,7 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
   const [error, setError] = useState<string | null>(null);
 
   // REASON: the shader needs cached pixels of the actual DOM, including the
-  // selected Embla card and web fonts. Capture on content/size changes, never
+  // profile card and web fonts. Capture on content/size changes, never
   // in the render loop; keep the real DOM for reading and interaction at rest.
   useEffect(() => {
     const handoff = handoffRef.current;
@@ -72,16 +72,12 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     if (!hero || !work) {
       return;
     }
-    const content = hero.firstElementChild;
     let disposed = false;
     let revision = 0;
     let timer = 0;
     let fontCss: Promise<string> | null = null;
     const capture = async (): Promise<void> => {
-      if (
-        content?.getAttribute('data-snapshot-ready') === 'false' ||
-        work.dataset.snapshotReady === 'false'
-      ) {
+      if (work.dataset.snapshotReady === 'false') {
         return;
       }
       const request = ++revision;
@@ -110,10 +106,6 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     const schedule = (): void => {
       revision++;
       window.clearTimeout(timer);
-      if (content?.getAttribute('data-snapshot-ready') === 'false') {
-        handoff.hero?.texture.dispose();
-        handoff.hero = null;
-      }
       if (work.dataset.snapshotReady === 'false') {
         handoff.work?.texture.dispose();
         handoff.work = null;
@@ -123,12 +115,6 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     const observer = new MutationObserver(schedule);
     // REASON: Embla mutates transforms every animation frame. Its settled
     // content signal avoids both stale-card textures and per-frame captures.
-    if (content) {
-      observer.observe(content, {
-        attributes: true,
-        attributeFilter: ['data-snapshot-ready'],
-      });
-    }
     observer.observe(work, {
       attributes: true,
       attributeFilter: ['data-active', 'data-snapshot-ready', 'open'],
