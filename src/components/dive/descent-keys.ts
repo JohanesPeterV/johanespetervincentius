@@ -134,26 +134,6 @@ export const RAW_DESCENT_KEYS: RawDescentKey[] = [
   },
   {
     at: 2.85,
-    position: [0.8, 3.1, 19.5],
-    look: [0.3, 2.2, 0],
-    fog: '#24425f',
-    fogDensity: 0.04,
-    glow: 0.22,
-    veil: 0,
-    veilColor: '#141f2c',
-  },
-  {
-    at: 3.15,
-    position: [0, 3.5, 16],
-    look: [0, 2.4, 0],
-    fog: '#24425f',
-    fogDensity: 0.035,
-    glow: 0.12,
-    veil: 0,
-    veilColor: '#141f2c',
-  },
-  {
-    at: 3.45,
     position: [0, 3.5, 16],
     look: [0, 2.4, 0],
     fog: '#24425f',
@@ -163,7 +143,7 @@ export const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#dfeefb',
   },
   {
-    at: 3.62,
+    at: 3.02,
     position: [0, 3.5, 16],
     look: [0, 2.4, 0],
     fog: '#48688a',
@@ -173,7 +153,7 @@ export const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#dfeefb',
   },
   {
-    at: 3.74,
+    at: 3.14,
     position: [0, 3.5, 16],
     look: [0, 2.4, 0],
     fog: '#7fa3c2',
@@ -183,7 +163,7 @@ export const RAW_DESCENT_KEYS: RawDescentKey[] = [
     veilColor: '#eaf4fd',
   },
   {
-    at: 4.1,
+    at: 3.5,
     position: [0, 3.5, 16],
     look: [0, 2.4, 0],
     fog: '#c6ccd4',

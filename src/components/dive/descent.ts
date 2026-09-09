@@ -1,18 +1,10 @@
-import { POMODORO_PLANTER } from '@/app/_components/projects/projects';
-
 import { RAW_DESCENT_KEYS } from './descent-keys';
-
-type DiveSectionLink = {
-  label: string;
-  href: string;
-};
 
 type DiveSectionBase = {
   tag: string;
   title: string;
   subtitle: string;
   center: number;
-  links?: DiveSectionLink[];
 };
 
 type CenterDiveSection = DiveSectionBase & {
@@ -48,16 +40,14 @@ export type MotionMode = 'full' | 'reduced';
 
 type DescentKey = DescentFrame & { at: number };
 
-export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
+export const TECH_STONE = { center: 2.55, x: -1.6, z: 8.1 };
 const TECH_DWELL_HALF = 0.3;
 
 export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
 
-export const PROJECT_STONE = { center: 2.55, x: -1.45, z: 8.4 };
-
 export const WORK_SECTION: StoneDiveSection = {
   tag: '02',
-  title: 'Work\nExperience',
+  title: 'Work',
   subtitle: '2020 — present',
   placement: 'stone',
   stoneIndex: 0,
@@ -75,36 +65,10 @@ export const DIVE_SECTIONS: DiveSection[] = [
   WORK_SECTION,
   {
     tag: '03',
-    title: 'Projects',
-    subtitle: 'From idea to a product you can use.',
-    placement: 'stone',
-    stoneIndex: 1,
-    ...PROJECT_STONE,
-    links: [
-      {
-        label: POMODORO_PLANTER.title,
-        href: POMODORO_PLANTER.link,
-      },
-      {
-        label: 'Simple Helpdesk',
-        href: 'https://github.com/JohanesPeterV/simple-helpdesk',
-      },
-      {
-        label: 'MyUtang Backend',
-        href: 'https://github.com/JohanesPeterV/MyUtangBackend',
-      },
-      {
-        label: 'This Portfolio',
-        href: 'https://github.com/JohanesPeterV/johanespetervincentius',
-      },
-    ],
-  },
-  {
-    tag: '04',
     title: 'Tech\nStack',
     subtitle: 'tools of the trade',
     placement: 'stone',
-    stoneIndex: 2,
+    stoneIndex: 1,
     // REASON: this stone passes behind the skill galaxy - at full size its
     // silhouette fights the constellation for the frame
     stoneScale: 0.38,
@@ -112,7 +76,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
   },
 ];
 
-export const DIVE_LENGTH = 4.1;
+export const DIVE_LENGTH = 3.5;
 export const DIVE_START = 0.95;
 export const WHEEL_SENSITIVITY = 1 / 2000;
 export const TOUCH_SENSITIVITY = 1 / 1000;
@@ -128,7 +92,7 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 const SEAM_CENTER = 1.4;
 const SEAM_SPAN = 0.46;
-const FINALE_CENTER = 3.68;
+const FINALE_CENTER = 3.08;
 const FINALE_SPAN = 0.4;
 
 const transitionBoost = (
