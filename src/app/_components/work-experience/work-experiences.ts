@@ -1,6 +1,6 @@
-type WorkExperience = {
+export type WorkExperience = {
   company: string;
-  artifact: 'gift' | 'ordering' | 'produce' | 'systems';
+  status: 'current' | 'past';
   positions: {
     name: string;
     workPeriod: string;
@@ -15,7 +15,7 @@ type WorkExperience = {
 export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Smilie',
-    artifact: 'gift',
+    status: 'current',
     positions: [
       {
         name: 'Lead Software Engineer',
@@ -44,7 +44,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   },
   {
     company: 'TableLink',
-    artifact: 'ordering',
+    status: 'past',
     positions: [
       {
         name: 'Full-stack Developer',
@@ -73,7 +73,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   },
   {
     company: 'Farmio',
-    artifact: 'produce',
+    status: 'past',
     positions: [
       {
         name: 'Software Engineer',
@@ -102,7 +102,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   },
   {
     company: 'BINUS University',
-    artifact: 'systems',
+    status: 'past',
     positions: [
       {
         name: 'Database Administrator · Developer Intern · Teaching Assistant',

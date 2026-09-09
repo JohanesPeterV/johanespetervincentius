@@ -32,6 +32,11 @@ const captureSection = async (
     color: style.color,
   });
   clone.style.setProperty('--reveal', '1');
+  // REASON: native dialogs live above the scene; the crossing captures the
+  // card spread underneath, with every card returned to its resting position.
+  clone.querySelectorAll('dialog').forEach((dialog) => {
+    dialog.removeAttribute('open');
+  });
   clone.querySelectorAll<HTMLElement>('[data-active]').forEach((panel) => {
     panel.style.translate = 'none';
     panel.style.transition = 'none';
@@ -113,8 +118,8 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
       timer = window.setTimeout(capture, 60);
     };
     const observer = new MutationObserver(schedule);
-    // REASON: Embla mutates transforms every animation frame. Its settled
-    // content signal avoids both stale-card textures and per-frame captures.
+    // REASON: capture settled content changes without observing the styles
+    // that the scene updates on every animation frame.
     observer.observe(work, {
       attributes: true,
       attributeFilter: ['data-active', 'data-snapshot-ready', 'open'],

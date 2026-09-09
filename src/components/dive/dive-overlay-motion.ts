@@ -14,7 +14,7 @@ import type { MotionMode } from './descent';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
-import { getWorkLayout } from './work-story';
+import { getWorkLayout } from './work-layout';
 
 export type OverlayNodes = {
   chapters: (HTMLButtonElement | null)[];
@@ -100,8 +100,6 @@ const positionStoneSection = (
     const layout = getWorkLayout(frame.width, frame.height);
     element.style.width = `${layout.width}px`;
     element.style.height = `${layout.height}px`;
-    element.style.setProperty('--work-art-width', `${layout.artWidth}px`);
-    element.style.setProperty('--work-art-height', `${layout.artHeight}px`);
     element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;
     return { left: layout.left, top: layout.top, anchor: 0 };
   }

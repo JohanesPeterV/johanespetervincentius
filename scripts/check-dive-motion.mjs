@@ -51,7 +51,7 @@ const load = (filename) => {
 
 const descent = load(resolve(root, 'src/components/dive/descent.ts'));
 const motion = load(resolve(root, 'src/components/dive/camera-motion.ts'));
-const story = load(resolve(root, 'src/components/dive/work-story.ts'));
+const work = load(resolve(root, 'src/components/dive/work-layout.ts'));
 const input = load(resolve(root, 'src/components/dive/dive-input.ts'));
 const palette = load(resolve(root, 'src/components/dive/dive-palette.ts'));
 const themes = load(resolve(root, 'src/lib/theme-colors.ts'));
@@ -451,25 +451,6 @@ test('a reverse gesture can leave Work while it is arriving', () => {
   );
 });
 
-test('one horizontal wheel gesture selects one chapter and absorbs its tail', () => {
-  const gesture = { distance: 0, lastAt: 0, consumed: false };
-  assert.equal(story.advanceWorkGesture(gesture, { delta: 24, now: 1000 }), 0);
-  assert.equal(story.advanceWorkGesture(gesture, { delta: 25, now: 1010 }), 1);
-  for (let now = 1020; now <= 1600; now += 10) {
-    assert.equal(story.advanceWorkGesture(gesture, { delta: 80, now }), 0);
-  }
-  assert.equal(
-    story.advanceWorkGesture(gesture, { delta: -60, now: 2000 }),
-    -1,
-  );
-});
-
-test('short horizontal gestures do not accumulate across unrelated swipes', () => {
-  const gesture = { distance: 0, lastAt: 0, consumed: false };
-  assert.equal(story.advanceWorkGesture(gesture, { delta: 30, now: 1000 }), 0);
-  assert.equal(story.advanceWorkGesture(gesture, { delta: 30, now: 1300 }), 0);
-});
-
 test('reading role details releases vertical input at either scroll edge', () => {
   const section = { scrollHeight: 400, clientHeight: 200, scrollTop: 100 };
   assert.equal(input.canScrollSection(section, 20), true);
@@ -483,7 +464,7 @@ test('reading role details releases vertical input at either scroll edge', () =>
   assert.equal(input.canScrollSection(null, 20), false);
 });
 
-test('work story stage stays centered inside safe insets with a right-edge preview', () => {
+test('work cards stay centered inside the viewport and clear of navigation', () => {
   for (const [width, height] of [
     [320, 568],
     [375, 667],
@@ -491,37 +472,18 @@ test('work story stage stays centered inside safe insets with a right-edge previ
     [768, 1024],
     [1440, 900],
     [2560, 1440],
+    [667, 375],
+    [844, 390],
   ]) {
-    const layout = story.getWorkLayout(width, height);
+    const layout = work.getWorkLayout(width, height);
     assert.ok(layout.left >= 24);
     assert.ok(layout.left + layout.width <= width - 24);
     assert.equal(layout.left * 2 + layout.width, width);
     assert.ok(layout.width <= 1440);
-    assert.ok(layout.top >= 80);
+    assert.ok(layout.top >= (height < 500 ? 64 : 80));
     assert.ok(layout.top + layout.height <= height - 88);
-    assert.ok(layout.height > 250);
-    assert.ok(layout.modelWidth > 0);
-    assert.ok(layout.modelX - layout.modelWidth / 2 >= layout.left);
-    assert.ok(layout.previewX > layout.modelX + layout.modelWidth / 2);
-    assert.equal(layout.previewX, layout.left + layout.width - 48);
-    assert.ok(layout.previewX <= layout.left + layout.width);
-    if (width < 768) {
-      assert.equal(layout.artWidth, 0);
-      assert.ok(layout.artHeight > 0);
-      assert.ok(layout.artHeight < layout.height / 2);
-      assert.ok(layout.modelWidth <= layout.artHeight * 1.1);
-      assert.ok(layout.modelY > layout.top);
-      assert.ok(layout.modelY < layout.top + 36 + layout.artHeight);
-    } else {
-      assert.equal(layout.artHeight, 0);
-      assert.ok(layout.artWidth > 0);
-      assert.ok(layout.artWidth < layout.width / 2);
-      assert.ok(layout.modelWidth < layout.artWidth);
-      assert.ok(layout.modelWidth <= 380);
-      assert.ok(
-        layout.modelX + layout.modelWidth / 2 < layout.left + layout.artWidth,
-      );
-    }
+    assert.ok(layout.height >= 220);
+    assert.ok(layout.height <= 760);
   }
 });
 
@@ -530,80 +492,6 @@ test('chapter composition is at rest at every reading stop', () => {
     assert.equal(descent.sectionTravel(section.center), 0);
     assert.equal(descent.sectionMotion(section.center, section).opacity, 1);
   }
-});
-
-test('short landscape stories keep smaller artifacts beside readable copy', () => {
-  for (const [width, height] of [
-    [667, 375],
-    [844, 390],
-  ]) {
-    const layout = story.getWorkLayout(width, height);
-    assert.ok(layout.left >= 24);
-    assert.equal(layout.left * 2 + layout.width, width);
-    assert.ok(layout.height >= 220);
-    assert.ok(layout.top >= 64);
-    assert.ok(layout.top + layout.height <= height - 88);
-    assert.equal(layout.artHeight, 0);
-    assert.ok(layout.artWidth > 0);
-    assert.ok(layout.modelWidth > 0);
-    assert.ok(layout.modelWidth < layout.artWidth);
-    assert.ok(layout.modelWidth < layout.height - 96);
-    assert.ok(layout.modelX - layout.modelWidth / 2 >= layout.left);
-    assert.ok(
-      layout.modelX + layout.modelWidth / 2 < layout.left + layout.artWidth,
-    );
-    assert.ok(layout.modelY > layout.top);
-    assert.ok(layout.modelY < layout.top + layout.height);
-    assert.ok(layout.previewX > layout.modelX + layout.modelWidth / 2);
-    assert.ok(layout.previewX <= layout.left + layout.width);
-  }
-});
-
-test('the active work artifact leads while its next story remains visibly smaller', () => {
-  const active = story.getWorkArtifactPose(0);
-  const next = story.getWorkArtifactPose(1);
-  assert.equal(active.visible, true);
-  assert.equal(next.visible, true);
-  assert.equal(active.scale, 1);
-  assert.ok(next.scale > 0.2 && next.scale < active.scale / 2);
-  assert.notEqual(next.rotationY, active.rotationY);
-  for (const offset of [-3, -1.1001, -1.1, 1.1, 1.1001, 3]) {
-    assert.equal(story.getWorkArtifactPose(offset).visible, false);
-  }
-  for (const offset of [-1.0999, 1.0999]) {
-    assert.equal(story.getWorkArtifactPose(offset).visible, true);
-  }
-});
-
-test('work artifact transforms remain continuous with finite positive scales', () => {
-  for (let step = -300; step <= 300; step++) {
-    const offset = step / 100;
-    const pose = story.getWorkArtifactPose(offset);
-    const nearby = story.getWorkArtifactPose(offset + 0.0001);
-    assert.ok(pose.scale > 0 && pose.scale <= 1);
-    for (const field of ['scale', 'rotationY', 'rotationZ']) {
-      assert.ok(Number.isFinite(pose[field]));
-      assert.ok(Math.abs(nearby[field] - pose[field]) < 0.001);
-    }
-  }
-});
-
-test('reversing a work swipe retraces both artifacts without residual motion', () => {
-  const positions = [0, 0.15, 0.4, 0.7, 1];
-  const forward = positions.map((position) => [
-    story.getWorkArtifactPose(-position),
-    story.getWorkArtifactPose(1 - position),
-  ]);
-  for (let index = positions.length - 1; index >= 0; index--) {
-    const position = positions[index];
-    assert.deepEqual(story.getWorkArtifactPose(-position), forward[index][0]);
-    assert.deepEqual(
-      story.getWorkArtifactPose(1 - position),
-      forward[index][1],
-    );
-  }
-  assert.equal(forward[0][0].scale, forward.at(-1)[1].scale);
-  assert.equal(forward[0][1].scale, forward.at(-1)[0].scale);
 });
 
 test('camera path is continuous through chapter handoffs', () => {
