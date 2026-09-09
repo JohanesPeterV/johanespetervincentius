@@ -20,14 +20,29 @@ export default function ProfilePortrait() {
         priority
         className="object-cover"
       />
-      <Image
-        src="/peter-cyan-ultraviolet.webp"
-        alt=""
-        fill
-        sizes="160px"
-        priority
-        className="profile-portrait-themed object-cover"
-      />
+      <div className="profile-portrait-themed absolute inset-0">
+        <Image
+          src="/portrait-cyan-ultraviolet-background.webp"
+          alt=""
+          fill
+          sizes="160px"
+          priority
+          className="object-cover"
+        />
+        <Image
+          src="/peter2.jpg"
+          alt=""
+          fill
+          sizes="160px"
+          priority
+          className="object-cover"
+          style={{
+            maskImage: "url('/peter-portrait-mask.png')",
+            maskSize: 'cover',
+            maskPosition: 'center',
+          }}
+        />
+      </div>
     </div>
   );
 }
