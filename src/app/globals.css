@@ -117,9 +117,15 @@
 
   .profile-portrait-themed {
     opacity: 0;
+    transition: opacity 350ms ease;
+  }
+
+  .profile-portrait-subject {
     transform: scale(1.65);
     transform-origin: 50% 20%;
-    transition: opacity 350ms ease;
+    mask-image: url('/peter-portrait-mask.png');
+    mask-size: cover;
+    mask-position: center;
   }
 
   .profile-avatar[data-themed='true'] .profile-portrait-themed {

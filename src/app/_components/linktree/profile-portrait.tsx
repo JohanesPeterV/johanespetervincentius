@@ -22,10 +22,10 @@ export default function ProfilePortrait() {
       />
       <div className="profile-portrait-themed absolute inset-0">
         <Image
-          src="/portrait-cyan-ultraviolet-background.webp"
+          src="/portrait-cyan-ultraviolet-background-v2.webp"
           alt=""
           fill
-          sizes="160px"
+          sizes="96px"
           priority
           className="object-cover"
         />
@@ -35,12 +35,7 @@ export default function ProfilePortrait() {
           fill
           sizes="160px"
           priority
-          className="object-cover"
-          style={{
-            maskImage: "url('/peter-portrait-mask.png')",
-            maskSize: 'cover',
-            maskPosition: 'center',
-          }}
+          className="profile-portrait-subject object-cover"
         />
       </div>
     </div>
