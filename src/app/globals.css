@@ -413,27 +413,40 @@
   }
 
   .work-card-spread {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-auto-rows: minmax(0, 1fr);
-    gap: clamp(0.75rem, 1.8vw, 1.75rem);
     margin-block: 1.5rem;
     isolation: isolate;
   }
 
   .work-card-slot {
-    --card-angle: -2deg;
-    position: relative;
-    min-width: 0;
-    min-height: 0;
+    --card-angle: -6deg;
+    position: absolute;
+    left: 2%;
+    top: 37%;
+    width: 30%;
+    height: 55%;
+    max-height: 20rem;
+    z-index: 4;
   }
 
-  .work-card-slot:nth-child(3n + 2) {
-    --card-angle: 2deg;
+  .work-card-slot:nth-child(2) {
+    --card-angle: 5deg;
+    left: 24%;
+    top: 8%;
+    z-index: 2;
   }
 
-  .work-card-slot:nth-child(3n) {
-    --card-angle: -1deg;
+  .work-card-slot:nth-child(3) {
+    --card-angle: -5deg;
+    left: 46%;
+    top: 43%;
+    z-index: 3;
+  }
+
+  .work-card-slot:nth-child(4) {
+    --card-angle: 4deg;
+    left: 68%;
+    top: 15%;
+    z-index: 1;
   }
 
   .work-card-slot:is(:hover, :focus-within) {
@@ -451,11 +464,11 @@
 
   .work-card {
     position: relative;
-    padding: clamp(0.75rem, 1.5vw, 1.5rem);
+    padding: clamp(1rem, 2.3vw, 2rem);
     cursor: pointer;
     transform: rotate(var(--card-angle));
     transition:
-      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
       border-color 200ms,
       opacity 200ms;
   }
@@ -481,31 +494,26 @@
     background: currentColor;
   }
 
-  .work-card-kind {
-    font-size: 0.5625rem;
-    letter-spacing: 0.1em;
+  .work-card-company {
+    margin-block: 1.5rem 0.625rem;
+    font-size: clamp(1.5rem, 3.2vw, 3rem);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -0.045em;
   }
 
-  .work-card-title {
-    margin-block: auto;
-    padding-block: 0.75rem;
-    font-size: clamp(1.375rem, 2.1vw, 2rem);
-    font-weight: 500;
-    line-height: 1.06;
-    letter-spacing: -0.045em;
-    overflow-wrap: anywhere;
+  .work-card-role {
+    max-width: 30ch;
     text-wrap: balance;
   }
 
-  .work-card-caption {
-    font-size: 0.5625rem;
-    line-height: 1.6;
-    letter-spacing: 0.03em;
+  .work-card-period {
+    padding-top: 1rem;
   }
 
   @media (hover: hover) {
-    .work-card:is(:hover, :focus-visible) {
-      transform: translateY(-24px) rotate(0deg) scale(1.1);
+    .work-card:hover {
+      transform: translateY(-16px) rotate(var(--card-angle)) scale(1.035);
       border-color: hsl(var(--primary-text));
     }
   }
@@ -572,58 +580,72 @@
     line-height: 1.7;
   }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 767px) and (min-height: 501px) {
     .work-card-spread {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 767px) {
-    .work-card-spread {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.75rem;
       margin-block: 1rem;
     }
 
+    .work-card-slot {
+      left: 1%;
+      top: 3%;
+      width: 51%;
+      height: 43%;
+      max-height: none;
+    }
+
+    .work-card-slot:nth-child(2) {
+      left: 48%;
+      top: 10%;
+    }
+
+    .work-card-slot:nth-child(3) {
+      left: 1%;
+      top: 51%;
+    }
+
+    .work-card-slot:nth-child(4) {
+      left: 48%;
+      top: 55%;
+    }
+
+    .work-card-company {
+      margin-top: 1.25rem;
+      font-size: clamp(1.375rem, 4.8vw, 2.5rem);
+    }
+
+    .work-card .type-meta {
+      font-size: 0.5625rem;
+    }
+
+    .work-card-role {
+      font-size: 0.6875rem;
+    }
+
+    .work-card-period {
+      padding-top: 0.5rem;
+    }
+  }
+
+  @media (max-width: 767px) and (max-height: 700px) {
     .work-card {
       padding: 0.75rem;
     }
 
-    .work-card-title {
-      font-size: clamp(1rem, 3.6vw, 1.5rem);
-    }
-
-    .work-card-kind {
-      font-size: 0.5rem;
-      letter-spacing: 0.03em;
-    }
-
-    .work-card-caption {
-      display: none;
-    }
-  }
-
-  @media (max-width: 400px) {
-    .work-card-spread {
-      gap: 0.5rem;
-    }
-
-    .work-card {
-      padding: 0.375rem;
-    }
-
-    .work-card-title {
-      font-size: 0.875rem;
-    }
-  }
-
-  @media (max-height: 700px) {
-    .work-card-caption {
+    .work-card-role {
       display: none;
     }
 
-    .work-card-title {
-      padding-block: 0.375rem;
+    .work-card-company {
+      margin-block: 0.5rem 0.25rem;
+      font-size: 1.25rem;
+    }
+
+    .work-card-period {
+      padding-top: 0.25rem;
+    }
+
+    .dive-work-section footer p {
+      max-width: 8rem;
     }
   }
 
@@ -632,27 +654,52 @@
       font-size: 1.75rem;
     }
 
-    .dive-work-section > header .identity-tag {
+    .dive-work-section header .identity-tag,
+    .work-card-role {
       display: none;
     }
 
     .work-card-spread {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.5rem;
       margin-block: 0.5rem;
     }
 
+    .work-card-slot {
+      left: 0;
+      top: 6%;
+      width: 24%;
+      height: 88%;
+    }
+
+    .work-card-slot:nth-child(2) {
+      left: 25.333%;
+      top: 0;
+    }
+
+    .work-card-slot:nth-child(3) {
+      left: 50.666%;
+      top: 8%;
+    }
+
+    .work-card-slot:nth-child(4) {
+      left: 76%;
+      top: 0;
+    }
+
     .work-card {
-      padding: 0.375rem 0.5rem;
+      padding: 0.75rem;
     }
 
-    .work-card-title {
-      padding-block: 0.125rem;
-      font-size: 0.875rem;
+    .work-card-company {
+      margin-block: 0.5rem;
+      font-size: 1.25rem;
     }
 
-    .work-card-kind {
+    .work-card .type-meta {
       font-size: 0.5rem;
+    }
+
+    .work-card-period {
+      padding-top: 0;
     }
   }
 
@@ -661,16 +708,16 @@
     perspective: 1000px;
   }
 
-  .work-project-preview .project-preview-stage {
+  .dive-project .project-preview-stage {
     aspect-ratio: 1.4;
   }
 
-  .work-project-preview .project-preview-window {
+  .dive-project .project-preview-window {
     width: 72%;
     left: 24%;
   }
 
-  .work-project-preview .project-preview-window[data-active='true'] {
+  .dive-project .project-preview-window[data-active='true'] {
     left: 10%;
   }
 
@@ -761,7 +808,7 @@
       transform: none;
     }
 
-    .work-card:is(:hover, :focus-visible) {
+    .work-card:hover {
       transform: rotate(var(--card-angle));
     }
   }

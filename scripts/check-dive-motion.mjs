@@ -235,10 +235,10 @@ test('vertical travel never captures Work or selects an employer', () => {
   }
 });
 
-test('one down-arrow can go straight from Work to Tech Stack', () => {
+test('one down-arrow can go straight from Work to Projects', () => {
   const drive = driveFrom(descent.WORK_STONE.center);
   motion.stepDriveToSection(drive, 1);
-  assert.equal(drive.target, descent.TECH_STONE.center);
+  assert.equal(drive.target, descent.PROJECT_STONE.center);
 });
 
 test('discrete commands reach every adjacent stop in either direction across laps', () => {
@@ -270,7 +270,7 @@ test('queued chapter commands advance the chosen destination rather than the cam
     assert.equal(drive.current, descent.TECH_STONE.center);
   }
   motion.stepDriveToSection(drive, -1);
-  assertNear(drive.target, descent.WORK_STONE.center + DIVE_LENGTH);
+  assertNear(drive.target, descent.PROJECT_STONE.center + DIVE_LENGTH);
 });
 
 test('continuous caps widen only past the long loop midpoint without changing sensitivity', () => {
@@ -481,7 +481,7 @@ test('work cards stay centered inside the viewport and clear of navigation', () 
     assert.equal(layout.left * 2 + layout.width, width);
     assert.ok(layout.width <= 1440);
     assert.ok(layout.top >= (height < 500 ? 64 : 80));
-    assert.ok(layout.top + layout.height <= height - (height < 500 ? 72 : 88));
+    assert.ok(layout.top + layout.height <= height - 88);
     assert.ok(layout.height >= 220);
     assert.ok(layout.height <= 760);
   }
@@ -1090,8 +1090,8 @@ test('unprepared original handoffs, reduced motion, and inactive chapters retain
   for (const journey of [
     handoff.HANDOFF_START,
     handoff.HANDOFF_END,
-    descent.WORK_STONE.center,
-    descent.TECH_STONE.center,
+    2.55,
+    3.15,
     descent.LOOP_START,
   ]) {
     state.journey = journey;
@@ -1126,12 +1126,12 @@ test('handoff starts at live Hero and the return waits for Tech to depart', () =
   assert.ok(handoff.loopHandoffProgress(LOOP_START + 0.001) > 0);
 });
 
-test('return progress is monotonic through the numeric wrap with exact endpoints on every lap', () => {
+test('return progress is monotonic through 4.1 to zero with exact endpoints on every lap', () => {
   const [start, end] = crossingRanges.loop;
   const samples = [
     start,
-    DIVE_LENGTH - 0.3,
-    DIVE_LENGTH - 0.05,
+    3.8,
+    4.05,
     DIVE_LENGTH - 0.00001,
     DIVE_LENGTH,
     DIVE_LENGTH + 0.00001,
@@ -1213,7 +1213,7 @@ for (const [crossing, [start, end]] of Object.entries(crossingRanges)) {
         assertNear(state.progress, phase);
       }
       if (crossing === 'loop') {
-        at((DIVE_LENGTH - 0.05 - start) / (end - start), 'composite');
+        at((4.05 - start) / (end - start), 'composite');
         assert.ok(state.progress > 0 && state.progress < 1);
       }
     }
@@ -1261,7 +1261,7 @@ for (const [crossing, [start, end]] of Object.entries(crossingRanges)) {
 test('the two crossings never overlap and ordinary wrapped chapters remain live', (t) => {
   const state = preparedHandoff(t, 'hero');
   const journeys = Array.from(
-    { length: Math.round(DIVE_LENGTH * 100) },
+    { length: 410 },
     (_, index) => (index + 0.5) / 100,
   );
   for (const journey of [
@@ -1270,8 +1270,8 @@ test('the two crossings never overlap and ordinary wrapped chapters remain live'
     DIVE_START,
     HANDOFF_START,
     HANDOFF_END,
-    descent.WORK_STONE.center,
-    descent.TECH_STONE.center,
+    2.55,
+    3.15,
   ]) {
     state.journey = journey;
     let expected = null;
@@ -1308,9 +1308,10 @@ test('the shared world classifier recognizes rendered endpoints across positive 
       [HANDOFF_START, 'hero'],
       [HANDOFF_END, 'orbital'],
       [descent.WORK_STONE.center, 'orbital'],
+      [descent.PROJECT_STONE.center, 'orbital'],
       [descent.TECH_STONE.center, 'orbital'],
       [LOOP_START, 'orbital'],
-      [DIVE_LENGTH - 0.05, 'orbital'],
+      [4.05, 'orbital'],
     ]) {
       assert.equal(
         handoff.worldAtProgress(progress + lap * DIVE_LENGTH),

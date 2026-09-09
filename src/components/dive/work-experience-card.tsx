@@ -1,17 +1,15 @@
 'use client';
 
-import { X } from 'lucide-react';
-import { ReactNode, useId, useRef } from 'react';
+import { ArrowUpRight, X } from 'lucide-react';
+import { useRef } from 'react';
 
 import type { WorkExperience } from '@/app/_components/work-experience/work-experiences';
 import { Button } from '@/components/ui/button';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
-type WorkCardProps = {
-  title: string;
-  kind: 'Project' | 'Experience';
-  caption: string;
-  status?: WorkExperience['status'];
-  children: ReactNode;
+type WorkExperienceCardProps = {
+  job: WorkExperience;
+  index: number;
 };
 
 const getPickupTransform = (
@@ -22,24 +20,17 @@ const getPickupTransform = (
   const target = dialog.getBoundingClientRect();
   const x = source.left + source.width / 2 - target.left - target.width / 2;
   const y = source.top + source.height / 2 - target.top - target.height / 2;
-  const matrix = new DOMMatrixReadOnly(getComputedStyle(card).transform);
-  const angle = Math.atan2(matrix.b, matrix.a);
-  const scale = Math.hypot(matrix.a, matrix.b);
-  return `translate(${x}px, ${y}px) rotate(${angle}rad) scale(${(card.offsetWidth * scale) / target.width}, ${(card.offsetHeight * scale) / target.height})`;
+  const angle = getComputedStyle(card).getPropertyValue('--card-angle');
+  return `translate(${x}px, ${y}px) rotate(${angle}) scale(${card.offsetWidth / target.width}, ${card.offsetHeight / target.height})`;
 };
 
-export const WorkCard = ({
-  title,
-  kind,
-  caption,
-  status,
-  children,
-}: WorkCardProps) => {
+export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
   const cardRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const animationRef = useRef<Animation | null>(null);
-  const current = status === 'current';
-  const titleId = useId();
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const current = job.status === 'current';
+  const titleId = `work-card-${index}-title`;
 
   const handlePick = (): void => {
     const card = cardRef.current;
@@ -54,7 +45,7 @@ export const WorkCard = ({
     if (details) {
       details.scrollTop = 0;
     }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (reducedMotion) {
       return;
     }
     animationRef.current = dialog.animate(
@@ -76,7 +67,7 @@ export const WorkCard = ({
     if (!card || !dialog || dialog.dataset.closing === 'true') {
       return;
     }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (reducedMotion) {
       dialog.close();
       return;
     }
@@ -99,16 +90,24 @@ export const WorkCard = ({
         ref={cardRef}
         type="button"
         className="work-card surface-panel flex h-full w-full flex-col text-left"
-        aria-label={`Pick up ${title}${current ? ', current role' : ''}`}
+        aria-label={`Pick up ${job.company}${current ? ', current role' : ''}`}
         aria-haspopup="dialog"
         onClick={handlePick}
       >
-        <span className="work-card-kind type-meta text-muted-foreground">
-          {current ? <span className="work-current-label">Current</span> : kind}
+        <span className="type-meta flex w-full items-center justify-between gap-2">
+          <span className="text-muted-foreground">0{index + 1}</span>
+          {current ? (
+            <span className="work-current-label">Current role</span>
+          ) : (
+            <ArrowUpRight size={16} aria-hidden />
+          )}
         </span>
-        <span className="work-card-title font-display">{title}</span>
-        <span className="work-card-caption type-meta mt-auto text-muted-foreground">
-          {caption}
+        <span className="work-card-company font-display">{job.company}</span>
+        <span className="work-card-role type-label text-muted-foreground">
+          {job.positions.map((position) => position.name).join(' · ')}
+        </span>
+        <span className="work-card-period type-meta mt-auto text-muted-foreground">
+          {job.positions[0].workPeriod}
         </span>
       </button>
       <dialog
@@ -140,7 +139,7 @@ export const WorkCard = ({
       >
         <header className="flex items-center justify-between gap-4">
           <span className="type-meta flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground">
-            <span>{kind}</span>
+            <span className="whitespace-nowrap">0{index + 1} / WORK</span>
             {current ? (
               <span className="work-current-label">Current role</span>
             ) : null}
@@ -150,7 +149,7 @@ export const WorkCard = ({
             size="sm"
             className="h-11 gap-2"
             onClick={handleReturn}
-            aria-label={`Put ${title} card back`}
+            aria-label={`Put ${job.company} card back`}
           >
             Put back <X aria-hidden />
           </Button>
@@ -160,12 +159,32 @@ export const WorkCard = ({
           data-section-scroll
           tabIndex={0}
           role="region"
-          aria-label={`${title} details`}
+          aria-label={`${job.company} role details`}
         >
           <h3 id={titleId} className="work-detail-title font-display">
-            {title}
+            {job.company}
           </h3>
-          {children}
+          {job.positions.map((position) => (
+            <div key={position.name} className="mt-5">
+              <h4 className="type-label">{position.name}</h4>
+              <p className="type-meta mt-1 text-muted-foreground">
+                {position.workPeriod}
+              </p>
+              <p className="work-description mt-5 text-muted-foreground">
+                {position.description}
+              </p>
+            </div>
+          ))}
+          <ul className="work-contributions mt-7 grid gap-5 sm:grid-cols-3">
+            {job.showcases.map((showcase) => (
+              <li key={showcase.title}>
+                <h4 className="type-label mb-2">{showcase.title}</h4>
+                <p className="work-description text-muted-foreground">
+                  {showcase.description}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
       </dialog>
     </div>
