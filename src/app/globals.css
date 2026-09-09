@@ -126,6 +126,7 @@
   }
 
   .profile-avatar-frame {
+    --coffee-crema: hsl(35 58% 78%);
     --coffee-paper: hsl(var(--background));
     --coffee-foam: color-mix(
       in srgb,
@@ -189,12 +190,12 @@
   }
 
   .profile-coffee-drink {
-    fill: color-mix(in srgb, hsl(var(--secondary)) 60%, hsl(var(--background)));
-    stroke: var(--coffee-foam);
+    fill: hsl(24 45% 20%);
+    stroke: var(--coffee-crema);
   }
 
   .profile-coffee-foam-fold {
-    stroke: var(--coffee-foam);
+    stroke: var(--coffee-crema);
     stroke-width: 0.9;
     stroke-linecap: round;
   }
