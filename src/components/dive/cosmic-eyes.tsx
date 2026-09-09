@@ -1,6 +1,7 @@
 'use client';
 
-import { useFrame } from '@react-three/fiber';
+import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
+import { useSetAtom } from 'jotai';
 import { useEffect, useRef, useState } from 'react';
 import { Color, Group, MathUtils, Vector3 } from 'three';
 
@@ -9,6 +10,7 @@ import { cosmicEyeFragment, cosmicEyeVertex } from './cosmic-eye-shader';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import { createSpaceOrigin } from './space-origin';
+import { nextStarfieldFormationAtom } from './starfield-controls';
 
 type CosmicEyesParams = {
   palette: DivePalette;
@@ -25,6 +27,8 @@ type EyePlacement = {
   variant: 'primary' | 'secondary';
   mobile: [number, number];
 };
+
+const CLICK_DRIFT_LIMIT = 6;
 
 const EYES: EyePlacement[] = [
   {
@@ -93,6 +97,8 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
   const groupRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
   const cameraTargetRef = useRef(new Vector3());
+  const canvas = useThree(({ gl }) => gl.domElement);
+  const nextFormation = useSetAtom(nextStarfieldFormationAtom);
   const [origin] = useState(createSpaceOrigin);
   const [geometry] = useState(createCosmicEyeGeometry);
   const [uniforms] = useState(() =>
@@ -125,6 +131,15 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
     palette.sunlight,
     uniforms,
   ]);
+
+  const handleClick = (event: ThreeEvent<MouseEvent>): void => {
+    // REASON: R3F fires click for any press/release on the same eye, so a
+    // scroll drag that starts on an eye must not switch formation.
+    if (event.delta > CLICK_DRIFT_LIMIT) {
+      return;
+    }
+    nextFormation();
+  };
 
   useFrame(({ camera, size }, delta) => {
     const group = groupRef.current;
@@ -182,6 +197,13 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
       name="cosmic-eyes"
       position={origin.position}
       quaternion={origin.quaternion}
+      onClick={handleClick}
+      onPointerOver={() => {
+        canvas.style.cursor = 'pointer';
+      }}
+      onPointerOut={() => {
+        canvas.style.cursor = '';
+      }}
     >
       {EYES.map((placement, index) => (
         <mesh
