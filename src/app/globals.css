@@ -44,6 +44,22 @@
   }
 }
 
+@keyframes avatarTrace {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@keyframes avatarSpark {
+  0%,
+  100% {
+    transform: scale(0.86) rotate(-8deg);
+  }
+  50% {
+    transform: scale(1) rotate(8deg);
+  }
+}
+
 .animate-fade-late {
   animation: fadeInLate 0.8s ease-out 1.7s both;
 }
@@ -113,6 +129,58 @@
 
   .dark .profile-avatar {
     border-color: hsl(var(--foreground) / 0.22);
+  }
+
+  .profile-avatar-frame {
+    color: hsl(var(--primary));
+  }
+
+  .profile-avatar-track {
+    stroke: hsl(var(--primary) / 0.3);
+  }
+
+  .profile-avatar-primary {
+    stroke: currentColor;
+  }
+
+  .profile-avatar-secondary {
+    stroke: hsl(var(--secondary));
+  }
+
+  .profile-avatar-trace {
+    stroke: currentColor;
+    animation: avatarTrace 12s linear infinite;
+  }
+
+  .profile-avatar-spark {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: avatarSpark 4s ease-in-out infinite;
+  }
+
+  .profile-avatar-spark-secondary {
+    fill: hsl(var(--secondary));
+  }
+
+  .profile-avatar-spark-primary {
+    fill: currentColor;
+    animation-delay: -2s;
+  }
+
+  .profile-avatar-spark-core {
+    fill: hsl(var(--background));
+    fill-opacity: 0.75;
+  }
+
+  .dark .profile-avatar-primary,
+  .dark .profile-avatar-trace,
+  .dark .profile-avatar-spark-primary {
+    filter: drop-shadow(0 0 3px hsl(var(--primary) / 0.5));
+  }
+
+  .dark .profile-avatar-secondary,
+  .dark .profile-avatar-spark-secondary {
+    filter: drop-shadow(0 0 3px hsl(var(--secondary) / 0.5));
   }
 
   .profile-card-name {
@@ -702,7 +770,9 @@
       transition: none;
     }
 
-    .appearance-orb {
+    .appearance-orb,
+    .profile-avatar-trace,
+    .profile-avatar-spark {
       animation: none;
     }
 
