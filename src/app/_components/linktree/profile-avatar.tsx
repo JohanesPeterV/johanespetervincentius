@@ -40,28 +40,28 @@ export default function ProfileAvatar() {
         <g className="profile-coffee-mug">
           <path
             className="profile-coffee-cup"
-            d="M36 96H42C59 96 59 117 42 117H36V111H42C50 111 50 102 42 102H36Z"
+            d="M35 94H41C55 94 56 118 40 120H35V114H40C48 113 49 100 41 100H35Z"
           />
           <path
             className="profile-coffee-cup"
-            d="M7 93H39C39 100 44 104 42 113C40 130 6 130 4 113C2 104 7 100 7 93Z"
+            d="M8 89H36C38 96 39 111 36.5 119Q35.5 124 31 125H13Q8.5 124 7.5 119C5 111 6 96 8 89Z"
           />
           <path
             className="profile-coffee-shade"
-            d="M32 95C32 102 37 104 35 114C34 121 26 125 14 122C27 132 41 124 42 113C44 104 39 100 39 93Z"
+            d="M30 91C33 100 34 112 31 119Q29 123 17 124L13 125H31Q35.5 124 36.5 119C39 111 38 96 36 89Z"
           />
           <ellipse
             className="profile-coffee-drink"
-            cx="23"
-            cy="93"
-            rx="16"
-            ry="5"
+            cx="22"
+            cy="89"
+            rx="14"
+            ry="3.5"
           />
           <path
             className="profile-coffee-ice"
-            d="M15 91L20 90L23 93L18 95ZM25 90L30 91L29 94L24 93Z"
+            d="M15 88L20 87L23 89L18 91ZM25 87L30 88L29 90L24 89Z"
           />
-          <circle className="profile-coffee-emblem" cx="23" cy="111" r="6.5" />
+          <circle className="profile-coffee-emblem" cx="22" cy="108" r="6.5" />
         </g>
       </svg>
     </div>
