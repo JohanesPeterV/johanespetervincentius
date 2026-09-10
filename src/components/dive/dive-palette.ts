@@ -12,9 +12,9 @@ export type DivePalette = {
   background: string;
   backgroundRgb: RgbColor;
   exposure: number;
-  etch: string;
   foreground: string;
   fogDensity: number;
+  glow: string;
   highlight: string;
   litInk: string;
   metal: string;
@@ -46,22 +46,15 @@ export const getDivePalette = (
     theme.mode === 'dark'
       ? [foreground, background]
       : [accent, secondary].sort((a, b) => luminance(b) - luminance(a));
-  // REASON: on paper the engraving is the raw second ink. In the dark that
-  // pigment glares and every wrinkle of the etch shows, so it thins to a
-  // faintly tinted grey.
-  const etch =
-    theme.mode === 'dark'
-      ? foreground.clone().lerp(secondary, 0.25).lerp(background, 0.6)
-      : secondary;
   return {
     mode: theme.mode,
     accent: accent.getStyle(),
     background: background.getStyle(),
     backgroundRgb: toRgbColor(background.getStyle()),
-    etch: etch.getStyle(),
     exposure: 0.9,
     foreground: foreground.getStyle(),
     fogDensity: 0,
+    glow: secondary.getStyle(),
     highlight: secondary.getStyle(),
     litInk: litInk.getStyle(),
     metal: foreground.clone().lerp(background, 0.28).getStyle(),

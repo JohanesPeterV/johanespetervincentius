@@ -14,8 +14,7 @@ import { heroHandoffFragment } from './hero-handoff-shader';
 export default class HeroHandoffEffect extends Effect {
   readonly ink = new Color();
   readonly paper = new Color();
-  readonly etch = new Color();
-  readonly sunlight = new Color();
+  readonly prism = new Color();
   private readonly source: { camera: Camera; target: WebGLRenderTarget };
   private readonly copy: CopyPass;
   private readonly active = new Uniform(0);
@@ -54,8 +53,7 @@ export default class HeroHandoffEffect extends Effect {
     this.uniforms.set('uAspect', this.aspect);
     this.uniforms.set('uInk', new Uniform(this.ink));
     this.uniforms.set('uPaper', new Uniform(this.paper));
-    this.uniforms.set('uEtch', new Uniform(this.etch));
-    this.uniforms.set('uSunlight', new Uniform(this.sunlight));
+    this.uniforms.set('uPrism', new Uniform(this.prism));
   }
 
   initialize(renderer: WebGLRenderer): void {

@@ -14,8 +14,7 @@ const ABERRATION_OFFSET = new Vector2();
 type DivePostprocessingParams = {
   background: string;
   foreground: string;
-  etch: string;
-  sunlight: string;
+  glow: string;
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
   handoffRef: RefObject<HeroHandoff>;
   gpuTier: number;
@@ -24,8 +23,7 @@ type DivePostprocessingParams = {
 const DivePostprocessing = memo(function DivePostprocessing({
   background,
   foreground,
-  etch,
-  sunlight,
+  glow,
   aberrationRef,
   handoffRef,
   gpuTier,
@@ -66,8 +64,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
         object={handoff}
         ink={foreground}
         paper={background}
-        etch={etch}
-        sunlight={sunlight}
+        prism={glow}
       />
     </EffectComposer>
   );

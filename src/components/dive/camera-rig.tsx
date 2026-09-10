@@ -259,8 +259,7 @@ export default function CameraRig({
         <DivePostprocessing
           background={palette.background}
           foreground={palette.foreground}
-          etch={palette.etch}
-          sunlight={palette.sunlight}
+          glow={palette.glow}
           aberrationRef={aberrationRef}
           handoffRef={handoffRef}
           gpuTier={gpuTier}
