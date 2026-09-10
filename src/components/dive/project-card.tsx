@@ -4,6 +4,7 @@ import { PomoplanterPreview } from '@/app/_components/projects/pomoplanter-previ
 import { POMODORO_PLANTER, Project } from '@/app/_components/projects/projects';
 import { Button } from '@/components/ui/button';
 import { PickableCard } from './pickable-card';
+import { StackList } from './stack-list';
 
 type ProjectCardProps = {
   project: Project;
@@ -23,7 +24,7 @@ export const ProjectCard = ({ project, index }: ProjectCardProps) => (
         </span>
         <span className="project-card-title font-display">{project.title}</span>
         <span className="project-card-stack type-meta text-muted-foreground">
-          {project.technologies.join(' · ')}
+          {project.stack.primary.join(' · ')}
         </span>
       </>
     }
@@ -32,9 +33,7 @@ export const ProjectCard = ({ project, index }: ProjectCardProps) => (
       <p className="work-description text-muted-foreground">
         {project.description}
       </p>
-      <p className="type-meta text-muted-foreground">
-        {project.technologies.join(' · ')}
-      </p>
+      <StackList stack={project.stack} />
       <div className="flex flex-wrap gap-2">
         {project.link ? (
           <Button asChild className="h-11 gap-2">

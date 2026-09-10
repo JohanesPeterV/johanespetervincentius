@@ -4,15 +4,12 @@ import {
   DIVE_SECTIONS,
   DIVE_START,
   DescentFrame,
-  TECH_STONE,
   WORK_STONE,
   sectionMotion,
-  techSectionOpacity,
   sectionJumpDelta,
   workScatter,
 } from './descent';
 import type { MotionMode } from './descent';
-import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
 import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { getCardSectionLayout } from './card-section-layout';
@@ -20,9 +17,6 @@ import { getCardSectionLayout } from './card-section-layout';
 export type OverlayNodes = {
   chapters: (HTMLButtonElement | null)[];
   sections: (HTMLDivElement | null)[];
-  skillLayer: HTMLDivElement | null;
-  skillRail: (HTMLButtonElement | null)[];
-  skillWords: (HTMLSpanElement | null)[];
   veil: HTMLDivElement | null;
 };
 
@@ -30,63 +24,10 @@ export type OverlayFrame = {
   descent: DescentFrame;
   height: number;
   progress: number;
-  skillAlphas: Float32Array;
-  skillScales: Float32Array;
-  skillScreens: Vector2[];
   stones: Vector2[];
   width: number;
   motionMode: MotionMode;
   handoff: HeroHandoff;
-};
-
-const SKILL_HIDE_THRESHOLD = 0.05;
-
-const applyGalaxyLabels = (nodes: OverlayNodes, frame: OverlayFrame): void => {
-  const layer = nodes.skillLayer;
-  if (!layer) {
-    return;
-  }
-  const opacity = techSectionOpacity(frame.progress);
-  layer.style.opacity = String(opacity);
-  const visibility = opacity < SKILL_HIDE_THRESHOLD ? 'hidden' : 'visible';
-  if (layer.style.visibility !== visibility) {
-    layer.style.visibility = visibility;
-  }
-  if (opacity < SKILL_HIDE_THRESHOLD) {
-    return;
-  }
-  const hovered = GALAXY_MOTION.hovered;
-  const active =
-    GALAXY_MOTION.focus ??
-    (hovered === null ? null : GALAXY_NODES[hovered].category);
-  nodes.skillRail.forEach((element, index) => {
-    if (!element) {
-      return;
-    }
-    const value = index === active ? 'true' : 'false';
-    if (element.dataset.active !== value) {
-      element.dataset.active = value;
-    }
-  });
-  nodes.skillWords.forEach((element, index) => {
-    if (!element) {
-      return;
-    }
-    const screen = frame.skillScreens[index];
-    element.style.transform = `translate3d(${screen.x}px, ${screen.y}px, 0) translate(-50%, -130%) scale(${frame.skillScales[index]})`;
-    element.style.opacity = String(frame.skillAlphas[index]);
-  });
-};
-
-// REASON: the galaxy claims the screen centre, so this section's copy docks
-// as a hud in the top-left corner instead of chasing its stone
-const positionTechHud = (
-  element: HTMLDivElement,
-  frame: OverlayFrame,
-): void => {
-  const left = Math.max(24, frame.width * 0.05);
-  const top = Math.max(104, frame.height * 0.14);
-  element.style.transform = `translate3d(${left}px, ${top}px, 0)`;
 };
 
 const positionStoneSection = (
@@ -165,8 +106,6 @@ export const applyOverlay = (
     }
     if (section.placement !== 'stone') {
       element.style.transform = '';
-    } else if (section.center === TECH_STONE.center) {
-      positionTechHud(element, frame);
     } else {
       const position = positionStoneSection(
         element,
@@ -195,7 +134,6 @@ export const applyOverlay = (
       element.removeAttribute('aria-current');
     }
   });
-  applyGalaxyLabels(nodes, frame);
   if (nodes.veil) {
     let opacity = frame.descent.veil;
     if (frame.progress < DIVE_START || frame.progress > WORK_STONE.center) {

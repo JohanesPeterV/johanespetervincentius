@@ -1,6 +1,9 @@
+import type { Stack } from '@/app/_components/stack';
+
 export type WorkExperience = {
   company: string;
   status: 'current' | 'past';
+  stack: Stack;
   positions: {
     name: string;
     workPeriod: string;
@@ -16,6 +19,21 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Smilie',
     status: 'current',
+    stack: {
+      primary: ['Next.js', 'TypeScript', 'tRPC', 'Prisma', 'PostgreSQL'],
+      others: [
+        'Turborepo',
+        'Clerk',
+        'Stripe',
+        'Resend',
+        'Upstash Redis',
+        'Playwright',
+        'Sentry',
+        'PostHog',
+        'Vercel',
+        'OpenAI',
+      ],
+    },
     positions: [
       {
         name: 'Lead Software Engineer',
@@ -45,6 +63,17 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'TableLink',
     status: 'past',
+    stack: {
+      primary: ['React', 'Next.js', 'Vite', 'TypeScript'],
+      others: [
+        'Storybook',
+        'Socket.IO',
+        'Electron',
+        'TanStack Query',
+        'Tailwind CSS',
+        'Express',
+      ],
+    },
     positions: [
       {
         name: 'Full-stack Developer',
@@ -74,6 +103,22 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Farmio',
     status: 'past',
+    stack: {
+      primary: ['Next.js', 'Express', 'Prisma', 'TypeScript'],
+      others: [
+        'Nx',
+        'MUI',
+        'NextAuth',
+        'OpenAI',
+        'LangChain',
+        'WhatsApp Cloud API',
+        'BullMQ',
+        'Redis',
+        'Stripe',
+        'PostHog',
+        'Sentry',
+      ],
+    },
     positions: [
       {
         name: 'Software Engineer',
@@ -103,6 +148,10 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'BINUS University',
     status: 'past',
+    stack: {
+      primary: ['ASP.NET', 'C#', 'SQL Server', 'Vue.js'],
+      others: ['Next.js', 'Nest.js'],
+    },
     positions: [
       {
         name: 'Database Administrator · Developer Intern · Teaching Assistant',

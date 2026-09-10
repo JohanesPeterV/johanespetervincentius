@@ -10,7 +10,6 @@ import SpaceWorld from './space-world';
 import type { MotionMode } from './descent';
 import type { OverlayNodes } from './dive-overlay-motion';
 import type { DivePalette } from './dive-palette';
-import SkillGalaxyScene from './skill-galaxy-scene';
 import type { HeroHandoff } from './hero-handoff';
 
 type DiveCanvasParams = {
@@ -21,7 +20,6 @@ type DiveCanvasParams = {
   overlayRef: RefObject<OverlayNodes>;
   handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
-  onEngage: (category: number | null) => void;
 };
 
 const LoadedSignal = ({ stageRef }: { stageRef: RefObject<DiveStage> }) => {
@@ -41,7 +39,6 @@ export default function DiveCanvas({
   overlayRef,
   handoffRef,
   motionMode,
-  onEngage,
 }: DiveCanvasParams) {
   const { tier } = useDetectGPU();
   const stageRef = useRef<DiveStage>('loading');
@@ -67,12 +64,6 @@ export default function DiveCanvas({
         />
         <LoadedSignal stageRef={stageRef} />
       </Suspense>
-      <SkillGalaxyScene
-        palette={palette}
-        progressRef={progressRef}
-        onEngage={onEngage}
-        motionMode={motionMode}
-      />
       <CameraRig
         driveRef={driveRef}
         progressRef={progressRef}

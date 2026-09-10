@@ -27,7 +27,7 @@ export const Projects = () => {
                     {POMODORO_PLANTER.description}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {POMODORO_PLANTER.technologies.join(' · ')}
+                    {POMODORO_PLANTER.stack.primary.join(' · ')}
                   </p>
                   <Button asChild size="lg" className="h-11">
                     <a
@@ -78,11 +78,9 @@ export const Projects = () => {
                         <CardContent className="text-muted-foreground text-xs sm:text-sm lg:text-base flex-1">
                           {project.description}
                         </CardContent>
-                        {project.technologies && (
-                          <p className="type-meta mt-auto px-4 pb-3 text-muted-foreground sm:px-6 sm:pb-4">
-                            {project.technologies.join(' · ')}
-                          </p>
-                        )}
+                        <p className="type-meta mt-auto px-4 pb-3 text-muted-foreground sm:px-6 sm:pb-4">
+                          {project.stack.primary.join(' · ')}
+                        </p>
                       </div>
                     </Card>
                   </a>

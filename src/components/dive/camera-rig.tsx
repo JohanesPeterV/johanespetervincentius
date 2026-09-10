@@ -23,7 +23,6 @@ import {
   rushFov,
   sectionTravel,
   stoneSectionOpacity,
-  techSectionOpacity,
   wrapProgress,
   writeDescentFrame,
 } from './descent';
@@ -35,7 +34,6 @@ import type { OverlayNodes } from './dive-overlay-motion';
 import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
-import { GALAXY_NODES, writeGalaxyScreens } from './skill-galaxy';
 import { sampleHeroHandoff } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
@@ -67,9 +65,6 @@ const ROLL_DAMPING = 6;
 
 const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
 const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
-const SKILL_SCREENS = GALAXY_NODES.map(() => new Vector2());
-const SKILL_ALPHAS = new Float32Array(GALAXY_NODES.length);
-const SKILL_SCALES = new Float32Array(GALAXY_NODES.length);
 
 export default function CameraRig({
   driveRef,
@@ -205,7 +200,7 @@ export default function CameraRig({
     camera.updateMatrixWorld();
   }, -2);
 
-  // REASON: DOM projection runs after the world and galaxy update, but before
+  // REASON: DOM projection runs after the world update, but before
   // the composer renders, so text and geometry describe the same frame.
   useFrame(({ camera, size }) => {
     const progress = wrapProgress(driveRef.current.current);
@@ -223,30 +218,17 @@ export default function CameraRig({
         ((1 - projection.y) * size.height) / 2,
       );
     });
-    const techVisible = techSectionOpacity(progress) > 0;
     const workVisible = stoneSectionOpacity(progress, WORK_STONE.center) > 0;
-    if (techVisible) {
-      writeGalaxyScreens({
-        alphas: SKILL_ALPHAS,
-        camera,
-        height: size.height,
-        progress,
-        scales: SKILL_SCALES,
-        screens: SKILL_SCREENS,
-        width: size.width,
-      });
-    }
     const sizeChanged =
       size.width !== overlaySizeRef.current.x ||
       size.height !== overlaySizeRef.current.y;
-    // REASON: galaxy labels and work panels animate while camera progress is
+    // REASON: work panels animate while camera progress is
     // frozen, so their visible sections still need overlay writes every frame
     if (
       progress !== overlayProgressRef.current ||
       motionMode !== overlayMotionModeRef.current ||
       sizeChanged ||
       (handoffRef.current.progress > 0 && handoffRef.current.progress < 1) ||
-      techVisible ||
       workVisible
     ) {
       overlayProgressRef.current = progress;
@@ -256,9 +238,6 @@ export default function CameraRig({
         descent: descentFrame,
         height: size.height,
         progress,
-        skillAlphas: SKILL_ALPHAS,
-        skillScales: SKILL_SCALES,
-        skillScreens: SKILL_SCREENS,
         stones: STONE_SCREENS,
         width: size.width,
         motionMode,
@@ -281,6 +260,7 @@ export default function CameraRig({
           background={palette.background}
           foreground={palette.foreground}
           glow={palette.glow}
+          sunlight={palette.sunlight}
           aberrationRef={aberrationRef}
           handoffRef={handoffRef}
           gpuTier={gpuTier}

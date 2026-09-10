@@ -2,6 +2,7 @@ import { ArrowUpRight } from 'lucide-react';
 
 import type { WorkExperience } from '@/app/_components/work-experience/work-experiences';
 import { PickableCard } from './pickable-card';
+import { StackList } from './stack-list';
 
 type WorkExperienceCardProps = {
   job: WorkExperience;
@@ -30,6 +31,9 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           <span className="work-card-role type-label text-muted-foreground">
             {job.positions.map((position) => position.name).join(' · ')}
           </span>
+          <span className="work-card-stack type-meta text-muted-foreground">
+            {job.stack.primary.join(' · ')}
+          </span>
           <span className="work-card-period type-meta mt-auto text-muted-foreground">
             {job.positions[0].workPeriod}
           </span>
@@ -47,6 +51,9 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           </p>
         </div>
       ))}
+      <div className="mt-5">
+        <StackList stack={job.stack} />
+      </div>
       <ul className="work-contributions mt-7 grid gap-5 sm:grid-cols-3">
         {job.showcases.map((showcase) => (
           <li key={showcase.title}>

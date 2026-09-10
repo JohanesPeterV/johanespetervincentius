@@ -40,9 +40,6 @@ export type MotionMode = 'full' | 'reduced';
 
 type DescentKey = DescentFrame & { at: number };
 
-export const TECH_STONE = { center: 3.15, x: -1.6, z: 8.1 };
-const TECH_DWELL_HALF = 0.3;
-
 export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
 
 export const WORK_SECTION: StoneDiveSection = {
@@ -63,20 +60,9 @@ export const DIVE_SECTIONS: DiveSection[] = [
     placement: 'center',
   },
   WORK_SECTION,
-  {
-    tag: '03',
-    title: 'Tech\nStack',
-    subtitle: 'tools of the trade',
-    placement: 'stone',
-    stoneIndex: 1,
-    // REASON: this stone passes behind the skill galaxy - at full size its
-    // silhouette fights the constellation for the frame
-    stoneScale: 0.38,
-    ...TECH_STONE,
-  },
 ];
 
-export const DIVE_LENGTH = 4.1;
+export const DIVE_LENGTH = 3.5;
 export const DIVE_START = 0.95;
 export const WHEEL_SENSITIVITY = 1 / 2000;
 export const TOUCH_SENSITIVITY = 1 / 1000;
@@ -92,7 +78,7 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 const SEAM_CENTER = 1.4;
 const SEAM_SPAN = 0.46;
-const FINALE_CENTER = 3.68;
+const FINALE_CENTER = 3.08;
 const FINALE_SPAN = 0.4;
 
 const transitionBoost = (
@@ -139,21 +125,12 @@ const NARRATIVE_STONE_CENTER_Y = 4.45;
 // active stone is ever in frame
 const NARRATIVE_STONE_RISE_RATE = 17;
 
-const DWELL_RATE = 2.5;
-
 export const narrativeStoneY = (progress: number, center: number): number => {
   let delta = progress - center;
   // REASON: the opening spans a full chapter rather than the later 0.6 steps;
   // the first stone must enter while the hero leaves, not after an empty gap.
   if (center === WORK_STONE.center && delta < 0) {
     delta *= 0.5;
-  }
-  // REASON: the tech section hosts the skill galaxy - compressing travel
-  // inside the dwell holds the galaxy on screen long enough to notice and
-  // explore it, then full rise speed resumes at the dwell edges
-  if (center === TECH_STONE.center) {
-    const held = Math.max(-TECH_DWELL_HALF, Math.min(TECH_DWELL_HALF, delta));
-    delta = held * (DWELL_RATE / NARRATIVE_STONE_RISE_RATE) + (delta - held);
   }
   return NARRATIVE_STONE_CENTER_Y + delta * NARRATIVE_STONE_RISE_RATE;
 };
@@ -253,9 +230,9 @@ export const writeDescentFrame = (
   return target;
 };
 
-// REASON: the work chapter releases at the snap midpoint to the tech chapter,
-// so idling before it gathers the cards back and past it commits the scatter
-const WORK_EXIT = TECH_STONE.center - 0.6;
+// REASON: the work chapter releases a fixed stretch past its centre, so idling
+// before it gathers the cards back and past it commits the scatter
+const WORK_EXIT = WORK_STONE.center + 0.6;
 const WORK_SCATTER_SPAN = 0.3;
 
 export const stoneSectionOpacity = (
@@ -271,34 +248,19 @@ export const stoneSectionOpacity = (
 export const workScatter = (progress: number): number =>
   smootherstep(WORK_EXIT, WORK_EXIT + WORK_SCATTER_SPAN, progress);
 
-const TECH_FADE_SPAN = 0.18;
+const SCATTER_SETTLE = 0.18;
 const HERO_FADE_SPAN = 0.54;
 const HERO_READING_HALF = 0.1;
 
-export const LOOP_START = TECH_STONE.center + TECH_DWELL_HALF + TECH_FADE_SPAN;
+export const LOOP_START = WORK_EXIT + WORK_SCATTER_SPAN + SCATTER_SETTLE;
 export const LOOP_END = DIVE_START - HERO_READING_HALF;
-
-export const techSectionOpacity = (progress: number): number => {
-  const distance = Math.abs(progress - TECH_STONE.center);
-  return (
-    1 -
-    smootherstep(TECH_DWELL_HALF, TECH_DWELL_HALF + TECH_FADE_SPAN, distance)
-  );
-};
-
-const stoneOpacity = (progress: number, center: number): number => {
-  if (center === TECH_STONE.center) {
-    return techSectionOpacity(progress);
-  }
-  return stoneSectionOpacity(progress, center);
-};
 
 export const sectionMotion = (
   progress: number,
   section: DiveSection,
 ): SectionMotion => {
   if (section.placement === 'stone') {
-    return { opacity: stoneOpacity(progress, section.center), shift: 0 };
+    return { opacity: stoneSectionOpacity(progress, section.center), shift: 0 };
   }
   const delta = progress - section.center;
   const distance = Math.abs(delta);

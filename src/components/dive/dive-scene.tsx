@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, Suspense, useEffect, useRef, useState } from 'react';
+import { ReactNode, Suspense, useEffect, useRef } from 'react';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
 import PalettePicker from '@/components/theme-buttons/palette-picker';
@@ -17,17 +17,7 @@ import {
 } from './descent';
 import { useDivePalette } from './use-dive-palette';
 import DiveOverlay from './dive-overlay';
-import type { DiveMode } from './dive-overlay';
 import type { OverlayNodes } from './dive-overlay-motion';
-import {
-  galaxyEngage,
-  galaxyPointerDown,
-  galaxyPointerMove,
-  galaxyPointerUp,
-  galaxyRelease,
-  galaxyZoomBy,
-  resetGalaxy,
-} from './skill-galaxy';
 import { useHeroHandoff } from './use-hero-handoff';
 import {
   canScrollSection,
@@ -56,14 +46,9 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   const overlayRef = useRef<OverlayNodes>({
     chapters: [],
     sections: [],
-    skillLayer: null,
-    skillRail: [],
-    skillWords: [],
     veil: null,
   });
   const { handoffRef, error: handoffError } = useHeroHandoff(overlayRef);
-  const modeRef = useRef<DiveMode>('dive');
-  const [mode, setMode] = useState<DiveMode>('dive');
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const motionMode = reducedMotion ? 'reduced' : 'full';
   const palette = useDivePalette();
@@ -77,28 +62,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     });
   };
 
-  const handleEngage = (category: number | null): void => {
-    modeRef.current = 'explore';
-    setMode('explore');
-    galaxyEngage(category);
-  };
-
-  const handleRelease = (): void => {
-    modeRef.current = 'dive';
-    setMode('dive');
-    galaxyRelease();
-  };
-
-  const handleToggleExplore = (): void => {
-    if (modeRef.current === 'explore') {
-      handleRelease();
-      return;
-    }
-    handleEngage(null);
-  };
-
   const handleNavigate = (center: number): void => {
-    handleRelease();
     driveRef.current.target += center - wrapProgress(driveRef.current.target);
   };
 
@@ -107,10 +71,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       return;
     }
     if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-      return;
-    }
-    if (modeRef.current === 'explore') {
-      galaxyZoomBy(normalizeWheelDelta(event));
       return;
     }
     applyDriveDelta(normalizeWheelDelta(event) * WHEEL_SENSITIVITY);
@@ -126,11 +86,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       event.target instanceof Element &&
       event.target.closest('a, button, summary')
     ) {
-      return;
-    }
-    if (modeRef.current === 'explore') {
-      event.currentTarget.setPointerCapture(event.pointerId);
-      galaxyPointerDown(event.pointerId, event.clientX, event.clientY);
       return;
     }
     const horizontal =
@@ -156,10 +111,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
         y: (event.clientY / window.innerHeight) * 2 - 1,
       };
     }
-    if (modeRef.current === 'explore') {
-      galaxyPointerMove(event.pointerId, event.clientX, event.clientY);
-      return;
-    }
     if (dragRef.current.id !== event.pointerId) {
       return;
     }
@@ -182,7 +133,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   const handlePointerEnd = (
     event: React.PointerEvent<HTMLDivElement>,
   ): void => {
-    galaxyPointerUp(event.pointerId);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -191,12 +141,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       dragRef.current.scrollTarget = null;
     }
   };
-
-  // REASON: galaxy motion survives React remounts; a return visit must not
-  // inherit an explored camera while the UI reports a fresh dive.
-  useEffect(() => {
-    resetGalaxy();
-  }, []);
 
   // REASON: arrow-key navigation needs window-level key events - the
   // full-screen div is never focused, so an onKeyDown prop would not fire
@@ -208,14 +152,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
           'input, textarea, select, [contenteditable="true"]',
         )
       ) {
-        return;
-      }
-      if (modeRef.current === 'explore') {
-        if (event.key === 'Escape') {
-          modeRef.current = 'dive';
-          setMode('dive');
-          galaxyRelease();
-        }
         return;
       }
       if (
@@ -262,17 +198,10 @@ export default function DiveScene({ children }: { children: ReactNode }) {
           overlayRef={overlayRef}
           handoffRef={handoffRef}
           motionMode={motionMode}
-          onEngage={handleEngage}
         />
       </Suspense>
       <PalettePicker />
-      <DiveOverlay
-        overlayRef={overlayRef}
-        mode={mode}
-        onEngage={handleEngage}
-        onToggleExplore={handleToggleExplore}
-        onNavigate={handleNavigate}
-      >
+      <DiveOverlay overlayRef={overlayRef} onNavigate={handleNavigate}>
         {children}
       </DiveOverlay>
       {handoffError ? (

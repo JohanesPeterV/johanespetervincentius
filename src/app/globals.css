@@ -389,13 +389,6 @@
     border-radius: 50%;
   }
 
-  .dive-hint {
-    color: hsl(var(--foreground));
-    text-shadow:
-      0 1px 4px hsl(var(--background)),
-      0 0 12px hsl(var(--background));
-  }
-
   .identity-tag {
     display: inline-flex;
     align-items: center;
@@ -411,16 +404,12 @@
     background: hsl(var(--secondary));
   }
 
-  .dive-skill {
-    border-radius: var(--radius);
-  }
-
   .dive-work-section {
     --scatter: 0;
     will-change: transform, opacity;
   }
 
-  /* Leaving for the tech chapter, every card lifts off along its own line and
+  /* Leaving the chapter, every card lifts off along its own line and
      recedes into the stars; --scatter is scrubbed by the scroll, so the deck
      gathers back when the dive reverses. */
   .work-card,
@@ -741,7 +730,8 @@
     overflow-wrap: anywhere;
   }
 
-  .project-card-stack {
+  .project-card-stack,
+  .work-card-stack {
     font-size: 0.5rem;
     line-height: 1.6;
   }
@@ -790,6 +780,7 @@
 
     .work-card-role,
     .work-card-period,
+    .work-card-stack,
     .project-card-stack {
       display: none;
     }
@@ -835,6 +826,7 @@
   @media (max-height: 600px) {
     .work-card-role,
     .work-card-period,
+    .work-card-stack,
     .project-card-stack {
       display: none;
     }
@@ -921,12 +913,6 @@
   .project-preview-stage:focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 4px;
-  }
-
-  @media (max-width: 639px) and (max-height: 720px) {
-    .dive-hint {
-      display: none;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
