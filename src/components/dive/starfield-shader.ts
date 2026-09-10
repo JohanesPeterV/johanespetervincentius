@@ -2,8 +2,8 @@ import { STARFIELD_REFERENCE_DISTANCE } from './starfield-space';
 
 export const starfieldVertex = `
   uniform float uTime;
-  uniform vec2 uAppearanceFrom;
-  uniform vec2 uAppearanceTo;
+  uniform vec3 uAppearanceFrom;
+  uniform vec3 uAppearanceTo;
   uniform float uLuminous;
   uniform float uAspect;
   uniform float uWorldScale;
@@ -20,6 +20,7 @@ export const starfieldVertex = `
   varying float vAlpha;
   varying float vGlow;
   varying float vTint;
+  varying float vColorStrength;
   varying float vHalo;
   varying vec3 vNormal;
   varying vec3 vViewPosition;
@@ -73,7 +74,7 @@ export const starfieldVertex = `
     point.y -= uFlow * flowDepth * (0.85 + aSeed.x * 0.65);
     point.x += sin(aSeed.z * 6.283) * uFlow * flowDepth * 0.08;
 
-    vec2 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
+    vec3 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
     vGlow = pow(smoothstep(STAR_ACCENT_THRESHOLD, 1.0, aSeed.y), 2.0);
     float twinkle = 0.64 + 0.36 * (0.5 + 0.5 * sin(
       uTime * (0.8 + aSeed.x * 0.35) + aSeed.z * 6.283
@@ -109,6 +110,7 @@ export const starfieldVertex = `
     float inkAlpha = (0.55 + 0.45 * aSeed.y) * (0.85 + 0.15 * twinkle) * nearFade;
     vAlpha = mix(inkAlpha, glowAlpha, uLuminous);
     vTint = mix(step(0.5, aSeed.x), 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283), uLuminous);
+    vColorStrength = mix(1.0, appearance.z, uLuminous);
     vHalo = appearance.y * twinkle;
   }
 `;
@@ -122,6 +124,7 @@ export const starfieldFragment = `
   varying float vAlpha;
   varying float vGlow;
   varying float vTint;
+  varying float vColorStrength;
   varying vec3 vNormal;
   varying vec3 vViewPosition;
 
@@ -130,8 +133,8 @@ export const starfieldFragment = `
     vec3 light = normalize(vec3(-0.6, 0.8, 1.0));
     float diffuse = max(dot(normal, light), 0.0);
     float specular = pow(max(dot(reflect(-light, normal), normalize(-vViewPosition)), 0.0), 24.0);
-    // REASON: a star is a mark in one of the two colourway inks; white only ever sparkles off a facet.
-    vec3 color = mix(uAccent, uHighlight, vTint);
+    vec3 pigment = mix(uAccent, uHighlight, vTint);
+    vec3 color = mix(uStarlight, pigment, vColorStrength);
     color *= mix(1.0, 0.38 + diffuse * 0.62, uLuminous);
     color += uStarlight * specular * vGlow * uLuminous * 0.3;
     gl_FragColor = vec4(mix(uBackground, color, vAlpha), 1.0);

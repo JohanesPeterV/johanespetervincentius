@@ -11,6 +11,7 @@ import {
   Color,
   DynamicDrawUsage,
   Vector2,
+  Vector3,
 } from 'three';
 
 import type { DivePalette } from './dive-palette';
@@ -107,8 +108,8 @@ export default function DiveAtmosphere({
     uBackground: { value: new Color(palette.background) },
     uAccent: { value: new Color(palette.accent) },
     uHighlight: { value: new Color(palette.highlight) },
-    uAppearanceFrom: { value: new Vector2() },
-    uAppearanceTo: { value: new Vector2() },
+    uAppearanceFrom: { value: new Vector3() },
+    uAppearanceTo: { value: new Vector3() },
     uLuminous: { value: Number(palette.mode === 'dark') },
     uTime: { value: 0 },
     uAspect: { value: aspect },
@@ -198,8 +199,8 @@ export default function DiveAtmosphere({
     uniforms.uMorph.value = field.timeline.morph;
     const from = field.layout.frames[field.timeline.from].appearance;
     const to = field.layout.frames[field.timeline.to].appearance;
-    uniforms.uAppearanceFrom.value.set(from.size, from.glow);
-    uniforms.uAppearanceTo.value.set(to.size, to.glow);
+    uniforms.uAppearanceFrom.value.set(from.size, from.glow, from.tint);
+    uniforms.uAppearanceTo.value.set(to.size, to.glow, to.tint);
     uniforms.uTravel.value =
       reality === 'orbital' ? sectionTravel(progressRef.current) : 0;
     const handoff = handoffRef.current;
