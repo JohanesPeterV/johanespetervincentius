@@ -6,7 +6,7 @@ export const DiveProjects = () => (
     className="dive-project-section"
     aria-labelledby="project-deck-title"
   >
-    <h3 id="project-deck-title" className="type-label">
+    <h3 id="project-deck-title" className="sr-only">
       Projects
     </h3>
     <div className="project-card-deck">
