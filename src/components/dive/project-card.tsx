@@ -23,9 +23,7 @@ export const ProjectCard = ({ project, index }: ProjectCardProps) => (
           <ArrowUpRight size={14} aria-hidden />
         </span>
         <span className="project-card-title font-display">{project.title}</span>
-        <span className="project-card-stack type-meta text-muted-foreground">
-          {project.stack.primary.join(' · ')}
-        </span>
+        <StackList stack={project.stack} tier="primary" />
       </>
     }
   >
@@ -33,7 +31,7 @@ export const ProjectCard = ({ project, index }: ProjectCardProps) => (
       <p className="work-description text-muted-foreground">
         {project.description}
       </p>
-      <StackList stack={project.stack} />
+      <StackList stack={project.stack} tier="all" />
       <div className="flex flex-wrap gap-2">
         {project.link ? (
           <Button asChild className="h-11 gap-2">
