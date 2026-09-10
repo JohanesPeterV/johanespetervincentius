@@ -20,7 +20,14 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     status: 'current',
     stack: {
-      primary: ['Next.js', 'TypeScript', 'tRPC', 'Prisma', 'PostgreSQL'],
+      primary: [
+        'Next.js',
+        'TypeScript',
+        'tRPC',
+        'Prisma',
+        'PostgreSQL',
+        'Convex',
+      ],
       others: [
         'Turborepo',
         'Clerk',
