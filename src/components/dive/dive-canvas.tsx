@@ -68,8 +68,7 @@ export default function DiveCanvas({
         <LoadedSignal stageRef={stageRef} />
       </Suspense>
       <SkillGalaxyScene
-        accentColor={palette.accent}
-        metalColor={palette.metal}
+        palette={palette}
         progressRef={progressRef}
         onEngage={onEngage}
         motionMode={motionMode}

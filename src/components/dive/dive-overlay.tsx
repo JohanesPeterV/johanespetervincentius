@@ -142,7 +142,7 @@ export default function DiveOverlay({
                   {GALAXY_CATEGORIES.map((category, categoryIndex) => (
                     <button
                       type="button"
-                      key={category.name}
+                      key={category}
                       data-active="false"
                       onClick={() => onEngage(categoryIndex)}
                       ref={(element) => {
@@ -150,7 +150,7 @@ export default function DiveOverlay({
                       }}
                       className="dive-skill choice-control pointer-events-auto min-h-11 px-3 text-left text-xs font-medium tracking-[0.14em]"
                     >
-                      {category.name}
+                      {category}
                     </button>
                   ))}
                   <button

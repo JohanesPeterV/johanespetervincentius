@@ -3,43 +3,46 @@
 import { useCursor } from '@react-three/drei';
 import { ThreeEvent, useFrame } from '@react-three/fiber';
 import { RefObject, useRef, useState } from 'react';
-import { Group, InstancedMesh, Object3D } from 'three';
+import { Color, Group, InstancedMesh, Object3D } from 'three';
 
 import { techSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
+import type { DivePalette } from './dive-palette';
 import {
-  GALAXY_LINKS,
   GALAXY_MOTION,
   GALAXY_NODES,
+  GALAXY_RINGS,
   advanceGalaxy,
   galaxyEngage,
   writeGalaxyPose,
 } from './skill-galaxy';
 
 type SkillGalaxySceneParams = {
-  accentColor: string;
-  metalColor: string;
+  palette: DivePalette;
   progressRef: RefObject<number>;
   onEngage: (category: number | null) => void;
   motionMode: MotionMode;
 };
 
-const HUB_NODE_SCALE = 2.4;
-const HOVER_BOOST = 1.25;
+const HUB_NODE_SCALE = 2.2;
+const HOVER_BOOST = 1.3;
 const CLICK_DRAG_THRESHOLD = 5;
 const nodeHelper = new Object3D();
+const nodeColor = new Color();
 
 export default function SkillGalaxyScene({
-  accentColor,
-  metalColor,
+  palette,
   progressRef,
   onEngage,
   motionMode,
 }: SkillGalaxySceneParams) {
   const groupRef = useRef<Group>(null);
   const nodesRef = useRef<InstancedMesh>(null);
+  const paintedRef = useRef('');
   const [hovered, setHovered] = useState(false);
   useCursor(hovered);
+  // REASON: orbit lines glow in the dark but are pigment on paper, which needs more coverage.
+  const ringOpacity = palette.mode === 'light' ? 0.7 : 0.3;
 
   const handlePointerMove = (event: ThreeEvent<PointerEvent>): void => {
     if (event.instanceId === undefined) {
@@ -92,15 +95,31 @@ export default function SkillGalaxyScene({
       group.quaternion,
     );
     group.scale.setScalar(scale);
+    const paint = `${palette.accent}|${palette.highlight}`;
+    const repaint = paintedRef.current !== paint;
+    const tumble = GALAXY_MOTION.orbit;
     GALAXY_NODES.forEach((node, index) => {
       nodeHelper.position.copy(node.position);
+      nodeHelper.rotation.set(
+        index * 0.7 + tumble * 0.3,
+        index + tumble * 0.2,
+        0.3,
+      );
       const base = node.kind === 'hub' ? HUB_NODE_SCALE : 1;
       const boost = GALAXY_MOTION.hovered === index ? HOVER_BOOST : 1;
       nodeHelper.scale.setScalar(base * boost);
       nodeHelper.updateMatrix();
       nodes.setMatrixAt(index, nodeHelper.matrix);
+      if (repaint) {
+        nodeColor.set(node.kind === 'hub' ? palette.accent : palette.highlight);
+        nodes.setColorAt(index, nodeColor);
+      }
     });
     nodes.instanceMatrix.needsUpdate = true;
+    if (repaint && nodes.instanceColor) {
+      nodes.instanceColor.needsUpdate = true;
+      paintedRef.current = paint;
+    }
   }, -1);
 
   return (
@@ -113,39 +132,38 @@ export default function SkillGalaxyScene({
         onPointerOut={handlePointerOut}
         onClick={handleClick}
       >
-        <sphereGeometry args={[0.055, 8, 8]} />
+        <octahedronGeometry args={[0.09, 0]} />
         <meshStandardMaterial
-          color={metalColor}
-          emissive={accentColor}
-          emissiveIntensity={0.1}
-          roughness={0.6}
-          metalness={0.1}
+          roughness={1}
+          metalness={0}
+          flatShading
+          toneMapped={false}
+          fog={false}
         />
       </instancedMesh>
       <mesh>
-        <sphereGeometry args={[0.18, 24, 16]} />
+        <icosahedronGeometry args={[0.44, 1]} />
         <meshStandardMaterial
-          color={metalColor}
-          emissive={accentColor}
-          emissiveIntensity={0.1}
-          roughness={0.6}
-          metalness={0.1}
+          color={palette.accent}
+          roughness={1}
+          metalness={0}
+          flatShading
+          toneMapped={false}
+          fog={false}
         />
       </mesh>
-      <lineSegments frustumCulled={false}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[GALAXY_LINKS, 3]}
+      {GALAXY_RINGS.map((ring) => (
+        <mesh key={ring.radius} rotation={ring.tilt}>
+          <torusGeometry args={[ring.radius, 0.006, 3, 128]} />
+          <meshBasicMaterial
+            color={palette.highlight}
+            transparent
+            opacity={ringOpacity}
+            toneMapped={false}
+            fog={false}
           />
-        </bufferGeometry>
-        <lineBasicMaterial
-          color={accentColor}
-          transparent
-          opacity={0.08}
-          depthWrite={false}
-        />
-      </lineSegments>
+        </mesh>
+      ))}
     </group>
   );
 }

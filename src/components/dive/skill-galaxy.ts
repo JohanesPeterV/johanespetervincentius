@@ -1,12 +1,4 @@
-import {
-  Camera,
-  Euler,
-  MathUtils,
-  QuadraticBezierCurve3,
-  Quaternion,
-  Vector2,
-  Vector3,
-} from 'three';
+import { Camera, Euler, MathUtils, Quaternion, Vector2, Vector3 } from 'three';
 
 import { TECHNOLOGIES } from '@/app/_components/technologies/technologies';
 
@@ -19,13 +11,14 @@ export type GalaxyNode = {
   link: string | null;
   category: number;
   kind: 'hub' | 'skill';
+  angle: number;
   position: Vector3;
 };
 
-export type GalaxyCategory = {
-  name: string;
-  yaw: number;
-  pitch: number;
+export type GalaxyRing = {
+  radius: number;
+  tilt: Euler;
+  speed: number;
 };
 
 type GalaxyMotion = {
@@ -39,6 +32,7 @@ type GalaxyMotion = {
   focusBlend: number;
   hovered: number | null;
   exploring: boolean;
+  orbit: number;
 };
 
 type GalaxyPlacement = {
@@ -57,114 +51,76 @@ type GalaxyScreenWrite = {
   width: number;
 };
 
-const HUB_RADIUS = 2.1;
-const SKILL_RADIUS = 0.95;
-const HUB_AZIMUTHS = [0.5, 1.76, 3.02, 4.27, 5.53];
-const HUB_ELEVATIONS = [0.42, -0.3, 0.24, -0.46, 0.1];
-const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+const RING_INNER_RADIUS = 1.35;
+const RING_STEP = 0.72;
+// REASON: every ring leans the same way so the stack reads as one inclined
+// system like the planet's orbits; the small per-ring wobble keeps the
+// satellites from lining up into flat concentric circles
+const RING_LEAN = -1.0;
+const RING_WOBBLE = [
+  [0.08, -0.2],
+  [-0.06, 0.14],
+  [0.1, -0.05],
+  [-0.04, 0.22],
+];
+const INNER_RING_SPEED = 0.14;
+// REASON: hubs lead their rings from staggered angles so the four category
+// markers fan around the core instead of stacking at one edge
+const HUB_ANGLE = -Math.PI / 2;
+const HUB_STAGGER = 0.85;
 
-const hubDirection = (index: number, target: Vector3): Vector3 => {
-  const azimuth = HUB_AZIMUTHS[index % HUB_AZIMUTHS.length];
-  const elevation = HUB_ELEVATIONS[index % HUB_ELEVATIONS.length];
-  return target.set(
-    Math.sin(azimuth) * Math.cos(elevation),
-    Math.sin(elevation),
-    Math.cos(azimuth) * Math.cos(elevation),
-  );
-};
+export const GALAXY_RINGS: GalaxyRing[] = TECHNOLOGIES.map((_, index) => {
+  const [wobbleX, wobbleZ] = RING_WOBBLE[index % RING_WOBBLE.length];
+  return {
+    radius: RING_INNER_RADIUS + index * RING_STEP,
+    tilt: new Euler(RING_LEAN + wobbleX, 0, wobbleZ),
+    speed: INNER_RING_SPEED / (1 + index * 0.55),
+  };
+});
 
-const buildGalaxy = (): {
-  nodes: GalaxyNode[];
-  categories: GalaxyCategory[];
-} => {
-  const nodes: GalaxyNode[] = [];
-  const categories: GalaxyCategory[] = [];
-  const direction = new Vector3();
-  TECHNOLOGIES.forEach((technology, categoryIndex) => {
-    hubDirection(categoryIndex, direction);
-    const hub = direction.clone().multiplyScalar(HUB_RADIUS);
-    categories.push({
-      name: technology.category,
-      yaw: -HUB_AZIMUTHS[categoryIndex % HUB_AZIMUTHS.length],
-      pitch: HUB_ELEVATIONS[categoryIndex % HUB_ELEVATIONS.length],
-    });
-    nodes.push({
+const RING_OUTER_RADIUS = GALAXY_RINGS[GALAXY_RINGS.length - 1].radius;
+
+export const GALAXY_CATEGORIES: string[] = TECHNOLOGIES.map(
+  (technology) => technology.category,
+);
+
+export const GALAXY_NODES: GalaxyNode[] = TECHNOLOGIES.flatMap(
+  (technology, categoryIndex) => {
+    const slots = technology.contents.length + 1;
+    const hubAngle = HUB_ANGLE + categoryIndex * HUB_STAGGER;
+    const hub: GalaxyNode = {
       label: technology.category,
       link: null,
       category: categoryIndex,
       kind: 'hub',
-      position: hub,
-    });
-    technology.contents.forEach((content, skillIndex) => {
-      // REASON: a fibonacci sphere spreads satellites evenly around the hub
-      // with no seeded randomness, so the layout is stable across renders
-      const t = (skillIndex + 0.5) / technology.contents.length;
-      const polar = Math.acos(1 - 2 * t);
-      const azimuth = skillIndex * GOLDEN_ANGLE;
-      nodes.push({
+      angle: hubAngle,
+      position: new Vector3(),
+    };
+    const skills = technology.contents.map(
+      (content, skillIndex): GalaxyNode => ({
         label: content.name,
         link: content.link,
         category: categoryIndex,
         kind: 'skill',
-        position: new Vector3(
-          Math.sin(polar) * Math.cos(azimuth),
-          Math.cos(polar),
-          Math.sin(polar) * Math.sin(azimuth),
-        )
-          .multiplyScalar(SKILL_RADIUS)
-          .add(hub),
-      });
-    });
-  });
-  return { nodes, categories };
-};
-
-const GALAXY = buildGalaxy();
-
-export const GALAXY_NODES = GALAXY.nodes;
-export const GALAXY_CATEGORIES = GALAXY.categories;
-
-const LINK_SEGMENTS = 8;
-// REASON: straight spokes read as a weightless network diagram - sagging every
-// link gives the structure weight, so it hangs instead of floating
-const LINK_SAG = 0.16;
-
-const pushSaggingLink = (
-  positions: number[],
-  from: Vector3,
-  to: Vector3,
-): void => {
-  const control = new Vector3().addVectors(from, to).multiplyScalar(0.5);
-  control.y -= from.distanceTo(to) * LINK_SAG;
-  const points = new QuadraticBezierCurve3(from, control, to).getPoints(
-    LINK_SEGMENTS,
-  );
-  for (let index = 0; index < points.length - 1; index++) {
-    positions.push(points[index].x, points[index].y, points[index].z);
-    positions.push(
-      points[index + 1].x,
-      points[index + 1].y,
-      points[index + 1].z,
+        angle: hubAngle + (Math.PI * 2 * (skillIndex + 1)) / slots,
+        position: new Vector3(),
+      }),
     );
-  }
+    return [hub, ...skills];
+  },
+);
+
+const writeOrbitPositions = (orbit: number): void => {
+  GALAXY_NODES.forEach((node) => {
+    const ring = GALAXY_RINGS[node.category];
+    const angle = node.angle + orbit * ring.speed;
+    node.position
+      .set(Math.cos(angle) * ring.radius, Math.sin(angle) * ring.radius, 0)
+      .applyEuler(ring.tilt);
+  });
 };
 
-export const GALAXY_LINKS: Float32Array = (() => {
-  const positions: number[] = [];
-  const core = new Vector3();
-  let hub: Vector3 | null = null;
-  GALAXY_NODES.forEach((node) => {
-    if (node.kind === 'hub') {
-      hub = node.position;
-      pushSaggingLink(positions, core, hub);
-      return;
-    }
-    if (hub) {
-      pushSaggingLink(positions, hub, node.position);
-    }
-  });
-  return new Float32Array(positions);
-})();
+writeOrbitPositions(0);
 
 export const GALAXY_MOTION: GalaxyMotion = {
   yaw: 0,
@@ -177,9 +133,9 @@ export const GALAXY_MOTION: GalaxyMotion = {
   focusBlend: 0,
   hovered: null,
   exploring: false,
+  orbit: 0,
 };
 
-const IDLE_SPIN_RATE = 0.1;
 const ORBIT_RATE = 0.0052;
 const INERTIA_KICK = 16;
 const VELOCITY_DAMPING = 2.4;
@@ -188,7 +144,8 @@ const FOCUS_DAMPING = 3.4;
 const PITCH_LIMIT = 1.1;
 const MIN_ZOOM = 0.65;
 const MAX_ZOOM = 3;
-const FOCUS_ZOOM = 2;
+const FOCUS_ZOOM = 1.35;
+const FOCUS_PITCH = 0.3;
 const WHEEL_ZOOM_RATE = 0.0016;
 
 const galaxyOrbit = (deltaX: number, deltaY: number): void => {
@@ -309,15 +266,12 @@ export const advanceGalaxy = (delta: number, motionMode: MotionMode): void => {
     motion.zoom = motion.zoomTarget;
     motion.focusBlend = motion.focus === null ? 0 : 1;
     if (motion.focus !== null) {
-      const target = GALAXY_CATEGORIES[motion.focus];
-      motion.yaw = target.yaw;
-      motion.pitch = target.pitch;
+      motion.pitch = FOCUS_PITCH;
     }
     return;
   }
-  if (!motion.exploring) {
-    motion.yaw += IDLE_SPIN_RATE * delta;
-  }
+  motion.orbit += delta;
+  writeOrbitPositions(motion.orbit);
   motion.yaw += motion.yawVelocity * delta;
   motion.pitch = MathUtils.clamp(
     motion.pitch + motion.pitchVelocity * delta,
@@ -349,11 +303,9 @@ export const advanceGalaxy = (delta: number, motionMode: MotionMode): void => {
     delta,
   );
   if (motion.focus !== null) {
-    const target = GALAXY_CATEGORIES[motion.focus];
-    motion.yaw = MathUtils.damp(motion.yaw, target.yaw, FOCUS_DAMPING, delta);
     motion.pitch = MathUtils.damp(
       motion.pitch,
-      target.pitch,
+      FOCUS_PITCH,
       FOCUS_DAMPING,
       delta,
     );
@@ -389,7 +341,6 @@ const galaxyPlacement = (aspect: number): GalaxyPlacement => {
 };
 
 const rotation = new Quaternion();
-const focusShift = new Vector3();
 const pose = new Vector3();
 const POSE_EULER = new Euler();
 const POSE_POSITION = new Vector3();
@@ -402,30 +353,17 @@ export const writeGalaxyPose = (
 ): number => {
   const motion = GALAXY_MOTION;
   const placement = galaxyPlacement(aspect);
-  const scale = placement.scale * motion.zoom;
   quaternion.setFromEuler(POSE_EULER.set(motion.pitch, motion.yaw, 0, 'YXZ'));
   position.set(
     placement.x,
     narrativeStoneY(progress, TECH_STONE.center) + placement.y,
     TECH_STONE.z,
   );
-  if (motion.focus !== null || motion.focusBlend > 0.001) {
-    const hub = GALAXY_NODES.find(
-      (node) => node.kind === 'hub' && node.category === motion.focus,
-    );
-    if (hub) {
-      focusShift
-        .copy(hub.position)
-        .applyQuaternion(quaternion)
-        .multiplyScalar(scale * motion.focusBlend);
-      position.sub(focusShift);
-    }
-  }
-  return scale;
+  return placement.scale * motion.zoom;
 };
 
 const HUB_ALPHA = 0.95;
-const SKILL_BASE_ALPHA = 0.42;
+const SKILL_BASE_ALPHA = 0.55;
 const DIM_ALPHA = 0.12;
 const LABEL_REFERENCE_DISTANCE = 8;
 
@@ -437,9 +375,9 @@ export const writeGalaxyScreens = (write: GalaxyScreenWrite): void => {
     POSE_POSITION,
     rotation,
   );
-  const zoomBoost = MathUtils.clamp((motion.zoom - 1) * 0.5, 0, 0.55);
+  const zoomBoost = MathUtils.clamp((motion.zoom - 1) * 0.5, 0, 0.45);
   const centerDistance = write.camera.position.distanceTo(POSE_POSITION);
-  const depthSpan = Math.max(1, (HUB_RADIUS + SKILL_RADIUS) * scale * 2);
+  const depthSpan = Math.max(1, RING_OUTER_RADIUS * scale * 2);
   GALAXY_NODES.forEach((node, index) => {
     pose
       .copy(node.position)
@@ -466,7 +404,7 @@ export const writeGalaxyScreens = (write: GalaxyScreenWrite): void => {
     if (motion.focus !== null) {
       alpha = node.category === motion.focus ? 1 : DIM_ALPHA;
     }
-    // REASON: rear labels at full strength flatten the cloud into noise -
+    // REASON: rear labels at full strength flatten the system into noise -
     // depth attenuation keeps the near face readable and the far face quiet
     const attenuation =
       node.kind === 'hub' || node.category === motion.focus
