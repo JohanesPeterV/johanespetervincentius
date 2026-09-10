@@ -3,7 +3,6 @@ export type StarfieldReality = 'watchers' | 'orbital';
 type StarfieldAppearance = {
   size: number;
   glow: number;
-  tint: number;
 };
 
 type ShapeGenerator = (
@@ -181,34 +180,34 @@ export const STARFIELD_SHAPES: Readonly<
     {
       id: 'scatter',
       generate: scatterStars,
-      appearance: { size: 0.9, glow: 0.7, tint: 0.16 },
+      appearance: { size: 0.9, glow: 0.7 },
     },
     {
       id: 'orbital-wave',
       generate: formOrbitalWave,
-      appearance: { size: 1, glow: 1, tint: 0.65 },
+      appearance: { size: 1, glow: 1 },
     },
     {
       id: 'bitcoin',
       generate: formBitcoin,
-      appearance: { size: 1, glow: 0.12, tint: 0.72 },
+      appearance: { size: 1, glow: 0.12 },
     },
   ],
   orbital: [
     {
       id: 'dust-belt',
       generate: formDustBelt,
-      appearance: { size: 0.8, glow: 0.8, tint: 0.95 },
+      appearance: { size: 0.8, glow: 0.8 },
     },
     {
       id: 'tilted-ring',
       generate: formTiltedRing,
-      appearance: { size: 1.1, glow: 1.3, tint: 0.45 },
+      appearance: { size: 1.1, glow: 1.3 },
     },
     {
       id: 'double-stream',
       generate: formDoubleStream,
-      appearance: { size: 0.95, glow: 1, tint: 0.82 },
+      appearance: { size: 0.95, glow: 1 },
     },
   ],
 };
@@ -223,7 +222,7 @@ export const buildStarfield = (
   const shapes = STARFIELD_SHAPES[reality];
   const frames = shapes.map(({ id, appearance }) => ({
     id,
-    appearance: { size: 1, glow: 1, tint: 0.5, ...appearance },
+    appearance: { size: 1, glow: 1, ...appearance },
     positions: new Float32Array(count * 3),
   }));
   const seeds = new Float32Array(count * 3);
