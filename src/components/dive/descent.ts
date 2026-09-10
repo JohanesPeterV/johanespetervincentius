@@ -45,24 +45,13 @@ const TECH_DWELL_HALF = 0.3;
 
 export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
 
-export const PROJECT_STONE = { center: 2.55, x: -1.45, z: 8.4 };
-
 export const WORK_SECTION: StoneDiveSection = {
   tag: '02',
-  title: 'Work\nExperience',
+  title: 'Work & Projects',
   subtitle: '2020 — present',
   placement: 'stone',
   stoneIndex: 0,
   ...WORK_STONE,
-};
-
-export const PROJECT_SECTION: StoneDiveSection = {
-  tag: '03',
-  title: 'Projects',
-  subtitle: 'From idea to a product you can use.',
-  placement: 'stone',
-  stoneIndex: 1,
-  ...PROJECT_STONE,
 };
 
 export const DIVE_SECTIONS: DiveSection[] = [
@@ -74,13 +63,12 @@ export const DIVE_SECTIONS: DiveSection[] = [
     placement: 'center',
   },
   WORK_SECTION,
-  PROJECT_SECTION,
   {
-    tag: '04',
+    tag: '03',
     title: 'Tech\nStack',
     subtitle: 'tools of the trade',
     placement: 'stone',
-    stoneIndex: 2,
+    stoneIndex: 1,
     // REASON: this stone passes behind the skill galaxy - at full size its
     // silhouette fights the constellation for the frame
     stoneScale: 0.38,
@@ -270,7 +258,8 @@ export const stoneSectionOpacity = (
   center: number,
 ): number => {
   const fadeIn = smootherstep(center - 0.34, center - 0.16, progress);
-  const fadeOut = 1 - smootherstep(center + 0.16, center + 0.34, progress);
+  const end = center === WORK_STONE.center ? TECH_STONE.center - 0.6 : center;
+  const fadeOut = 1 - smootherstep(end + 0.16, end + 0.34, progress);
   return fadeIn * fadeOut;
 };
 

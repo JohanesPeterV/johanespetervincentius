@@ -96,10 +96,7 @@ const positionStoneSection = (
   // REASON: reserve the appearance controls above and chapter navigation below;
   // anchored copy scrolls within that space instead of covering either control.
   const height = element.offsetHeight;
-  if (
-    element.dataset.workStory === 'true' ||
-    element.dataset.projectDeck === 'true'
-  ) {
+  if (element.dataset.workStory === 'true') {
     const layout = getCardSectionLayout(frame.width, frame.height);
     element.style.width = `${layout.width}px`;
     element.style.height = `${layout.height}px`;

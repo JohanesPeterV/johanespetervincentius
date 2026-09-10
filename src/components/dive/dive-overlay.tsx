@@ -2,14 +2,8 @@
 
 import { ReactNode, RefObject } from 'react';
 
-import {
-  DIVE_SECTIONS,
-  PROJECT_STONE,
-  TECH_STONE,
-  WORK_STONE,
-} from './descent';
+import { DIVE_SECTIONS, TECH_STONE, WORK_STONE } from './descent';
 import { DiveWorkExperience } from './dive-work-experience';
-import { DiveProjects } from './dive-projects';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { GALAXY_CATEGORIES, GALAXY_NODES } from './skill-galaxy';
 
@@ -103,17 +97,6 @@ export default function DiveOverlay({
           if (section.center === WORK_STONE.center) {
             return (
               <DiveWorkExperience
-                key={section.tag}
-                sectionRef={(element) => {
-                  overlayRef.current.sections[index] = element;
-                }}
-                onContinue={() => onNavigate(PROJECT_STONE.center)}
-              />
-            );
-          }
-          if (section.center === PROJECT_STONE.center) {
-            return (
-              <DiveProjects
                 key={section.tag}
                 sectionRef={(element) => {
                   overlayRef.current.sections[index] = element;

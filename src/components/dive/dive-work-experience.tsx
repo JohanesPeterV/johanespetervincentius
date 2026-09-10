@@ -4,6 +4,7 @@ import { ArrowDown } from 'lucide-react';
 
 import { WORK_EXPERIENCES } from '@/app/_components/work-experience/work-experiences';
 import { Button } from '@/components/ui/button';
+import { DiveProjects } from './dive-projects';
 import { WORK_SECTION } from './descent';
 import { WorkExperienceCard } from './work-experience-card';
 
@@ -40,11 +41,12 @@ export const DiveWorkExperience = ({
         <WorkExperienceCard key={job.company} job={job} index={index} />
       ))}
     </div>
+    <DiveProjects />
     <footer className="flex justify-end">
       <Button
         size="icon"
         onClick={onContinue}
-        aria-label="Explore Projects"
+        aria-label="Explore Tech Stack"
         className="h-11 w-11"
       >
         <ArrowDown aria-hidden />

@@ -237,10 +237,19 @@ test('vertical travel never captures Work or selects an employer', () => {
   }
 });
 
-test('one down-arrow can go straight from Work to Projects', () => {
+test('Work and Projects share a chapter that stays visible through the former project stop', () => {
+  assert.deepEqual(
+    Array.from(descent.DIVE_SECTIONS, ({ tag }) => tag),
+    ['01', '02', '03'],
+  );
+  assert.equal(handoff.workSectionOpacity(2.55), 1);
+  assert.equal(handoff.workSectionOpacity(descent.TECH_STONE.center), 0);
+});
+
+test('one down-arrow goes from Work and Projects to Tech', () => {
   const drive = driveFrom(descent.WORK_STONE.center);
   motion.stepDriveToSection(drive, 1);
-  assert.equal(drive.target, descent.PROJECT_STONE.center);
+  assertNear(drive.target, descent.TECH_STONE.center);
 });
 
 test('discrete commands reach every adjacent stop in either direction across laps', () => {
@@ -272,7 +281,7 @@ test('queued chapter commands advance the chosen destination rather than the cam
     assert.equal(drive.current, descent.TECH_STONE.center);
   }
   motion.stepDriveToSection(drive, -1);
-  assertNear(drive.target, descent.PROJECT_STONE.center + DIVE_LENGTH);
+  assertNear(drive.target, descent.WORK_STONE.center + DIVE_LENGTH);
 });
 
 test('continuous caps widen only past the long loop midpoint without changing sensitivity', () => {
@@ -1019,7 +1028,7 @@ test('Work artwork and copy share one exit boundary in both scroll directions', 
         descent.stoneSectionOpacity(journey, descent.WORK_STONE.center),
       );
     }
-    if (journey >= 2.3) {
+    if (journey >= 2.9) {
       assert.equal(opacity, 0);
     }
   }
@@ -1310,7 +1319,6 @@ test('the shared world classifier recognizes rendered endpoints across positive 
       [HANDOFF_START, 'hero'],
       [HANDOFF_END, 'orbital'],
       [descent.WORK_STONE.center, 'orbital'],
-      [descent.PROJECT_STONE.center, 'orbital'],
       [descent.TECH_STONE.center, 'orbital'],
       [LOOP_START, 'orbital'],
       [4.05, 'orbital'],
