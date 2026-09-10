@@ -15,6 +15,7 @@ export default class HeroHandoffEffect extends Effect {
   readonly ink = new Color();
   readonly paper = new Color();
   readonly prism = new Color();
+  readonly sunlight = new Color();
   private readonly source: { camera: Camera; target: WebGLRenderTarget };
   private readonly copy: CopyPass;
   private readonly active = new Uniform(0);
@@ -54,6 +55,7 @@ export default class HeroHandoffEffect extends Effect {
     this.uniforms.set('uInk', new Uniform(this.ink));
     this.uniforms.set('uPaper', new Uniform(this.paper));
     this.uniforms.set('uPrism', new Uniform(this.prism));
+    this.uniforms.set('uSunlight', new Uniform(this.sunlight));
   }
 
   initialize(renderer: WebGLRenderer): void {

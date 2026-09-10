@@ -11,6 +11,7 @@ uniform float uAspect;
 uniform vec3 uInk;
 uniform vec3 uPaper;
 uniform vec3 uPrism;
+uniform vec3 uSunlight;
 
 float handoffHash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -63,9 +64,8 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
 
   float progress = uProgress;
   vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
-  bool lightSurface = dot(uPaper, luminance) > dot(uInk, luminance);
-  // REASON: both modes share the same etched field, zoom, and reveal timing.
-  // Only the material changes with the theme, so scroll and reversal stay identical.
+  // REASON: one recipe for both themes. The wash and engraving run on the
+  // background and foreground; only the highlight colour follows the theme.
   vec2 p = uv * vec2(uAspect, 1.0);
   float broad = handoffNoise(p * 4.6 + 3.2);
   float medium = handoffNoise(p * 21.0 + broad * 2.8);
@@ -83,28 +83,20 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
 
   float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);
-  vec3 etched = from * 0.045 + uInk * lines;
-  if (lightSurface) {
-    vec3 engraving = mix(uInk, uPrism, 0.7);
-    etched = mix(mix(from, uPaper, 0.94), engraving, min(lines * 0.75, 0.88));
-  }
+  vec3 engraving = mix(uInk, uPrism, 0.7);
+  vec3 etched = mix(mix(from, uPaper, 0.94), engraving, min(lines * 0.75, 0.88));
   from = mix(from, etched, proximity * envelope * 0.95);
 
   float aa = max(fwidth(edge) * 1.5, 0.0006);
   float reveal = smoothstep(-aa, aa, edge);
   float rim = 1.0 - smoothstep(aa, aa + 0.001, abs(edge));
-  float glow = exp(-abs(edge) * 150.0) * 0.08 + exp(-abs(edge) * 48.0) * 0.018;
+  float fringe = exp(-abs(edge + 0.012) * 240.0);
+  float sheen = exp(-abs(edge) * 65.0);
+  float glint = pow(0.5 + 0.5 * sin(uv.x * 13.0 + medium * 2.0 - progress * 8.0), 8.0);
+  vec3 edgeColor = mix(uPrism, uSunlight, 0.3 + medium * 0.25);
   vec3 color = mix(from, next, reveal);
-  if (lightSurface) {
-    float fringe = exp(-abs(edge + 0.012) * 240.0);
-    float sheen = exp(-abs(edge) * 65.0);
-    float glint = pow(0.5 + 0.5 * sin(uv.x * 13.0 + medium * 2.0 - progress * 8.0), 8.0);
-    vec3 edgeColor = mix(uPrism, uPaper, 0.3 + medium * 0.25);
-    color = mix(color, edgeColor, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
-    color += uPaper * (rim * 0.22 + fringe * 0.06 + sheen * glint * 0.28) * envelope;
-  } else {
-    color += uInk * (rim * (0.16 + clamp(luma * 3.0 + lines, 0.0, 1.0)) + glow) * envelope;
-  }
+  color = mix(color, edgeColor, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
+  color += uSunlight * (rim * 0.22 + fringe * 0.06 + sheen * glint * 0.28) * envelope;
   outputColor = vec4(max(color, 0.0), 1.0);
 }
 `;

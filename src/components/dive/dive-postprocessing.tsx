@@ -15,6 +15,7 @@ type DivePostprocessingParams = {
   background: string;
   foreground: string;
   glow: string;
+  sunlight: string;
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
   handoffRef: RefObject<HeroHandoff>;
   gpuTier: number;
@@ -24,6 +25,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
   background,
   foreground,
   glow,
+  sunlight,
   aberrationRef,
   handoffRef,
   gpuTier,
@@ -65,6 +67,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
         ink={foreground}
         paper={background}
         prism={glow}
+        sunlight={sunlight}
       />
     </EffectComposer>
   );
