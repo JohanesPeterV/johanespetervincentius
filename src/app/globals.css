@@ -117,11 +117,13 @@
 
   .profile-avatar-frame {
     --coffee-paper: hsl(var(--background));
+    --coffee-shadow: hsl(var(--foreground));
     color: hsl(var(--primary));
   }
 
   .dark .profile-avatar-frame {
     --coffee-paper: hsl(var(--foreground));
+    --coffee-shadow: hsl(var(--background));
   }
 
   .profile-avatar-track {
@@ -147,7 +149,7 @@
   }
 
   .profile-coffee-shade {
-    fill: hsl(var(--secondary));
+    fill: var(--coffee-shadow);
     fill-opacity: 0.16;
     stroke: none;
   }

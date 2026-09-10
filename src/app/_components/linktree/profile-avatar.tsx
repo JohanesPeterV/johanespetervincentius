@@ -40,28 +40,41 @@ export default function ProfileAvatar() {
         <g className="profile-coffee-mug">
           <path
             className="profile-coffee-cup"
-            d="M35 94H41C55 94 56 118 40 120H35V114H40C48 113 49 100 41 100H35Z"
+            d="M35 95C44 95 44 119 35 120V116C39 114 40 102 35 100Z"
           />
           <path
             className="profile-coffee-cup"
-            d="M8 89H36C38 96 39 111 36.5 119Q35.5 124 31 125H13Q8.5 124 7.5 119C5 111 6 96 8 89Z"
+            d="M8.5 87.5C5.7 97.5 5.7 111 8 121C10 126.5 35 126.5 37 121C39.3 111 39.3 97.5 36.5 87.5Z"
           />
           <path
             className="profile-coffee-shade"
-            d="M30 91C33 100 34 112 31 119Q29 123 17 124L13 125H31Q35.5 124 36.5 119C39 111 38 96 36 89Z"
+            d="M31 89C34 100 35 114 32 122C29 125 16 125 12 123C19 127 35 125 37 121C39.3 111 39.3 97.5 36.5 87.5Z"
+          />
+          <ellipse
+            className="profile-coffee-emblem"
+            cx="22.5"
+            cy="113"
+            rx="12"
+            ry="10.5"
+          />
+          <ellipse
+            className="profile-coffee-cup"
+            cx="22.5"
+            cy="87.5"
+            rx="14"
+            ry="3.3"
           />
           <ellipse
             className="profile-coffee-drink"
-            cx="22"
-            cy="89"
-            rx="14"
-            ry="3.5"
+            cx="22.5"
+            cy="87.8"
+            rx="12.7"
+            ry="2.25"
           />
           <path
             className="profile-coffee-ice"
-            d="M15 88L20 87L23 89L18 91ZM25 87L30 88L29 90L24 89Z"
+            d="M15 87.5L19 86.5L22 88L18 89.5ZM25 86.5L29 87L29 89L24 88.5Z"
           />
-          <circle className="profile-coffee-emblem" cx="22" cy="108" r="6.5" />
         </g>
       </svg>
     </div>
