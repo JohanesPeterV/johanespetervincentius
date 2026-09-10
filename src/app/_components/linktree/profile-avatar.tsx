@@ -25,19 +25,28 @@ export default function ProfileAvatar() {
           height="104"
           rx="26"
         />
-        <path
+        <rect
           className="profile-avatar-rim-primary"
-          d="M10 80V38C10 22 22 10 38 10H85"
+          x="10"
+          y="10"
+          width="108"
+          height="108"
+          rx="28"
           pathLength={1}
           strokeWidth="2.5"
           strokeLinecap="round"
         />
-        <path
+        <rect
           className="profile-avatar-rim-secondary"
-          d="M48 118H89C105 118 118 105 118 89V48"
+          x="10"
+          y="10"
+          width="108"
+          height="108"
+          rx="28"
           pathLength={1}
           strokeWidth="2.5"
           strokeLinecap="round"
+          transform="rotate(180 64 64)"
         />
         <g
           className="profile-coffee-mug"

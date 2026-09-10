@@ -44,12 +44,9 @@
   }
 }
 
-@keyframes drawRim {
-  from {
-    stroke-dashoffset: 1;
-  }
+@keyframes orbitRim {
   to {
-    stroke-dashoffset: 0;
+    stroke-dashoffset: -1;
   }
 }
 
@@ -155,8 +152,8 @@
 
   .profile-avatar-rim-primary,
   .profile-avatar-rim-secondary {
-    stroke-dasharray: 1;
-    animation: drawRim 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    stroke-dasharray: 0.4 0.6;
+    animation: orbitRim 10s linear infinite;
   }
 
   .profile-avatar-rim-primary {
@@ -165,7 +162,6 @@
 
   .profile-avatar-rim-secondary {
     stroke: hsl(var(--secondary));
-    animation-delay: 350ms;
   }
 
   .profile-coffee-mug {
