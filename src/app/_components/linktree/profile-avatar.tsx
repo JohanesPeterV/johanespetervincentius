@@ -28,12 +28,14 @@ export default function ProfileAvatar() {
         <path
           className="profile-avatar-rim-primary"
           d="M10 80V38C10 22 22 10 38 10H85"
+          pathLength={1}
           strokeWidth="2.5"
           strokeLinecap="round"
         />
         <path
           className="profile-avatar-rim-secondary"
           d="M48 118H89C105 118 118 105 118 89V48"
+          pathLength={1}
           strokeWidth="2.5"
           strokeLinecap="round"
         />
@@ -41,6 +43,11 @@ export default function ProfileAvatar() {
           className="profile-coffee-mug"
           transform="translate(3 15) scale(0.88)"
         >
+          <g className="profile-coffee-steam">
+            <path d="M17 83C14 79 20 77 17 72" />
+            <path d="M23.5 81C20.5 77 26.5 75 23.5 70" />
+            <path d="M30 83C27 79 33 77 30 72" />
+          </g>
           <path
             className="profile-coffee-cup"
             d="M35 95C44 95 44 119 35 120V116C39 114 40 102 35 100Z"

@@ -44,6 +44,29 @@
   }
 }
 
+@keyframes drawRim {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes steamRise {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  35% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-9px);
+  }
+}
+
 .animate-fade-late {
   animation: fadeInLate 0.8s ease-out 1.7s both;
 }
@@ -130,12 +153,19 @@
     stroke: hsl(var(--primary) / 0.3);
   }
 
+  .profile-avatar-rim-primary,
+  .profile-avatar-rim-secondary {
+    stroke-dasharray: 1;
+    animation: drawRim 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
   .profile-avatar-rim-primary {
     stroke: currentColor;
   }
 
   .profile-avatar-rim-secondary {
     stroke: hsl(var(--secondary));
+    animation-delay: 350ms;
   }
 
   .profile-coffee-mug {
@@ -162,6 +192,26 @@
   .profile-coffee-drink {
     fill: hsl(24 45% 20%);
     stroke: var(--coffee-paper);
+  }
+
+  .profile-coffee-steam {
+    fill: none;
+    stroke: var(--coffee-paper);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+  }
+
+  .profile-coffee-steam path {
+    opacity: 0;
+    animation: steamRise 2.8s ease-in-out infinite;
+  }
+
+  .profile-coffee-steam path:nth-child(2) {
+    animation-delay: 1s;
+  }
+
+  .profile-coffee-steam path:nth-child(3) {
+    animation-delay: 1.9s;
   }
 
   .profile-card-name {
@@ -366,7 +416,20 @@
   }
 
   .dive-work-section {
+    --scatter: 0;
     will-change: transform, opacity;
+  }
+
+  /* Leaving for the tech chapter, every card lifts off along its own line and
+     recedes into the stars; --scatter is scrubbed by the scroll, so the deck
+     gathers back when the dive reverses. */
+  .work-card,
+  .project-card {
+    translate: calc(var(--scatter) * var(--fling-x))
+      calc(var(--scatter) * -60vh);
+    rotate: calc(var(--scatter) * var(--card-angle) * 6);
+    scale: calc(1 - var(--scatter) * 0.35);
+    opacity: calc(1 - var(--scatter) * 0.6);
   }
 
   .work-card-spread {
@@ -379,6 +442,7 @@
   /* Cards only touch at their corners so every face stays readable. */
   .work-card-slot {
     --card-angle: -6deg;
+    --fling-x: -42vw;
     position: absolute;
     left: 0;
     top: 10%;
@@ -390,6 +454,7 @@
 
   .work-card-slot:nth-child(2) {
     --card-angle: 5deg;
+    --fling-x: -14vw;
     left: 25%;
     top: 0;
     z-index: 2;
@@ -397,6 +462,7 @@
 
   .work-card-slot:nth-child(3) {
     --card-angle: -5deg;
+    --fling-x: 14vw;
     left: 50%;
     top: 10%;
     z-index: 3;
@@ -404,6 +470,7 @@
 
   .work-card-slot:nth-child(4) {
     --card-angle: 4deg;
+    --fling-x: 42vw;
     left: 75%;
     top: 0;
     z-index: 1;
@@ -592,38 +659,45 @@
     flex: none;
     height: var(--drop);
     border-left: 1px solid hsl(var(--foreground) / 0.5);
+    opacity: calc(1 - var(--scatter) * 4);
   }
 
   .project-card-slot:nth-child(7n + 1) {
     --card-angle: -3deg;
+    --fling-x: -48vw;
     --drop: 24%;
     --card-height: 46%;
     flex-grow: 0.85;
   }
   .project-card-slot:nth-child(7n + 2) {
     --card-angle: 2deg;
+    --fling-x: -30vw;
     --drop: 10%;
   }
   .project-card-slot:nth-child(7n + 3) {
     --card-angle: -2deg;
+    --fling-x: -12vw;
     --drop: 42%;
     --card-height: 48%;
     flex-grow: 0.9;
   }
   .project-card-slot:nth-child(7n + 4) {
     --card-angle: 3deg;
+    --fling-x: 8vw;
     --drop: 12%;
     --card-height: 68%;
     flex-grow: 1.3;
   }
   .project-card-slot:nth-child(7n + 5) {
     --card-angle: -4deg;
+    --fling-x: 24vw;
     --drop: 30%;
     --card-height: 50%;
     flex-grow: 0.85;
   }
   .project-card-slot:nth-child(7n + 6) {
     --card-angle: 2deg;
+    --fling-x: 38vw;
     --drop: 16%;
     --card-height: 60%;
     flex-grow: 1.05;
@@ -632,6 +706,7 @@
      clear it. */
   .project-card-slot:nth-child(7n) {
     --card-angle: -3deg;
+    --fling-x: 52vw;
     --drop: 28%;
     --card-height: 62%;
     flex-grow: 1.15;
@@ -864,7 +939,10 @@
       transition: none;
     }
 
-    .appearance-orb {
+    .appearance-orb,
+    .profile-avatar-rim-primary,
+    .profile-avatar-rim-secondary,
+    .profile-coffee-steam path {
       animation: none;
     }
 
