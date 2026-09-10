@@ -369,13 +369,6 @@
     will-change: transform, opacity;
   }
 
-  .work-section-title {
-    font-size: clamp(1.75rem, 3.6vw, 3.5rem);
-    font-weight: 500;
-    line-height: 1.04;
-    letter-spacing: -0.045em;
-  }
-
   .work-card-spread {
     margin-top: auto;
     margin-bottom: 1rem;
@@ -443,7 +436,24 @@
 
   .work-card-slot[data-current='true'] :is(.work-card, .card-detail) {
     border-color: hsl(var(--primary-text));
-    border-top-width: 3px;
+  }
+
+  /* The current role is the one lit card on the table: accent wash, accent
+     edge, and a coloured glow underneath. */
+  .work-card-slot[data-current='true'] .work-card.surface-panel {
+    background: linear-gradient(
+      165deg,
+      hsl(var(--primary) / 0.18),
+      hsl(var(--card) / 0.97) 60%
+    );
+    box-shadow:
+      inset 0 1px 0 hsl(var(--primary-text) / 0.5),
+      0 3px 0 hsl(var(--primary-text) / 0.6),
+      0 32px 64px -24px hsl(var(--primary) / 0.75);
+  }
+
+  .work-card-slot[data-current='true'] .work-card-company {
+    color: hsl(var(--primary-text));
   }
 
   .work-current-label {
