@@ -10,7 +10,7 @@ uniform float uActive;
 uniform float uAspect;
 uniform vec3 uInk;
 uniform vec3 uPaper;
-uniform vec3 uPrism;
+uniform vec3 uEtch;
 uniform vec3 uSunlight;
 
 float handoffHash(vec2 p) {
@@ -83,7 +83,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
 
   float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);
-  vec3 engraving = mix(uInk, uPrism, 0.7);
+  vec3 engraving = mix(uInk, uEtch, 0.7);
   vec3 etched = mix(mix(from, uPaper, 0.94), engraving, min(lines * 0.75, 0.88));
   from = mix(from, etched, proximity * envelope * 0.95);
 
@@ -93,7 +93,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float fringe = exp(-abs(edge + 0.012) * 240.0);
   float sheen = exp(-abs(edge) * 65.0);
   float glint = pow(0.5 + 0.5 * sin(uv.x * 13.0 + medium * 2.0 - progress * 8.0), 8.0);
-  vec3 edgeColor = mix(uPrism, uSunlight, 0.3 + medium * 0.25);
+  vec3 edgeColor = mix(uEtch, uSunlight, 0.3 + medium * 0.25);
   vec3 color = mix(from, next, reveal);
   color = mix(color, edgeColor, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
   color += uSunlight * (rim * 0.22 + fringe * 0.06 + sheen * glint * 0.28) * envelope;
