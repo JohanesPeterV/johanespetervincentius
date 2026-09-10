@@ -377,7 +377,9 @@
   }
 
   .work-card-spread {
-    margin-block: 1rem;
+    margin-top: auto;
+    margin-bottom: 1rem;
+    max-height: 22rem;
     isolation: isolate;
   }
 
@@ -387,7 +389,7 @@
     position: absolute;
     left: 0;
     top: 10%;
-    width: 25.5%;
+    width: 25%;
     height: 84%;
     max-height: 20rem;
     z-index: 4;
@@ -395,21 +397,21 @@
 
   .work-card-slot:nth-child(2) {
     --card-angle: 5deg;
-    left: 24.8%;
+    left: 25%;
     top: 0;
     z-index: 2;
   }
 
   .work-card-slot:nth-child(3) {
     --card-angle: -5deg;
-    left: 49.7%;
+    left: 50%;
     top: 10%;
     z-index: 3;
   }
 
   .work-card-slot:nth-child(4) {
     --card-angle: 4deg;
-    left: 74.5%;
+    left: 75%;
     top: 0;
     z-index: 1;
   }
@@ -631,7 +633,7 @@
 
   .project-card {
     position: relative;
-    flex: 0 0 var(--card-height);
+    flex: 0 0 min(var(--card-height), 18rem);
     min-height: 0;
     padding: 0.75rem;
     cursor: pointer;
