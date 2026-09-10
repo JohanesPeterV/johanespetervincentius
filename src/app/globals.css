@@ -546,7 +546,7 @@
   }
 
   .dive-project-section {
-    flex: 0 0 36%;
+    flex: 0 0 40%;
     min-height: 0;
     position: relative;
     z-index: 6;
@@ -554,50 +554,72 @@
 
   .project-card-deck {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    gap: clamp(0.5rem, 1.5vw, 1.5rem);
     height: calc(100% - 2rem);
-    padding-top: 1rem;
+    padding-inline: clamp(0.5rem, 3vw, 3rem);
     isolation: isolate;
   }
 
+  /* Each slot is a string pinned to the deck top; its card hangs --drop below. */
   .project-card-slot {
     --card-angle: 0deg;
-    --card-lift: 0px;
-    position: relative;
-    flex: 0 0 clamp(8rem, 15vw, 12rem);
+    --drop: 0%;
+    --card-height: 72%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 0;
     min-width: 0;
-    height: 85%;
-    margin-left: clamp(-4.5rem, -5vw, -2.5rem);
+    height: calc(var(--drop) + var(--card-height));
   }
 
-  .project-card-slot:first-child {
-    margin-left: 0;
+  .project-card-slot::before {
+    content: '';
+    flex: none;
+    height: var(--drop);
+    border-left: 1px solid hsl(var(--foreground) / 0.35);
   }
 
   .project-card-slot:nth-child(7n + 1) {
-    --card-angle: -12deg;
-    --card-lift: 1rem;
+    --card-angle: -3deg;
+    --drop: 16%;
+    --card-height: 60%;
+    flex-grow: 0.9;
   }
   .project-card-slot:nth-child(7n + 2) {
-    --card-angle: -8deg;
-    --card-lift: 0.5rem;
+    --card-angle: 2deg;
+    --drop: 6%;
+    --card-height: 70%;
   }
   .project-card-slot:nth-child(7n + 3) {
-    --card-angle: -4deg;
-    --card-lift: 0.125rem;
+    --card-angle: -2deg;
+    --drop: 28%;
+    --card-height: 64%;
+    flex-grow: 0.95;
+  }
+  .project-card-slot:nth-child(7n + 4) {
+    --card-angle: 3deg;
+    --card-height: 82%;
+    flex-grow: 1.2;
   }
   .project-card-slot:nth-child(7n + 5) {
-    --card-angle: 4deg;
-    --card-lift: 0.125rem;
+    --card-angle: -4deg;
+    --drop: 20%;
+    --card-height: 62%;
+    flex-grow: 0.9;
   }
   .project-card-slot:nth-child(7n + 6) {
-    --card-angle: 8deg;
-    --card-lift: 0.5rem;
+    --card-angle: 2deg;
+    --drop: 10%;
+    --card-height: 72%;
+    flex-grow: 1.05;
   }
   .project-card-slot:nth-child(7n) {
-    --card-angle: 12deg;
-    --card-lift: 1rem;
+    --card-angle: -3deg;
+    --drop: 4%;
+    --card-height: 76%;
+    flex-grow: 1.1;
   }
 
   .project-card-slot:is(:hover, :focus-within) {
@@ -606,9 +628,12 @@
 
   .project-card {
     position: relative;
+    flex: 1 1 0;
+    min-height: 0;
     padding: 0.75rem;
     cursor: pointer;
-    transform: translateY(var(--card-lift)) rotate(var(--card-angle));
+    transform-origin: 50% 0;
+    transform: rotate(var(--card-angle));
     transition:
       transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
       border-color 200ms,
@@ -634,7 +659,7 @@
   .project-card:focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 5px;
-    transform: translateY(-3rem) rotate(0deg) scale(1.15);
+    transform: rotate(0deg) scale(1.06);
   }
 
   .project-card-slot:has(dialog[open]) .project-card {
@@ -643,7 +668,7 @@
 
   @media (hover: hover) {
     .project-card:hover {
-      transform: translateY(-3rem) rotate(0deg) scale(1.15);
+      transform: rotate(0deg) scale(1.06);
       border-color: hsl(var(--primary-text));
     }
   }
@@ -693,10 +718,8 @@
 
     .project-card-slot:nth-child(n) {
       --card-angle: -4deg;
-      --card-lift: 0px;
-      width: 112%;
-      height: 95%;
-      margin: 0;
+      --drop: 0%;
+      --card-height: 95%;
     }
 
     .project-card-slot:nth-child(even) {
@@ -728,10 +751,6 @@
       font-size: 0.75rem;
       padding-block: 0.125rem;
     }
-
-    .project-card-deck {
-      padding-top: 0;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -740,7 +759,7 @@
     }
 
     .project-card:is(:hover, :focus-visible) {
-      transform: translateY(var(--card-lift)) rotate(var(--card-angle));
+      transform: rotate(var(--card-angle));
     }
   }
 

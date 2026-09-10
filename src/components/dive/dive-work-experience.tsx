@@ -36,12 +36,12 @@ export const DiveWorkExperience = ({
         Work experience.
       </h2>
     </header>
+    <DiveProjects />
     <div className="work-card-spread relative min-h-0 flex-1">
       {WORK_EXPERIENCES.map((job, index) => (
         <WorkExperienceCard key={job.company} job={job} index={index} />
       ))}
     </div>
-    <DiveProjects />
     <footer className="flex justify-end">
       <Button
         size="icon"
