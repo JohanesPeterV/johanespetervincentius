@@ -77,6 +77,9 @@ export const worldAtProgress = (progress: number): HandoffWorld =>
     ? 'orbital'
     : 'hero';
 
+// REASON: without the compositor (snapshot still capturing, or reduced motion)
+// a cross-fade shows both overlays as translucent cards over the live scene;
+// cutting at the midpoint keeps every card opaque, as the loop crossing does.
 export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
   if (handoff.compositing) {
     return 0;
@@ -84,12 +87,12 @@ export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
   if (handoff.crossing === 'loop') {
     return Number(handoff.progress >= 0.5);
   }
-  return 1 - heroHandoffProgress(handoff.journey);
+  return Number(heroHandoffProgress(handoff.journey) < 0.5);
 };
 
 export const workSectionOpacity = (progress: number): number =>
   progress <= HANDOFF_END
-    ? heroHandoffProgress(progress)
+    ? Number(heroHandoffProgress(progress) >= 0.5)
     : stoneSectionOpacity(progress, WORK_STONE.center);
 
 export const workOverlayOpacity = (handoff: HeroHandoff): number =>
