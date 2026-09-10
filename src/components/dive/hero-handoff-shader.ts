@@ -86,7 +86,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
 
   float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);
-  vec3 etched = mix(from, mix(uPaper, uPrism, 0.03), 0.94);
+  vec3 etched = mix(from, mix(uPaper, uPrism, 0.008), 0.94);
   if (lightSurface) {
     vec3 engraving = mix(uInk, uPrism, 0.7);
     etched = mix(mix(from, uPaper, 0.94), engraving, min(lines * 0.75, 0.88));
@@ -105,7 +105,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     color = mix(color, edgeColor, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
     color += uPaper * (rim * 0.22 + fringe * 0.06 + sheen * glint * 0.28) * envelope;
   } else {
-    vec3 dim = mix(uPaper, uPrism, 0.25);
+    vec3 dim = mix(uPaper, uPrism, 0.08);
     color = mix(color, dim, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
   }
   outputColor = vec4(max(color, 0.0), 1.0);
