@@ -7,7 +7,7 @@ import { memo, RefObject, useEffect, useState } from 'react';
 import { Vector2 } from 'three';
 
 import HeroHandoffEffect from './hero-handoff-effect';
-import PaperGrainEffect from './paper-grain-effect';
+import InkOutlineEffect from './ink-outline-effect';
 import type { HeroHandoff } from './hero-handoff';
 
 const ABERRATION_OFFSET = new Vector2();
@@ -16,7 +16,7 @@ type DivePostprocessingParams = {
   background: string;
   foreground: string;
   glow: string;
-  paper: boolean;
+  print: boolean;
   aberrationRef: RefObject<ChromaticAberrationEffect | null>;
   handoffRef: RefObject<HeroHandoff>;
   gpuTier: number;
@@ -26,7 +26,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
   background,
   foreground,
   glow,
-  paper,
+  print,
   aberrationRef,
   handoffRef,
   gpuTier,
@@ -36,7 +36,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
   const [handoff] = useState(
     () => new HeroHandoffEffect(handoffRef.current, scene, camera),
   );
-  const [grain] = useState(() => new PaperGrainEffect());
+  const [outline] = useState(() => new InkOutlineEffect());
   const [aberration] = useState(
     () =>
       new ChromaticAberrationEffect({
@@ -51,9 +51,9 @@ const DivePostprocessing = memo(function DivePostprocessing({
     () => () => {
       handoff.dispose();
       aberration.dispose();
-      grain.dispose();
+      outline.dispose();
     },
-    [handoff, aberration, grain],
+    [handoff, aberration, outline],
   );
   return (
     <EffectComposer multisampling={0}>
@@ -71,7 +71,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
         paper={background}
         prism={glow}
       />
-      {paper ? <primitive object={grain} /> : <></>}
+      {print ? <primitive object={outline} ink={foreground} /> : <></>}
     </EffectComposer>
   );
 });
