@@ -11,12 +11,12 @@ export const getCardSectionLayout = (
 ): CardSectionLayout => {
   const panelWidth = Math.min(1440, width - 48);
   const topInset = height < 500 ? 64 : 80;
-  const availableHeight = height - topInset - 88;
-  const panelHeight = Math.min(760, availableHeight);
+  // REASON: the project strings hang from the viewport edge, so the panel
+  // starts at the top and keeps the inset as ceiling space above its content.
   return {
     left: (width - panelWidth) / 2,
-    top: topInset + (availableHeight - panelHeight) / 2,
+    top: 0,
     width: panelWidth,
-    height: panelHeight,
+    height: topInset + Math.min(760, height - topInset - 88),
   };
 };
