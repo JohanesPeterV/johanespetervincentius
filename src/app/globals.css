@@ -418,6 +418,7 @@
   }
 
   .work-card-spread {
+    z-index: 1;
     margin-top: auto;
     margin-bottom: 1rem;
     max-height: 22rem;
@@ -729,36 +730,159 @@
     line-height: 1.6;
   }
 
-  /* The main stack is pinned; secondary tags rotate through a few slots. */
-  .stack-strip {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1rem;
-    padding-top: 0.75rem;
+  /* The main stack holds the seam between the decks; the rest drifts across
+     the chapter behind the cards, each tag on its own lane, speed and phase. */
+  .stack-field {
+    padding-block: 0.5rem;
   }
 
-  .stack-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
+  .stack-field-primary,
+  .stack-field-drift {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .stack-tag-enter {
-    animation: stack-tag-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  .stack-field-primary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
-  @keyframes stack-tag-in {
-    from {
+  .stack-field-primary .stack-tag {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .stack-bob {
+    animation: stack-bob 7s ease-in-out infinite alternate;
+  }
+
+  .stack-bob:nth-child(3n + 2) {
+    animation-delay: -2.3s;
+  }
+
+  .stack-bob:nth-child(3n) {
+    animation-delay: -4.6s;
+  }
+
+  .stack-field-drift {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .stack-drift {
+    --lane: 50%;
+    --drift-duration: 36s;
+    --drift-phase: 0;
+    position: absolute;
+    top: var(--lane);
+    left: 0;
+    opacity: 0;
+    animation: stack-drift var(--drift-duration) linear infinite;
+    animation-delay: calc(var(--drift-duration) * var(--drift-phase) * -1);
+  }
+
+  .stack-drift:nth-child(even) {
+    animation-direction: reverse;
+  }
+
+  .stack-drift:nth-child(7n + 1) {
+    --lane: 4%;
+  }
+  .stack-drift:nth-child(7n + 2) {
+    --lane: 17%;
+  }
+  .stack-drift:nth-child(7n + 3) {
+    --lane: 30%;
+  }
+  .stack-drift:nth-child(7n + 4) {
+    --lane: 46%;
+  }
+  .stack-drift:nth-child(7n + 5) {
+    --lane: 60%;
+  }
+  .stack-drift:nth-child(7n + 6) {
+    --lane: 74%;
+  }
+  .stack-drift:nth-child(7n) {
+    --lane: 90%;
+  }
+
+  .stack-drift:nth-child(5n + 1) {
+    --drift-duration: 44s;
+  }
+  .stack-drift:nth-child(5n + 2) {
+    --drift-duration: 31s;
+  }
+  .stack-drift:nth-child(5n + 3) {
+    --drift-duration: 52s;
+  }
+  .stack-drift:nth-child(5n + 4) {
+    --drift-duration: 37s;
+  }
+  .stack-drift:nth-child(5n) {
+    --drift-duration: 26s;
+  }
+
+  .stack-drift:nth-child(11n + 2) {
+    --drift-phase: 0.09;
+  }
+  .stack-drift:nth-child(11n + 3) {
+    --drift-phase: 0.18;
+  }
+  .stack-drift:nth-child(11n + 4) {
+    --drift-phase: 0.27;
+  }
+  .stack-drift:nth-child(11n + 5) {
+    --drift-phase: 0.36;
+  }
+  .stack-drift:nth-child(11n + 6) {
+    --drift-phase: 0.45;
+  }
+  .stack-drift:nth-child(11n + 7) {
+    --drift-phase: 0.55;
+  }
+  .stack-drift:nth-child(11n + 8) {
+    --drift-phase: 0.64;
+  }
+  .stack-drift:nth-child(11n + 9) {
+    --drift-phase: 0.73;
+  }
+  .stack-drift:nth-child(11n + 10) {
+    --drift-phase: 0.82;
+  }
+  .stack-drift:nth-child(11n) {
+    --drift-phase: 0.91;
+  }
+
+  @keyframes stack-drift {
+    0% {
+      translate: -110% 0;
       opacity: 0;
-      translate: 0 0.375rem;
+    }
+    8% {
+      opacity: 0.8;
+    }
+    92% {
+      opacity: 0.8;
+    }
+    100% {
+      translate: 100vw 0;
+      opacity: 0;
+    }
+  }
+
+  @keyframes stack-bob {
+    from {
+      translate: 0 -0.2rem;
     }
     to {
-      opacity: 1;
-      translate: 0 0;
+      translate: 0 0.2rem;
     }
   }
 
@@ -875,7 +999,22 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .stack-tag-enter {
+    .stack-bob {
+      animation: none;
+    }
+
+    .stack-field-drift {
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.375rem;
+      padding-top: 0.5rem;
+    }
+
+    .stack-drift {
+      position: static;
+      opacity: 1;
       animation: none;
     }
 
