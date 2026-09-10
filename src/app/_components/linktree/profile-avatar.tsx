@@ -37,7 +37,10 @@ export default function ProfileAvatar() {
           strokeWidth="2.5"
           strokeLinecap="round"
         />
-        <g className="profile-coffee-mug">
+        <g
+          className="profile-coffee-mug"
+          transform="translate(3 15) scale(0.88)"
+        >
           <path
             className="profile-coffee-cup"
             d="M35 95C44 95 44 119 35 120V116C39 114 40 102 35 100Z"
@@ -70,10 +73,6 @@ export default function ProfileAvatar() {
             cy="87.8"
             rx="12.7"
             ry="2.25"
-          />
-          <path
-            className="profile-coffee-ice"
-            d="M15 87.5L19 86.5L22 88L18 89.5ZM25 86.5L29 87L29 89L24 88.5Z"
           />
         </g>
       </svg>
