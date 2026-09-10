@@ -724,6 +724,20 @@
     overflow-wrap: anywhere;
   }
 
+  .project-card-stack {
+    font-size: 0.5rem;
+    line-height: 1.6;
+  }
+
+  /* The main stack is pinned; secondary tags rotate through a few slots. */
+  .stack-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding-top: 0.75rem;
+  }
+
   .stack-list {
     display: flex;
     flex-wrap: wrap;
@@ -731,6 +745,21 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  .stack-tag-enter {
+    animation: stack-tag-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes stack-tag-in {
+    from {
+      opacity: 0;
+      translate: 0 0.375rem;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
   }
 
   .stack-tag {
@@ -789,7 +818,8 @@
     }
 
     .work-card-role,
-    .work-card-period {
+    .work-card-period,
+    .project-card-stack {
       display: none;
     }
 
@@ -833,7 +863,8 @@
 
   @media (max-height: 600px) {
     .work-card-role,
-    .work-card-period {
+    .work-card-period,
+    .project-card-stack {
       display: none;
     }
 
@@ -844,6 +875,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .stack-tag-enter {
+      animation: none;
+    }
+
     .project-card {
       transition: none;
     }

@@ -2,6 +2,7 @@
 
 import { WORK_EXPERIENCES } from '@/app/_components/work-experience/work-experiences';
 import { DiveProjects } from './dive-projects';
+import { StackStrip } from './stack-strip';
 import { WORK_SECTION } from './descent';
 import { WorkExperienceCard } from './work-experience-card';
 
@@ -24,5 +25,6 @@ export const DiveWorkExperience = ({ sectionRef }: DiveWorkExperienceProps) => (
         <WorkExperienceCard key={job.company} job={job} index={index} />
       ))}
     </div>
+    <StackStrip />
   </div>
 );
