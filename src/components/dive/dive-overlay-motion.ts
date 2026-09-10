@@ -9,6 +9,7 @@ import {
   sectionMotion,
   techSectionOpacity,
   sectionJumpDelta,
+  workScatter,
 } from './descent';
 import type { MotionMode } from './descent';
 import { GALAXY_MOTION, GALAXY_NODES } from './skill-galaxy';
@@ -101,6 +102,9 @@ const positionStoneSection = (
     element.style.width = `${layout.width}px`;
     element.style.height = `${layout.height}px`;
     element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;
+    const scatter =
+      frame.motionMode === 'reduced' ? 0 : workScatter(frame.progress);
+    element.style.setProperty('--scatter', String(scatter));
     return { left: layout.left, top: layout.top, anchor: 0 };
   }
   const maxTop = frame.height - height - 104;

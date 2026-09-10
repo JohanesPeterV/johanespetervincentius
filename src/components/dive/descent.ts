@@ -253,15 +253,23 @@ export const writeDescentFrame = (
   return target;
 };
 
+// REASON: the work chapter releases at the snap midpoint to the tech chapter,
+// so idling before it gathers the cards back and past it commits the scatter
+const WORK_EXIT = TECH_STONE.center - 0.6;
+const WORK_SCATTER_SPAN = 0.3;
+
 export const stoneSectionOpacity = (
   progress: number,
   center: number,
 ): number => {
   const fadeIn = smootherstep(center - 0.34, center - 0.16, progress);
-  const end = center === WORK_STONE.center ? TECH_STONE.center - 0.6 : center;
+  const end = center === WORK_STONE.center ? WORK_EXIT : center;
   const fadeOut = 1 - smootherstep(end + 0.16, end + 0.34, progress);
   return fadeIn * fadeOut;
 };
+
+export const workScatter = (progress: number): number =>
+  smootherstep(WORK_EXIT, WORK_EXIT + WORK_SCATTER_SPAN, progress);
 
 const TECH_FADE_SPAN = 0.18;
 const HERO_FADE_SPAN = 0.54;
