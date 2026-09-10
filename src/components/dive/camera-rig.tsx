@@ -260,6 +260,7 @@ export default function CameraRig({
           background={palette.background}
           foreground={palette.foreground}
           glow={palette.glow}
+          paper={palette.mode === 'light'}
           aberrationRef={aberrationRef}
           handoffRef={handoffRef}
           gpuTier={gpuTier}
