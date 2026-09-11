@@ -68,6 +68,7 @@ export default function DiveCanvas({
       <StackDebris
         palette={palette}
         progressRef={progressRef}
+        handoffRef={handoffRef}
         motionMode={motionMode}
       />
       <CameraRig

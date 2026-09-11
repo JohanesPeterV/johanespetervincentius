@@ -9,10 +9,12 @@ import { STACK } from '@/app/_components/stack';
 import { WORK_STONE, narrativeStoneY, stoneSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
+import type { HeroHandoff } from './hero-handoff';
 
 type StackDebrisParams = {
   palette: DivePalette;
   progressRef: RefObject<number>;
+  handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
 };
 
@@ -75,6 +77,7 @@ const Body = ({ name, color, tier, scale, bodyRef }: BodyProps) => (
 export default function StackDebris({
   palette,
   progressRef,
+  handoffRef,
   motionMode,
 }: StackDebrisParams) {
   const groupRef = useRef<Group>(null);
@@ -93,11 +96,15 @@ export default function StackDebris({
     const progress = progressRef.current;
     const opacity = stoneSectionOpacity(progress, WORK_STONE.center);
     group.visible = opacity > 0;
-    if (alphaRef.current !== opacity) {
-      alphaRef.current = opacity;
+    // REASON: the crossing renders the scene at its destination pose and wipes
+    // it in under the etched edge; the labels are DOM the wipe cannot cover,
+    // so they wait until the compositor hands back to live HTML
+    const labelAlpha = handoffRef.current.compositing ? 0 : opacity;
+    if (alphaRef.current !== labelAlpha) {
+      alphaRef.current = labelAlpha;
       const scene = gl.domElement.closest('[data-dive-scene]');
       if (scene instanceof HTMLElement) {
-        scene.style.setProperty('--stack-alpha', String(opacity));
+        scene.style.setProperty('--stack-alpha', String(labelAlpha));
       }
     }
     if (!group.visible) {
