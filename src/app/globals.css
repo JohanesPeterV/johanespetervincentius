@@ -730,41 +730,90 @@
     line-height: 1.6;
   }
 
-  /* The main stack holds the seam between the decks; the rest drifts across
-     the chapter behind the cards, each tag on its own lane, speed and phase. */
+  /* The main stack hangs from a line strung across the seam between the two
+     decks, each tag on its own string and swing; the rest blows through the
+     chapter behind the cards like paper scraps, each on its own lane, speed,
+     depth and phase. */
   .stack-field {
-    padding-block: 0.5rem;
+    padding-block: 0.25rem 0.75rem;
   }
 
-  .stack-field-primary,
+  .stack-line,
   .stack-field-drift {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .stack-field-primary {
+  .stack-line {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
+    align-items: flex-start;
+    justify-content: space-evenly;
+    border-top: 1px solid hsl(var(--foreground) / 0.5);
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 6%,
+      black 94%,
+      transparent
+    );
   }
 
-  .stack-field-primary .stack-tag {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
+  .stack-hang {
+    --string: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: 50% 0;
+    animation: stack-swing 5.2s ease-in-out infinite alternate;
   }
 
-  .stack-bob {
-    animation: stack-bob 7s ease-in-out infinite alternate;
+  .stack-hang::before {
+    content: '';
+    height: var(--string);
+    border-left: 1px solid hsl(var(--foreground) / 0.5);
   }
 
-  .stack-bob:nth-child(3n + 2) {
-    animation-delay: -2.3s;
+  .stack-hang:nth-child(4n + 2) {
+    --string: 1.25rem;
+    animation-delay: -1.7s;
+  }
+  .stack-hang:nth-child(4n + 3) {
+    --string: 0.5rem;
+    animation-duration: 6.1s;
+    animation-delay: -3.1s;
+  }
+  .stack-hang:nth-child(4n) {
+    --string: 1rem;
+    animation-duration: 4.6s;
+    animation-delay: -4.4s;
   }
 
-  .stack-bob:nth-child(3n) {
-    animation-delay: -4.6s;
+  .stack-tag {
+    display: block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.5rem;
+    color: hsl(var(--primary-text));
+    white-space: nowrap;
+  }
+
+  .stack-scrap {
+    --depth: 1;
+    border: 1px solid hsl(var(--border) / 0.8);
+    background: hsl(var(--card) / 0.85);
+    color: hsl(var(--muted-foreground));
+    opacity: var(--depth);
+    scale: var(--depth);
+    animation: stack-tumble 4.8s ease-in-out infinite alternate;
+  }
+
+  .stack-drift:nth-child(3n + 2) .stack-scrap {
+    --depth: 0.82;
+    animation-delay: -1.6s;
+  }
+  .stack-drift:nth-child(3n) .stack-scrap {
+    --depth: 0.68;
+    animation-delay: -3.2s;
   }
 
   .stack-field-drift {
@@ -777,7 +826,7 @@
 
   .stack-drift {
     --lane: 50%;
-    --drift-duration: 36s;
+    --drift-duration: 60s;
     --drift-phase: 0;
     position: absolute;
     top: var(--lane);
@@ -814,19 +863,19 @@
   }
 
   .stack-drift:nth-child(5n + 1) {
-    --drift-duration: 44s;
+    --drift-duration: 72s;
   }
   .stack-drift:nth-child(5n + 2) {
-    --drift-duration: 31s;
+    --drift-duration: 50s;
   }
   .stack-drift:nth-child(5n + 3) {
-    --drift-duration: 52s;
+    --drift-duration: 84s;
   }
   .stack-drift:nth-child(5n + 4) {
-    --drift-duration: 37s;
+    --drift-duration: 60s;
   }
   .stack-drift:nth-child(5n) {
-    --drift-duration: 26s;
+    --drift-duration: 42s;
   }
 
   .stack-drift:nth-child(11n + 2) {
@@ -860,16 +909,22 @@
     --drift-phase: 0.91;
   }
 
+  /* Each scrap crosses in the first third of its cycle and waits offstage for
+     the rest, so only a handful are in the air at once. */
   @keyframes stack-drift {
     0% {
       translate: -110% 0;
       opacity: 0;
     }
-    8% {
-      opacity: 0.8;
+    3% {
+      opacity: 1;
     }
-    92% {
-      opacity: 0.8;
+    30% {
+      opacity: 1;
+    }
+    33% {
+      translate: 100vw 0;
+      opacity: 0;
     }
     100% {
       translate: 100vw 0;
@@ -877,26 +932,24 @@
     }
   }
 
-  @keyframes stack-bob {
+  @keyframes stack-swing {
     from {
-      translate: 0 -0.2rem;
+      rotate: -2.5deg;
     }
     to {
-      translate: 0 0.2rem;
+      rotate: 2.5deg;
     }
   }
 
-  .stack-tag {
-    padding: 0.125rem 0.5rem;
-    border: 1px solid hsl(var(--border));
-    border-radius: 999px;
-    color: hsl(var(--muted-foreground));
-    white-space: nowrap;
-  }
-
-  .stack-tag[data-tier='primary'] {
-    color: hsl(var(--primary-text));
-    border-color: hsl(var(--primary-text) / 0.45);
+  @keyframes stack-tumble {
+    from {
+      rotate: -7deg;
+      translate: 0 -0.4rem;
+    }
+    to {
+      rotate: 6deg;
+      translate: 0 0.4rem;
+    }
   }
 
   .project-card:focus-visible {
@@ -999,7 +1052,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .stack-bob {
+    .stack-hang,
+    .stack-scrap {
       animation: none;
     }
 
