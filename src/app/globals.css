@@ -721,15 +721,19 @@
     opacity: 0.6;
   }
 
-  .stack-debris-name[data-tier='primary'] {
-    opacity: var(--stack-alpha-primary, 0);
+  .stack-debris-name[data-tier='core'] {
+    opacity: var(--stack-alpha-work, 0);
     font-size: 0.75rem;
     letter-spacing: 0.18em;
     color: hsl(var(--primary-text));
   }
 
-  .stack-debris-name[data-tier='secondary'] {
-    opacity: var(--stack-alpha-secondary, 0);
+  .stack-debris-name[data-tier='satellite'] {
+    opacity: calc(var(--stack-alpha-work, 0) * var(--stack-depth, 1));
+  }
+
+  .stack-debris-name[data-tier='drifter'] {
+    opacity: var(--stack-alpha-projects, 0);
   }
 
   .project-card:focus-visible {

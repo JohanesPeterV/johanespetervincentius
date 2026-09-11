@@ -23,22 +23,59 @@ type StackDebrisParams = {
   motionMode: MotionMode;
 };
 
-// REASON: the main stack hangs on a line above the work deck; the rest
-// blow through the projects chapter across its full height
+type Tier = 'core' | 'satellite' | 'drifter';
+
+type BodyProps = {
+  name: string;
+  color: string;
+  tier: Tier;
+  scale: number;
+  bodyRef: (element: Group | null) => void;
+  labelRef?: (element: HTMLSpanElement | null) => void;
+};
+
+type SatelliteRefs = { body: Group | null; label: HTMLSpanElement | null };
+
+// REASON: each group's cores hang on a line above the work deck with their
+// satellites orbiting them, near side rising clear of the core labels and
+// far side ducking behind the deck; the drifters blow through the projects
+// chapter
 const WORK_LINE_RISE = 1.4;
+const GROUP_SPACING = 2.4;
+const GROUP_CENTER_X = -0.8;
+const CORE_SPREAD = 0.45;
+const ORBIT_DEPTH = 0.9;
 const FIELD_HALF_WIDTH = 7.5;
 const CROSSING_SHARE = 0.35;
 const PARKED_Z = 30;
+const TAU = Math.PI * 2;
 
-const PRIMARY = STACK.primary.map((name, index) => ({
-  name,
-  x: -5.9 + (10.2 * index) / (STACK.primary.length - 1),
-  phase: index * 1.7,
-}));
+const groupX = (group: number): number =>
+  GROUP_CENTER_X + (group - (STACK.groups.length - 1) / 2) * GROUP_SPACING;
 
-const SECONDARY = STACK.secondary.map((name, index) => ({
+const CORES = STACK.groups.flatMap((group, groupIndex) =>
+  group.core.map((name, index) => ({
+    name,
+    x: groupX(groupIndex) + (2 * index - (group.core.length - 1)) * CORE_SPREAD,
+    phase: groupIndex * 1.7 + index * 0.9,
+  })),
+);
+
+const SATELLITES = STACK.groups.flatMap((group, groupIndex) =>
+  group.satellites.map((name, index) => ({
+    name,
+    centerX: groupX(groupIndex),
+    radius: 0.55 + group.satellites.length * 0.08,
+    incline: 0.5 + (index % 3) * 0.12,
+    period: (36 + groupIndex * 6) * (groupIndex % 2 === 0 ? 1 : -1),
+    phase: (index / group.satellites.length) * TAU,
+    scale: 0.13 + (index % 3) * 0.02,
+  })),
+);
+
+const DRIFTERS = STACK.drifters.map((name, index) => ({
   name,
-  y: -3.4 + (((index * 7) % 26) / 25) * 6.8,
+  y: -3.4 + (index / (STACK.drifters.length - 1)) * 6.8,
   z: PROJECTS_STONE.z - 1 + ((index * 3) % 5) * 0.5,
   period: 40 + ((index * 11) % 30),
   phase: (index * 0.37) % 1,
@@ -46,15 +83,7 @@ const SECONDARY = STACK.secondary.map((name, index) => ({
   scale: 0.13 + ((index * 5) % 4) * 0.02,
 }));
 
-type BodyProps = {
-  name: string;
-  color: string;
-  tier: 'primary' | 'secondary';
-  scale: number;
-  bodyRef: (element: Group | null) => void;
-};
-
-const Body = ({ name, color, tier, scale, bodyRef }: BodyProps) => (
+const Body = ({ name, color, tier, scale, bodyRef, labelRef }: BodyProps) => (
   <group ref={bodyRef} scale={scale}>
     <mesh>
       <octahedronGeometry args={[1, 0]} />
@@ -72,7 +101,7 @@ const Body = ({ name, color, tier, scale, bodyRef }: BodyProps) => (
       position={[1.7, 0, 0]}
       zIndexRange={[0, 0]}
     >
-      <span className="stack-debris-name" data-tier={tier}>
+      <span ref={labelRef} className="stack-debris-name" data-tier={tier}>
         {name}
       </span>
     </Html>
@@ -86,13 +115,16 @@ export default function StackDebris({
   motionMode,
 }: StackDebrisParams) {
   const groupRef = useRef<Group>(null);
-  const primaryRefs = useRef<(Group | null)[]>([]);
-  const secondaryRefs = useRef<(Group | null)[]>([]);
+  const coreRefs = useRef<(Group | null)[]>([]);
+  const satelliteRefs = useRef<SatelliteRefs[]>(
+    SATELLITES.map(() => ({ body: null, label: null })),
+  );
+  const drifterRefs = useRef<(Group | null)[]>([]);
   const elapsedRef = useRef(0);
-  const alphaRef = useRef({ primary: -1, secondary: -1 });
+  const alphaRef = useRef({ work: -1, projects: -1 });
 
   // REASON: drei Html portals the labels next to the event target, not the
-  // canvas, so each tier's chapter alpha is set on the dive root holding both
+  // canvas, so each chapter's alpha is set on the dive root holding both
   useFrame(({ gl }, delta) => {
     const group = groupRef.current;
     if (!group) {
@@ -110,21 +142,18 @@ export default function StackDebris({
     // so they wait until the compositor hands back to live HTML
     const compositing = handoffRef.current.compositing;
     const alpha = {
-      primary: compositing ? 0 : workOpacity,
-      secondary: compositing ? 0 : projectsOpacity,
+      work: compositing ? 0 : workOpacity,
+      projects: compositing ? 0 : projectsOpacity,
     };
     const scene = gl.domElement.closest('[data-dive-scene]');
     if (
       scene instanceof HTMLElement &&
-      (alpha.primary !== alphaRef.current.primary ||
-        alpha.secondary !== alphaRef.current.secondary)
+      (alpha.work !== alphaRef.current.work ||
+        alpha.projects !== alphaRef.current.projects)
     ) {
       alphaRef.current = alpha;
-      scene.style.setProperty('--stack-alpha-primary', String(alpha.primary));
-      scene.style.setProperty(
-        '--stack-alpha-secondary',
-        String(alpha.secondary),
-      );
+      scene.style.setProperty('--stack-alpha-work', String(alpha.work));
+      scene.style.setProperty('--stack-alpha-projects', String(alpha.projects));
     }
     if (!group.visible) {
       return;
@@ -135,13 +164,13 @@ export default function StackDebris({
     const time = elapsedRef.current;
     const lineY = narrativeStoneY(progress, WORK_STONE.center) + WORK_LINE_RISE;
     const fieldY = narrativeStoneY(progress, PROJECTS_STONE.center);
-    PRIMARY.forEach((body, index) => {
-      const object = primaryRefs.current[index];
+    CORES.forEach((body, index) => {
+      const object = coreRefs.current[index];
       if (!object) {
         return;
       }
       object.position.set(
-        body.x + Math.sin(time * 0.31 + body.phase) * 0.35,
+        body.x + Math.sin(time * 0.31 + body.phase) * 0.2,
         lineY + Math.sin(time * 0.47 + body.phase) * 0.14,
         WORK_STONE.z,
       );
@@ -151,8 +180,26 @@ export default function StackDebris({
         0.3,
       );
     });
-    SECONDARY.forEach((body, index) => {
-      const object = secondaryRefs.current[index];
+    SATELLITES.forEach((body, index) => {
+      const { body: object, label } = satelliteRefs.current[index];
+      if (!object || !label) {
+        return;
+      }
+      const angle = (time / body.period) * TAU + body.phase;
+      const toward = Math.sin(angle);
+      object.position.set(
+        body.centerX + Math.cos(angle) * body.radius,
+        lineY + toward * body.incline,
+        WORK_STONE.z + toward * ORBIT_DEPTH,
+      );
+      object.rotation.set(time * 0.2 + index, time * 0.12 + index, 0.3);
+      // REASON: the label only reads on the near side of the orbit, so the
+      // name comes and goes with the body instead of piling up behind the core
+      const depth = Math.min(1, Math.max(0, (toward - 0.4) / 0.5));
+      label.style.setProperty('--stack-depth', depth.toFixed(3));
+    });
+    DRIFTERS.forEach((body, index) => {
+      const object = drifterRefs.current[index];
       if (!object) {
         return;
       }
@@ -173,27 +220,42 @@ export default function StackDebris({
 
   return (
     <group ref={groupRef} visible={false}>
-      {PRIMARY.map((body, index) => (
+      {CORES.map((body, index) => (
         <Body
           key={body.name}
           name={body.name}
           color={palette.accent}
-          tier="primary"
+          tier="core"
           scale={0.26}
           bodyRef={(element) => {
-            primaryRefs.current[index] = element;
+            coreRefs.current[index] = element;
           }}
         />
       ))}
-      {SECONDARY.map((body, index) => (
+      {SATELLITES.map((body, index) => (
         <Body
           key={body.name}
           name={body.name}
           color={palette.highlight}
-          tier="secondary"
+          tier="satellite"
           scale={body.scale}
           bodyRef={(element) => {
-            secondaryRefs.current[index] = element;
+            satelliteRefs.current[index].body = element;
+          }}
+          labelRef={(element) => {
+            satelliteRefs.current[index].label = element;
+          }}
+        />
+      ))}
+      {DRIFTERS.map((body, index) => (
+        <Body
+          key={body.name}
+          name={body.name}
+          color={palette.highlight}
+          tier="drifter"
+          scale={body.scale}
+          bodyRef={(element) => {
+            drifterRefs.current[index] = element;
           }}
         />
       ))}

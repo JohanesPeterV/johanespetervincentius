@@ -1,47 +1,47 @@
-export type Stack = {
-  primary: string[];
-  secondary: string[];
+export type StackGroup = {
+  core: string[];
+  satellites: string[];
 };
 
-// REASON: primary is the stack Peter reaches for on every build (Smilie,
-// Pomodoro Planter); secondary is everything else he has shipped with
+export type Stack = {
+  groups: StackGroup[];
+  drifters: string[];
+};
+
+// REASON: core is the stack Peter reaches for on every build (Smilie,
+// Pomodoro Planter); satellites are the tools that ship alongside each core;
+// drifters are past-platform tools that belong to none of them
 export const STACK: Stack = {
-  primary: [
-    'Next.js',
-    'TypeScript',
-    'tRPC',
-    'Prisma',
-    'PostgreSQL',
-    'Convex',
-    'Tailwind CSS',
-    'shadcn/ui',
+  groups: [
+    {
+      core: ['Next.js'],
+      satellites: ['Vercel', 'Clerk', 'Turborepo', 'Nx', 'Sentry', 'PostHog'],
+    },
+    {
+      core: ['TypeScript', 'tRPC'],
+      satellites: [
+        'Zod',
+        'Express',
+        'Nest.js',
+        'Socket.IO',
+        'GraphQL',
+        'Vite',
+        'Storybook',
+        'Playwright',
+      ],
+    },
+    {
+      core: ['Prisma', 'PostgreSQL'],
+      satellites: ['SQL Server', 'Upstash Redis', 'Firebase'],
+    },
+    {
+      core: ['Convex'],
+      satellites: ['OpenAI', 'Resend', 'Stripe'],
+    },
+    {
+      core: ['Tailwind CSS', 'shadcn/ui'],
+      satellites: ['Three.js', 'React Three Fiber', 'Vue.js'],
+    },
   ],
-  secondary: [
-    'Clerk',
-    'Stripe',
-    'Resend',
-    'Upstash Redis',
-    'Turborepo',
-    'Playwright',
-    'Sentry',
-    'PostHog',
-    'Vercel',
-    'Zod',
-    'Three.js',
-    'React Three Fiber',
-    'Express',
-    'Vite',
-    'Storybook',
-    'Socket.IO',
-    'OpenAI',
-    'Nx',
-    'GraphQL',
-    'ASP.NET',
-    'C#',
-    'SQL Server',
-    'Vue.js',
-    'Nest.js',
-    'Kotlin',
-    'Firebase',
-  ],
+  drifters: ['ASP.NET', 'C#', 'Kotlin'],
 };
