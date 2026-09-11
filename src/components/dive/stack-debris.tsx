@@ -25,7 +25,7 @@ const PARKED_Z = 30;
 
 const PRIMARY = STACK.primary.map((name, index) => ({
   name,
-  x: -5.4 + (10.8 * index) / (STACK.primary.length - 1),
+  x: -5.9 + (10.2 * index) / (STACK.primary.length - 1),
   phase: index * 1.7,
 }));
 
@@ -42,12 +42,12 @@ const SECONDARY = STACK.secondary.map((name, index) => ({
 type BodyProps = {
   name: string;
   color: string;
-  labelClass: string;
+  tier: 'primary' | 'secondary';
   scale: number;
   bodyRef: (element: Group | null) => void;
 };
 
-const Body = ({ name, color, labelClass, scale, bodyRef }: BodyProps) => (
+const Body = ({ name, color, tier, scale, bodyRef }: BodyProps) => (
   <group ref={bodyRef} scale={scale}>
     <mesh>
       <octahedronGeometry args={[1, 0]} />
@@ -65,7 +65,7 @@ const Body = ({ name, color, labelClass, scale, bodyRef }: BodyProps) => (
       position={[1.7, 0, 0]}
       zIndexRange={[0, 0]}
     >
-      <span className={`type-meta whitespace-nowrap ${labelClass}`}>
+      <span className="stack-debris-name" data-tier={tier}>
         {name}
       </span>
     </Html>
@@ -151,8 +151,8 @@ export default function StackDebris({
           key={body.name}
           name={body.name}
           color={palette.accent}
-          labelClass="text-primary-text"
-          scale={0.22}
+          tier="primary"
+          scale={0.26}
           bodyRef={(element) => {
             primaryRefs.current[index] = element;
           }}
@@ -163,7 +163,7 @@ export default function StackDebris({
           key={body.name}
           name={body.name}
           color={palette.highlight}
-          labelClass="text-muted-foreground"
+          tier="secondary"
           scale={body.scale}
           bodyRef={(element) => {
             secondaryRefs.current[index] = element;

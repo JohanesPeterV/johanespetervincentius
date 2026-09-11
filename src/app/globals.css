@@ -736,6 +736,39 @@
     pointer-events: none;
   }
 
+  /* Callout type: the body's name reads like an instrument label, tied to it
+     by a leader line; ink marks the main stack, neutral keeps the rest quiet. */
+  .stack-debris-name {
+    display: block;
+    translate: 0 -50%;
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: hsl(var(--foreground) / 0.72);
+    text-shadow:
+      0 1px 3px hsl(var(--background)),
+      0 0 12px hsl(var(--background));
+  }
+
+  .stack-debris-name::before {
+    content: '';
+    display: inline-block;
+    width: 0.875rem;
+    height: 1px;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
+  .stack-debris-name[data-tier='primary'] {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    color: hsl(var(--primary-text));
+  }
+
   .project-card:focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 5px;
