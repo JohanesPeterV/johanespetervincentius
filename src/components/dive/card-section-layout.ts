@@ -5,9 +5,8 @@ type CardSectionLayout = {
   height: number;
 };
 
-// REASON: the project strings hang from the viewport edge and the work cards
-// rest above the chapter navigation, so the panel spans the full height and
-// any spare room opens up between the two.
+// REASON: the panel spans the full height so each card chapter can centre
+// itself between the appearance controls and the chapter navigation.
 export const getCardSectionLayout = (
   width: number,
   height: number,

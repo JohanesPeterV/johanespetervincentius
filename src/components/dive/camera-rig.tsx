@@ -11,15 +11,13 @@ import {
   PointLight,
   SRGBColorSpace,
   Vector2,
-  Vector3,
 } from 'three';
 
 import {
-  NARRATIVE_STONES,
+  PROJECTS_STONE,
   WORK_STONE,
   aberrationStrength,
   createDescentFrame,
-  narrativeStoneY,
   rushFov,
   sectionTravel,
   stoneSectionOpacity,
@@ -62,9 +60,6 @@ const MAX_FRAME_DELTA = 0.1;
 const PARALLAX_DAMPING = 1.7;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
-
-const STONE_PROJECTIONS = NARRATIVE_STONES.map(() => new Vector3());
-const STONE_SCREENS = NARRATIVE_STONES.map(() => new Vector2());
 
 export default function CameraRig({
   driveRef,
@@ -200,36 +195,24 @@ export default function CameraRig({
     camera.updateMatrixWorld();
   }, -2);
 
-  // REASON: DOM projection runs after the world update, but before
-  // the composer renders, so text and geometry describe the same frame.
-  useFrame(({ camera, size }) => {
+  // REASON: overlay writes run after the world update, but before the
+  // composer renders, so text and geometry describe the same frame.
+  useFrame(({ size }) => {
     const progress = wrapProgress(driveRef.current.current);
-    NARRATIVE_STONES.forEach((stone, index) => {
-      const projection = STONE_PROJECTIONS[index];
-      projection
-        .set(
-          stone.x,
-          narrativeStoneY(progressRef.current, stone.center),
-          stone.z,
-        )
-        .project(camera);
-      STONE_SCREENS[index].set(
-        ((projection.x + 1) * size.width) / 2,
-        ((1 - projection.y) * size.height) / 2,
-      );
-    });
-    const workVisible = stoneSectionOpacity(progress, WORK_STONE.center) > 0;
+    const cardsVisible =
+      stoneSectionOpacity(progress, WORK_STONE.center) > 0 ||
+      stoneSectionOpacity(progress, PROJECTS_STONE.center) > 0;
     const sizeChanged =
       size.width !== overlaySizeRef.current.x ||
       size.height !== overlaySizeRef.current.y;
-    // REASON: work panels animate while camera progress is
+    // REASON: card panels animate while camera progress is
     // frozen, so their visible sections still need overlay writes every frame
     if (
       progress !== overlayProgressRef.current ||
       motionMode !== overlayMotionModeRef.current ||
       sizeChanged ||
       (handoffRef.current.progress > 0 && handoffRef.current.progress < 1) ||
-      workVisible
+      cardsVisible
     ) {
       overlayProgressRef.current = progress;
       overlayMotionModeRef.current = motionMode;
@@ -238,7 +221,6 @@ export default function CameraRig({
         descent: descentFrame,
         height: size.height,
         progress,
-        stones: STONE_SCREENS,
         width: size.width,
         motionMode,
         handoff: handoffRef.current,

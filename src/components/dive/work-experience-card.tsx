@@ -26,9 +26,14 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
               <ArrowUpRight size={16} aria-hidden />
             )}
           </span>
-          <span className="work-card-company font-display">{job.company}</span>
+          <span className="card-face-title font-display">{job.company}</span>
           <span className="work-card-role type-label text-muted-foreground">
             {job.positions.map((position) => position.name).join(' · ')}
+          </span>
+          <span className="work-card-proof type-label">
+            {job.showcases.map((showcase) => (
+              <span key={showcase.title}>{showcase.title}</span>
+            ))}
           </span>
           <span className="work-card-period type-meta mt-auto text-muted-foreground">
             {job.positions[0].workPeriod}

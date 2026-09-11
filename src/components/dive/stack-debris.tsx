@@ -6,7 +6,12 @@ import { RefObject, useRef } from 'react';
 import { Group } from 'three';
 
 import { STACK } from '@/app/_components/stack';
-import { WORK_STONE, narrativeStoneY, stoneSectionOpacity } from './descent';
+import {
+  PROJECTS_STONE,
+  WORK_STONE,
+  narrativeStoneY,
+  stoneSectionOpacity,
+} from './descent';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
 import type { HeroHandoff } from './hero-handoff';
@@ -18,9 +23,9 @@ type StackDebrisParams = {
   motionMode: MotionMode;
 };
 
-// REASON: the seam between the two card decks sits under the work stone; the
-// main bodies hover there and the rest cross the chapter's full height
-const SEAM_DROP = -0.85;
+// REASON: the main stack hangs on a line above the work deck; the rest
+// blow through the projects chapter across its full height
+const WORK_LINE_RISE = 1.4;
 const FIELD_HALF_WIDTH = 7.5;
 const CROSSING_SHARE = 0.35;
 const PARKED_Z = 30;
@@ -34,7 +39,7 @@ const PRIMARY = STACK.primary.map((name, index) => ({
 const SECONDARY = STACK.secondary.map((name, index) => ({
   name,
   y: -3.4 + (((index * 7) % 26) / 25) * 6.8,
-  z: WORK_STONE.z - 1 + ((index * 3) % 5) * 0.5,
+  z: PROJECTS_STONE.z - 1 + ((index * 3) % 5) * 0.5,
   period: 40 + ((index * 11) % 30),
   phase: (index * 0.37) % 1,
   direction: index % 2 === 0 ? 1 : -1,
@@ -84,28 +89,42 @@ export default function StackDebris({
   const primaryRefs = useRef<(Group | null)[]>([]);
   const secondaryRefs = useRef<(Group | null)[]>([]);
   const elapsedRef = useRef(0);
-  const alphaRef = useRef(-1);
+  const alphaRef = useRef({ primary: -1, secondary: -1 });
 
   // REASON: drei Html portals the labels next to the event target, not the
-  // canvas, so the chapter alpha is set on the dive root that contains both
+  // canvas, so each tier's chapter alpha is set on the dive root holding both
   useFrame(({ gl }, delta) => {
     const group = groupRef.current;
     if (!group) {
       return;
     }
     const progress = progressRef.current;
-    const opacity = stoneSectionOpacity(progress, WORK_STONE.center);
-    group.visible = opacity > 0;
+    const workOpacity = stoneSectionOpacity(progress, WORK_STONE.center);
+    const projectsOpacity = stoneSectionOpacity(
+      progress,
+      PROJECTS_STONE.center,
+    );
+    group.visible = workOpacity > 0 || projectsOpacity > 0;
     // REASON: the crossing renders the scene at its destination pose and wipes
     // it in under the etched edge; the labels are DOM the wipe cannot cover,
     // so they wait until the compositor hands back to live HTML
-    const labelAlpha = handoffRef.current.compositing ? 0 : opacity;
-    if (alphaRef.current !== labelAlpha) {
-      alphaRef.current = labelAlpha;
-      const scene = gl.domElement.closest('[data-dive-scene]');
-      if (scene instanceof HTMLElement) {
-        scene.style.setProperty('--stack-alpha', String(labelAlpha));
-      }
+    const compositing = handoffRef.current.compositing;
+    const alpha = {
+      primary: compositing ? 0 : workOpacity,
+      secondary: compositing ? 0 : projectsOpacity,
+    };
+    const scene = gl.domElement.closest('[data-dive-scene]');
+    if (
+      scene instanceof HTMLElement &&
+      (alpha.primary !== alphaRef.current.primary ||
+        alpha.secondary !== alphaRef.current.secondary)
+    ) {
+      alphaRef.current = alpha;
+      scene.style.setProperty('--stack-alpha-primary', String(alpha.primary));
+      scene.style.setProperty(
+        '--stack-alpha-secondary',
+        String(alpha.secondary),
+      );
     }
     if (!group.visible) {
       return;
@@ -114,7 +133,8 @@ export default function StackDebris({
       elapsedRef.current += Math.min(delta, 0.1);
     }
     const time = elapsedRef.current;
-    const seamY = narrativeStoneY(progress, WORK_STONE.center) + SEAM_DROP;
+    const lineY = narrativeStoneY(progress, WORK_STONE.center) + WORK_LINE_RISE;
+    const fieldY = narrativeStoneY(progress, PROJECTS_STONE.center);
     PRIMARY.forEach((body, index) => {
       const object = primaryRefs.current[index];
       if (!object) {
@@ -122,7 +142,7 @@ export default function StackDebris({
       }
       object.position.set(
         body.x + Math.sin(time * 0.31 + body.phase) * 0.35,
-        seamY + Math.sin(time * 0.47 + body.phase) * 0.14,
+        lineY + Math.sin(time * 0.47 + body.phase) * 0.14,
         WORK_STONE.z,
       );
       object.rotation.set(
@@ -144,7 +164,7 @@ export default function StackDebris({
       const travel = cycle / CROSSING_SHARE;
       object.position.set(
         body.direction * (FIELD_HALF_WIDTH * (2 * travel - 1)),
-        seamY + body.y + Math.sin(time * 0.4 + index) * 0.15,
+        fieldY + body.y + Math.sin(time * 0.4 + index) * 0.15,
         body.z,
       );
       object.rotation.set(time * 0.2 + index, time * 0.12 + index, 0.3);

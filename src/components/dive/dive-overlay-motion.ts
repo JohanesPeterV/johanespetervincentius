@@ -1,15 +1,13 @@
-import type { Vector2 } from 'three';
-
 import {
   DIVE_SECTIONS,
   DIVE_START,
   DescentFrame,
   WORK_STONE,
+  cardScatter,
   sectionMotion,
   sectionJumpDelta,
-  workScatter,
 } from './descent';
-import type { MotionMode } from './descent';
+import type { DiveSection, MotionMode } from './descent';
 import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { getCardSectionLayout } from './card-section-layout';
@@ -24,48 +22,26 @@ export type OverlayFrame = {
   descent: DescentFrame;
   height: number;
   progress: number;
-  stones: Vector2[];
   width: number;
   motionMode: MotionMode;
   handoff: HeroHandoff;
 };
 
-const positionStoneSection = (
+const positionCardSection = (
   element: HTMLDivElement,
   frame: OverlayFrame,
-  stone: Vector2,
-): { left: number; top: number; anchor: number } => {
-  // REASON: reserve the appearance controls above and chapter navigation below;
-  // anchored copy scrolls within that space instead of covering either control.
-  const height = element.offsetHeight;
-  if (element.dataset.workStory === 'true') {
-    const layout = getCardSectionLayout(frame.width, frame.height);
-    element.style.width = `${layout.width}px`;
-    element.style.height = `${layout.height}px`;
-    element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;
-    const scatter =
-      frame.motionMode === 'reduced' ? 0 : workScatter(frame.progress);
-    element.style.setProperty('--scatter', String(scatter));
-    return { left: layout.left, top: layout.top, anchor: 0 };
-  }
-  const maxTop = frame.height - height - 104;
-  if (frame.width < 768) {
-    const top = Math.max(88, Math.min(frame.height * 0.16, maxTop));
-    element.style.transform = `translate3d(24px, ${top}px, 0)`;
-    return { left: 24, top, anchor: 0 };
-  }
-  const horizontalGap = Math.min(320, Math.max(96, frame.width * 0.16));
-  const left = Math.max(
-    24,
-    Math.min(frame.width - 456, stone.x + horizontalGap),
-  );
-  const center = Math.max(
-    frame.height * 0.4,
-    Math.min(frame.height * 0.6, stone.y),
-  );
-  const top = Math.max(104, Math.min(center - height / 2, maxTop));
-  element.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-  return { left, top, anchor: 0 };
+  section: DiveSection,
+): { left: number; top: number } => {
+  const layout = getCardSectionLayout(frame.width, frame.height);
+  element.style.width = `${layout.width}px`;
+  element.style.height = `${layout.height}px`;
+  element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;
+  const scatter =
+    frame.motionMode === 'reduced'
+      ? 0
+      : cardScatter(frame.progress, section.center);
+  element.style.setProperty('--scatter', String(scatter));
+  return { left: layout.left, top: layout.top };
 };
 
 export const applyOverlay = (
@@ -107,17 +83,13 @@ export const applyOverlay = (
     if (section.placement !== 'stone') {
       element.style.transform = '';
     } else {
-      const position = positionStoneSection(
-        element,
-        frame,
-        frame.stones[section.stoneIndex],
-      );
-      if (section.center === WORK_STONE.center && frame.handoff.work) {
+      const position = positionCardSection(element, frame, section);
+      if (section.story === 'work' && frame.handoff.work) {
         const rect = frame.handoff.workRect;
         const { width, height } = frame.handoff.work;
         rect.set(
           position.left / frame.width,
-          1 - (position.top + height * (1 - position.anchor)) / frame.height,
+          1 - (position.top + height) / frame.height,
           width / frame.width,
           height / frame.height,
         );

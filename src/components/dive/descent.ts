@@ -13,9 +13,7 @@ type CenterDiveSection = DiveSectionBase & {
 
 type StoneDiveSection = DiveSectionBase & {
   placement: 'stone';
-  stoneIndex: number;
-  stoneScale?: number;
-  x: number;
+  story: 'work' | 'projects';
   z: number;
 };
 
@@ -40,15 +38,25 @@ export type MotionMode = 'full' | 'reduced';
 
 type DescentKey = DescentFrame & { at: number };
 
-export const WORK_STONE = { center: 1.95, x: -1.65, z: 8 };
+export const WORK_STONE = { center: 1.95, z: 8 };
+export const PROJECTS_STONE = { center: 2.55, z: 8 };
 
 export const WORK_SECTION: StoneDiveSection = {
   tag: '02',
-  title: 'Work & Projects',
+  title: 'Work',
   subtitle: '2020 — present',
   placement: 'stone',
-  stoneIndex: 0,
+  story: 'work',
   ...WORK_STONE,
+};
+
+export const PROJECTS_SECTION: StoneDiveSection = {
+  tag: '03',
+  title: 'Projects',
+  subtitle: 'Shipped on the side',
+  placement: 'stone',
+  story: 'projects',
+  ...PROJECTS_STONE,
 };
 
 export const DIVE_SECTIONS: DiveSection[] = [
@@ -60,6 +68,7 @@ export const DIVE_SECTIONS: DiveSection[] = [
     placement: 'center',
   },
   WORK_SECTION,
+  PROJECTS_SECTION,
 ];
 
 export const DIVE_LENGTH = 3.5;
@@ -95,29 +104,6 @@ export const seamBoost = (progress: number): number =>
 
 export const finaleBoost = (progress: number): number =>
   transitionBoost(progress, FINALE_CENTER, FINALE_SPAN);
-
-type NarrativeStone = {
-  center: number;
-  scale: number;
-  x: number;
-  z: number;
-};
-
-export const NARRATIVE_STONES: NarrativeStone[] = DIVE_SECTIONS.flatMap(
-  (section) => {
-    if (section.placement === 'center') {
-      return [];
-    }
-    return [
-      {
-        center: section.center,
-        scale: section.stoneScale ?? 1,
-        x: section.x,
-        z: section.z,
-      },
-    ];
-  },
-);
 
 const NARRATIVE_STONE_CENTER_Y = 4.45;
 // REASON: stone sections sit 0.6 progress apart and the camera sees ~9 world
@@ -230,29 +216,33 @@ export const writeDescentFrame = (
   return target;
 };
 
-// REASON: the work chapter releases a fixed stretch past its centre, so idling
-// before it gathers the cards back and past it commits the scatter
-const WORK_EXIT = WORK_STONE.center + 0.6;
-const WORK_SCATTER_SPAN = 0.3;
-
 export const stoneSectionOpacity = (
   progress: number,
   center: number,
 ): number => {
   const fadeIn = smootherstep(center - 0.34, center - 0.16, progress);
-  const end = center === WORK_STONE.center ? WORK_EXIT : center;
-  const fadeOut = 1 - smootherstep(end + 0.16, end + 0.34, progress);
+  const fadeOut = 1 - smootherstep(center + 0.16, center + 0.34, progress);
   return fadeIn * fadeOut;
 };
 
-export const workScatter = (progress: number): number =>
-  smootherstep(WORK_EXIT, WORK_EXIT + WORK_SCATTER_SPAN, progress);
+// REASON: leaving a card chapter flings its cards off along the scroll, so
+// idling before the fling gathers them back and past it commits the scatter
+const SCATTER_START = 0.05;
+const SCATTER_SPAN = 0.3;
+const SCATTER_SETTLE = 0.13;
 
-const SCATTER_SETTLE = 0.18;
+export const cardScatter = (progress: number, center: number): number =>
+  smootherstep(
+    center + SCATTER_START,
+    center + SCATTER_START + SCATTER_SPAN,
+    progress,
+  );
+
 const HERO_FADE_SPAN = 0.54;
 const HERO_READING_HALF = 0.1;
 
-export const LOOP_START = WORK_EXIT + WORK_SCATTER_SPAN + SCATTER_SETTLE;
+export const LOOP_START =
+  PROJECTS_STONE.center + SCATTER_START + SCATTER_SPAN + SCATTER_SETTLE;
 export const LOOP_END = DIVE_START - HERO_READING_HALF;
 
 export const sectionMotion = (

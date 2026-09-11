@@ -3,8 +3,11 @@
 import { ReactNode, RefObject } from 'react';
 
 import { DIVE_SECTIONS } from './descent';
+import { DiveProjects } from './dive-projects';
 import { DiveWorkExperience } from './dive-work-experience';
 import type { OverlayNodes } from './dive-overlay-motion';
+
+const STORIES = { work: DiveWorkExperience, projects: DiveProjects };
 
 type DiveOverlayParams = {
   children: ReactNode;
@@ -42,8 +45,9 @@ export default function DiveOverlay({
               </div>
             );
           }
+          const Story = STORIES[section.story];
           return (
-            <DiveWorkExperience
+            <Story
               key={section.tag}
               sectionRef={(element) => {
                 overlayRef.current.sections[index] = element;
