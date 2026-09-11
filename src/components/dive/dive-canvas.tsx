@@ -7,6 +7,7 @@ import { RefObject, Suspense, useEffect, useRef } from 'react';
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
 import type { DriveMotion } from './camera-motion';
 import SpaceWorld from './space-world';
+import StackDebris from './stack-debris';
 import type { MotionMode } from './descent';
 import type { OverlayNodes } from './dive-overlay-motion';
 import type { DivePalette } from './dive-palette';
@@ -64,6 +65,11 @@ export default function DiveCanvas({
         />
         <LoadedSignal stageRef={stageRef} />
       </Suspense>
+      <StackDebris
+        palette={palette}
+        progressRef={progressRef}
+        motionMode={motionMode}
+      />
       <CameraRig
         driveRef={driveRef}
         progressRef={progressRef}
