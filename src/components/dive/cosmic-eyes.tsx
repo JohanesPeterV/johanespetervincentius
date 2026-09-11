@@ -2,19 +2,22 @@
 
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import { useSetAtom } from 'jotai';
-import { useEffect, useRef, useState } from 'react';
+import { RefObject, useEffect, useRef, useState } from 'react';
 import { Color, Group, MathUtils, Vector3 } from 'three';
 
+import { arrivalLids } from './arrival';
 import { createCosmicEyeGeometry } from './cosmic-eye-geometry';
 import { cosmicEyeFragment, cosmicEyeVertex } from './cosmic-eye-shader';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
+import type { HeroHandoff } from './hero-handoff';
 import { createSpaceOrigin } from './space-origin';
 import { nextStarfieldFormationAtom } from './starfield-controls';
 
 type CosmicEyesParams = {
   palette: DivePalette;
   motionMode: MotionMode;
+  handoffRef: RefObject<HeroHandoff>;
 };
 
 type EyePlacement = {
@@ -93,7 +96,11 @@ const EYES: EyePlacement[] = [
   },
 ];
 
-export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
+export default function CosmicEyes({
+  palette,
+  motionMode,
+  handoffRef,
+}: CosmicEyesParams) {
   const groupRef = useRef<Group>(null);
   const elapsedRef = useRef(0);
   const cameraTargetRef = useRef(new Vector3());
@@ -187,7 +194,8 @@ export default function CosmicEyes({ palette, motionMode }: CosmicEyesParams) {
           MathUtils.smoothstep(blinkPhase, 0.42, 0.49) -
           MathUtils.smoothstep(blinkPhase, 0.52, 0.76);
       }
-      eye.uBlink.value = motionMode === 'reduced' ? 0 : blink;
+      const lids = arrivalLids(handoffRef.current.arrival - index * 0.05);
+      eye.uBlink.value = motionMode === 'reduced' ? 0 : Math.max(blink, lids);
     });
   }, -1);
 

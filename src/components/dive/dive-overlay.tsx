@@ -4,6 +4,7 @@ import { ReactNode, RefObject } from 'react';
 
 import { DIVE_SECTIONS } from './descent';
 import { DiveProjects } from './dive-projects';
+import DiveLoader from './dive-loader';
 import { DiveWorkExperience } from './dive-work-experience';
 import type { OverlayNodes } from './dive-overlay-motion';
 
@@ -29,6 +30,7 @@ export default function DiveOverlay({
         aria-hidden
         className="pointer-events-none absolute inset-0 z-10 opacity-0"
       />
+      <DiveLoader />
       <div className="pointer-events-none absolute inset-0">
         {DIVE_SECTIONS.map((section, index) => {
           if (section.placement === 'center') {
@@ -39,7 +41,7 @@ export default function DiveOverlay({
                 ref={(element) => {
                   overlayRef.current.sections[index] = element;
                 }}
-                className="absolute inset-0 flex items-center justify-center [will-change:transform,opacity] [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
+                className="absolute inset-0 flex items-center justify-center opacity-0 [will-change:transform,opacity] [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
               >
                 {children}
               </div>
@@ -58,7 +60,7 @@ export default function DiveOverlay({
       </div>
       <nav
         aria-label="Journey chapters"
-        className="surface-panel absolute bottom-5 right-5 z-20 flex gap-1 p-1 sm:bottom-7 sm:right-8"
+        className="dive-chrome surface-panel absolute bottom-5 right-5 z-20 flex gap-1 p-1 sm:bottom-7 sm:right-8"
       >
         {DIVE_SECTIONS.map((section, index) => (
           <button

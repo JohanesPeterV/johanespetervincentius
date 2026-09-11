@@ -1,3 +1,4 @@
+import { ARRIVAL_RISE, arrivalCard } from './arrival';
 import {
   DIVE_SECTIONS,
   DIVE_START,
@@ -14,6 +15,7 @@ import { getCardSectionLayout } from './card-section-layout';
 
 export type OverlayNodes = {
   chapters: (HTMLButtonElement | null)[];
+  root: HTMLDivElement | null;
   sections: (HTMLDivElement | null)[];
   veil: HTMLDivElement | null;
 };
@@ -50,6 +52,10 @@ export const applyOverlay = (
 ): void => {
   let activeChapter = 0;
   let nearestDistance = Infinity;
+  const card = arrivalCard(frame.handoff.arrival);
+  if (nodes.root) {
+    nodes.root.style.setProperty('--arrival', String(frame.handoff.arrival));
+  }
   DIVE_SECTIONS.forEach((section, index) => {
     const distance = Math.abs(sectionJumpDelta(frame.progress, section.center));
     if (distance < nearestDistance) {
@@ -62,7 +68,7 @@ export const applyOverlay = (
     }
     let opacity = sectionMotion(frame.progress, section).opacity;
     if (section.placement === 'center') {
-      opacity = heroOverlayOpacity(frame.handoff);
+      opacity = heroOverlayOpacity(frame.handoff) * card;
     }
     if (section.center === WORK_STONE.center) {
       opacity = workOverlayOpacity(frame.handoff);
@@ -81,7 +87,7 @@ export const applyOverlay = (
       element.dataset.visible = 'false';
     }
     if (section.placement !== 'stone') {
-      element.style.transform = '';
+      element.style.transform = `translate3d(0, ${(1 - card) * ARRIVAL_RISE}px, 0)`;
     } else {
       const position = positionCardSection(element, frame, section);
       if (section.story === 'work' && frame.handoff.work) {

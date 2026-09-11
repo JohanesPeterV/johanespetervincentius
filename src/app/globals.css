@@ -26,15 +26,6 @@
   }
 }
 
-@keyframes fadeInLate {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
 @keyframes colourTurn {
   from {
     transform: rotate(-240deg);
@@ -61,16 +52,6 @@
   100% {
     opacity: 0;
     transform: translateY(-9px);
-  }
-}
-
-.animate-fade-late {
-  animation: fadeInLate 0.8s ease-out 1.7s both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-late {
-    animation: none;
   }
 }
 
@@ -383,6 +364,20 @@
 
   .dive-chapter {
     border-radius: 50%;
+  }
+
+  /* The opening: --arrival runs 0 to 1 once the scene is live. The loading
+     count gives way first; the chrome waits until the observer has settled. */
+  [data-dive-scene] {
+    --arrival: 0;
+  }
+
+  .dive-loader {
+    opacity: clamp(0, 1 - var(--arrival, 1) / 0.15, 1);
+  }
+
+  .dive-chrome {
+    opacity: clamp(0, (var(--arrival, 1) - 0.85) / 0.15, 1);
   }
 
   .identity-tag {

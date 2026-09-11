@@ -45,6 +45,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const overlayRef = useRef<OverlayNodes>({
     chapters: [],
+    root: null,
     sections: [],
     veil: null,
   });
@@ -181,6 +182,9 @@ export default function DiveScene({ children }: { children: ReactNode }) {
 
   return (
     <div
+      ref={(element) => {
+        overlayRef.current.root = element;
+      }}
       data-dive-scene
       onWheel={handleWheel}
       onPointerDown={handlePointerDown}
@@ -200,7 +204,9 @@ export default function DiveScene({ children }: { children: ReactNode }) {
           motionMode={motionMode}
         />
       </Suspense>
-      <PalettePicker />
+      <div className="dive-chrome relative z-30">
+        <PalettePicker />
+      </div>
       <DiveOverlay overlayRef={overlayRef} onNavigate={handleNavigate}>
         {children}
       </DiveOverlay>

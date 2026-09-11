@@ -30,6 +30,9 @@ export type HeroHandoff = {
   compositing: boolean;
   progress: number;
   journey: number;
+  // REASON: the opening is the first crossing, from the void into Hero, so it
+  // rides the shared transition state every layer already samples per frame.
+  arrival: number;
 };
 
 export const HANDOFF_START = DIVE_START + 0.1;
@@ -44,6 +47,7 @@ export const createHeroHandoff = (): HeroHandoff => ({
   compositing: false,
   progress: 0,
   journey: DIVE_START,
+  arrival: 0,
 });
 
 const clampHandoffProgress = (value: number): number => {

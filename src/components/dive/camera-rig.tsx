@@ -25,6 +25,13 @@ import {
   writeDescentFrame,
 } from './descent';
 import type { DescentFrame, MotionMode } from './descent';
+import {
+  ARRIVAL_ABERRATION,
+  ARRIVAL_DOLLY,
+  ARRIVAL_DURATION,
+  ARRIVAL_LENS,
+  arrivalApproach,
+} from './arrival';
 import { advanceDrive } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import { applyOverlay } from './dive-overlay-motion';
@@ -75,6 +82,7 @@ export default function CameraRig({
   const fovRef = useRef(BASE_FOV);
   const rollRef = useRef(0);
   const overlayProgressRef = useRef(Number.NaN);
+  const overlayArrivalRef = useRef(Number.NaN);
   const overlayMotionModeRef = useRef(motionMode);
   const overlaySizeRef = useRef(new Vector2());
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
@@ -100,6 +108,13 @@ export default function CameraRig({
     const step = drive.current - previousProgress;
     const driveStep = frameDelta > 0 ? step / (frameDelta * BASELINE_FPS) : 0;
     const handoff = handoffRef.current;
+    if (live) {
+      handoff.arrival =
+        motionMode === 'reduced'
+          ? 1
+          : Math.min(1, handoff.arrival + frameDelta / ARRIVAL_DURATION);
+    }
+    const approach = arrivalApproach(handoff.arrival);
     handoff.journey = wrapProgress(drive.current);
     const progress = sampleHeroHandoff(handoff, motionMode);
     progressRef.current = progress;
@@ -132,7 +147,7 @@ export default function CameraRig({
     camera.position.set(
       frame.position[0] + parallax.x * 0.3,
       frame.position[1] - parallax.y * 0.15,
-      frame.position[2],
+      frame.position[2] + approach * ARRIVAL_DOLLY,
     );
     camera.lookAt(
       frame.look[0] + parallax.x * 0.28,
@@ -153,7 +168,8 @@ export default function CameraRig({
     );
     camera.rotateZ(rollRef.current);
     if (camera instanceof PerspectiveCamera) {
-      const targetFov = rushFov(driveStep * transitionZone);
+      const targetFov =
+        rushFov(driveStep * transitionZone) + approach * ARRIVAL_LENS;
       fovRef.current = MathUtils.damp(
         fovRef.current,
         targetFov,
@@ -186,7 +202,10 @@ export default function CameraRig({
       );
     }
     if (aberrationRef.current) {
-      const strength = aberrationStrength(driveStep) * transitionZone;
+      const strength = Math.max(
+        aberrationStrength(driveStep) * transitionZone,
+        approach * ARRIVAL_ABERRATION,
+      );
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
     if (glowRef.current) {
@@ -212,9 +231,11 @@ export default function CameraRig({
       motionMode !== overlayMotionModeRef.current ||
       sizeChanged ||
       (handoffRef.current.progress > 0 && handoffRef.current.progress < 1) ||
+      handoffRef.current.arrival !== overlayArrivalRef.current ||
       cardsVisible
     ) {
       overlayProgressRef.current = progress;
+      overlayArrivalRef.current = handoffRef.current.arrival;
       overlayMotionModeRef.current = motionMode;
       overlaySizeRef.current.set(size.width, size.height);
       applyOverlay(overlayRef.current, {
