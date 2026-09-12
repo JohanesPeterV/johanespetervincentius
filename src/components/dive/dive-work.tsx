@@ -13,17 +13,13 @@ export const DiveWork = ({ sectionRef }: DiveWorkProps) => (
   <div
     ref={sectionRef}
     data-visible="false"
+    data-section-scroll
+    tabIndex={0}
     role="region"
     aria-label={WORK_SECTION.title}
-    className="dive-card-section work-chapter pointer-events-auto invisible absolute left-0 top-0 flex flex-col text-left opacity-0"
+    className="dive-card-section pointer-events-auto invisible absolute inset-0 overflow-y-auto text-left opacity-0 scrollbar-thin"
   >
-    <div
-      data-section-scroll
-      tabIndex={0}
-      role="region"
-      aria-label="Browse work and projects"
-      className="min-h-0 overflow-y-auto scrollbar-thin"
-    >
+    <div className="mx-auto max-w-[1440px] px-6 pb-24 pt-20">
       <header className="px-4 pb-8">
         <h2 className="card-face-title font-display">{WORK_SECTION.title}</h2>
         <p className="type-meta text-muted-foreground">

@@ -413,10 +413,6 @@
     opacity: calc(1 - var(--scatter) * 0.6);
   }
 
-  .work-chapter {
-    padding-top: 5rem;
-  }
-
   .work-card-spread {
     margin: 1rem 1.5rem;
     height: 22rem;

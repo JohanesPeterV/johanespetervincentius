@@ -8,10 +8,9 @@ import {
   sectionMotion,
   sectionJumpDelta,
 } from './descent';
-import type { DiveSection, MotionMode } from './descent';
+import type { MotionMode } from './descent';
 import { heroOverlayOpacity, workSectionOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
-import { getCardSectionLayout } from './card-section-layout';
 
 export type OverlayNodes = {
   chapters: (HTMLButtonElement | null)[];
@@ -22,27 +21,9 @@ export type OverlayNodes = {
 
 export type OverlayFrame = {
   descent: DescentFrame;
-  height: number;
   progress: number;
-  width: number;
   motionMode: MotionMode;
   handoff: HeroHandoff;
-};
-
-const positionCardSection = (
-  element: HTMLDivElement,
-  frame: OverlayFrame,
-  section: DiveSection,
-): void => {
-  const layout = getCardSectionLayout(frame.width, frame.height);
-  element.style.width = `${layout.width}px`;
-  element.style.height = `${layout.height}px`;
-  element.style.transform = `translate3d(${layout.left}px, ${layout.top}px, 0)`;
-  const scatter =
-    frame.motionMode === 'reduced'
-      ? 0
-      : cardScatter(frame.progress, section.center);
-  element.style.setProperty('--scatter', String(scatter));
 };
 
 export const applyOverlay = (
@@ -87,7 +68,11 @@ export const applyOverlay = (
     if (section.placement !== 'stone') {
       element.style.transform = `translate3d(0, ${(1 - card) * ARRIVAL_RISE}px, 0)`;
     } else {
-      positionCardSection(element, frame, section);
+      const scatter =
+        frame.motionMode === 'reduced'
+          ? 0
+          : cardScatter(frame.progress, section.center);
+      element.style.setProperty('--scatter', String(scatter));
     }
   });
   nodes.chapters.forEach((element, index) => {

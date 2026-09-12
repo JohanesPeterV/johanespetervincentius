@@ -10,7 +10,6 @@ import {
   PerspectiveCamera,
   PointLight,
   SRGBColorSpace,
-  Vector2,
 } from 'three';
 
 import {
@@ -83,7 +82,6 @@ export default function CameraRig({
   const overlayProgressRef = useRef(Number.NaN);
   const overlayArrivalRef = useRef(Number.NaN);
   const overlayMotionModeRef = useRef(motionMode);
-  const overlaySizeRef = useRef(new Vector2());
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
@@ -215,18 +213,14 @@ export default function CameraRig({
 
   // REASON: overlay writes run after the world update, but before the
   // composer renders, so text and geometry describe the same frame.
-  useFrame(({ size }) => {
+  useFrame(() => {
     const progress = wrapProgress(driveRef.current.current);
     const cardsVisible = stoneSectionOpacity(progress, WORK_STONE.center) > 0;
-    const sizeChanged =
-      size.width !== overlaySizeRef.current.x ||
-      size.height !== overlaySizeRef.current.y;
     // REASON: card panels animate while camera progress is
     // frozen, so their visible sections still need overlay writes every frame
     if (
       progress !== overlayProgressRef.current ||
       motionMode !== overlayMotionModeRef.current ||
-      sizeChanged ||
       (handoffRef.current.progress > 0 && handoffRef.current.progress < 1) ||
       handoffRef.current.arrival !== overlayArrivalRef.current ||
       cardsVisible
@@ -234,12 +228,9 @@ export default function CameraRig({
       overlayProgressRef.current = progress;
       overlayArrivalRef.current = handoffRef.current.arrival;
       overlayMotionModeRef.current = motionMode;
-      overlaySizeRef.current.set(size.width, size.height);
       applyOverlay(overlayRef.current, {
         descent: descentFrame,
-        height: size.height,
         progress,
-        width: size.width,
         motionMode,
         handoff: handoffRef.current,
       });
