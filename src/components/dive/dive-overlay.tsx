@@ -3,12 +3,9 @@
 import { ReactNode, RefObject } from 'react';
 
 import { DIVE_SECTIONS } from './descent';
-import { DiveProjects } from './dive-projects';
 import DiveLoader from './dive-loader';
-import { DiveWorkExperience } from './dive-work-experience';
+import { DiveWork } from './dive-work';
 import type { OverlayNodes } from './dive-overlay-motion';
-
-const STORIES = { work: DiveWorkExperience, projects: DiveProjects };
 
 type DiveOverlayParams = {
   children: ReactNode;
@@ -50,9 +47,8 @@ export default function DiveOverlay({
           if (section.placement === 'scene') {
             return null;
           }
-          const Story = STORIES[section.story];
           return (
-            <Story
+            <DiveWork
               key={section.tag}
               sectionRef={(element) => {
                 overlayRef.current.sections[index] = element;

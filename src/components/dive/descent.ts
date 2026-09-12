@@ -13,7 +13,6 @@ type CenterDiveSection = DiveSectionBase & {
 
 type StoneDiveSection = DiveSectionBase & {
   placement: 'stone';
-  story: 'work' | 'projects';
   z: number;
 };
 
@@ -48,14 +47,12 @@ type DescentKey = DescentFrame & { at: number };
 
 export const WORK_STONE = { center: 1.95, z: 8 };
 export const STACK_STONE = { center: 2.55, z: 8 };
-export const PROJECTS_STONE = { center: 3.15, z: 8 };
 
 export const WORK_SECTION: StoneDiveSection = {
   tag: '02',
-  title: 'Work',
-  subtitle: '2020 — present',
+  title: 'Work & Projects',
+  subtitle: 'Professional experience & independent builds',
   placement: 'stone',
-  story: 'work',
   ...WORK_STONE,
 };
 
@@ -68,15 +65,6 @@ export const STACK_SECTION: SceneDiveSection = {
   ...STACK_STONE,
 };
 
-export const PROJECTS_SECTION: StoneDiveSection = {
-  tag: '04',
-  title: 'Projects',
-  subtitle: 'Shipped on the side',
-  placement: 'stone',
-  story: 'projects',
-  ...PROJECTS_STONE,
-};
-
 export const DIVE_SECTIONS: DiveSection[] = [
   {
     tag: '01',
@@ -87,10 +75,9 @@ export const DIVE_SECTIONS: DiveSection[] = [
   },
   WORK_SECTION,
   STACK_SECTION,
-  PROJECTS_SECTION,
 ];
 
-export const DIVE_LENGTH = 4.1;
+export const DIVE_LENGTH = 3.5;
 export const DIVE_START = 0.95;
 export const WHEEL_SENSITIVITY = 1 / 2000;
 export const TOUCH_SENSITIVITY = 1 / 1000;
@@ -106,7 +93,7 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 const SEAM_CENTER = 1.4;
 const SEAM_SPAN = 0.46;
-const FINALE_CENTER = 3.68;
+const FINALE_CENTER = 3.08;
 const FINALE_SPAN = 0.4;
 
 const transitionBoost = (
@@ -261,7 +248,7 @@ const HERO_FADE_SPAN = 0.54;
 const HERO_READING_HALF = 0.1;
 
 export const LOOP_START =
-  PROJECTS_STONE.center + SCATTER_START + SCATTER_SPAN + SCATTER_SETTLE;
+  STACK_STONE.center + SCATTER_START + SCATTER_SPAN + SCATTER_SETTLE;
 export const LOOP_END = DIVE_START - HERO_READING_HALF;
 
 export const sectionMotion = (

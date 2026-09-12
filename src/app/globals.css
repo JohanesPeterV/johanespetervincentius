@@ -413,9 +413,13 @@
     opacity: calc(1 - var(--scatter) * 0.6);
   }
 
+  .work-chapter {
+    padding-top: 5rem;
+  }
+
   .work-card-spread {
-    margin-block: auto;
-    max-height: 22rem;
+    margin: 1rem 1.5rem;
+    height: 22rem;
     isolation: isolate;
   }
 
@@ -613,7 +617,7 @@
 
   /* One live product carries the chapter; the rest sit as a quiet grid. */
   .project-chapter {
-    padding: 5.5rem clamp(0.5rem, 3vw, 3rem) 1rem;
+    padding: 2rem clamp(0.5rem, 3vw, 3rem);
     gap: clamp(1rem, 3vw, 3rem);
     align-items: center;
     isolation: isolate;
@@ -788,7 +792,7 @@
 
     .project-chapter {
       flex-direction: column;
-      padding: 5rem 0.5rem 0;
+      padding: 1.5rem 0.75rem;
     }
 
     .project-showcase {

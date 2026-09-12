@@ -14,7 +14,6 @@ import {
 } from 'three';
 
 import {
-  PROJECTS_STONE,
   WORK_STONE,
   aberrationStrength,
   createDescentFrame,
@@ -218,9 +217,7 @@ export default function CameraRig({
   // composer renders, so text and geometry describe the same frame.
   useFrame(({ size }) => {
     const progress = wrapProgress(driveRef.current.current);
-    const cardsVisible =
-      stoneSectionOpacity(progress, WORK_STONE.center) > 0 ||
-      stoneSectionOpacity(progress, PROJECTS_STONE.center) > 0;
+    const cardsVisible = stoneSectionOpacity(progress, WORK_STONE.center) > 0;
     const sizeChanged =
       size.width !== overlaySizeRef.current.x ||
       size.height !== overlaySizeRef.current.y;
