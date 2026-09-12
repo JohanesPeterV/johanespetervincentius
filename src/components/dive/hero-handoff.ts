@@ -1,4 +1,4 @@
-import { MathUtils, Vector4 } from 'three';
+import { MathUtils } from 'three';
 import type { CanvasTexture } from 'three';
 
 import {
@@ -23,8 +23,6 @@ export type SectionSnapshot = {
 
 export type HeroHandoff = {
   hero: SectionSnapshot | null;
-  work: SectionSnapshot | null;
-  workRect: Vector4;
   sourceWorld: HandoffWorld | null;
   crossing: HandoffCrossing;
   compositing: boolean;
@@ -40,8 +38,6 @@ export const HANDOFF_END = WORK_STONE.center - 0.1;
 
 export const createHeroHandoff = (): HeroHandoff => ({
   hero: null,
-  work: null,
-  workRect: new Vector4(),
   sourceWorld: null,
   crossing: null,
   compositing: false,
@@ -94,19 +90,14 @@ export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
   return Number(heroHandoffProgress(handoff.journey) < 0.5);
 };
 
-export const workSectionOpacity = (progress: number): number =>
-  progress <= HANDOFF_END
-    ? Number(heroHandoffProgress(progress) >= 0.5)
-    : stoneSectionOpacity(progress, WORK_STONE.center);
+// REASON: the crossing wipes in the bare orbital world under the etched edge;
+// the deck and its artwork settle in together once the journey clears it, so
+// no card is ever sliced by the edge or hidden under the departing hero card.
+export const orbitalArrival = (journey: number): number =>
+  MathUtils.smootherstep(journey, HANDOFF_END, WORK_STONE.center);
 
-export const workOverlayOpacity = (handoff: HeroHandoff): number =>
-  handoff.compositing ? 0 : workSectionOpacity(handoff.journey);
-
-// REASON: the crossing renders the orbital world at its destination pose and
-// wipes it in under the etched edge; its artwork follows the journey instead,
-// settling in with the deck after the crossing rather than showing under the wipe
-export const orbitalArrival = (handoff: HeroHandoff): number =>
-  MathUtils.smootherstep(handoff.journey, HANDOFF_END, WORK_STONE.center);
+export const workSectionOpacity = (journey: number): number =>
+  orbitalArrival(journey) * stoneSectionOpacity(journey, WORK_STONE.center);
 
 export const sampleHeroHandoff = (
   handoff: HeroHandoff,
@@ -128,7 +119,6 @@ export const sampleHeroHandoff = (
     motionMode === 'full' &&
     handoff.sourceWorld !== null &&
     handoff.hero !== null &&
-    (crossing === 'loop' || handoff.work !== null) &&
     (entering || handoff.compositing);
   handoff.crossing = crossing;
   handoff.progress = crossing === 'loop' ? loopProgress : workProgress;

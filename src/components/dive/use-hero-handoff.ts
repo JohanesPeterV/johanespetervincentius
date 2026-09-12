@@ -48,16 +48,6 @@ const captureSection = async (
     fontFamily: style.fontFamily,
     color: style.color,
   });
-  clone.style.setProperty('--reveal', '1');
-  // REASON: native dialogs live above the scene; the crossing captures the
-  // card spread underneath, with every card returned to its resting position.
-  clone.querySelectorAll('dialog').forEach((dialog) => {
-    dialog.removeAttribute('open');
-  });
-  clone.querySelectorAll<HTMLElement>('[data-active]').forEach((panel) => {
-    panel.style.translate = 'none';
-    panel.style.transition = 'none';
-  });
   const stage = document.createElement('div');
   stage.inert = true;
   stage.setAttribute('aria-hidden', 'true');
@@ -91,8 +81,7 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
   useEffect(() => {
     const handoff = handoffRef.current;
     const hero = overlayRef.current.sections[0];
-    const work = overlayRef.current.sections[1];
-    if (!hero || !work) {
+    if (!hero) {
       return;
     }
     let disposed = false;
@@ -100,27 +89,19 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     let timer = 0;
     let fontCss: Promise<string> | null = null;
     const capture = async (): Promise<void> => {
-      if (work.dataset.snapshotReady === 'false') {
-        return;
-      }
       const request = ++revision;
-      const prepared: SectionSnapshot[] = [];
       try {
         await document.fonts.ready;
         fontCss ??= getFontEmbedCSS(hero, { preferredFontFormat: 'woff2' });
-        const css = await fontCss;
-        prepared.push(await captureSection(hero, css));
-        prepared.push(await captureSection(work, css));
+        const snapshot = await captureSection(hero, await fontCss);
         if (disposed || request !== revision) {
-          prepared.forEach((snapshot) => snapshot.texture.dispose());
+          snapshot.texture.dispose();
           return;
         }
         handoff.hero?.texture.dispose();
-        handoff.work?.texture.dispose();
-        [handoff.hero, handoff.work] = prepared;
+        handoff.hero = snapshot;
         setError(null);
       } catch (cause) {
-        prepared.forEach((snapshot) => snapshot.texture.dispose());
         if (!disposed && request === revision) {
           setError(cause instanceof Error ? cause.message : String(cause));
         }
@@ -129,27 +110,17 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     const schedule = (): void => {
       revision++;
       window.clearTimeout(timer);
-      if (work.dataset.snapshotReady === 'false') {
-        handoff.work?.texture.dispose();
-        handoff.work = null;
-      }
       timer = window.setTimeout(capture, 60);
     };
+    // REASON: recapture on theme changes and resizes only, never the styles
+    // the scene updates on every animation frame.
     const observer = new MutationObserver(schedule);
-    // REASON: capture settled content changes without observing the styles
-    // that the scene updates on every animation frame.
-    observer.observe(work, {
-      attributes: true,
-      attributeFilter: ['data-active', 'data-snapshot-ready', 'open'],
-      subtree: true,
-    });
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'style'],
     });
     const resizeObserver = new ResizeObserver(schedule);
     resizeObserver.observe(hero);
-    resizeObserver.observe(work);
     capture();
     return () => {
       disposed = true;
@@ -157,9 +128,7 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
       resizeObserver.disconnect();
       window.clearTimeout(timer);
       handoff.hero?.texture.dispose();
-      handoff.work?.texture.dispose();
       handoff.hero = null;
-      handoff.work = null;
     };
   }, [overlayRef]);
 

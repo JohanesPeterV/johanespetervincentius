@@ -77,7 +77,7 @@ export default function OrbitalReality({
     if (!group || !(camera instanceof PerspectiveCamera)) {
       return;
     }
-    const arrival = orbitalArrival(handoffRef.current);
+    const arrival = orbitalArrival(handoffRef.current.journey);
     group.visible = arrival > 0;
     if (!group.visible) {
       return;

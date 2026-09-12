@@ -1,8 +1,6 @@
 export const heroHandoffFragment = `
 uniform sampler2D uSavedScene;
 uniform sampler2D uHeroContent;
-uniform sampler2D uWorkContent;
-uniform vec4 uWorkRect;
 uniform float uProgress;
 uniform float uReturning;
 uniform float uSourceIsHero;
@@ -44,16 +42,7 @@ vec3 handoffHero(vec2 uv) {
 }
 
 vec3 handoffOrbital(vec2 uv) {
-  vec3 scene = uSourceIsHero > 0.5 ? texture2D(inputBuffer, uv).rgb : texture2D(uSavedScene, uv).rgb;
-  if (uReturning > 0.5) {
-    return scene;
-  }
-  vec2 contentUv = (uv - uWorkRect.xy) / uWorkRect.zw;
-  vec4 content = texture2D(uWorkContent, clamp(contentUv, 0.0, 1.0));
-  float inside = step(0.0, contentUv.x) * step(contentUv.x, 1.0)
-               * step(0.0, contentUv.y) * step(contentUv.y, 1.0);
-  content.a *= inside;
-  return handoffOver(scene, content);
+  return uSourceIsHero > 0.5 ? texture2D(inputBuffer, uv).rgb : texture2D(uSavedScene, uv).rgb;
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {

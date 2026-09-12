@@ -9,7 +9,7 @@ import {
   sectionJumpDelta,
 } from './descent';
 import type { DiveSection, MotionMode } from './descent';
-import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
+import { heroOverlayOpacity, workSectionOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { getCardSectionLayout } from './card-section-layout';
 
@@ -33,7 +33,7 @@ const positionCardSection = (
   element: HTMLDivElement,
   frame: OverlayFrame,
   section: DiveSection,
-): { left: number; top: number } => {
+): void => {
   const layout = getCardSectionLayout(frame.width, frame.height);
   element.style.width = `${layout.width}px`;
   element.style.height = `${layout.height}px`;
@@ -43,7 +43,6 @@ const positionCardSection = (
       ? 0
       : cardScatter(frame.progress, section.center);
   element.style.setProperty('--scatter', String(scatter));
-  return { left: layout.left, top: layout.top };
 };
 
 export const applyOverlay = (
@@ -71,10 +70,9 @@ export const applyOverlay = (
       opacity = heroOverlayOpacity(frame.handoff) * card;
     }
     if (section.center === WORK_STONE.center) {
-      opacity = workOverlayOpacity(frame.handoff);
+      opacity = workSectionOpacity(frame.handoff.journey);
     }
     element.style.opacity = String(opacity);
-    element.style.setProperty('--reveal', String(opacity));
     element.inert = opacity < 0.1;
     const visibility = opacity < 0.05 ? 'hidden' : 'visible';
     if (element.style.visibility !== visibility) {
@@ -89,17 +87,7 @@ export const applyOverlay = (
     if (section.placement !== 'stone') {
       element.style.transform = `translate3d(0, ${(1 - card) * ARRIVAL_RISE}px, 0)`;
     } else {
-      const position = positionCardSection(element, frame, section);
-      if (section.story === 'work' && frame.handoff.work) {
-        const rect = frame.handoff.workRect;
-        const { width, height } = frame.handoff.work;
-        rect.set(
-          position.left / frame.width,
-          1 - (position.top + height) / frame.height,
-          width / frame.width,
-          height / frame.height,
-        );
-      }
+      positionCardSection(element, frame, section);
     }
   });
   nodes.chapters.forEach((element, index) => {
