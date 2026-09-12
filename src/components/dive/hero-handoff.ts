@@ -1,4 +1,4 @@
-import { Vector4 } from 'three';
+import { MathUtils, Vector4 } from 'three';
 import type { CanvasTexture } from 'three';
 
 import {
@@ -101,6 +101,12 @@ export const workSectionOpacity = (progress: number): number =>
 
 export const workOverlayOpacity = (handoff: HeroHandoff): number =>
   handoff.compositing ? 0 : workSectionOpacity(handoff.journey);
+
+// REASON: the crossing renders the orbital world at its destination pose and
+// wipes it in under the etched edge; its artwork follows the journey instead,
+// settling in with the deck after the crossing rather than showing under the wipe
+export const orbitalArrival = (handoff: HeroHandoff): number =>
+  MathUtils.smootherstep(handoff.journey, HANDOFF_END, WORK_STONE.center);
 
 export const sampleHeroHandoff = (
   handoff: HeroHandoff,

@@ -3,7 +3,7 @@
 import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { RefObject, useRef } from 'react';
-import { Group } from 'three';
+import { Group, MeshStandardMaterial, OctahedronGeometry } from 'three';
 
 import { STACK } from '@/app/_components/stack';
 import {
@@ -14,6 +14,7 @@ import {
 } from './descent';
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
+import { orbitalArrival } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
 type StackDebrisParams = {
@@ -27,7 +28,7 @@ type Tier = 'core' | 'satellite' | 'drifter';
 
 type BodyProps = {
   name: string;
-  color: string;
+  material: MeshStandardMaterial;
   tier: Tier;
   scale: number;
   bodyRef: (element: Group | null) => void;
@@ -49,6 +50,7 @@ const FIELD_HALF_WIDTH = 7.5;
 const CROSSING_SHARE = 0.35;
 const PARKED_Z = 30;
 const TAU = Math.PI * 2;
+const OCTAHEDRON = new OctahedronGeometry(1, 0);
 
 const groupX = (group: number): number =>
   GROUP_CENTER_X + (group - (STACK.groups.length - 1) / 2) * GROUP_SPACING;
@@ -83,19 +85,26 @@ const DRIFTERS = STACK.drifters.map((name, index) => ({
   scale: 0.13 + ((index * 5) % 4) * 0.02,
 }));
 
-const Body = ({ name, color, tier, scale, bodyRef, labelRef }: BodyProps) => (
+const createBodyMaterial = (): MeshStandardMaterial =>
+  new MeshStandardMaterial({
+    roughness: 1,
+    metalness: 0,
+    flatShading: true,
+    toneMapped: false,
+    fog: false,
+    transparent: true,
+  });
+
+const Body = ({
+  name,
+  material,
+  tier,
+  scale,
+  bodyRef,
+  labelRef,
+}: BodyProps) => (
   <group ref={bodyRef} scale={scale}>
-    <mesh>
-      <octahedronGeometry args={[1, 0]} />
-      <meshStandardMaterial
-        color={color}
-        roughness={1}
-        metalness={0}
-        flatShading
-        toneMapped={false}
-        fog={false}
-      />
-    </mesh>
+    <mesh geometry={OCTAHEDRON} material={material} />
     <Html
       wrapperClass="stack-debris-label"
       position={[1.7, 0, 0]}
@@ -122,6 +131,16 @@ export default function StackDebris({
   const drifterRefs = useRef<(Group | null)[]>([]);
   const elapsedRef = useRef(0);
   const alphaRef = useRef({ work: -1, projects: -1 });
+  // REASON: one material per tier so a chapter fades every body at once
+  const materialsRef = useRef<Record<Tier, MeshStandardMaterial> | null>(null);
+  if (materialsRef.current === null) {
+    materialsRef.current = {
+      core: createBodyMaterial(),
+      satellite: createBodyMaterial(),
+      drifter: createBodyMaterial(),
+    };
+  }
+  const materials = materialsRef.current;
 
   // REASON: drei Html portals the labels next to the event target, not the
   // canvas, so each chapter's alpha is set on the dive root holding both
@@ -131,20 +150,18 @@ export default function StackDebris({
       return;
     }
     const progress = progressRef.current;
-    const workOpacity = stoneSectionOpacity(progress, WORK_STONE.center);
-    const projectsOpacity = stoneSectionOpacity(
-      progress,
-      PROJECTS_STONE.center,
-    );
-    group.visible = workOpacity > 0 || projectsOpacity > 0;
-    // REASON: the crossing renders the scene at its destination pose and wipes
-    // it in under the etched edge; the labels are DOM the wipe cannot cover,
-    // so they wait until the compositor hands back to live HTML
-    const compositing = handoffRef.current.compositing;
+    const arrival = orbitalArrival(handoffRef.current);
     const alpha = {
-      work: compositing ? 0 : workOpacity,
-      projects: compositing ? 0 : projectsOpacity,
+      work: stoneSectionOpacity(progress, WORK_STONE.center) * arrival,
+      projects: stoneSectionOpacity(progress, PROJECTS_STONE.center),
     };
+    group.visible = alpha.work > 0 || alpha.projects > 0;
+    materials.core.color.set(palette.accent);
+    materials.satellite.color.set(palette.highlight);
+    materials.drifter.color.set(palette.highlight);
+    materials.core.opacity = alpha.work;
+    materials.satellite.opacity = alpha.work;
+    materials.drifter.opacity = alpha.projects;
     const scene = gl.domElement.closest('[data-dive-scene]');
     if (
       scene instanceof HTMLElement &&
@@ -224,7 +241,7 @@ export default function StackDebris({
         <Body
           key={body.name}
           name={body.name}
-          color={palette.accent}
+          material={materials.core}
           tier="core"
           scale={0.26}
           bodyRef={(element) => {
@@ -236,7 +253,7 @@ export default function StackDebris({
         <Body
           key={body.name}
           name={body.name}
-          color={palette.highlight}
+          material={materials.satellite}
           tier="satellite"
           scale={body.scale}
           bodyRef={(element) => {
@@ -251,7 +268,7 @@ export default function StackDebris({
         <Body
           key={body.name}
           name={body.name}
-          color={palette.highlight}
+          material={materials.drifter}
           tier="drifter"
           scale={body.scale}
           bodyRef={(element) => {
