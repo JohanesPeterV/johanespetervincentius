@@ -8,6 +8,23 @@ import type { OverlayNodes } from './dive-overlay-motion';
 import { createHeroHandoff } from './hero-handoff';
 import type { SectionSnapshot } from './hero-handoff';
 
+// REASON: html-to-image deep-clones <svg> without inlining its descendants'
+// computed styles, so strokes and fills that come from stylesheets vanish
+// from the snapshot (the profile avatar frame). Read them off the staged
+// clone, whose root is forced visible, never off the live section, which is
+// hidden while the opening still runs.
+const inlineSvgStyles = (staged: HTMLElement): void => {
+  staged.querySelectorAll('svg *').forEach((node) => {
+    if (!(node instanceof SVGElement)) {
+      return;
+    }
+    const computed = getComputedStyle(node);
+    for (const name of computed) {
+      node.style.setProperty(name, computed.getPropertyValue(name));
+    }
+  });
+};
+
 const captureSection = async (
   element: HTMLDivElement,
   fontEmbedCSS: string,
@@ -49,6 +66,7 @@ const captureSection = async (
   stage.append(clone);
   document.body.append(stage);
   try {
+    inlineSvgStyles(clone);
     const canvas = await toCanvas(clone, {
       fontEmbedCSS,
       pixelRatio: Math.min(window.devicePixelRatio, 1.5),
