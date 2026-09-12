@@ -18,7 +18,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     status: 'current',
     positions: [
       {
-        name: 'Lead Software Engineer',
+        name: 'Senior Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
           'Lead technical direction across corporate gifting, digital rewards, and e-commerce, working directly with the Founder on product and operational decisions.',
@@ -47,7 +47,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     status: 'past',
     positions: [
       {
-        name: 'Full-stack Developer',
+        name: 'Senior Software Engineer',
         workPeriod: 'Feb – Sep 2025',
         description:
           'Delivered QR ordering, dynamic menus, and real-time guest operations while standardizing the shared architecture behind them.',
