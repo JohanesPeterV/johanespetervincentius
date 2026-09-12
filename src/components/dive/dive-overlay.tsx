@@ -47,6 +47,9 @@ export default function DiveOverlay({
               </div>
             );
           }
+          if (section.placement === 'scene') {
+            return null;
+          }
           const Story = STORIES[section.story];
           return (
             <Story

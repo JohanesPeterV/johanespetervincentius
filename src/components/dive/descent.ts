@@ -17,7 +17,15 @@ type StoneDiveSection = DiveSectionBase & {
   z: number;
 };
 
-export type DiveSection = CenterDiveSection | StoneDiveSection;
+type SceneDiveSection = DiveSectionBase & {
+  placement: 'scene';
+  z: number;
+};
+
+export type DiveSection =
+  | CenterDiveSection
+  | StoneDiveSection
+  | SceneDiveSection;
 
 export type DescentFrame = {
   position: [number, number, number];
@@ -39,7 +47,8 @@ export type MotionMode = 'full' | 'reduced';
 type DescentKey = DescentFrame & { at: number };
 
 export const WORK_STONE = { center: 1.95, z: 8 };
-export const PROJECTS_STONE = { center: 2.55, z: 8 };
+export const STACK_STONE = { center: 2.55, z: 8 };
+export const PROJECTS_STONE = { center: 3.15, z: 8 };
 
 export const WORK_SECTION: StoneDiveSection = {
   tag: '02',
@@ -50,8 +59,17 @@ export const WORK_SECTION: StoneDiveSection = {
   ...WORK_STONE,
 };
 
-export const PROJECTS_SECTION: StoneDiveSection = {
+// REASON: the stack chapter is drawn entirely in the canvas; it has no overlay
+export const STACK_SECTION: SceneDiveSection = {
   tag: '03',
+  title: 'Stack',
+  subtitle: 'What I build with',
+  placement: 'scene',
+  ...STACK_STONE,
+};
+
+export const PROJECTS_SECTION: StoneDiveSection = {
+  tag: '04',
   title: 'Projects',
   subtitle: 'Shipped on the side',
   placement: 'stone',
@@ -68,10 +86,11 @@ export const DIVE_SECTIONS: DiveSection[] = [
     placement: 'center',
   },
   WORK_SECTION,
+  STACK_SECTION,
   PROJECTS_SECTION,
 ];
 
-export const DIVE_LENGTH = 3.5;
+export const DIVE_LENGTH = 4.1;
 export const DIVE_START = 0.95;
 export const WHEEL_SENSITIVITY = 1 / 2000;
 export const TOUCH_SENSITIVITY = 1 / 1000;
@@ -87,7 +106,7 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 const SEAM_CENTER = 1.4;
 const SEAM_SPAN = 0.46;
-const FINALE_CENTER = 3.08;
+const FINALE_CENTER = 3.68;
 const FINALE_SPAN = 0.4;
 
 const transitionBoost = (
@@ -249,7 +268,7 @@ export const sectionMotion = (
   progress: number,
   section: DiveSection,
 ): SectionMotion => {
-  if (section.placement === 'stone') {
+  if (section.placement !== 'center') {
     return { opacity: stoneSectionOpacity(progress, section.center), shift: 0 };
   }
   const delta = progress - section.center;
