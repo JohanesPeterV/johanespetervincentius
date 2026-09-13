@@ -17,6 +17,7 @@ import {
 } from './descent';
 import { useDivePalette } from './use-dive-palette';
 import DiveOverlay from './dive-overlay';
+import DiveLoader from './dive-loader';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { useHeroHandoff } from './use-hero-handoff';
 import {
@@ -204,6 +205,11 @@ export default function DiveScene({ children }: { children: ReactNode }) {
           motionMode={motionMode}
         />
       </Suspense>
+      <DiveLoader
+        handoffRef={handoffRef}
+        palette={palette}
+        motionMode={motionMode}
+      />
       <div className="dive-chrome relative z-30">
         <PalettePicker />
       </div>

@@ -3,7 +3,6 @@
 import { ReactNode, RefObject } from 'react';
 
 import { DIVE_SECTIONS, WORK_SECTION } from './descent';
-import DiveLoader from './dive-loader';
 import { DiveStack } from './dive-stack';
 import { DiveWork } from './dive-work';
 import type { OverlayNodes } from './dive-overlay-motion';
@@ -28,7 +27,6 @@ export default function DiveOverlay({
         aria-hidden
         className="pointer-events-none absolute inset-0 z-10 opacity-0"
       />
-      <DiveLoader />
       <div className="pointer-events-none absolute inset-0">
         {DIVE_SECTIONS.map((section, index) => {
           if (section.placement === 'center') {
