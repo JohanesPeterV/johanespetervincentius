@@ -772,6 +772,43 @@
     overflow-wrap: anywhere;
   }
 
+  .stack-group {
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .stack-group-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .stack-technology {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .stack-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .stack-group[data-group='main'] .stack-group-title {
+    font-size: 2rem;
+  }
+
+  .stack-group[data-group='main'] .stack-technology {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .stack-group[data-group='main'] .stack-icon {
+    width: 2rem;
+    height: 2rem;
+    color: hsl(var(--primary-text));
+  }
+
   .project-card:focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 5px;
