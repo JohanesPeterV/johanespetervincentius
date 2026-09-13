@@ -9,7 +9,7 @@ import {
   sectionJumpDelta,
 } from './descent';
 import type { MotionMode } from './descent';
-import { heroOverlayOpacity, workSectionOpacity } from './hero-handoff';
+import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
 export type OverlayNodes = {
@@ -51,7 +51,7 @@ export const applyOverlay = (
       opacity = heroOverlayOpacity(frame.handoff) * card;
     }
     if (section.center === WORK_STONE.center) {
-      opacity = workSectionOpacity(frame.handoff.journey);
+      opacity = workOverlayOpacity(frame.handoff);
     }
     element.style.opacity = String(opacity);
     element.inert = opacity < 0.1;
@@ -64,6 +64,9 @@ export const applyOverlay = (
     }
     if (opacity < 0.05 && element.dataset.visible !== 'false') {
       element.dataset.visible = 'false';
+      // REASON: the crossing reveals the chapter from its top, so the live
+      // panel must hand over from the top as well.
+      element.scrollTop = 0;
     }
     if (section.placement !== 'stone') {
       element.style.transform = `translate3d(0, ${(1 - card) * ARRIVAL_RISE}px, 0)`;

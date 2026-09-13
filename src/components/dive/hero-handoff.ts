@@ -15,14 +15,9 @@ import type { MotionMode } from './descent';
 type HandoffWorld = 'hero' | 'orbital';
 type HandoffCrossing = 'work' | 'loop' | null;
 
-export type SectionSnapshot = {
-  texture: CanvasTexture;
-  width: number;
-  height: number;
-};
-
 export type HeroHandoff = {
-  hero: SectionSnapshot | null;
+  hero: CanvasTexture | null;
+  work: CanvasTexture | null;
   sourceWorld: HandoffWorld | null;
   crossing: HandoffCrossing;
   compositing: boolean;
@@ -38,6 +33,7 @@ export const HANDOFF_END = WORK_STONE.center - 0.1;
 
 export const createHeroHandoff = (): HeroHandoff => ({
   hero: null,
+  work: null,
   sourceWorld: null,
   crossing: null,
   compositing: false,
@@ -90,14 +86,19 @@ export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
   return Number(heroHandoffProgress(handoff.journey) < 0.5);
 };
 
-// REASON: the crossing wipes in the bare orbital world under the etched edge;
-// the deck and its artwork settle in together once the journey clears it, so
-// no card is ever sliced by the edge or hidden under the departing hero card.
+export const workSectionOpacity = (progress: number): number =>
+  progress <= HANDOFF_END
+    ? Number(heroHandoffProgress(progress) >= 0.5)
+    : stoneSectionOpacity(progress, WORK_STONE.center);
+
+export const workOverlayOpacity = (handoff: HeroHandoff): number =>
+  handoff.compositing ? 0 : workSectionOpacity(handoff.journey);
+
+// REASON: the crossing wipes the chapter in under the etched edge; its
+// artwork follows the journey instead, settling in after the crossing rather
+// than showing under the wipe.
 export const orbitalArrival = (journey: number): number =>
   MathUtils.smootherstep(journey, HANDOFF_END, WORK_STONE.center);
-
-export const workSectionOpacity = (journey: number): number =>
-  orbitalArrival(journey) * stoneSectionOpacity(journey, WORK_STONE.center);
 
 export const sampleHeroHandoff = (
   handoff: HeroHandoff,
@@ -119,6 +120,7 @@ export const sampleHeroHandoff = (
     motionMode === 'full' &&
     handoff.sourceWorld !== null &&
     handoff.hero !== null &&
+    (crossing === 'loop' || handoff.work !== null) &&
     (entering || handoff.compositing);
   handoff.crossing = crossing;
   handoff.progress = crossing === 'loop' ? loopProgress : workProgress;

@@ -1,6 +1,7 @@
 export const heroHandoffFragment = `
 uniform sampler2D uSavedScene;
 uniform sampler2D uHeroContent;
+uniform sampler2D uWorkContent;
 uniform float uProgress;
 uniform float uReturning;
 uniform float uSourceIsHero;
@@ -42,7 +43,16 @@ vec3 handoffHero(vec2 uv) {
 }
 
 vec3 handoffOrbital(vec2 uv) {
-  return uSourceIsHero > 0.5 ? texture2D(inputBuffer, uv).rgb : texture2D(uSavedScene, uv).rgb;
+  vec3 scene = uSourceIsHero > 0.5 ? texture2D(inputBuffer, uv).rgb : texture2D(uSavedScene, uv).rgb;
+  if (uReturning > 0.5) {
+    return scene;
+  }
+  // REASON: the chapter rises into the space the edge has burned open, its top
+  // held under the edge's lowest dip, so it is on screen from the first frame
+  // of the crossing and no card is ever sliced by the edge.
+  vec2 contentUv = uv + vec2(0.0, max(0.0, 1.38 - uProgress * 1.5));
+  vec4 content = texture2D(uWorkContent, contentUv) * step(contentUv.y, 1.0);
+  return handoffOver(scene, content);
 }
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {

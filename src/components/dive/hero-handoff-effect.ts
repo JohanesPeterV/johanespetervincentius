@@ -25,6 +25,7 @@ export default class HeroHandoffEffect extends Effect {
   private readonly sourceIsHero = new Uniform(0);
   private readonly aspect = new Uniform(1);
   private readonly hero = new Uniform<Texture | null>(null);
+  private readonly work = new Uniform<Texture | null>(null);
 
   constructor(
     private readonly handoff: HeroHandoff,
@@ -45,6 +46,7 @@ export default class HeroHandoffEffect extends Effect {
     handoff.sourceWorld = null;
     this.uniforms.set('uSavedScene', new Uniform(this.copy.texture));
     this.uniforms.set('uHeroContent', this.hero);
+    this.uniforms.set('uWorkContent', this.work);
     this.uniforms.set('uProgress', this.progress);
     this.uniforms.set('uReturning', this.returning);
     this.uniforms.set('uSourceIsHero', this.sourceIsHero);
@@ -84,7 +86,8 @@ export default class HeroHandoffEffect extends Effect {
     this.returning.value = Number(handoff.crossing === 'loop');
     this.sourceIsHero.value = Number(handoff.sourceWorld === 'hero');
     this.aspect.value = inputBuffer.width / inputBuffer.height;
-    this.hero.value = handoff.hero?.texture ?? null;
+    this.hero.value = handoff.hero;
+    this.work.value = handoff.work;
   }
 
   private renderHero(renderer: WebGLRenderer): void {

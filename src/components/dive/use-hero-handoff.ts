@@ -6,7 +6,6 @@ import { CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
 import type { OverlayNodes } from './dive-overlay-motion';
 import { createHeroHandoff } from './hero-handoff';
-import type { SectionSnapshot } from './hero-handoff';
 
 // REASON: html-to-image deep-clones <svg> without inlining its descendants'
 // computed styles, so strokes and fills that come from stylesheets vanish
@@ -28,25 +27,34 @@ const inlineSvgStyles = (staged: HTMLElement): void => {
 const captureSection = async (
   element: HTMLDivElement,
   fontEmbedCSS: string,
-): Promise<SectionSnapshot> => {
+): Promise<CanvasTexture> => {
   const clone = element.cloneNode(true);
   if (!(clone instanceof HTMLElement)) {
     throw new Error('Scene content could not be prepared for the transition.');
   }
   const style = getComputedStyle(element);
-  const width = element.clientWidth;
-  const height = element.clientHeight;
   Object.assign(clone.style, {
     position: 'relative',
     inset: 'auto',
-    width: `${width}px`,
-    height: `${height}px`,
+    width: `${element.clientWidth}px`,
+    height: `${element.clientHeight}px`,
+    overflow: 'hidden',
     transform: 'none',
     translate: 'none',
     opacity: '1',
     visibility: 'visible',
     fontFamily: style.fontFamily,
     color: style.color,
+  });
+  // REASON: the crossing captures the chapter at rest from its top: cards in
+  // their slots, the carousel on its active pane, native dialogs closed.
+  clone.style.setProperty('--scatter', '0');
+  clone.querySelectorAll('dialog').forEach((dialog) => {
+    dialog.removeAttribute('open');
+  });
+  clone.querySelectorAll<HTMLElement>('[data-active]').forEach((panel) => {
+    panel.style.translate = 'none';
+    panel.style.transition = 'none';
   });
   const stage = document.createElement('div');
   stage.inert = true;
@@ -65,7 +73,7 @@ const captureSection = async (
     texture.colorSpace = SRGBColorSpace;
     texture.minFilter = LinearFilter;
     texture.generateMipmaps = false;
-    return { texture, width, height };
+    return texture;
   } finally {
     stage.remove();
   }
@@ -76,12 +84,13 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
   const [error, setError] = useState<string | null>(null);
 
   // REASON: the shader needs cached pixels of the actual DOM, including the
-  // profile card and web fonts. Capture on content/size changes, never
-  // in the render loop; keep the real DOM for reading and interaction at rest.
+  // profile card, the chapter and web fonts. Capture on content/size changes,
+  // never in the render loop; keep the real DOM for reading and interaction.
   useEffect(() => {
     const handoff = handoffRef.current;
     const hero = overlayRef.current.sections[0];
-    if (!hero) {
+    const work = overlayRef.current.sections[1];
+    if (!hero || !work) {
       return;
     }
     let disposed = false;
@@ -90,18 +99,23 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     let fontCss: Promise<string> | null = null;
     const capture = async (): Promise<void> => {
       const request = ++revision;
+      const prepared: CanvasTexture[] = [];
       try {
         await document.fonts.ready;
         fontCss ??= getFontEmbedCSS(hero, { preferredFontFormat: 'woff2' });
-        const snapshot = await captureSection(hero, await fontCss);
+        const css = await fontCss;
+        prepared.push(await captureSection(hero, css));
+        prepared.push(await captureSection(work, css));
         if (disposed || request !== revision) {
-          snapshot.texture.dispose();
+          prepared.forEach((texture) => texture.dispose());
           return;
         }
-        handoff.hero?.texture.dispose();
-        handoff.hero = snapshot;
+        handoff.hero?.dispose();
+        handoff.work?.dispose();
+        [handoff.hero, handoff.work] = prepared;
         setError(null);
       } catch (cause) {
+        prepared.forEach((texture) => texture.dispose());
         if (!disposed && request === revision) {
           setError(cause instanceof Error ? cause.message : String(cause));
         }
@@ -112,23 +126,31 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
       window.clearTimeout(timer);
       timer = window.setTimeout(capture, 60);
     };
-    // REASON: recapture on theme changes and resizes only, never the styles
-    // the scene updates on every animation frame.
+    // REASON: recapture settled content changes (theme, size, the chapter's
+    // carousel and dialogs), never the styles the scene writes every frame.
     const observer = new MutationObserver(schedule);
+    observer.observe(work, {
+      attributes: true,
+      attributeFilter: ['data-active', 'open'],
+      subtree: true,
+    });
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'style'],
     });
     const resizeObserver = new ResizeObserver(schedule);
     resizeObserver.observe(hero);
+    resizeObserver.observe(work);
     capture();
     return () => {
       disposed = true;
       observer.disconnect();
       resizeObserver.disconnect();
       window.clearTimeout(timer);
-      handoff.hero?.texture.dispose();
+      handoff.hero?.dispose();
+      handoff.work?.dispose();
       handoff.hero = null;
+      handoff.work = null;
     };
   }, [overlayRef]);
 
