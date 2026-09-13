@@ -30,11 +30,15 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           <span className="work-card-role type-label text-muted-foreground">
             {job.positions.map((position) => position.name).join(' · ')}
           </span>
-          <span className="work-card-proof type-label">
-            {job.showcases.map((showcase) => (
-              <span key={showcase.title}>{showcase.title}</span>
-            ))}
-          </span>
+          {job.summary ? (
+            <span className="work-card-summary">{job.summary}</span>
+          ) : (
+            <span className="work-card-proof type-label">
+              {job.showcases.map((showcase) => (
+                <span key={showcase.title}>{showcase.title}</span>
+              ))}
+            </span>
+          )}
           <span className="work-card-period type-meta mt-auto text-muted-foreground">
             {job.positions[0].workPeriod}
           </span>
@@ -62,6 +66,28 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           </li>
         ))}
       </ul>
+      {job.products ? (
+        <ul className="work-product-links mt-7 grid gap-3 sm:grid-cols-3 sm:gap-6">
+          {job.products.map((product) => (
+            <li key={product.href}>
+              <a
+                className="work-product-link flex items-center justify-between gap-4"
+                href={product.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="grid gap-1">
+                  <span className="type-label">{product.name}</span>
+                  <span className="type-meta text-muted-foreground">
+                    {product.description}
+                  </span>
+                </span>
+                <ArrowUpRight size={18} aria-hidden />
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </PickableCard>
   );
 };

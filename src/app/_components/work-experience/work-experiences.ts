@@ -1,6 +1,7 @@
 export type WorkExperience = {
   company: string;
   status: 'current' | 'past';
+  summary?: string;
   products?: { name: string; href: string; description: string }[];
   positions: {
     name: string;
@@ -17,6 +18,8 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Smilie',
     status: 'current',
+    summary:
+      'Own the systems behind corporate gifting, online ordering, and digital rewards — from checkout to fulfilment.',
     products: [
       {
         name: 'Smilie',

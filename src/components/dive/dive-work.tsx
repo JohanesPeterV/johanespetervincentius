@@ -3,7 +3,6 @@
 import { WORK_EXPERIENCES } from '@/app/_components/work-experience/work-experiences';
 import { WORK_SECTION } from './descent';
 import { DiveProjects } from './dive-projects';
-import { FeaturedWork } from './featured-work';
 import { WorkExperienceCard } from './work-experience-card';
 
 type DiveWorkProps = {
@@ -28,17 +27,10 @@ export const DiveWork = ({ sectionRef }: DiveWorkProps) => (
             Work
           </h2>
         </header>
-        {WORK_EXPERIENCES.filter((job) => job.status === 'current').map(
-          (job) => (
-            <FeaturedWork key={job.company} job={job} />
-          ),
-        )}
         <div className="work-card-spread relative">
-          {WORK_EXPERIENCES.filter((job) => job.status === 'past').map(
-            (job, index) => (
-              <WorkExperienceCard key={job.company} job={job} index={index} />
-            ),
-          )}
+          {WORK_EXPERIENCES.map((job, index) => (
+            <WorkExperienceCard key={job.company} job={job} index={index} />
+          ))}
         </div>
       </section>
       <section aria-labelledby="independent-projects" className="pt-12">

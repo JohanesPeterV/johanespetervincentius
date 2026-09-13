@@ -421,25 +421,10 @@
     letter-spacing: -0.055em;
   }
 
-  .work-feature {
-    display: grid;
-    gap: 1.75rem;
-    margin: 0 1rem 3rem;
-    padding-block: 1.75rem;
-    border-block: 1px solid hsl(var(--border));
-  }
-
-  .work-feature-title {
-    margin-top: 0.75rem;
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: -0.045em;
-  }
-
-  .work-feature-summary {
-    max-width: 58ch;
-    font-size: clamp(1rem, 1.5vw, 1.25rem);
+  .work-card-summary {
+    margin-top: 1rem;
+    max-width: 32ch;
+    font-size: 0.875rem;
     line-height: 1.6;
   }
 
@@ -465,10 +450,10 @@
 
   .work-card-spread {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1.5rem;
     margin: 1rem 1.5rem;
-    height: 22rem;
+    height: 24rem;
     isolation: isolate;
   }
 
@@ -479,7 +464,7 @@
     position: relative;
     top: 10%;
     height: 84%;
-    max-height: 20rem;
+    max-height: 22rem;
     z-index: 4;
   }
 
@@ -495,6 +480,17 @@
     --fling-x: 14vw;
     top: 10%;
     z-index: 3;
+  }
+
+  .work-card-slot:nth-child(4) {
+    --card-angle: 4deg;
+    --fling-x: 42vw;
+    top: 0;
+    z-index: 1;
+  }
+
+  .work-card-slot[data-current='true'] .work-card {
+    border-color: hsl(var(--primary-text));
   }
 
   .work-card-slot:is(:hover, :focus-within) {
@@ -766,6 +762,18 @@
     .project-card:hover {
       transform: rotate(0deg) scale(1.06);
       border-color: hsl(var(--primary-text));
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .work-card-spread {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      height: auto;
+    }
+
+    .work-card-slot:nth-child(n) {
+      top: 0;
+      height: 20rem;
     }
   }
 
