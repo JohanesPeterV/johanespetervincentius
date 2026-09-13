@@ -16,15 +16,7 @@ type StoneDiveSection = DiveSectionBase & {
   z: number;
 };
 
-type SceneDiveSection = DiveSectionBase & {
-  placement: 'scene';
-  z: number;
-};
-
-export type DiveSection =
-  | CenterDiveSection
-  | StoneDiveSection
-  | SceneDiveSection;
+export type DiveSection = CenterDiveSection | StoneDiveSection;
 
 export type DescentFrame = {
   position: [number, number, number];
@@ -56,12 +48,11 @@ export const WORK_SECTION: StoneDiveSection = {
   ...WORK_STONE,
 };
 
-// REASON: the stack chapter is drawn entirely in the canvas; it has no overlay
-export const STACK_SECTION: SceneDiveSection = {
+export const STACK_SECTION: StoneDiveSection = {
   tag: '03',
   title: 'Stack',
   subtitle: 'What I build with',
-  placement: 'scene',
+  placement: 'stone',
   ...STACK_STONE,
 };
 

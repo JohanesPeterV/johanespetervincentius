@@ -2,8 +2,9 @@
 
 import { ReactNode, RefObject } from 'react';
 
-import { DIVE_SECTIONS } from './descent';
+import { DIVE_SECTIONS, WORK_SECTION } from './descent';
 import DiveLoader from './dive-loader';
+import { DiveStack } from './dive-stack';
 import { DiveWork } from './dive-work';
 import type { OverlayNodes } from './dive-overlay-motion';
 
@@ -44,17 +45,13 @@ export default function DiveOverlay({
               </div>
             );
           }
-          if (section.placement === 'scene') {
-            return null;
+          const sectionRef = (element: HTMLDivElement | null) => {
+            overlayRef.current.sections[index] = element;
+          };
+          if (section === WORK_SECTION) {
+            return <DiveWork key={section.tag} sectionRef={sectionRef} />;
           }
-          return (
-            <DiveWork
-              key={section.tag}
-              sectionRef={(element) => {
-                overlayRef.current.sections[index] = element;
-              }}
-            />
-          );
+          return <DiveStack key={section.tag} sectionRef={sectionRef} />;
         })}
       </div>
       <nav
