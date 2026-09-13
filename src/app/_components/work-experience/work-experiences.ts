@@ -19,7 +19,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     status: 'current',
     summary:
-      'Own the systems behind corporate gifting, online ordering, and digital rewards — from checkout to fulfilment.',
+      'Own engineering across corporate gifting, online ordering, and rewards — connecting payments, inventory, fulfilment, and accounting.',
     products: [
       {
         name: 'Smilie',
@@ -42,24 +42,39 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Senior Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
-          'Build and operate the systems behind corporate gifting, e-commerce, and digital rewards, working directly with the Founder from product decisions to production delivery.',
+          'Work directly with the Founder to turn business needs into production systems. Own architecture and delivery across Smilie’s storefront, gifting operations, and IG Club Rewards, including the move from legacy WordPress and Airtable workflows.',
       },
     ],
     showcases: [
       {
-        title: 'Gifting operations',
+        title: 'Commerce & gifting',
         description:
-          'Replaced legacy WordPress and Airtable workflows with a unified Next.js and Prisma platform for gifting operations.',
+          'Connect product selection and checkout with gifting campaigns, recipient allocations, and delivery scheduling, so customer orders flow into the tools used by operations.',
       },
       {
-        title: 'Commerce & automation',
+        title: 'Inventory & fulfilment',
         description:
-          'Delivered cart, checkout, Stripe payments, order tracking, and email confirmations, alongside AI-assisted product catalogue preparation.',
+          'Build stock reservations, packing, dispatch, and courier tracking around an inventory ledger that traces each movement between warehouse stock and customer-owned inventory.',
       },
       {
-        title: 'Engineering ownership',
+        title: 'Payments & accounting',
         description:
-          'Own architecture, vendor integrations, and production reliability. Onboard engineers and establish code review, testing, and delivery conventions.',
+          'Integrate Stripe payments, company credits, and Xero invoicing. Build reconciliation and retry workflows so failed accounting updates can recover without undoing successful payments.',
+      },
+      {
+        title: 'Rewards platform',
+        description:
+          'Build and operate IG Club Rewards: points wallets, physical gift redemption, and digital vouchers through Qwikcilver, with activation retries, expiry handling, and redemption reporting.',
+      },
+      {
+        title: 'Catalogue automation',
+        description:
+          'Turn supplier data into usable product listings through shared import tools and AI-assisted categorisation, marketing copy, and SEO, with structured validation and review flags.',
+      },
+      {
+        title: 'Engineering foundations',
+        description:
+          'Unify storefront and operations apps around shared business logic, database models, and UI. Establish automated checks, database and browser tests, review standards, and engineer onboarding.',
       },
     ],
   },
