@@ -133,10 +133,6 @@ export default function PalettePicker() {
               );
             })}
           </div>
-          <p className="type-meta mt-2 text-muted-foreground">
-            Colour pairs change accents. Full themes change the whole scene.
-            Your choice is saved.
-          </p>
           <div
             role="group"
             aria-label="Mode"
