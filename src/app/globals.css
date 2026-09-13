@@ -366,14 +366,55 @@
     border-radius: 50%;
   }
 
-  /* The opening: --arrival runs 0 to 1 once the scene is live. The loading
-     count gives way first; the chrome waits until the observer has settled. */
+  /* The opening: --arrival runs 0 to 1 once the first scene is live. The
+     loader follows that rendered handoff rather than the asset request queue;
+     the chrome waits until the observer has settled. */
   [data-dive-scene] {
     --arrival: 0;
   }
 
   .dive-loader {
     opacity: clamp(0, 1 - var(--arrival, 1) / 0.15, 1);
+    will-change: opacity;
+  }
+
+  .dive-loader-count {
+    flex-shrink: 0;
+    color: hsl(var(--primary-text));
+    font-size: clamp(3.5rem, 12vw, 7rem);
+    font-weight: 400;
+    line-height: 0.72;
+    letter-spacing: -0.08em;
+  }
+
+  .dive-loader-track {
+    position: relative;
+    height: 1px;
+    background: hsl(var(--border));
+  }
+
+  .dive-loader-fill {
+    position: relative;
+    height: 100%;
+    color: hsl(var(--primary));
+    background: linear-gradient(
+      90deg,
+      hsl(var(--secondary)),
+      hsl(var(--primary))
+    );
+    transition: width 400ms ease-out;
+  }
+
+  .dive-loader-fill::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: currentColor;
+    box-shadow: 0 0 1rem currentColor;
+    transform: translate(50%, -50%) rotate(45deg);
   }
 
   .dive-chrome {
@@ -931,6 +972,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .dive-loader-fill {
+      transition: none;
+    }
+
     .appearance-dial,
     .appearance-trigger,
     .appearance-close,
