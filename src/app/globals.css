@@ -413,7 +413,60 @@
     opacity: calc(1 - var(--scatter) * 0.6);
   }
 
+  .work-section-title {
+    margin-top: 0.5rem;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.055em;
+  }
+
+  .work-feature {
+    display: grid;
+    gap: 1.75rem;
+    margin: 0 1rem 3rem;
+    padding-block: 1.75rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+
+  .work-feature-title {
+    margin-top: 0.75rem;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+
+  .work-feature-summary {
+    max-width: 58ch;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    line-height: 1.6;
+  }
+
+  .work-product-links {
+    border-top: 1px solid hsl(var(--border));
+    padding-top: 1rem;
+  }
+
+  .work-product-link {
+    min-height: 3.5rem;
+    padding-block: 0.5rem;
+    transition: color 200ms;
+  }
+
+  .work-product-link:hover {
+    color: hsl(var(--primary-text));
+  }
+
+  .work-product-link:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 5px;
+  }
+
   .work-card-spread {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
     margin: 1rem 1.5rem;
     height: 22rem;
     isolation: isolate;
@@ -423,10 +476,8 @@
   .work-card-slot {
     --card-angle: -6deg;
     --fling-x: -42vw;
-    position: absolute;
-    left: 0;
+    position: relative;
     top: 10%;
-    width: 25%;
     height: 84%;
     max-height: 20rem;
     z-index: 4;
@@ -435,7 +486,6 @@
   .work-card-slot:nth-child(2) {
     --card-angle: 5deg;
     --fling-x: -14vw;
-    left: 25%;
     top: 0;
     z-index: 2;
   }
@@ -443,17 +493,8 @@
   .work-card-slot:nth-child(3) {
     --card-angle: -5deg;
     --fling-x: 14vw;
-    left: 50%;
     top: 10%;
     z-index: 3;
-  }
-
-  .work-card-slot:nth-child(4) {
-    --card-angle: 4deg;
-    --fling-x: 42vw;
-    left: 75%;
-    top: 0;
-    z-index: 1;
   }
 
   .work-card-slot:is(:hover, :focus-within) {
@@ -479,26 +520,6 @@
       transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
       border-color 200ms,
       opacity 200ms;
-  }
-
-  .work-card-slot[data-current='true'] :is(.work-card, .card-detail) {
-    border-color: hsl(var(--primary-text));
-  }
-
-  /* The current role is the one lit card on the table: accent wash, accent
-     edge, and a coloured glow underneath. */
-  .work-card-slot[data-current='true'] .work-card.surface-panel {
-    background:
-      linear-gradient(165deg, hsl(var(--primary) / 0.18), transparent 60%),
-      hsl(var(--card) / 0.97);
-    box-shadow:
-      inset 0 1px 0 hsl(var(--primary-text) / 0.5),
-      0 3px 0 hsl(var(--primary-text) / 0.6),
-      0 32px 64px -24px hsl(var(--primary) / 0.75);
-  }
-
-  .work-card-slot[data-current='true'] .card-face-title {
-    color: hsl(var(--primary-text));
   }
 
   .work-current-label {
@@ -749,32 +770,26 @@
   }
 
   @media (max-width: 767px) {
-    .work-card-slot {
-      left: 1%;
-      top: 2%;
-      width: 51%;
-      height: 45%;
+    .work-card-spread {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      height: auto;
+    }
+
+    .work-card-slot:nth-child(n) {
+      --card-angle: -1deg;
+      top: 0;
+      height: auto;
     }
 
     .work-card-slot:nth-child(even) {
-      left: 48%;
-      top: 2%;
-    }
-
-    .work-card-slot:nth-child(3) {
-      left: 1%;
+      --card-angle: 1deg;
     }
 
     .work-card .type-meta {
-      font-size: 0.5625rem;
+      font-size: 0.625rem;
     }
 
-    .work-card-slot:nth-child(n + 3) {
-      top: 52%;
-    }
-
-    .work-card-role,
-    .work-card-period,
     .work-card-proof,
     .project-card-stack,
     .project-showcase-description {

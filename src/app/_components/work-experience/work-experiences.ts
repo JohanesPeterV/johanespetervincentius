@@ -1,6 +1,7 @@
 export type WorkExperience = {
   company: string;
   status: 'current' | 'past';
+  products?: { name: string; href: string; description: string }[];
   positions: {
     name: string;
     workPeriod: string;
@@ -16,29 +17,46 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Smilie',
     status: 'current',
+    products: [
+      {
+        name: 'Smilie',
+        href: 'https://smilie.io',
+        description: 'Corporate gifting & commerce',
+      },
+      {
+        name: 'Gift Management',
+        href: 'https://gms.smilie.io',
+        description: 'Orders, inventory & fulfilment',
+      },
+      {
+        name: 'IG Club Rewards',
+        href: 'https://ig.smilie.io',
+        description: 'Points & reward redemption',
+      },
+    ],
     positions: [
       {
         name: 'Senior Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
-          'Lead technical direction across corporate gifting, digital rewards, and e-commerce, working directly with the Founder on product and operational decisions.',
+          'Build and operate the systems behind corporate gifting, e-commerce, and digital rewards, working directly with the Founder from product decisions to production delivery.',
       },
     ],
     showcases: [
       {
-        title: 'Code review and onboarding',
+        title: 'Gifting operations',
         description:
-          'Onboard engineers and set conventions for code review, testing, and delivery.',
+          'Replaced legacy WordPress and Airtable workflows with a unified Next.js and Prisma platform for gifting operations.',
       },
       {
-        title: 'Architecture and operations',
+        title: 'Commerce & automation',
         description:
-          'Own architecture, database design, vendor integrations, and production reliability.',
+          'Delivered cart, checkout, Stripe payments, order tracking, and email confirmations, alongside AI-assisted product catalogue preparation.',
       },
       {
-        title: 'AI-assisted development',
+        title: 'Engineering ownership',
         description:
-          'Build AI-assisted development workflows for a lean engineering team.',
+          'Own architecture, vendor integrations, and production reliability. Onboard engineers and establish code review, testing, and delivery conventions.',
       },
     ],
   },
