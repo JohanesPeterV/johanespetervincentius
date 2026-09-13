@@ -15,6 +15,7 @@ import {
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 import { printInkGlsl } from './celestial-shader';
+import { createWorkspaceInstances } from './workspace-instances';
 
 type WorkspaceSource = {
   scene: Group;
@@ -92,7 +93,9 @@ export const createWorkspaceModels = (
     for (const clip of animations) {
       mixer.clipAction(clip).play();
     }
-    return { object, mixer, scene };
+    const instances = createWorkspaceInstances(scene);
+    instances.update();
+    return { object, mixer, scene, instances };
   });
 
   return {
@@ -102,6 +105,7 @@ export const createWorkspaceModels = (
       for (const model of models) {
         model.mixer.stopAllAction();
         model.mixer.uncacheRoot(model.scene);
+        model.instances.dispose();
       }
       for (const material of materials.values()) {
         material.dispose();

@@ -67,10 +67,14 @@ export default class HeroHandoffEffect extends Effect {
     // REASON: retain the outgoing viewpoint. Hero animations keep rendering
     // during a crossing; orbital artwork depends on the other endpoint's pose.
     if (handoff.crossing === null) {
-      this.copy.setSize(inputBuffer.width, inputBuffer.height);
       this.source.camera.copy(this.camera, false);
-      this.copy.render(renderer, inputBuffer, null);
       handoff.sourceWorld = worldAtProgress(handoff.journey);
+      // REASON: Hero is rendered live during the crossing, so only the
+      // camera-bound orbital endpoint needs a full-screen snapshot each frame.
+      if (handoff.sourceWorld === 'orbital') {
+        this.copy.setSize(inputBuffer.width, inputBuffer.height);
+        this.copy.render(renderer, inputBuffer, null);
+      }
     } else if (handoff.compositing && handoff.sourceWorld === 'hero') {
       this.copy.setSize(inputBuffer.width, inputBuffer.height);
       this.renderHero(renderer);

@@ -102,7 +102,7 @@ const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
     const step = motionMode === 'full' ? Math.min(delta, 0.1) : 0;
     const compact = size.width < 768;
     const time = starfield.time.value;
-    workspace.models.forEach(({ object, mixer }, index) => {
+    workspace.models.forEach(({ object, mixer, instances }, index) => {
       const placement = DEVICES[index];
       const phase = index * 1.8;
       starfield.sampleParticle(stars[index], object.position);
@@ -121,6 +121,7 @@ const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
       } else {
         mixer.update(step);
       }
+      instances.update();
     });
   }, -0.5);
 

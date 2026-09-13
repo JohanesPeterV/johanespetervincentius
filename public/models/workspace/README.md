@@ -21,12 +21,21 @@ Temporary tooling: glTF Transform 4.5.0 and Meshoptimizer 1.2.0. Compatible stat
 
 | Asset    |     Bytes | Scene triangles | Draw primitives |
 | -------- | --------: | --------------: | --------------: |
-| MacBook  | 3,496,568 |         331,086 |              21 |
-| Trackpad |   220,744 |          21,386 |              13 |
-| Monitor  | 1,239,468 |         116,334 |              17 |
-| Keyboard | 1,402,832 |         171,652 |             116 |
+| MacBook  | 2,017,688 |         168,641 |              21 |
+| Trackpad |   168,144 |          14,908 |              13 |
+| Monitor  | 1,072,888 |          92,178 |              17 |
+| Keyboard | 1,091,628 |         124,228 |             116 |
 
-All four outputs were decoded again and passed Khronos glTF Validator with zero errors and warnings. The runtime uses Drei's bundled Meshopt decoder, normalizes each model by visible width, and provides a shared reflection environment. The monitor's opaque LCD sits about 0.1 mm above its backing panel; its front face receives a two-unit depth bias to prevent z-fighting at starfield scale while retaining its reflections. Devices sample the starfield's live particle buffers and clock for formation changes, drift, pointer/click response, and departure flow. Particle selection considers the authored formations and spacing; small world-space sizes preserve perspective while responsive scaling keeps devices quiet on mobile. Dark mode preserves product colours; light mode remaps shading through the scene's existing two-ink shader. Only instance-owned materials, reflection resources, and mixers are disposed. Loader geometry and textures stay cached.
+A second preparation pass on 2026-09-13 reduces the already prepared meshes with `simplify --ratio 0.25 --error 0.001`, then `meshopt --level medium` using the same tooling versions. The error limit is 0.1% of mesh radius, so it stops before the target ratio where needed. Medium encoding keeps 10-bit normals and avoids filtering animation channels again. No scene nodes, mesh primitives, or material bindings were removed; texture bytes and decoded animation curves remain identical. All scene bounds remain within 0.2% of the previous model width. Total scene triangles decrease from 640,458 to 399,955, and the combined files from 6,359,612 to 4,350,348 bytes.
+
+To repeat from the previously prepared GLBs (not these outputs):
+
+```bash
+npx --yes @gltf-transform/cli@4.5.0 simplify input.glb simplified.glb --ratio 0.25 --error 0.001
+npx --yes @gltf-transform/cli@4.5.0 meshopt simplified.glb output.glb --level medium
+```
+
+All four outputs were decoded again and passed Khronos glTF Validator with zero errors and warnings. The runtime uses Drei's bundled Meshopt decoder, normalizes each model by visible width, and provides a shared reflection environment. The monitor's opaque LCD sits about 0.1 mm above its backing panel; its front face receives a two-unit depth bias to prevent z-fighting at starfield scale while retaining its reflections. Devices sample the starfield's live particle buffers and clock for formation changes, drift, pointer/click response, and departure flow. Particle selection considers the authored formations and spacing; small world-space sizes preserve perspective while responsive scaling keeps devices quiet on mobile. Dark mode preserves product colours; light mode remaps shading through the scene's existing two-ink shader. Repeated leaf meshes with identical geometry and materials use shared instance draws. Original nodes remain mounted for the typing clip; instance transforms and bounds update after the animation mixer, including the reduced-motion rest pose. Transparent, skinned, morphing, and non-leaf meshes keep their own draws. Only instance-owned materials, reflection resources, mixers, and instance buffers are disposed. Loader geometry and textures stay cached.
 
 ## Attribution
 
@@ -38,7 +47,7 @@ The SPACE65 exterior is an unofficial reconstruction of Graystudio's industrial 
 
 | Asset    | Source                                                             | Output                                                             |
 | -------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| MacBook  | `d1545a6ce69d1599f99ed62be9e78993b8e2caee1bdc05f8b7de8192fcc28ec7` | `a2f103ec30d8825d1be383453b4e6af6a96eeb497187d75520e993c96ca8bc86` |
-| Trackpad | `d5f2dc9030130499ad19058e0a0f418cc2d41170ad841735b7feeb241d5d6ef8` | `9836958d895a8545795fb668d10dfa7c8328416ecd55f56e3d8060a207bc6861` |
-| Monitor  | `3b63aa96edc14f21eeded6d0a2dc28a917ac4d0ef4a37ac9d3605f9dccea1252` | `82190aee3608649f2247d864684a0d6157ef71a153133428e1827d546c7539e5` |
-| Keyboard | `73dc0e6190b9fd559d140f7670d29a9f59374a81221a6a594df208e037220917` | `323d35f47f401b3c1bc6c001a5754575035e4623e05200c1d5e13a582ec426af` |
+| MacBook  | `d1545a6ce69d1599f99ed62be9e78993b8e2caee1bdc05f8b7de8192fcc28ec7` | `3ef081d1ea416739a8c4115233ae45159d6d18d1c7a99c7cff06401be4abfbe2` |
+| Trackpad | `d5f2dc9030130499ad19058e0a0f418cc2d41170ad841735b7feeb241d5d6ef8` | `4a07ecfa2eaf1ee6a4139e97a3197b1a1b1ada8a9116eac9773a5baaf18ad491` |
+| Monitor  | `3b63aa96edc14f21eeded6d0a2dc28a917ac4d0ef4a37ac9d3605f9dccea1252` | `07bc5e521f8a1efc9ed386ab4d2b67a16cb9455fc62951397aa06a6d47db138c` |
+| Keyboard | `73dc0e6190b9fd559d140f7670d29a9f59374a81221a6a594df208e037220917` | `54f0be0859a0a3c88cf54f014ec1d9e7d3affc6decab2619e4486913623b52bc` |

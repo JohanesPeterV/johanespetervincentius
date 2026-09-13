@@ -1,8 +1,8 @@
 'use client';
 
-import { AdaptiveDpr, useDetectGPU } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
-import { RefObject, Suspense, useEffect, useRef } from 'react';
+import { PerformanceMonitor, useDetectGPU } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { RefObject, Suspense, useEffect, useRef, useState } from 'react';
 
 import CameraRig, { DiveStage, PointerState } from './camera-rig';
 import type { DriveMotion } from './camera-motion';
@@ -31,6 +31,26 @@ const LoadedSignal = ({ stageRef }: { stageRef: RefObject<DiveStage> }) => {
   return null;
 };
 
+const AdaptiveResolution = ({ maxDpr }: { maxDpr: number }) => {
+  const [qualityDpr, setQualityDpr] = useState(maxDpr);
+  useFrame(({ performance, viewport, setDpr }) => {
+    const dpr = qualityDpr * performance.current;
+    if (viewport.dpr !== dpr) {
+      setDpr(dpr);
+    }
+  });
+  return (
+    <PerformanceMonitor
+      bounds={() => [55, Infinity]}
+      onDecline={() => {
+        // REASON: sustained slow frames lower the resolution ceiling for this
+        // visit; scrolling must not reset it to the original GPU-tier estimate.
+        setQualityDpr((current) => Math.max(1, current - 0.25));
+      }}
+    />
+  );
+};
+
 export default function DiveCanvas({
   palette,
   driveRef,
@@ -51,7 +71,7 @@ export default function DiveCanvas({
       gl={{ toneMappingExposure: palette.exposure }}
       performance={{ min: 0.72, debounce: 350 }}
     >
-      <AdaptiveDpr />
+      <AdaptiveResolution maxDpr={dpr} />
       <color attach="background" args={[palette.background]} />
       <fogExp2 attach="fog" args={[palette.background, palette.fogDensity]} />
       <Suspense fallback={null}>

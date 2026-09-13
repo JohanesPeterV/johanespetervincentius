@@ -1,9 +1,10 @@
 'use client';
 
 import { EffectComposer, SMAA } from '@react-three/postprocessing';
-import { useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { ChromaticAberrationEffect } from 'postprocessing';
-import { memo, RefObject, useEffect, useState } from 'react';
+import type { EffectComposer as PostprocessingComposer } from 'postprocessing';
+import { memo, RefObject, useEffect, useRef, useState } from 'react';
 import { Vector2 } from 'three';
 
 import HeroHandoffEffect from './hero-handoff-effect';
@@ -33,6 +34,8 @@ const DivePostprocessing = memo(function DivePostprocessing({
 }: DivePostprocessingParams) {
   const scene = useThree(({ scene }) => scene);
   const camera = useThree(({ camera }) => camera);
+  const composerRef = useRef<PostprocessingComposer>(null);
+  const renderDprRef = useRef(0);
   const [handoff] = useState(
     () => new HeroHandoffEffect(handoffRef.current, scene, camera),
   );
@@ -45,6 +48,15 @@ const DivePostprocessing = memo(function DivePostprocessing({
         modulationOffset: 0.4,
       }),
   );
+  // REASON: the composer only watches CSS size; adaptive DPR otherwise leaves
+  // its full-screen render targets at the original, expensive resolution.
+  useFrame(({ gl, size }) => {
+    const dpr = gl.getPixelRatio();
+    if (composerRef.current && dpr !== renderDprRef.current) {
+      composerRef.current.setSize(size.width, size.height);
+      renderDprRef.current = dpr;
+    }
+  });
   // REASON: primitive effects are not disposed by R3F. Release the saved GPU
   // frame when reduced-motion removes the composer or the route unmounts.
   useEffect(
@@ -56,7 +68,7 @@ const DivePostprocessing = memo(function DivePostprocessing({
     [handoff, aberration, outline],
   );
   return (
-    <EffectComposer multisampling={0}>
+    <EffectComposer ref={composerRef} multisampling={0}>
       {gpuTier >= 2 ? (
         <>
           <SMAA />
