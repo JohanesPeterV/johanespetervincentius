@@ -3,9 +3,8 @@ import {
   BaseColor,
   baseColors,
   DEFAULT_BASE_COLOR,
+  ThemeMode,
 } from '@/registry/registry-base-colors';
-
-type ThemeMode = 'light' | 'dark';
 
 const neutralSurfaces = {
   light: {
@@ -49,7 +48,11 @@ const getContrast = (color: string, background: string): number => {
   return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
 };
 
-const getReadableColor = (color: string, backgrounds: string[]): string => {
+const getReadableColor = (
+  color: string,
+  backgrounds: string[],
+  minimumContrast = 5,
+): string => {
   const [hue, saturation, lightness] = color.split(' ').map(parseFloat);
   const direction = getLuminance(backgrounds[0]) < 0.5 ? 1 : -1;
 
@@ -59,7 +62,9 @@ const getReadableColor = (color: string, backgrounds: string[]): string => {
     const level = Math.max(0, Math.min(100, lightness + step * direction));
     const candidate = `${hue} ${saturation}% ${level}%`;
     if (
-      backgrounds.every((background) => getContrast(candidate, background) >= 5)
+      backgrounds.every(
+        (background) => getContrast(candidate, background) >= minimumContrast,
+      )
     ) {
       return candidate;
     }
@@ -82,36 +87,49 @@ const getBaseColor = (themeName: BaseColor['name']): BaseColor => {
   );
 };
 
+export const getBaseColorPalette = (base: BaseColor, mode: ThemeMode) => {
+  return 'primary' in base ? base : base[mode];
+};
+
 export const getThemeColorValues = (
   themeName: BaseColor['name'],
   resolvedTheme: string | undefined,
 ) => {
   const mode: ThemeMode = resolvedTheme === 'light' ? 'light' : 'dark';
-  const base = getBaseColor(themeName);
-  const neutral = neutralSurfaces[mode];
+  const base = getBaseColorPalette(getBaseColor(themeName), mode);
+  const neutral = 'background' in base ? base : neutralSurfaces[mode];
   const [hue, saturation] = base.primary.split(' ').map(parseFloat);
   const accent = `${hue} ${saturation * 0.3}% ${mode === 'light' ? 89 : 18}%`;
-  const primaryText = getReadableColor(base.primary, [neutral.muted, accent]);
+  const surfaces = [neutral.background, neutral.surface, neutral.muted, accent];
+  const primaryText = getReadableColor(base.primary, surfaces);
+  const foreground =
+    'background' in base
+      ? getReadableColor(neutral.foreground, surfaces, 7)
+      : neutral.foreground;
+  const mutedForeground =
+    'background' in base
+      ? getReadableColor(neutral.mutedForeground, surfaces)
+      : neutral.mutedForeground;
   const destructive = getReadableColor('0 72% 50%', [neutral.muted]);
 
   return {
     mode,
     cssVars: {
       background: neutral.background,
-      foreground: neutral.foreground,
+      foreground,
       card: neutral.surface,
-      'card-foreground': neutral.foreground,
+      'card-foreground': foreground,
       popover: neutral.surface,
-      'popover-foreground': neutral.foreground,
+      'popover-foreground': foreground,
       primary: base.primary,
       'primary-foreground': getColorForeground(base.primary),
       'primary-text': primaryText,
       secondary: base.secondary,
       'secondary-foreground': getColorForeground(base.secondary),
       muted: neutral.muted,
-      'muted-foreground': neutral.mutedForeground,
+      'muted-foreground': mutedForeground,
       accent,
-      'accent-foreground': neutral.foreground,
+      'accent-foreground': foreground,
       destructive,
       'destructive-foreground': getColorForeground(destructive),
       border: neutral.border,
@@ -142,14 +160,13 @@ export const getFluidThemeColors = (
   themeName: BaseColor['name'],
   resolvedTheme: string | undefined,
 ) => {
-  const base = getBaseColor(themeName);
   const { mode, cssVars } = getThemeColorValues(themeName, resolvedTheme);
 
   return {
     mode,
     backgroundColor: getThemeHexColor(cssVars.background),
-    fluidColor: getThemeHexColor(base.primary),
-    secondaryColor: getThemeHexColor(base.secondary),
+    fluidColor: getThemeHexColor(cssVars.primary),
+    secondaryColor: getThemeHexColor(cssVars.secondary),
     textColor: getThemeHexColor(cssVars.foreground),
   };
 };

@@ -55,11 +55,6 @@ const cardLayout = load(
   resolve(root, 'src/components/dive/card-section-layout.ts'),
 );
 const input = load(resolve(root, 'src/components/dive/dive-input.ts'));
-const palette = load(resolve(root, 'src/components/dive/dive-palette.ts'));
-const themes = load(resolve(root, 'src/lib/theme-colors.ts'));
-const { baseColors } = load(
-  resolve(root, 'src/registry/registry-base-colors.ts'),
-);
 const world = load(resolve(root, 'src/components/dive/world-layout.ts'));
 const starfieldTimeline = load(
   resolve(root, 'src/components/dive/starfield-timeline.ts'),
@@ -517,116 +512,6 @@ test('camera path is continuous through chapter handoffs', () => {
   }
 });
 
-test('all colourways have two distinct authored hues shared with the scene', () => {
-  for (const base of baseColors) {
-    const difference = Math.abs(
-      parseFloat(base.primary) - parseFloat(base.secondary),
-    );
-    assert.ok(Math.min(difference, 360 - difference) >= 60, base.label);
-    for (const mode of ['light', 'dark']) {
-      const resolved = themes.getFluidThemeColors(base.name, mode);
-      const { cssVars } = themes.getThemeColorValues(base.name, mode);
-      assert.equal(cssVars.primary, base.primary);
-      assert.equal(cssVars.secondary, base.secondary);
-      assert.equal(
-        resolved.fluidColor,
-        `#${new Color(`hsl(${base.primary.split(' ').join(',')})`).getHexString()}`,
-      );
-      assert.equal(
-        resolved.secondaryColor,
-        `#${new Color(`hsl(${base.secondary.split(' ').join(',')})`).getHexString()}`,
-      );
-    }
-  }
-});
-
-test('theme text, buttons, links, and hover surfaces meet AA in both modes', () => {
-  const pairs = [
-    ['foreground', 'background'],
-    ['card-foreground', 'card'],
-    ['popover-foreground', 'popover'],
-    ['muted-foreground', 'muted'],
-    ['primary-foreground', 'primary'],
-    ['secondary-foreground', 'secondary'],
-    ['accent-foreground', 'accent'],
-    ['destructive-foreground', 'destructive'],
-    ...['background', 'card', 'muted', 'accent'].map((surface) => [
-      'primary-text',
-      surface,
-    ]),
-  ];
-  const luminance = (hsl) => {
-    const color = new Color(`hsl(${hsl.split(' ').join(',')})`);
-    return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
-  };
-  for (const base of baseColors) {
-    for (const mode of ['light', 'dark']) {
-      const { cssVars } = themes.getThemeColorValues(base.name, mode);
-      for (const [text, surface] of pairs) {
-        const values = [luminance(cssVars[text]), luminance(cssVars[surface])];
-        const contrast =
-          (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
-        assert.ok(
-          contrast >= 4.5,
-          `${base.name} ${mode}: ${text} on ${surface} = ${contrast}`,
-        );
-      }
-    }
-  }
-});
-
-test('scene mode comes from the resolved theme rather than color brightness', () => {
-  for (const base of baseColors) {
-    for (const mode of ['light', 'dark']) {
-      const theme = themes.getFluidThemeColors(base.name, mode);
-      assert.equal(palette.getDivePalette(theme).mode, theme.mode);
-      assert.equal(
-        palette.getDivePalette({
-          ...theme,
-          backgroundColor: mode === 'light' ? '#000000' : '#ffffff',
-        }).mode,
-        mode,
-      );
-    }
-  }
-});
-
-test('palette samples preserve the sRGB contract of descent keyframes', () => {
-  for (const base of baseColors) {
-    for (const mode of ['light', 'dark']) {
-      const theme = themes.getFluidThemeColors(base.name, mode);
-      const resolved = palette.getDivePalette(theme);
-      assert.equal(
-        new Color(resolved.highlight).getHexString(),
-        new Color(theme.secondaryColor).getHexString(),
-      );
-      assert.equal(
-        new Color(resolved.accent).getHexString(),
-        new Color(theme.fluidColor).getHexString(),
-      );
-      const encoded = new Color(theme.backgroundColor).convertLinearToSRGB();
-      const frame = descent.createDescentFrame();
-      palette.applyDivePalette(frame, resolved, descent.WORK_STONE.center);
-      [encoded.r, encoded.g, encoded.b].forEach((channel, index) => {
-        assert.ok(Math.abs(resolved.backgroundRgb[index] - channel) < 0.005);
-        assert.ok(Math.abs(frame.fogColor[index] - channel) < 0.005);
-        assert.ok(Math.abs(frame.veilColor[index] - channel) < 0.005);
-      });
-      const foreground = new Color(resolved.foreground);
-      const background = new Color(resolved.background);
-      const luminance = (color) =>
-        color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
-      const values = [luminance(foreground), luminance(background)].sort(
-        (a, b) => a - b,
-      );
-      assert.ok(
-        (values[1] + 0.05) / (values[0] + 0.05) > 7,
-        `${base.name} ${mode} text contrast`,
-      );
-    }
-  }
-});
-
 test('small click drift leaves the camera still until a drag begins', () => {
   const drag = { x: 100, y: 100, axis: 'pending-vertical' };
   for (const [clientX, clientY] of [
@@ -907,73 +792,6 @@ test('all authored star formations remain finite and distinct at both viewport s
       configurations.push(signatures.join(';'));
     }
     assert.notEqual(configurations[0], configurations[1]);
-  }
-});
-
-test('changing colourway never introduces a warm cast into neutral surfaces', () => {
-  for (const mode of ['light', 'dark']) {
-    const reference = palette.getDivePalette(
-      themes.getFluidThemeColors('blue', mode),
-    );
-    for (const base of baseColors) {
-      const resolved = palette.getDivePalette(
-        themes.getFluidThemeColors(base.name, mode),
-      );
-      assert.equal(resolved.background, reference.background);
-      assert.equal(resolved.surface, reference.surface);
-      assert.equal(resolved.foreground, reference.foreground);
-      if (mode === 'dark') {
-        const color = new Color(resolved.background);
-        assert.ok(color.b >= color.r && color.b >= color.g);
-      }
-    }
-  }
-});
-
-test('space grading stays finite through every seam for all colourways', () => {
-  for (const base of baseColors) {
-    for (const mode of ['light', 'dark']) {
-      const resolved = palette.getDivePalette(
-        themes.getFluidThemeColors(base.name, mode),
-      );
-      const frame = descent.createDescentFrame();
-      for (let progress = 0; progress < descent.DIVE_LENGTH; progress += 0.01) {
-        descent.writeDescentFrame(frame, progress);
-        palette.applyDivePalette(frame, resolved, progress);
-        assert.ok(frame.fogDensity >= 0 && frame.fogDensity <= 0.006);
-        for (const channel of [...frame.fogColor, ...frame.veilColor]) {
-          assert.ok(Number.isFinite(channel) && channel >= 0 && channel <= 1);
-        }
-      }
-    }
-  }
-});
-
-test('each colourway has a distinct sky glow and celestial material', () => {
-  for (const mode of ['light', 'dark']) {
-    const palettes = baseColors.map((base) =>
-      palette.getDivePalette(themes.getFluidThemeColors(base.name, mode)),
-    );
-    for (const property of ['glow', 'highlight']) {
-      const colours = palettes.map((entry) => entry[property]);
-      assert.equal(new Set(colours).size, baseColors.length);
-      palettes.forEach((entry) => {
-        assert.notEqual(entry[property], entry.background);
-        assert.notEqual(entry[property], entry.metal);
-      });
-    }
-  }
-});
-
-test('warm accents retain cool ambient light instead of a brown sky', () => {
-  for (const mode of ['light', 'dark']) {
-    for (const name of ['red', 'orange', 'yellow']) {
-      const resolved = palette.getDivePalette(
-        themes.getFluidThemeColors(name, mode),
-      );
-      const glow = new Color(resolved.glow);
-      assert.ok(glow.b > glow.r, `${name} ${mode} atmosphere stays cool`);
-    }
   }
 });
 

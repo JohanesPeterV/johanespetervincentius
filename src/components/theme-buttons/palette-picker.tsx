@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useId, useState } from 'react';
 
 import { pickRandomColorway, useConfig } from '@/hooks/use-config';
+import { getBaseColorPalette } from '@/lib/theme-colors';
 import {
   baseColors,
   DEFAULT_BASE_COLOR,
@@ -18,10 +19,11 @@ const THEME_MODES = [
 
 export default function PalettePicker() {
   const [config, setConfig] = useConfig();
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const panelId = useId();
   const titleId = useId();
   const [hydrated, setHydrated] = useState(false);
+  const mode = hydrated && resolvedTheme === 'light' ? 'light' : 'dark';
   const selected =
     baseColors.find(({ name }) => hydrated && name === config.theme) ??
     DEFAULT_BASE_COLOR;
@@ -77,7 +79,7 @@ export default function PalettePicker() {
         onPointerUp={(event) => event.stopPropagation()}
         onWheel={(event) => event.stopPropagation()}
         onKeyDown={(event) => event.stopPropagation()}
-        className="appearance-panel fixed bottom-auto left-auto right-4 top-[4.75rem] m-0 max-h-[calc(100svh-6rem)] w-72 max-w-[calc(100vw-2rem)] flex-col p-5 sm:right-7 sm:top-[5.5rem] [&:popover-open]:flex"
+        className="appearance-panel fixed bottom-auto left-auto right-4 top-[4.75rem] m-0 max-h-[calc(100svh-6rem)] w-80 max-w-[calc(100vw-2rem)] flex-col p-5 sm:right-7 sm:top-[5.5rem] [&:popover-open]:flex"
       >
         <div className="flex shrink-0 items-center justify-between">
           <h2 id={titleId} className="font-display text-sm font-medium">
@@ -95,35 +97,45 @@ export default function PalettePicker() {
         </div>
         <div className="-m-1.5 min-h-0 overflow-y-auto overscroll-contain p-1.5">
           <div className="mb-2 mt-4 flex items-center justify-between text-xs text-muted-foreground">
-            <span>Colourway</span>
+            <span>Colour & theme</span>
             <span>{selected.label}</span>
           </div>
           <div
             role="group"
-            aria-label="Colour"
-            className="grid grid-cols-4 gap-1"
+            aria-label="Colour and theme"
+            className="grid grid-cols-2 gap-1"
           >
-            {baseColors.map((baseColor) => (
-              <button
-                key={baseColor.name}
-                type="button"
-                aria-label={baseColor.label}
-                title={baseColor.label}
-                aria-pressed={hydrated && baseColor.name === selected.name}
-                onClick={() => setConfig({ theme: baseColor.name })}
-                className="appearance-swatch flex h-11 items-center justify-center"
-              >
-                <span
-                  aria-hidden
-                  style={{
-                    background: `linear-gradient(135deg, hsl(${baseColor.primary}) 60%, hsl(${baseColor.secondary}) 60%)`,
-                  }}
-                />
-              </button>
-            ))}
+            {baseColors.map((baseColor) => {
+              const palette = getBaseColorPalette(baseColor, mode);
+              const preview =
+                'background' in palette
+                  ? `linear-gradient(135deg, hsl(${palette.background}) 50%, hsl(${palette.primary}) 50% 75%, hsl(${palette.secondary}) 75%)`
+                  : `linear-gradient(135deg, hsl(${palette.primary}) 60%, hsl(${palette.secondary}) 60%)`;
+              return (
+                <button
+                  key={baseColor.name}
+                  type="button"
+                  aria-label={baseColor.label}
+                  title={baseColor.label}
+                  aria-pressed={hydrated && baseColor.name === selected.name}
+                  onClick={() => setConfig({ theme: baseColor.name })}
+                  className="appearance-swatch choice-control flex min-h-11 items-center gap-2 px-2 py-2 text-left"
+                >
+                  <span
+                    aria-hidden
+                    className="appearance-swatch-preview shrink-0"
+                    style={{
+                      background: preview,
+                    }}
+                  />
+                  <span className="type-meta">{baseColor.label}</span>
+                </button>
+              );
+            })}
           </div>
           <p className="type-meta mt-2 text-muted-foreground">
-            Your colour is saved.
+            Colour pairs change accents. Full themes change the whole scene.
+            Your choice is saved.
           </p>
           <div
             role="group"

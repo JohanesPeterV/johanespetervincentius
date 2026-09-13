@@ -305,10 +305,10 @@
   }
 
   .appearance-swatch {
-    border-radius: 50%;
+    border-radius: 0.75rem;
   }
 
-  .appearance-swatch > span {
+  .appearance-swatch-preview {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -317,12 +317,12 @@
     transition: opacity 250ms;
   }
 
-  .appearance-swatch:hover > span,
-  .appearance-swatch[aria-pressed='true'] > span {
+  .appearance-swatch:hover .appearance-swatch-preview,
+  .appearance-swatch[aria-pressed='true'] .appearance-swatch-preview {
     opacity: 1;
   }
 
-  .appearance-swatch[aria-pressed='true'] > span {
+  .appearance-swatch[aria-pressed='true'] .appearance-swatch-preview {
     outline: 1px solid hsl(var(--foreground) / 0.5);
     outline-offset: 4px;
   }
@@ -995,7 +995,7 @@
     .appearance-dial,
     .appearance-trigger,
     .appearance-close,
-    .appearance-swatch > span,
+    .appearance-swatch-preview,
     .choice-control,
     .contact-link {
       transition: none;
