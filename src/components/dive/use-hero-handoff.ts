@@ -13,15 +13,25 @@ import { createHeroHandoff } from './hero-handoff';
 // clone, whose root is forced visible, never off the live section, which is
 // hidden while the opening still runs.
 const inlineSvgStyles = (staged: HTMLElement): void => {
+  const styles: { node: SVGElement; cssText: string }[] = [];
   staged.querySelectorAll('svg *').forEach((node) => {
     if (!(node instanceof SVGElement)) {
       return;
     }
     const computed = getComputedStyle(node);
-    for (const name of computed) {
-      node.style.setProperty(name, computed.getPropertyValue(name));
-    }
+    styles.push({
+      node,
+      cssText: Array.from(
+        computed,
+        (name) => `${name}: ${computed.getPropertyValue(name)};`,
+      ).join(''),
+    });
   });
+  // REASON: computed styles are live; interleaving reads and writes forces
+  // another style calculation for every property of every SVG descendant.
+  for (const { node, cssText } of styles) {
+    node.style.cssText = cssText;
+  }
 };
 
 const captureSection = async (
@@ -49,8 +59,10 @@ const captureSection = async (
   // REASON: the crossing captures the chapter at rest from its top: cards in
   // their slots, the carousel on its active pane, native dialogs closed.
   clone.style.setProperty('--scatter', '0');
+  // REASON: closed dialogs have no pixels in the crossing. Their interactive
+  // content stays in the live DOM, outside this temporary snapshot clone.
   clone.querySelectorAll('dialog').forEach((dialog) => {
-    dialog.removeAttribute('open');
+    dialog.remove();
   });
   clone.querySelectorAll<HTMLElement>('[data-active]').forEach((panel) => {
     panel.style.translate = 'none';
@@ -139,9 +151,11 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
       attributeFilter: ['class', 'style'],
     });
     const resizeObserver = new ResizeObserver(schedule);
-    resizeObserver.observe(hero);
-    resizeObserver.observe(work);
-    capture();
+    // REASON: flinging cards can toggle a scrollbar without resizing the
+    // section. Only its outer size invalidates the cached transition; the
+    // observer's initial delivery also schedules the first capture once.
+    resizeObserver.observe(hero, { box: 'border-box' });
+    resizeObserver.observe(work, { box: 'border-box' });
     return () => {
       disposed = true;
       observer.disconnect();
