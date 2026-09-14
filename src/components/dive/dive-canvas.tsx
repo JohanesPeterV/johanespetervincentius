@@ -4,7 +4,8 @@ import { PerformanceMonitor, useDetectGPU } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { RefObject, Suspense, useEffect, useRef, useState } from 'react';
 
-import CameraRig, { DiveStage } from './camera-rig';
+import CameraRig from './camera-rig';
+import type { DiveStage } from './dive-timeline';
 import type { PointerState } from './dive-input';
 import type { DriveMotion } from './camera-motion';
 import SpaceWorld from './space-world';

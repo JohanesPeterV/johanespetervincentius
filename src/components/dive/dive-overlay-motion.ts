@@ -1,4 +1,9 @@
-import { DIVE_SECTIONS, DIVE_START, ENTRY_SECTION } from './dive-sections';
+import {
+  CONTENT_SECTIONS,
+  DIVE_SECTIONS,
+  DIVE_START,
+  ENTRY_SECTION,
+} from './dive-sections';
 import type { DiveSectionId } from './dive-sections';
 import { ARRIVAL_RISE, arrivalCard } from './arrival';
 import {
@@ -20,15 +25,54 @@ export type OverlayNodes = {
 
 export type OverlayFrame = {
   descent: DescentFrame;
-  progress: number;
   motionMode: MotionMode;
   handoff: HeroHandoff;
 };
 
-export const applyOverlay = (
-  nodes: OverlayNodes,
+type OverlayMotion = {
+  nodes: OverlayNodes;
+  progress: number;
+  arrival: number;
+  motionMode: MotionMode | null;
+};
+
+export const createOverlayMotion = (nodes: OverlayNodes): OverlayMotion => ({
+  nodes,
+  progress: Number.NaN,
+  arrival: Number.NaN,
+  motionMode: null,
+});
+
+export const overlayNeedsUpdate = (
+  previous: OverlayMotion,
+  frame: OverlayFrame,
+): boolean =>
+  frame.handoff.journey !== previous.progress ||
+  frame.motionMode !== previous.motionMode ||
+  frame.handoff.arrival !== previous.arrival ||
+  (frame.handoff.progress > 0 && frame.handoff.progress < 1) ||
+  CONTENT_SECTIONS.some(
+    (section) =>
+      section.animation === 'cards' &&
+      stoneSectionOpacity(frame.handoff.journey, section.center) > 0,
+  );
+
+export const updateOverlay = (
+  motion: OverlayMotion,
   frame: OverlayFrame,
 ): void => {
+  // REASON: resting text needs no repeated DOM writes, but card and crossing
+  // animations still need refreshes when the rendered camera is held still.
+  if (!overlayNeedsUpdate(motion, frame)) {
+    return;
+  }
+  applyOverlay(motion.nodes, frame);
+  motion.progress = frame.handoff.journey;
+  motion.arrival = frame.handoff.arrival;
+  motion.motionMode = frame.motionMode;
+};
+
+const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
   let activeChapter: DiveSectionId = 'hero';
   let nearestDistance = Infinity;
   const card = arrivalCard(frame.handoff.arrival);
@@ -36,7 +80,9 @@ export const applyOverlay = (
     nodes.root.style.setProperty('--arrival', String(frame.handoff.arrival));
   }
   DIVE_SECTIONS.forEach((section) => {
-    const distance = Math.abs(sectionJumpDelta(frame.progress, section.center));
+    const distance = Math.abs(
+      sectionJumpDelta(frame.handoff.journey, section.center),
+    );
     if (distance < nearestDistance) {
       nearestDistance = distance;
       activeChapter = section.id;
@@ -45,7 +91,7 @@ export const applyOverlay = (
     if (!element) {
       return;
     }
-    let opacity = stoneSectionOpacity(frame.progress, section.center);
+    let opacity = stoneSectionOpacity(frame.handoff.journey, section.center);
     if (section.id === 'hero') {
       opacity = heroOverlayOpacity(frame.handoff) * card;
     }
@@ -73,7 +119,7 @@ export const applyOverlay = (
       const scatter =
         frame.motionMode === 'reduced'
           ? 0
-          : cardScatter(frame.progress, section.center);
+          : cardScatter(frame.handoff.journey, section.center);
       element.style.setProperty('--scatter', String(scatter));
     }
   });
@@ -89,7 +135,10 @@ export const applyOverlay = (
   });
   if (nodes.veil) {
     let opacity = frame.descent.veil;
-    if (frame.progress < DIVE_START || frame.progress > ENTRY_SECTION.center) {
+    if (
+      frame.handoff.journey < DIVE_START ||
+      frame.handoff.journey > ENTRY_SECTION.center
+    ) {
       opacity = 0;
     }
     nodes.veil.style.opacity = String(opacity);

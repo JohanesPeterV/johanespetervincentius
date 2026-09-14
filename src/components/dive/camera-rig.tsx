@@ -12,37 +12,31 @@ import {
   SRGBColorSpace,
 } from 'three';
 
-import { CONTENT_SECTIONS } from './dive-sections';
 import {
   aberrationStrength,
   createDescentFrame,
   rushFov,
   sectionTravel,
-  stoneSectionOpacity,
-  wrapJourney,
   writeDescentFrame,
 } from './descent';
 import type { DescentFrame, MotionMode } from './descent';
 import {
   ARRIVAL_ABERRATION,
   ARRIVAL_DOLLY,
-  ARRIVAL_DURATION,
   ARRIVAL_LENS,
   arrivalApproach,
 } from './arrival';
-import { advanceDrive } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
-import { applyOverlay } from './dive-overlay-motion';
+import { createOverlayMotion, updateOverlay } from './dive-overlay-motion';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { applyDivePalette } from './dive-palette';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
-import { sampleHeroHandoff } from './hero-handoff';
+import { createDiveTimeline, advanceDiveTimeline } from './dive-timeline';
+import type { DiveStage } from './dive-timeline';
 import type { HeroHandoff } from './hero-handoff';
 
 import type { PointerState } from './dive-input';
-
-export type DiveStage = 'loading' | 'live';
 
 type CameraRigParams = {
   driveRef: RefObject<DriveMotion>;
@@ -56,9 +50,7 @@ type CameraRigParams = {
   motionMode: MotionMode;
 };
 
-const BASELINE_FPS = 60;
 const BASE_FOV = 58;
-const MAX_FRAME_DELTA = 0.1;
 const PARALLAX_DAMPING = 1.7;
 const LENS_DAMPING = 5.5;
 const ROLL_DAMPING = 6;
@@ -76,9 +68,10 @@ export default function CameraRig({
 }: CameraRigParams) {
   const fovRef = useRef(BASE_FOV);
   const rollRef = useRef(0);
-  const overlayProgressRef = useRef(Number.NaN);
-  const overlayArrivalRef = useRef(Number.NaN);
-  const overlayMotionModeRef = useRef(motionMode);
+  const timelineRef = useRef(
+    createDiveTimeline(driveRef.current, handoffRef.current),
+  );
+  const overlayMotionRef = useRef(createOverlayMotion(overlayRef.current));
   const parallaxRef = useRef<PointerState>({ x: 0, y: 0 });
   const aberrationRef = useRef<ChromaticAberrationEffect>(null);
   const glowRef = useRef<PointLight>(null);
@@ -89,28 +82,20 @@ export default function CameraRig({
   const descentFrame = frameRef.current;
 
   useFrame(({ camera, scene, performance }, delta) => {
-    const frameDelta = Math.min(delta, MAX_FRAME_DELTA);
-    const live = stageRef.current === 'live';
-    const drive = driveRef.current;
-    const previousProgress = drive.current;
-    if (live) {
-      advanceDrive(drive, frameDelta);
-      if (motionMode === 'reduced') {
-        drive.current = drive.target;
-      }
-    }
-    const step = drive.current - previousProgress;
-    const driveStep = frameDelta > 0 ? step / (frameDelta * BASELINE_FPS) : 0;
+    const timeline = timelineRef.current;
+    advanceDiveTimeline(timeline, {
+      delta,
+      stage: stageRef.current,
+      motionMode,
+    });
+    const {
+      delta: frameDelta,
+      step,
+      velocity: driveStep,
+      renderProgress: progress,
+    } = timeline;
     const handoff = handoffRef.current;
-    if (live) {
-      handoff.arrival =
-        motionMode === 'reduced'
-          ? 1
-          : Math.min(1, handoff.arrival + frameDelta / ARRIVAL_DURATION);
-    }
     const approach = arrivalApproach(handoff.arrival);
-    handoff.journey = wrapJourney(drive.current);
-    const progress = sampleHeroHandoff(handoff, motionMode);
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
     applyDivePalette(frame, palette, progress);
@@ -122,7 +107,7 @@ export default function CameraRig({
       frame.look[1] = 2.4;
       frame.look[2] = 0;
     }
-    if (live && Math.abs(step) > 0.00008) {
+    if (stageRef.current === 'live' && Math.abs(step) > 0.00008) {
       performance.regress();
     }
     const parallax = parallaxRef.current;
@@ -211,31 +196,11 @@ export default function CameraRig({
   // REASON: overlay writes run after the world update, but before the
   // composer renders, so text and geometry describe the same frame.
   useFrame(() => {
-    const progress = wrapJourney(driveRef.current.current);
-    const cardsVisible = CONTENT_SECTIONS.some(
-      (section) =>
-        section.animation === 'cards' &&
-        stoneSectionOpacity(progress, section.center) > 0,
-    );
-    // REASON: card panels animate while camera progress is
-    // frozen, so their visible sections still need overlay writes every frame
-    if (
-      progress !== overlayProgressRef.current ||
-      motionMode !== overlayMotionModeRef.current ||
-      (handoffRef.current.progress > 0 && handoffRef.current.progress < 1) ||
-      handoffRef.current.arrival !== overlayArrivalRef.current ||
-      cardsVisible
-    ) {
-      overlayProgressRef.current = progress;
-      overlayArrivalRef.current = handoffRef.current.arrival;
-      overlayMotionModeRef.current = motionMode;
-      applyOverlay(overlayRef.current, {
-        descent: descentFrame,
-        progress,
-        motionMode,
-        handoff: handoffRef.current,
-      });
-    }
+    updateOverlay(overlayMotionRef.current, {
+      descent: descentFrame,
+      motionMode,
+      handoff: handoffRef.current,
+    });
   });
 
   return (

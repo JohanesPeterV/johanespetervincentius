@@ -26,26 +26,38 @@ preview those when extending the journey beyond its current length.
 
 ## Behaviour owners
 
-| Concern                                            | Owner                                       |
-| -------------------------------------------------- | ------------------------------------------- |
-| Chapter identity, order, spacing                   | `dive-sections.ts`                          |
-| Wheel, drag, keyboard, and nested reading gestures | `dive-navigation.tsx`                       |
-| Gesture classification and scroll boundaries       | `dive-input.ts`                             |
-| Chapter commands and damped drive movement         | `camera-motion.ts`                          |
-| Camera timeline, looping, and chapter motion maths | `descent.ts`, `descent-keys.ts`             |
-| Frame scheduling, camera, and overlay updates      | `camera-rig.tsx`                            |
-| DOM visibility, focus availability, and scatter    | `dive-overlay-motion.ts`                    |
-| Hero/entry snapshot lifecycle                      | `use-hero-handoff.ts`                       |
-| Two-world crossing state and compositing           | `hero-handoff.ts`, `hero-handoff-effect.ts` |
+| Concern                                                | Owner                                       |
+| ------------------------------------------------------ | ------------------------------------------- |
+| Chapter identity, order, spacing                       | `dive-sections.ts`                          |
+| Wheel, drag, keyboard, and nested reading gestures     | `dive-navigation.tsx`                       |
+| Gesture classification and scroll boundaries           | `dive-input.ts`                             |
+| Chapter commands and damped drive movement             | `camera-motion.ts`                          |
+| Camera timeline, looping, and chapter motion maths     | `descent.ts`, `descent-keys.ts`             |
+| Loading, arrival, and journey advancement              | `dive-timeline.ts`                          |
+| Frame scheduling and camera rendering                  | `camera-rig.tsx`                            |
+| Overlay refresh policy, visibility, focus, and scatter | `dive-overlay-motion.ts`                    |
+| Hero/entry snapshot lifecycle                          | `use-hero-handoff.ts`                       |
+| Two-world crossing state and compositing               | `hero-handoff.ts`, `hero-handoff-effect.ts` |
 
 Keep the frame ordering intact: camera/journey at priority -2, world updates,
 then the HTML overlay and compositor. The journey position can differ from the
 rendered camera position while a crossing holds an endpoint.
 
+`advanceDiveTimeline` advances the shared drive and handoff objects once per
+frame, caps elapsed time, and publishes `renderProgress` and velocity for the
+camera. Loading pauses drive movement and arrival. The timeline retains those
+shared objects for the lifetime of the canvas; it does not copy their state.
+
+`updateOverlay` reads `handoff.journey` directly and owns its last-applied state.
+It skips unchanged static chapters but refreshes during arrival, crossings,
+card animation, and motion-mode changes. Camera-held progress is never an
+input to HTML chapter visibility.
+
 ## Verification
 
 Run `npm run test:dive` for chapter stepping, repeated laps, direct navigation,
-slow frames, gesture direction, and crossing/reduced-motion regression checks.
+loading/arrival timing, slow frames, gesture direction, overlay refreshes,
+and crossing/reduced-motion regression checks.
 It uses the existing TypeScript compiler and Node test runner.
 
 Also run the build, lint, and file-size checks. In the browser, check chapter
