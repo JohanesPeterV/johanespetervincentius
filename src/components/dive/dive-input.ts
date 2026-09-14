@@ -2,8 +2,35 @@ export type PointerDrag = {
   id: number | null;
   x: number;
   y: number;
-  axis: 'pending' | 'pending-vertical' | 'horizontal' | 'vertical';
+  axis:
+    | 'pending'
+    | 'pending-vertical'
+    | 'horizontal'
+    | 'vertical'
+    | 'scrolling';
   scrollTarget: HTMLElement | null;
+};
+
+export type WheelGesture = {
+  lastEventAt: number;
+  scrollTarget: HTMLElement | null;
+};
+
+export const captureWheelSection = (
+  gesture: WheelGesture,
+  event: { target: EventTarget; deltaY: number; timeStamp: number },
+): HTMLElement | null => {
+  if (event.timeStamp - gesture.lastEventAt > 180) {
+    gesture.scrollTarget = null;
+  }
+  gesture.lastEventAt = event.timeStamp;
+  const section = getScrollableSection(event.target);
+  if (canScrollSection(section, event.deltaY)) {
+    gesture.scrollTarget = section;
+  }
+  // REASON: momentum at a panel edge still belongs to the reading gesture;
+  // only a new gesture may move the journey beyond that panel.
+  return gesture.scrollTarget;
 };
 
 export const dragInputDelta = (

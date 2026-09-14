@@ -11,8 +11,10 @@ import type { DriveMotion } from './camera-motion';
 import DiveCanvas from './dive-canvas';
 import {
   DIVE_START,
+  DIVE_SECTIONS,
   TOUCH_SENSITIVITY,
   WHEEL_SENSITIVITY,
+  sectionJumpDelta,
   wrapProgress,
 } from './descent';
 import { useDivePalette } from './use-dive-palette';
@@ -22,11 +24,12 @@ import type { OverlayNodes } from './dive-overlay-motion';
 import { useHeroHandoff } from './use-hero-handoff';
 import {
   canScrollSection,
+  captureWheelSection,
   dragInputDelta,
   getScrollableSection,
   normalizeWheelDelta,
 } from './dive-input';
-import type { PointerDrag } from './dive-input';
+import type { PointerDrag, WheelGesture } from './dive-input';
 
 export default function DiveScene({ children }: { children: ReactNode }) {
   const driveRef = useRef<DriveMotion>({
@@ -36,6 +39,10 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     idleTime: 0,
   });
   const progressRef = useRef(DIVE_START);
+  const wheelRef = useRef<WheelGesture>({
+    lastEventAt: -Infinity,
+    scrollTarget: null,
+  });
   const dragRef = useRef<PointerDrag>({
     id: null,
     x: 0,
@@ -69,13 +76,27 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   };
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
-    if (canScrollSection(getScrollableSection(event.target), event.deltaY)) {
-      return;
-    }
     if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
       return;
     }
+    const section = captureWheelSection(wheelRef.current, event);
+    if (section) {
+      settleReadingSection(section);
+      return;
+    }
     applyDriveDelta(normalizeWheelDelta(event) * WHEEL_SENSITIVITY);
+  };
+
+  const settleReadingSection = (section: HTMLElement): void => {
+    const index = overlayRef.current.sections.findIndex((element) =>
+      element?.contains(section),
+    );
+    if (index >= 0) {
+      const drive = driveRef.current;
+      drive.target =
+        drive.current +
+        sectionJumpDelta(drive.current, DIVE_SECTIONS[index].center);
+    }
   };
 
   const handlePointerDown = (
@@ -93,12 +114,13 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     const horizontal =
       event.target instanceof Element &&
       event.target.closest('[data-horizontal-gesture]');
+    const section = getScrollableSection(event.target);
     dragRef.current = {
       id: event.pointerId,
       x: event.clientX,
       y: event.clientY,
       axis: horizontal ? 'pending' : 'pending-vertical',
-      scrollTarget: getScrollableSection(event.target),
+      scrollTarget: section,
     };
   };
 
@@ -125,7 +147,12 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.setPointerCapture(event.pointerId);
     }
-    if (canScrollSection(drag.scrollTarget, delta) && drag.scrollTarget) {
+    if (
+      drag.scrollTarget &&
+      (canScrollSection(drag.scrollTarget, delta) || drag.axis === 'scrolling')
+    ) {
+      drag.axis = 'scrolling';
+      settleReadingSection(drag.scrollTarget);
       drag.scrollTarget.scrollTop += delta;
     } else {
       applyDriveDelta(delta * TOUCH_SENSITIVITY);
