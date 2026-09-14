@@ -56,7 +56,7 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           </p>
         </div>
       ))}
-      <ul className="work-contributions mt-7 grid gap-5 sm:grid-cols-3">
+      <ul className="work-contributions mt-7 grid gap-6 sm:grid-cols-2">
         {job.showcases.map((showcase) => (
           <li key={showcase.title}>
             <h4 className="type-label mb-2">{showcase.title}</h4>

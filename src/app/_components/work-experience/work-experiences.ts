@@ -19,7 +19,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     status: 'current',
     summary:
-      'Own engineering across corporate gifting, online ordering, and rewards — connecting payments, inventory, fulfilment, and accounting.',
+      'Own the platforms behind custom merchandise, corporate gifting, and rewards — from quotes and checkout to inventory, delivery, and accounting.',
     products: [
       {
         name: 'Smilie',
@@ -29,7 +29,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         name: 'Gift Management',
         href: 'https://gms.smilie.io',
-        description: 'Orders, inventory & fulfilment',
+        description: 'Merchandise, gifting & fulfilment',
       },
       {
         name: 'IG Club Rewards',
@@ -42,39 +42,39 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Senior Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
-          'Work directly with the Founder to turn business needs into production systems. Own architecture and delivery across Smilie’s storefront, gifting operations, and IG Club Rewards, including the move from legacy WordPress and Airtable workflows.',
+          'Work directly with the Founder to build and operate Smilie’s commerce, merchandise, gifting, and rewards platforms. Own architecture, business workflows, and production delivery, replacing legacy WordPress and Airtable processes.',
       },
     ],
     showcases: [
       {
-        title: 'Commerce & gifting',
+        title: 'Custom merchandise',
         description:
-          'Connect product selection and checkout with gifting campaigns, recipient allocations, and delivery scheduling, so customer orders flow into the tools used by operations.',
+          'Build the workflow from product proposals and quantity-based pricing to customer approvals, revised quotes, and confirmed orders, with inventory reservations tied to order decisions.',
       },
       {
-        title: 'Inventory & fulfilment',
+        title: 'Gifting & fulfilment',
         description:
-          'Build stock reservations, packing, dispatch, and courier tracking around an inventory ledger that traces each movement between warehouse stock and customer-owned inventory.',
+          'Connect checkout and recipient campaigns to stock reservations, packing, dispatch, and courier tracking. An inventory ledger traces movements between warehouse stock and customer-owned inventory.',
       },
       {
         title: 'Payments & accounting',
         description:
-          'Integrate Stripe payments, company credits, and Xero invoicing. Build reconciliation and retry workflows so failed accounting updates can recover without undoing successful payments.',
+          'Connect Stripe payments, company credits, and Xero invoices, with reconciliation and retries that recover failed accounting updates while preserving successful payments.',
       },
       {
         title: 'Rewards platform',
         description:
-          'Build and operate IG Club Rewards: points wallets, physical gift redemption, and digital vouchers through Qwikcilver, with activation retries, expiry handling, and redemption reporting.',
+          'Build IG Club Rewards for points-based physical gifts and digital vouchers, including wallets, Qwikcilver integration, activation retries, expiry handling, and redemption reports.',
       },
       {
         title: 'Catalogue automation',
         description:
-          'Turn supplier data into usable product listings through shared import tools and AI-assisted categorisation, marketing copy, and SEO, with structured validation and review flags.',
+          'Turn supplier data into product listings with reusable import tools and AI-assisted categorisation, copy, and SEO. Validate structured output and flag uncertain results for review.',
       },
       {
         title: 'Engineering foundations',
         description:
-          'Unify storefront and operations apps around shared business logic, database models, and UI. Establish automated checks, database and browser tests, review standards, and engineer onboarding.',
+          'Unify apps around shared business logic, database models, and UI. Establish database and browser tests, automated checks, code review standards, and engineer onboarding.',
       },
     ],
   },

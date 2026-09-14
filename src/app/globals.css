@@ -648,23 +648,34 @@
   }
 
   .card-detail {
+    --detail-padding: clamp(1.25rem, 3vw, 2.5rem);
     position: fixed;
     inset: 0;
     width: min(48rem, calc(100% - 3rem));
-    height: min(38rem, calc(100% - 5rem));
-    max-height: none;
+    height: fit-content;
+    max-height: calc(100dvh - 3rem);
     margin: auto;
-    padding: clamp(1.25rem, 3vw, 2.5rem);
-    overflow: hidden;
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+    scrollbar-gutter: stable;
     cursor: auto;
     touch-action: pan-y;
     transform-origin: center;
   }
 
   .card-detail[open] {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+    display: block;
+  }
+
+  .card-detail > header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 1.25rem var(--detail-padding);
+    background: hsl(var(--card));
   }
 
   .card-detail::backdrop {
@@ -673,8 +684,7 @@
   }
 
   .card-detail-content {
-    padding-right: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding: 0 var(--detail-padding) var(--detail-padding);
     touch-action: pan-y;
   }
 

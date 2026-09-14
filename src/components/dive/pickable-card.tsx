@@ -55,12 +55,7 @@ export const PickableCard = ({
       return;
     }
     dialog.showModal();
-    const details = dialog.querySelector<HTMLDivElement>(
-      '[data-section-scroll]',
-    );
-    if (details) {
-      details.scrollTop = 0;
-    }
+    dialog.scrollTop = 0;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
@@ -116,6 +111,7 @@ export const PickableCard = ({
         ref={dialogRef}
         aria-labelledby={titleId}
         data-card-details
+        data-section-scroll
         className="card-detail surface-panel text-left"
         onCancel={(event) => {
           event.preventDefault();
@@ -157,8 +153,7 @@ export const PickableCard = ({
           </Button>
         </header>
         <div
-          className="card-detail-content min-h-0 overflow-y-auto overscroll-contain scrollbar-thin"
-          data-section-scroll
+          className="card-detail-content"
           tabIndex={0}
           role="region"
           aria-label={`${title} details`}
