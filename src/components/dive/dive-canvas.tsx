@@ -5,6 +5,8 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { RefObject, Suspense, useEffect, useRef, useState } from 'react';
 
 import CameraRig from './camera-rig';
+import DiveDirector from './dive-director';
+import { createDiveFrame } from './dive-frame';
 import type { DiveStage } from './dive-timeline';
 import type { PointerState } from './dive-input';
 import type { DriveMotion } from './camera-motion';
@@ -17,7 +19,6 @@ import type { HeroHandoff } from './hero-handoff';
 type DiveCanvasParams = {
   palette: DivePalette;
   driveRef: RefObject<DriveMotion>;
-  progressRef: RefObject<number>;
   pointerRef: RefObject<PointerState>;
   overlayRef: RefObject<OverlayNodes>;
   handoffRef: RefObject<HeroHandoff>;
@@ -56,7 +57,6 @@ const AdaptiveResolution = ({ maxDpr }: { maxDpr: number }) => {
 export default function DiveCanvas({
   palette,
   driveRef,
-  progressRef,
   pointerRef,
   overlayRef,
   handoffRef,
@@ -64,6 +64,7 @@ export default function DiveCanvas({
 }: DiveCanvasParams) {
   const { tier } = useDetectGPU();
   const stageRef = useRef<DiveStage>('loading');
+  const [frame] = useState(createDiveFrame);
   const dpr = Math.min(1.5, 1 + Math.max(0, tier - 1) * 0.25);
 
   return (
@@ -79,22 +80,28 @@ export default function DiveCanvas({
       <Suspense fallback={null}>
         <SpaceWorld
           palette={palette}
-          progressRef={progressRef}
+          frame={frame}
           handoffRef={handoffRef}
           motionMode={motionMode}
           gpuTier={tier}
         />
         <LoadedSignal stageRef={stageRef} />
       </Suspense>
-      <CameraRig
+      <DiveDirector
         driveRef={driveRef}
-        progressRef={progressRef}
-        pointerRef={pointerRef}
+        frame={frame}
         overlayRef={overlayRef}
         handoffRef={handoffRef}
         palette={palette}
-        gpuTier={tier}
         stageRef={stageRef}
+        motionMode={motionMode}
+      />
+      <CameraRig
+        frame={frame}
+        pointerRef={pointerRef}
+        handoffRef={handoffRef}
+        palette={palette}
+        gpuTier={tier}
         motionMode={motionMode}
       />
     </Canvas>

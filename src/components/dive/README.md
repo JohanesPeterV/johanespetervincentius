@@ -27,7 +27,9 @@ route; there is no global portfolio layout in the motion functions.
 | Chapter commands and damped movement                    | `camera-motion.ts`                          |
 | Loading, arrival, and journey advancement               | `dive-timeline.ts`                          |
 | Authored camera poses and interpolation                 | `descent-keys.ts`, `descent.ts`             |
-| Camera, lighting, and frame scheduling                  | `camera-rig.tsx`                            |
+| Frame scheduling and HTML synchronization               | `dive-director.tsx`                         |
+| Shared render frame and world selection                 | `dive-frame.ts`                             |
+| Camera, lighting, and optics                            | `camera-rig.tsx`                            |
 | HTML visibility, focus, scatter, and refresh policy     | `dive-overlay-motion.ts`                    |
 | Hero/entry snapshot lifecycle                           | `use-hero-handoff.ts`                       |
 | Two-world crossing state and compositing                | `hero-handoff.ts`, `hero-handoff-effect.ts` |
@@ -42,13 +44,21 @@ handoff journey wraps into the current route, and the rendered position may
 hold a crossing endpoint. `sceneProgress` maps that rendered position onto
 the authored camera keys. HTML visibility follows the handoff journey.
 
-High-frequency motion stays in refs. Frame order is camera/journey at priority
--2, world updates at -1, then the HTML overlay and compositor. Loading pauses
-drive movement and arrival so the existing opening stays synchronized.
+`DiveCanvas` owns one stable render frame. `DiveDirector` advances the timeline
+and writes that frame at priority -3. Camera rendering reads it at -2, world
+updates at -1, and the director updates HTML at 0 before compositing. Loading
+pauses drive movement and arrival so the existing opening stays synchronized.
+
+The camera never advances navigation or writes HTML. It reads the sampled
+pose, timing, arrival, and travel from the frame. World visibility and atmosphere
+read that same frame, so they do not keep a separate progress ref or resample
+the route. Sampling mutates the existing frame and its tuples; it does not
+advance the timeline or allocate replacement geometry per tick.
 
 ## Verification
 
-Run `npm run test:dive`. It compiles and runs every `tests/dive*.test.ts`,
+Run `npm run test:dive`. The test config inherits the application types and
+aliases, then compiles and runs every `tests/dive*.test.ts`,
 including the rendering regressions formerly in `check-handoff-rendering.mjs`.
 The suite covers reordered, single, and extended chapter lists, camera poses,
 repeated laps, gesture direction, loading, overlay refreshes, crossing reversal,

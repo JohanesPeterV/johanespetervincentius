@@ -5,7 +5,7 @@ import { ReactNode, Suspense, useRef } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import PalettePicker from '@/components/theme-buttons/palette-picker';
 
-import { DIVE_START, DiveRoute } from './dive-route';
+import { DiveRoute } from './dive-route';
 import type { PointerState } from './dive-input';
 import DiveNavigation from './dive-navigation';
 import { createDrive } from './camera-motion';
@@ -32,7 +32,6 @@ export default function DiveScene({
   const route = new DiveRoute(heroTitle, chapters);
   const driveRef = useRef(createDrive(route));
   driveRef.current.route = route;
-  const progressRef = useRef(DIVE_START);
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const overlayRef = useRef<OverlayNodes>({
     chapters: new Map(),
@@ -57,7 +56,6 @@ export default function DiveScene({
         <DiveCanvas
           palette={palette}
           driveRef={driveRef}
-          progressRef={progressRef}
           pointerRef={pointerRef}
           overlayRef={overlayRef}
           handoffRef={handoffRef}

@@ -12,13 +12,13 @@ import FloatingWorkspace from './floating-workspace';
 import AsteroidField from './asteroid-field';
 import { SPACE_KEY_LIGHT } from './space-lighting';
 import OrbitalReality from './orbital-reality';
-import { worldAtProgress } from './hero-handoff';
+import type { DiveFrame } from './dive-frame';
 import type { HeroHandoff } from './hero-handoff';
 import { useStarfieldInteraction } from './use-starfield-interaction';
 
 type SpaceWorldParams = {
   palette: DivePalette;
-  progressRef: RefObject<number>;
+  frame: Readonly<DiveFrame>;
   handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
   gpuTier: number;
@@ -26,7 +26,7 @@ type SpaceWorldParams = {
 
 export default function SpaceWorld({
   palette,
-  progressRef,
+  frame,
   handoffRef,
   motionMode,
   gpuTier,
@@ -39,9 +39,7 @@ export default function SpaceWorld({
     // REASON: the compositor keeps Hero live on either side of a crossing.
     // Main-pass visibility follows rendered progress, so an
     // etched edge separates two complete scenes instead of shared decoration.
-    const secondWorld =
-      worldAtProgress(progressRef.current, handoffRef.current.route) ===
-      'orbital';
+    const secondWorld = frame.world === 'orbital';
     if (firstWorldRef.current) {
       firstWorldRef.current.visible = !secondWorld;
     }
@@ -59,7 +57,7 @@ export default function SpaceWorld({
         <DiveAtmosphere
           reality="watchers"
           handoffRef={handoffRef}
-          progressRef={progressRef}
+          frame={frame}
           interactionRef={interactionRef}
           palette={palette}
           gpuTier={gpuTier}

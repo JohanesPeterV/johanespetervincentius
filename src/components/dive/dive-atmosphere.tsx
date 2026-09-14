@@ -15,6 +15,7 @@ import {
 } from 'three';
 
 import type { DivePalette } from './dive-palette';
+import type { DiveFrame } from './dive-frame';
 import type { MotionMode } from './descent';
 import { heroHandoffProgress } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
@@ -47,7 +48,7 @@ type DiveAtmosphereParams = {
   palette: DivePalette;
   gpuTier: number;
   motionMode: MotionMode;
-  progressRef: RefObject<number>;
+  frame: Readonly<DiveFrame>;
   handoffRef: RefObject<HeroHandoff>;
   interactionRef: RefObject<StarfieldInteraction>;
   children?: ReactNode;
@@ -60,7 +61,7 @@ export default function DiveAtmosphere({
   palette,
   gpuTier,
   motionMode,
-  progressRef,
+  frame,
   handoffRef,
   interactionRef,
   children,
@@ -200,10 +201,7 @@ export default function DiveAtmosphere({
     const to = field.layout.frames[field.timeline.to].appearance;
     uniforms.uAppearanceFrom.value.set(from.size, from.glow, from.tint);
     uniforms.uAppearanceTo.value.set(to.size, to.glow, to.tint);
-    uniforms.uTravel.value =
-      reality === 'orbital'
-        ? handoffRef.current.route.travel(progressRef.current)
-        : 0;
+    uniforms.uTravel.value = reality === 'orbital' ? frame.travel : 0;
     const handoff = handoffRef.current;
     const departure = Math.max(
       handoff.crossing === 'loop'

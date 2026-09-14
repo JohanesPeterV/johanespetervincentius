@@ -13,7 +13,7 @@ type TimelineTick = {
   motionMode: MotionMode;
 };
 
-type DiveTimeline = {
+export type DiveTimeline = {
   drive: DriveMotion;
   handoff: HeroHandoff;
   delta: number;

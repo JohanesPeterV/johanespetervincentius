@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "target": "es2020",
+    "noEmit": false,
+    "incremental": false,
+    "outDir": "../.next-build/dive-tests"
+  },
+  "include": ["dive*.test.ts"]
+}
