@@ -39,9 +39,13 @@ export default function DiveScene({
     sections: new Map(),
     veil: null,
   });
-  const { handoffRef, error: handoffError } = useHeroHandoff(overlayRef, route);
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const motionMode = reducedMotion ? 'reduced' : 'full';
+  const { handoffRef, error: handoffError } = useHeroHandoff(
+    overlayRef,
+    route,
+    motionMode,
+  );
   const palette = useDivePalette();
 
   return (
