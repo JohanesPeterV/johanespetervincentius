@@ -1,37 +1,13 @@
+import type { DriveMotion } from './camera-motion';
+
 export type PointerState = { x: number; y: number };
 
 export type PointerDrag = {
   id: number | null;
   x: number;
   y: number;
-  axis:
-    | 'pending'
-    | 'pending-vertical'
-    | 'horizontal'
-    | 'vertical'
-    | 'scrolling';
+  axis: 'pending' | 'pending-vertical' | 'horizontal' | 'vertical';
   scrollTarget: HTMLElement | null;
-};
-
-export type WheelGesture = {
-  lastEventAt: number;
-  scrollTarget: HTMLElement | null;
-};
-
-export const captureWheelSection = (
-  gesture: WheelGesture,
-  event: { target: EventTarget | null; deltaY: number; timeStamp: number },
-): HTMLElement | null => {
-  if (event.timeStamp - gesture.lastEventAt > 180) {
-    const section = getScrollableSection(event.target);
-    gesture.scrollTarget = canScrollSection(section, event.deltaY)
-      ? section
-      : null;
-  }
-  gesture.lastEventAt = event.timeStamp;
-  // REASON: momentum at a panel edge still belongs to the reading gesture;
-  // only a new gesture may move the journey beyond that panel.
-  return gesture.scrollTarget;
 };
 
 export const dragInputDelta = (
@@ -76,6 +52,43 @@ export const canScrollSection = (
   return delta > 0
     ? section.scrollTop + section.clientHeight < section.scrollHeight - 1
     : section.scrollTop > 0;
+};
+
+export const getReadingSection = (
+  target: EventTarget | null,
+  drive: DriveMotion,
+): HTMLElement | null => {
+  const section = getScrollableSection(target);
+  const id = section?.closest<HTMLElement>('[data-dive-section]')?.dataset
+    .diveSection;
+  const chapter = drive.route.sections.find((candidate) => candidate.id === id);
+  // REASON: departing and incoming panels must not reclaim scroll and reset
+  // the journey while the camera is still travelling between reading poses.
+  if (
+    !chapter ||
+    Math.abs(drive.route.jumpDelta(drive.current, chapter.center)) > 0.05 ||
+    Math.abs(drive.route.jumpDelta(drive.target, chapter.center)) > 0.05
+  ) {
+    return null;
+  }
+  return section;
+};
+
+export const scrollSectionBy = (
+  section: Pick<
+    HTMLElement,
+    'scrollTop' | 'scrollHeight' | 'clientHeight'
+  > | null,
+  delta: number,
+): number => {
+  if (!section) {
+    return delta;
+  }
+  const requested = section.scrollTop + delta;
+  const max = Math.max(0, section.scrollHeight - section.clientHeight);
+  const next = Math.min(max, Math.max(0, requested));
+  section.scrollTop = next;
+  return requested - next;
 };
 
 export const normalizeWheelDelta = (

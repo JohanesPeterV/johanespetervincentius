@@ -5,31 +5,19 @@ import { scrollDriveBy, stepDriveToSection } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import {
   canScrollSection,
-  captureWheelSection,
   dragInputDelta,
+  getReadingSection,
   getScrollableSection,
   normalizeWheelDelta,
+  scrollSectionBy,
 } from './dive-input';
-import type { PointerDrag, PointerState, WheelGesture } from './dive-input';
+import type { PointerDrag, PointerState } from './dive-input';
 
 type DiveNavigationProps = {
   children: ReactNode;
   driveRef: RefObject<DriveMotion>;
   pointerRef: RefObject<PointerState>;
   onMount: (element: HTMLDivElement | null) => void;
-};
-
-const settleReadingSection = (
-  section: HTMLElement,
-  drive: DriveMotion,
-): void => {
-  const id = section.closest<HTMLElement>('[data-dive-section]')?.dataset
-    .diveSection;
-  const chapter = drive.route.sections.find((candidate) => candidate.id === id);
-  if (chapter) {
-    drive.target =
-      drive.current + drive.route.jumpDelta(drive.current, chapter.center);
-  }
 };
 
 export default function DiveNavigation({
@@ -39,10 +27,6 @@ export default function DiveNavigation({
   onMount,
 }: DiveNavigationProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const wheelRef = useRef<WheelGesture>({
-    lastEventAt: -Infinity,
-    scrollTarget: null,
-  });
   const dragRef = useRef<PointerDrag>({
     id: null,
     x: 0,
@@ -98,16 +82,13 @@ export default function DiveNavigation({
     if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.setPointerCapture(event.pointerId);
     }
-    if (
-      drag.scrollTarget &&
-      (canScrollSection(drag.scrollTarget, delta) || drag.axis === 'scrolling')
-    ) {
-      drag.axis = 'scrolling';
-      settleReadingSection(drag.scrollTarget, driveRef.current);
-      drag.scrollTarget.scrollTop += delta;
-    } else {
+    const remaining = scrollSectionBy(
+      getReadingSection(drag.scrollTarget, driveRef.current),
+      delta,
+    );
+    if (remaining !== 0) {
       drag.scrollTarget = null;
-      scrollDriveBy(driveRef.current, delta / 1000);
+      scrollDriveBy(driveRef.current, remaining / 1000);
     }
   };
 
@@ -123,8 +104,8 @@ export default function DiveNavigation({
     }
   };
 
-  // REASON: journey gestures must cancel native scrolling so their momentum
-  // cannot scroll an incoming panel; React's wheel listener is passive.
+  // REASON: one wheel delta can finish reading a panel and continue the
+  // journey; a non-passive listener prevents the browser applying it twice.
   useEffect(() => {
     const handleWheel = (event: WheelEvent): void => {
       if (
@@ -134,16 +115,14 @@ export default function DiveNavigation({
       ) {
         return;
       }
-      const section = captureWheelSection(wheelRef.current, event);
-      if (section) {
-        settleReadingSection(section, driveRef.current);
-        return;
-      }
       event.preventDefault();
-      scrollDriveBy(
-        driveRef.current,
-        normalizeWheelDelta(event, window.innerHeight) / 2000,
+      const remaining = scrollSectionBy(
+        getReadingSection(event.target, driveRef.current),
+        normalizeWheelDelta(event, window.innerHeight),
       );
+      if (remaining !== 0) {
+        scrollDriveBy(driveRef.current, remaining / 1000);
+      }
     };
 
     const root = rootRef.current;

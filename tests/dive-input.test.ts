@@ -7,7 +7,10 @@ import {
   scrollDriveBy,
   stepDriveToSection,
 } from '../src/components/dive/camera-motion';
-import { normalizeWheelDelta } from '../src/components/dive/dive-input';
+import {
+  normalizeWheelDelta,
+  scrollSectionBy,
+} from '../src/components/dive/dive-input';
 import { DiveRoute } from '../src/components/dive/dive-route';
 
 const route = new DiveRoute('Hero', [
@@ -70,4 +73,51 @@ test('wheel pixel, line and page units retain proportional distance', () => {
   assert.equal(normalizeWheelDelta({ deltaY: 40, deltaMode: 0 }, 800), 40);
   assert.equal(normalizeWheelDelta({ deltaY: -3, deltaMode: 1 }, 800), -48);
   assert.equal(normalizeWheelDelta({ deltaY: 1, deltaMode: 2 }, 800), 800);
+});
+
+test('reading consumes only the distance remaining before the panel edge', () => {
+  const panel = { scrollTop: 590, scrollHeight: 1400, clientHeight: 800 };
+  assert.equal(scrollSectionBy(panel, 40), 30);
+  assert.equal(panel.scrollTop, 600);
+  assert.equal(scrollSectionBy(panel, 40), 40);
+  assert.equal(scrollSectionBy(panel, -40), 0);
+  assert.equal(panel.scrollTop, 560);
+});
+
+test('the top edge transfers upward scroll without swallowing or doubling it', () => {
+  const panel = { scrollTop: 10, scrollHeight: 1400, clientHeight: 800 };
+  assert.equal(scrollSectionBy(panel, -40), -30);
+  assert.equal(panel.scrollTop, 0);
+  assert.equal(scrollSectionBy(panel, -40), -40);
+  assert.equal(scrollSectionBy(null, 40), 40);
+});
+
+test('browser pixel rounding does not leak reading input into the journey', () => {
+  let top = 0;
+  const panel = {
+    scrollHeight: 1400,
+    clientHeight: 800,
+    get scrollTop() {
+      return top;
+    },
+    set scrollTop(value: number) {
+      top = Math.round(value);
+    },
+  };
+  assert.equal(scrollSectionBy(panel, 0.4), 0);
+  assert.equal(panel.scrollTop, 0);
+});
+
+test('overflow continues toward Stack within the same reading gesture', () => {
+  const panel = { scrollTop: 590, scrollHeight: 1400, clientHeight: 800 };
+  const drive = createDrive(route);
+  drive.current = route.entry.center;
+  drive.target = drive.current;
+  for (let input = 0; input < 10; input++) {
+    const remaining = scrollSectionBy(panel, 40);
+    scrollDriveBy(drive, remaining / 1000);
+    advanceDrive(drive, 1 / 60);
+  }
+  assert.ok(drive.target > (route.entry.center + route.sections[2].center) / 2);
+  assert.ok(drive.target < route.sections[2].center);
 });
