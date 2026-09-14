@@ -9,6 +9,7 @@ import {
   WORK_STONE,
   stoneSectionOpacity,
   wrapProgress,
+  wrapJourney,
 } from './descent';
 import type { MotionMode } from './descent';
 
@@ -69,7 +70,7 @@ export const loopHandoffProgress = (progress: number): number => {
 };
 
 export const worldAtProgress = (progress: number): HandoffWorld =>
-  wrapProgress(progress) >= (HANDOFF_START + HANDOFF_END) / 2
+  wrapJourney(progress) >= (HANDOFF_START + HANDOFF_END) / 2
     ? 'orbital'
     : 'hero';
 

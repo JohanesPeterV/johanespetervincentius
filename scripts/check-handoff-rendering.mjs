@@ -64,7 +64,7 @@ const crossingJourney = (crossing, phase) => {
     crossing === 'work'
       ? [handoff.HANDOFF_START, handoff.HANDOFF_END]
       : [LOOP_START, DIVE_LENGTH + LOOP_END];
-  return descent.wrapProgress(start + phase * (end - start));
+  return descent.wrapJourney(start + phase * (end - start));
 };
 const sampleAt = (state, journey) => {
   state.journey = journey;
@@ -165,3 +165,72 @@ for (const [sourceWorld, crossing] of combinations(
     }
   });
 }
+
+test('Hero and Stack are adjacent across a return gap equal to the opening', () => {
+  const opening = descent.WORK_STONE.center - DIVE_START;
+  const returning = DIVE_LENGTH + DIVE_START - descent.STACK_STONE.center;
+  assert.ok(Math.abs(returning - opening) < 1e-9);
+  for (const lap of [-100, -1, 0, 1, 100]) {
+    const offset = lap * DIVE_LENGTH;
+    assert.ok(
+      Math.abs(
+        descent.sectionJumpDelta(
+          DIVE_START + offset,
+          descent.STACK_STONE.center,
+        ) + opening,
+      ) < 1e-9,
+    );
+    assert.ok(
+      Math.abs(
+        descent.sectionStepDelta(descent.STACK_STONE.center + offset, 1) -
+          opening,
+      ) < 1e-9,
+    );
+    for (const pose of [
+      LOOP_END,
+      DIVE_START,
+      descent.WORK_STONE.center,
+      descent.STACK_STONE.center,
+      LOOP_START,
+    ]) {
+      assert.ok(Math.abs(descent.wrapJourney(pose + offset) - pose) < 1e-9);
+    }
+    assert.equal(handoff.worldAtProgress(LOOP_START + offset), 'orbital');
+    assert.equal(handoff.worldAtProgress(LOOP_END + offset), 'hero');
+  }
+});
+
+test('chapter gestures settle monotonically at exactly one adjacent destination in both directions', () => {
+  const motion = load(resolve(root, 'src/components/dive/camera-motion.ts'));
+  for (const lap of [-3, 0, 3]) {
+    for (const section of descent.DIVE_SECTIONS) {
+      for (const direction of [-1, 1]) {
+        const current = section.center + lap * DIVE_LENGTH;
+        const drive = {
+          current,
+          target: current,
+          expectedTarget: NaN,
+          idleTime: 0,
+        };
+        const destination =
+          current + descent.sectionStepDelta(current, direction);
+        motion.stepDriveToSection(drive, direction);
+        for (let frame = 0; frame < 180; frame++) {
+          const previous = drive.current;
+          motion.advanceDrive(drive, 1 / 60);
+          assert.ok((drive.current - previous) * direction >= -1e-9);
+          assert.ok(Math.abs(drive.target - destination) < 1e-9);
+          const journey = descent.wrapJourney(drive.current);
+          const state = handoff.createHeroHandoff();
+          state.journey = journey;
+          const rendered = handoff.sampleHeroHandoff(state, 'reduced');
+          assert.ok(Number.isFinite(rendered));
+          if (state.crossing === 'loop') {
+            assert.ok(rendered === LOOP_START || rendered === LOOP_END);
+          }
+        }
+        assert.ok(Math.abs(drive.current - destination) < 0.001);
+      }
+    }
+  }
+});

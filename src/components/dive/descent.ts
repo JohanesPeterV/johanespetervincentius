@@ -68,8 +68,9 @@ export const DIVE_SECTIONS: DiveSection[] = [
   STACK_SECTION,
 ];
 
-export const DIVE_LENGTH = 3.5;
 export const DIVE_START = 0.95;
+export const DIVE_LENGTH =
+  STACK_STONE.center + WORK_STONE.center - DIVE_START * 2;
 export const WHEEL_SENSITIVITY = 1 / 2000;
 export const TOUCH_SENSITIVITY = 1 / 1000;
 
@@ -188,7 +189,7 @@ export const writeDescentFrame = (
   target: DescentFrame,
   progress: number,
 ): DescentFrame => {
-  const wrapped = wrapProgress(progress);
+  const wrapped = wrapJourney(progress);
   let start = DESCENT_KEYS[0];
   let end = DESCENT_KEYS[DESCENT_KEYS.length - 1];
   for (let index = 0; index < DESCENT_KEYS.length - 1; index++) {
@@ -226,7 +227,6 @@ export const stoneSectionOpacity = (
 // idling before the fling gathers them back and past it commits the scatter
 const SCATTER_START = 0.05;
 const SCATTER_SPAN = 0.3;
-const SCATTER_SETTLE = 0.13;
 
 export const cardScatter = (progress: number, center: number): number =>
   smootherstep(
@@ -238,9 +238,13 @@ export const cardScatter = (progress: number, center: number): number =>
 const HERO_FADE_SPAN = 0.54;
 const HERO_READING_HALF = 0.1;
 
-export const LOOP_START =
-  STACK_STONE.center + SCATTER_START + SCATTER_SPAN + SCATTER_SETTLE;
+export const LOOP_START = STACK_STONE.center + SCATTER_START + SCATTER_SPAN;
 export const LOOP_END = DIVE_START - HERO_READING_HALF;
+
+// REASON: journey coordinates wrap at Hero's arrival, keeping the authored
+// chapter poses intact when the return gap matches the opening gap.
+export const wrapJourney = (value: number): number =>
+  LOOP_END + wrapProgress(value - LOOP_END);
 
 export const sectionMotion = (
   progress: number,

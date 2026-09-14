@@ -7,6 +7,7 @@ export type PointerDrag = {
     | 'pending-vertical'
     | 'horizontal'
     | 'vertical'
+    | 'navigating'
     | 'scrolling';
   scrollTarget: HTMLElement | null;
 };
@@ -14,20 +15,21 @@ export type PointerDrag = {
 export type WheelGesture = {
   lastEventAt: number;
   scrollTarget: HTMLElement | null;
+  navigating: boolean;
 };
 
 export const captureWheelSection = (
   gesture: WheelGesture,
-  event: { target: EventTarget; deltaY: number; timeStamp: number },
+  event: { target: EventTarget | null; deltaY: number; timeStamp: number },
 ): HTMLElement | null => {
   if (event.timeStamp - gesture.lastEventAt > 180) {
-    gesture.scrollTarget = null;
+    const section = getScrollableSection(event.target);
+    gesture.scrollTarget = canScrollSection(section, event.deltaY)
+      ? section
+      : null;
+    gesture.navigating = false;
   }
   gesture.lastEventAt = event.timeStamp;
-  const section = getScrollableSection(event.target);
-  if (canScrollSection(section, event.deltaY)) {
-    gesture.scrollTarget = section;
-  }
   // REASON: momentum at a panel edge still belongs to the reading gesture;
   // only a new gesture may move the journey beyond that panel.
   return gesture.scrollTarget;
@@ -56,7 +58,7 @@ export const dragInputDelta = (
 };
 
 export const getScrollableSection = (
-  target: EventTarget,
+  target: EventTarget | null,
 ): HTMLElement | null => {
   if (!(target instanceof Element)) {
     return null;

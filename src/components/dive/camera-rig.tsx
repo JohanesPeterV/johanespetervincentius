@@ -19,7 +19,7 @@ import {
   rushFov,
   sectionTravel,
   stoneSectionOpacity,
-  wrapProgress,
+  wrapJourney,
   writeDescentFrame,
 } from './descent';
 import type { DescentFrame, MotionMode } from './descent';
@@ -112,7 +112,7 @@ export default function CameraRig({
           : Math.min(1, handoff.arrival + frameDelta / ARRIVAL_DURATION);
     }
     const approach = arrivalApproach(handoff.arrival);
-    handoff.journey = wrapProgress(drive.current);
+    handoff.journey = wrapJourney(drive.current);
     const progress = sampleHeroHandoff(handoff, motionMode);
     progressRef.current = progress;
     const frame = writeDescentFrame(descentFrame, progress);
@@ -214,7 +214,7 @@ export default function CameraRig({
   // REASON: overlay writes run after the world update, but before the
   // composer renders, so text and geometry describe the same frame.
   useFrame(() => {
-    const progress = wrapProgress(driveRef.current.current);
+    const progress = wrapJourney(driveRef.current.current);
     const cardsVisible = stoneSectionOpacity(progress, WORK_STONE.center) > 0;
     // REASON: card panels animate while camera progress is
     // frozen, so their visible sections still need overlay writes every frame

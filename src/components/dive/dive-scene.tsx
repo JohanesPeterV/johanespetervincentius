@@ -6,17 +6,10 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import PalettePicker from '@/components/theme-buttons/palette-picker';
 
 import type { PointerState } from './camera-rig';
-import { driveInputDelta, stepDriveToSection } from './camera-motion';
+import { stepDriveToSection } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import DiveCanvas from './dive-canvas';
-import {
-  DIVE_START,
-  DIVE_SECTIONS,
-  TOUCH_SENSITIVITY,
-  WHEEL_SENSITIVITY,
-  sectionJumpDelta,
-  wrapProgress,
-} from './descent';
+import { DIVE_START, DIVE_SECTIONS, sectionJumpDelta } from './descent';
 import { useDivePalette } from './use-dive-palette';
 import DiveOverlay from './dive-overlay';
 import DiveLoader from './dive-loader';
@@ -27,9 +20,21 @@ import {
   captureWheelSection,
   dragInputDelta,
   getScrollableSection,
-  normalizeWheelDelta,
 } from './dive-input';
 import type { PointerDrag, WheelGesture } from './dive-input';
+
+const settleReadingSection = (
+  section: HTMLElement,
+  drive: DriveMotion,
+  sections: OverlayNodes['sections'],
+): void => {
+  const index = sections.findIndex((element) => element?.contains(section));
+  if (index >= 0) {
+    drive.target =
+      drive.current +
+      sectionJumpDelta(drive.current, DIVE_SECTIONS[index].center);
+  }
+};
 
 export default function DiveScene({ children }: { children: ReactNode }) {
   const driveRef = useRef<DriveMotion>({
@@ -42,6 +47,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   const wheelRef = useRef<WheelGesture>({
     lastEventAt: -Infinity,
     scrollTarget: null,
+    navigating: false,
   });
   const dragRef = useRef<PointerDrag>({
     id: null,
@@ -62,41 +68,11 @@ export default function DiveScene({ children }: { children: ReactNode }) {
   const motionMode = reducedMotion ? 'reduced' : 'full';
   const palette = useDivePalette();
 
-  const applyDriveDelta = (step: number): void => {
-    const drive = driveRef.current;
-    drive.target += driveInputDelta({
-      target: drive.target,
-      progress: drive.current,
-      step,
-    });
-  };
-
   const handleNavigate = (center: number): void => {
-    driveRef.current.target += center - wrapProgress(driveRef.current.target);
-  };
-
-  const handleWheel = (event: React.WheelEvent<HTMLDivElement>): void => {
-    if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-      return;
-    }
-    const section = captureWheelSection(wheelRef.current, event);
-    if (section) {
-      settleReadingSection(section);
-      return;
-    }
-    applyDriveDelta(normalizeWheelDelta(event) * WHEEL_SENSITIVITY);
-  };
-
-  const settleReadingSection = (section: HTMLElement): void => {
-    const index = overlayRef.current.sections.findIndex((element) =>
-      element?.contains(section),
+    driveRef.current.target += sectionJumpDelta(
+      driveRef.current.target,
+      center,
     );
-    if (index >= 0) {
-      const drive = driveRef.current;
-      drive.target =
-        drive.current +
-        sectionJumpDelta(drive.current, DIVE_SECTIONS[index].center);
-    }
   };
 
   const handlePointerDown = (
@@ -139,6 +115,9 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       return;
     }
     const drag = dragRef.current;
+    if (drag.axis === 'navigating') {
+      return;
+    }
     const delta = dragInputDelta(drag, event);
     if (delta === 0) {
       return;
@@ -152,10 +131,15 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       (canScrollSection(drag.scrollTarget, delta) || drag.axis === 'scrolling')
     ) {
       drag.axis = 'scrolling';
-      settleReadingSection(drag.scrollTarget);
+      settleReadingSection(
+        drag.scrollTarget,
+        driveRef.current,
+        overlayRef.current.sections,
+      );
       drag.scrollTarget.scrollTop += delta;
     } else {
-      applyDriveDelta(delta * TOUCH_SENSITIVITY);
+      drag.axis = 'navigating';
+      stepDriveToSection(driveRef.current, delta > 0 ? 1 : -1);
     }
   };
 
@@ -170,6 +154,38 @@ export default function DiveScene({ children }: { children: ReactNode }) {
       dragRef.current.scrollTarget = null;
     }
   };
+
+  // REASON: journey gestures must cancel native scrolling so their momentum
+  // cannot scroll an incoming panel; React's wheel listener is passive.
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent): void => {
+      if (
+        event.ctrlKey ||
+        event.deltaY === 0 ||
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+      ) {
+        return;
+      }
+      const section = captureWheelSection(wheelRef.current, event);
+      if (section) {
+        settleReadingSection(
+          section,
+          driveRef.current,
+          overlayRef.current.sections,
+        );
+        return;
+      }
+      event.preventDefault();
+      if (!wheelRef.current.navigating) {
+        wheelRef.current.navigating = true;
+        stepDriveToSection(driveRef.current, event.deltaY > 0 ? 1 : -1);
+      }
+    };
+
+    const root = overlayRef.current.root;
+    root?.addEventListener('wheel', handleWheel, { passive: false });
+    return () => root?.removeEventListener('wheel', handleWheel);
+  }, []);
 
   // REASON: arrow-key navigation needs window-level key events - the
   // full-screen div is never focused, so an onKeyDown prop would not fire
@@ -214,7 +230,6 @@ export default function DiveScene({ children }: { children: ReactNode }) {
         overlayRef.current.root = element;
       }}
       data-dive-scene
-      onWheel={handleWheel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
