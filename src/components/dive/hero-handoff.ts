@@ -1,12 +1,11 @@
 import { MathUtils } from 'three';
 import type { CanvasTexture } from 'three';
 
+import { DIVE_LENGTH, DIVE_START, ENTRY_SECTION } from './dive-sections';
+
 import {
-  DIVE_LENGTH,
-  DIVE_START,
   LOOP_END,
   LOOP_START,
-  WORK_STONE,
   stoneSectionOpacity,
   wrapProgress,
   wrapJourney,
@@ -14,11 +13,11 @@ import {
 import type { MotionMode } from './descent';
 
 type HandoffWorld = 'hero' | 'orbital';
-type HandoffCrossing = 'work' | 'loop' | null;
+type HandoffCrossing = 'entry' | 'loop' | null;
 
 export type HeroHandoff = {
   hero: CanvasTexture | null;
-  work: CanvasTexture | null;
+  entry: CanvasTexture | null;
   sourceWorld: HandoffWorld | null;
   crossing: HandoffCrossing;
   compositing: boolean;
@@ -30,11 +29,11 @@ export type HeroHandoff = {
 };
 
 export const HANDOFF_START = DIVE_START + 0.1;
-export const HANDOFF_END = WORK_STONE.center - 0.1;
+export const HANDOFF_END = ENTRY_SECTION.center - 0.1;
 
 export const createHeroHandoff = (): HeroHandoff => ({
   hero: null,
-  work: null,
+  entry: null,
   sourceWorld: null,
   crossing: null,
   compositing: false,
@@ -87,31 +86,31 @@ export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
   return Number(heroHandoffProgress(handoff.journey) < 0.5);
 };
 
-export const workSectionOpacity = (progress: number): number =>
+export const entrySectionOpacity = (progress: number): number =>
   progress <= HANDOFF_END
     ? Number(heroHandoffProgress(progress) >= 0.5)
-    : stoneSectionOpacity(progress, WORK_STONE.center);
+    : stoneSectionOpacity(progress, ENTRY_SECTION.center);
 
-export const workOverlayOpacity = (handoff: HeroHandoff): number =>
-  handoff.compositing ? 0 : workSectionOpacity(handoff.journey);
+export const entryOverlayOpacity = (handoff: HeroHandoff): number =>
+  handoff.compositing ? 0 : entrySectionOpacity(handoff.journey);
 
 // REASON: the crossing wipes the chapter in under the etched edge; its
 // artwork follows the journey instead, settling in after the crossing rather
 // than showing under the wipe.
 export const orbitalArrival = (journey: number): number =>
-  MathUtils.smootherstep(journey, HANDOFF_END, WORK_STONE.center);
+  MathUtils.smootherstep(journey, HANDOFF_END, ENTRY_SECTION.center);
 
 export const sampleHeroHandoff = (
   handoff: HeroHandoff,
   motionMode: MotionMode,
 ): number => {
-  const workProgress = heroHandoffProgress(handoff.journey);
+  const entryProgress = heroHandoffProgress(handoff.journey);
   const loopProgress = loopHandoffProgress(handoff.journey);
   let crossing: HandoffCrossing = null;
   if (loopProgress > 0 && loopProgress < 1) {
     crossing = 'loop';
-  } else if (workProgress > 0 && workProgress < 1) {
-    crossing = 'work';
+  } else if (entryProgress > 0 && entryProgress < 1) {
+    crossing = 'entry';
   }
   // REASON: late snapshots must not replace a cut/crossfade midway through a
   // gesture. The saved outgoing world also stays fixed when input reverses.
@@ -121,10 +120,10 @@ export const sampleHeroHandoff = (
     motionMode === 'full' &&
     handoff.sourceWorld !== null &&
     handoff.hero !== null &&
-    (crossing === 'loop' || handoff.work !== null) &&
+    (crossing === 'loop' || handoff.entry !== null) &&
     (entering || handoff.compositing);
   handoff.crossing = crossing;
-  handoff.progress = crossing === 'loop' ? loopProgress : workProgress;
+  handoff.progress = crossing === 'loop' ? loopProgress : entryProgress;
   if (handoff.compositing) {
     // REASON: render the other endpoint behind the etched edge, never the
     // numeric wrap's resetting camera. The source identity survives reversals.

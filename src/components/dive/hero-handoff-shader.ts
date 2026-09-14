@@ -1,7 +1,7 @@
 export const heroHandoffFragment = `
 uniform sampler2D uSavedScene;
 uniform sampler2D uHeroContent;
-uniform sampler2D uWorkContent;
+uniform sampler2D uEntryContent;
 uniform float uProgress;
 uniform float uReturning;
 uniform float uSourceIsHero;
@@ -51,7 +51,7 @@ vec3 handoffOrbital(vec2 uv) {
   // held under the edge's lowest dip, so it is on screen from the first frame
   // of the crossing and no card is ever sliced by the edge.
   vec2 contentUv = uv + vec2(0.0, max(0.0, 1.38 - uProgress * 1.5));
-  vec4 content = texture2D(uWorkContent, contentUv) * step(contentUv.y, 1.0);
+  vec4 content = texture2D(uEntryContent, contentUv) * step(contentUv.y, 1.0);
   return handoffOver(scene, content);
 }
 

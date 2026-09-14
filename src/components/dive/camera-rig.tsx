@@ -12,8 +12,8 @@ import {
   SRGBColorSpace,
 } from 'three';
 
+import { CONTENT_SECTIONS } from './dive-sections';
 import {
-  WORK_STONE,
   aberrationStrength,
   createDescentFrame,
   rushFov,
@@ -40,10 +40,7 @@ import DivePostprocessing from './dive-postprocessing';
 import { sampleHeroHandoff } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
-export type PointerState = {
-  x: number;
-  y: number;
-};
+import type { PointerState } from './dive-input';
 
 export type DiveStage = 'loading' | 'live';
 
@@ -215,7 +212,11 @@ export default function CameraRig({
   // composer renders, so text and geometry describe the same frame.
   useFrame(() => {
     const progress = wrapJourney(driveRef.current.current);
-    const cardsVisible = stoneSectionOpacity(progress, WORK_STONE.center) > 0;
+    const cardsVisible = CONTENT_SECTIONS.some(
+      (section) =>
+        section.animation === 'cards' &&
+        stoneSectionOpacity(progress, section.center) > 0,
+    );
     // REASON: card panels animate while camera progress is
     // frozen, so their visible sections still need overlay writes every frame
     if (

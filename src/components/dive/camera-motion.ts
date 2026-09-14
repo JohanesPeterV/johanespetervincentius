@@ -1,9 +1,9 @@
 import { MathUtils } from 'three';
 
+import { DIVE_LENGTH, DIVE_START } from './dive-sections';
 import {
-  DIVE_LENGTH,
-  DIVE_START,
   nearestSectionDelta,
+  sectionJumpDelta,
   sectionStepDelta,
   wrapProgress,
 } from './descent';
@@ -15,15 +15,8 @@ export type DriveMotion = {
   idleTime: number;
 };
 
-type DriveInput = {
-  target: number;
-  progress: number;
-  step: number;
-};
-
 const POSITION_FOLLOW_RATE = 7.5;
 const MAX_TARGET_SPEED = 4.5;
-const BASE_TARGET_LEAD = 0.85;
 const POSITION_EPSILON = 0.0004;
 const SNAP_IDLE_DELAY = 0.4;
 const SNAP_RATE = 2.2;
@@ -53,15 +46,6 @@ const driftTargetToSection = (
   return next;
 };
 
-export const limitDriveTarget = (target: number, progress: number): number => {
-  // REASON: cap momentum without trapping a long loop hop before its snap
-  // midpoint. Ordinary chapter gaps keep the same lead and input sensitivity.
-  const direction = target < progress ? -1 : 1;
-  const nextStop = Math.abs(sectionStepDelta(progress, direction));
-  const lead = Math.max(BASE_TARGET_LEAD, nextStop / 2 + POSITION_EPSILON);
-  return MathUtils.clamp(target, progress - lead, progress + lead);
-};
-
 export const advanceDrive = (motion: DriveMotion, delta: number): void => {
   const resolved = driftTargetToSection(motion, motion.target, delta);
   motion.target = resolved;
@@ -88,15 +72,11 @@ export const advanceDrive = (motion: DriveMotion, delta: number): void => {
   }
 };
 
-export const driveInputDelta = (input: DriveInput): number => {
-  const step =
-    limitDriveTarget(input.target + input.step, input.progress) - input.target;
-  // REASON: a chosen chapter can lead by more than the wheel limit; another
-  // forward gesture must never be converted into backward motion by that cap.
-  if (Math.sign(step) !== Math.sign(input.step)) {
-    return 0;
-  }
-  return step;
+export const jumpDriveToSection = (
+  motion: DriveMotion,
+  center: number,
+): void => {
+  motion.target += sectionJumpDelta(motion.target, center);
 };
 
 export const stepDriveToSection = (

@@ -1,22 +1,10 @@
 import { RAW_DESCENT_KEYS } from './descent-keys';
-
-type DiveSectionBase = {
-  tag: string;
-  title: string;
-  subtitle: string;
-  center: number;
-};
-
-type CenterDiveSection = DiveSectionBase & {
-  placement: 'center';
-};
-
-type StoneDiveSection = DiveSectionBase & {
-  placement: 'stone';
-  z: number;
-};
-
-export type DiveSection = CenterDiveSection | StoneDiveSection;
+import {
+  DIVE_LENGTH,
+  DIVE_START,
+  DIVE_SECTIONS,
+  LAST_SECTION,
+} from './dive-sections';
 
 export type DescentFrame = {
   position: [number, number, number];
@@ -28,51 +16,9 @@ export type DescentFrame = {
   veilColor: [number, number, number];
 };
 
-type SectionMotion = {
-  opacity: number;
-  shift: number;
-};
-
 export type MotionMode = 'full' | 'reduced';
 
 type DescentKey = DescentFrame & { at: number };
-
-export const WORK_STONE = { center: 1.95, z: 8 };
-export const STACK_STONE = { center: 2.55, z: 8 };
-
-export const WORK_SECTION: StoneDiveSection = {
-  tag: '02',
-  title: 'Work & Projects',
-  subtitle: 'Professional experience & independent builds',
-  placement: 'stone',
-  ...WORK_STONE,
-};
-
-export const STACK_SECTION: StoneDiveSection = {
-  tag: '03',
-  title: 'Stack',
-  subtitle: 'What I build with',
-  placement: 'stone',
-  ...STACK_STONE,
-};
-
-export const DIVE_SECTIONS: DiveSection[] = [
-  {
-    tag: '01',
-    title: 'Johanes Peter\nVincentius',
-    subtitle: 'Scroll to explore',
-    center: 0.95,
-    placement: 'center',
-  },
-  WORK_SECTION,
-  STACK_SECTION,
-];
-
-export const DIVE_START = 0.95;
-export const DIVE_LENGTH =
-  STACK_STONE.center + WORK_STONE.center - DIVE_START * 2;
-export const WHEEL_SENSITIVITY = 1 / 2000;
-export const TOUCH_SENSITIVITY = 1 / 1000;
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const value = parseInt(hex.slice(1), 16);
@@ -102,22 +48,6 @@ export const seamBoost = (progress: number): number =>
 
 export const finaleBoost = (progress: number): number =>
   transitionBoost(progress, FINALE_CENTER, FINALE_SPAN);
-
-const NARRATIVE_STONE_CENTER_Y = 4.45;
-// REASON: stone sections sit 0.6 progress apart and the camera sees ~9 world
-// units vertically - a rate of 17 spaces stones ~10 units apart so only the
-// active stone is ever in frame
-const NARRATIVE_STONE_RISE_RATE = 17;
-
-export const narrativeStoneY = (progress: number, center: number): number => {
-  let delta = progress - center;
-  // REASON: the opening spans a full chapter rather than the later 0.6 steps;
-  // the first stone must enter while the hero leaves, not after an empty gap.
-  if (center === WORK_STONE.center && delta < 0) {
-    delta *= 0.5;
-  }
-  return NARRATIVE_STONE_CENTER_Y + delta * NARRATIVE_STONE_RISE_RATE;
-};
 
 const DESCENT_KEYS: DescentKey[] = RAW_DESCENT_KEYS.map((raw) => ({
   at: raw.at,
@@ -235,31 +165,15 @@ export const cardScatter = (progress: number, center: number): number =>
     progress,
   );
 
-const HERO_FADE_SPAN = 0.54;
 const HERO_READING_HALF = 0.1;
 
-export const LOOP_START = STACK_STONE.center + SCATTER_START + SCATTER_SPAN;
+export const LOOP_START = LAST_SECTION.center + SCATTER_START + SCATTER_SPAN;
 export const LOOP_END = DIVE_START - HERO_READING_HALF;
 
 // REASON: journey coordinates wrap at Hero's arrival, keeping the authored
 // chapter poses intact when the return gap matches the opening gap.
 export const wrapJourney = (value: number): number =>
   LOOP_END + wrapProgress(value - LOOP_END);
-
-export const sectionMotion = (
-  progress: number,
-  section: DiveSection,
-): SectionMotion => {
-  if (section.placement !== 'center') {
-    return { opacity: stoneSectionOpacity(progress, section.center), shift: 0 };
-  }
-  const delta = progress - section.center;
-  const distance = Math.abs(delta);
-  return {
-    opacity: 1 - smootherstep(HERO_READING_HALF, HERO_FADE_SPAN, distance),
-    shift: -delta * 240,
-  };
-};
 
 export const sectionTravel = (progress: number): number => {
   let travel = 1;

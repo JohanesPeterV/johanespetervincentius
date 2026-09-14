@@ -1,3 +1,5 @@
+export type PointerState = { x: number; y: number };
+
 export type PointerDrag = {
   id: number | null;
   x: number;
@@ -77,17 +79,4 @@ export const canScrollSection = (
   return delta > 0
     ? section.scrollTop + section.clientHeight < section.scrollHeight - 1
     : section.scrollTop > 0;
-};
-
-export const normalizeWheelDelta = (event: {
-  deltaY: number;
-  deltaMode: number;
-}): number => {
-  if (event.deltaMode === 1) {
-    return event.deltaY * 16;
-  }
-  if (event.deltaMode === 2) {
-    return event.deltaY * window.innerHeight;
-  }
-  return event.deltaY;
 };

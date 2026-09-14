@@ -1,21 +1,20 @@
+import { DIVE_SECTIONS, DIVE_START, ENTRY_SECTION } from './dive-sections';
+import type { DiveSectionId } from './dive-sections';
 import { ARRIVAL_RISE, arrivalCard } from './arrival';
 import {
-  DIVE_SECTIONS,
-  DIVE_START,
   DescentFrame,
-  WORK_STONE,
   cardScatter,
-  sectionMotion,
+  stoneSectionOpacity,
   sectionJumpDelta,
 } from './descent';
 import type { MotionMode } from './descent';
-import { heroOverlayOpacity, workOverlayOpacity } from './hero-handoff';
+import { heroOverlayOpacity, entryOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
 export type OverlayNodes = {
-  chapters: (HTMLButtonElement | null)[];
+  chapters: Map<DiveSectionId, HTMLButtonElement | null>;
   root: HTMLDivElement | null;
-  sections: (HTMLDivElement | null)[];
+  sections: Map<DiveSectionId, HTMLDivElement | null>;
   veil: HTMLDivElement | null;
 };
 
@@ -30,28 +29,28 @@ export const applyOverlay = (
   nodes: OverlayNodes,
   frame: OverlayFrame,
 ): void => {
-  let activeChapter = 0;
+  let activeChapter: DiveSectionId = 'hero';
   let nearestDistance = Infinity;
   const card = arrivalCard(frame.handoff.arrival);
   if (nodes.root) {
     nodes.root.style.setProperty('--arrival', String(frame.handoff.arrival));
   }
-  DIVE_SECTIONS.forEach((section, index) => {
+  DIVE_SECTIONS.forEach((section) => {
     const distance = Math.abs(sectionJumpDelta(frame.progress, section.center));
     if (distance < nearestDistance) {
       nearestDistance = distance;
-      activeChapter = index;
+      activeChapter = section.id;
     }
-    const element = nodes.sections[index];
+    const element = nodes.sections.get(section.id);
     if (!element) {
       return;
     }
-    let opacity = sectionMotion(frame.progress, section).opacity;
-    if (section.placement === 'center') {
+    let opacity = stoneSectionOpacity(frame.progress, section.center);
+    if (section.id === 'hero') {
       opacity = heroOverlayOpacity(frame.handoff) * card;
     }
-    if (section.center === WORK_STONE.center) {
-      opacity = workOverlayOpacity(frame.handoff);
+    if (section.id === ENTRY_SECTION.id) {
+      opacity = entryOverlayOpacity(frame.handoff);
     }
     element.style.opacity = String(opacity);
     element.inert = opacity < 0.1;
@@ -68,7 +67,7 @@ export const applyOverlay = (
       // panel must hand over from the top as well.
       element.scrollTop = 0;
     }
-    if (section.placement !== 'stone') {
+    if (section.id === 'hero') {
       element.style.transform = `translate3d(0, ${(1 - card) * ARRIVAL_RISE}px, 0)`;
     } else {
       const scatter =
@@ -78,11 +77,11 @@ export const applyOverlay = (
       element.style.setProperty('--scatter', String(scatter));
     }
   });
-  nodes.chapters.forEach((element, index) => {
+  nodes.chapters.forEach((element, id) => {
     if (!element) {
       return;
     }
-    if (index === activeChapter) {
+    if (id === activeChapter) {
       element.setAttribute('aria-current', 'step');
     } else {
       element.removeAttribute('aria-current');
@@ -90,7 +89,7 @@ export const applyOverlay = (
   });
   if (nodes.veil) {
     let opacity = frame.descent.veil;
-    if (frame.progress < DIVE_START || frame.progress > WORK_STONE.center) {
+    if (frame.progress < DIVE_START || frame.progress > ENTRY_SECTION.center) {
       opacity = 0;
     }
     nodes.veil.style.opacity = String(opacity);

@@ -4,6 +4,7 @@ import { getFontEmbedCSS, toCanvas } from 'html-to-image';
 import { RefObject, useEffect, useRef, useState } from 'react';
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
+import { ENTRY_SECTION, HERO_SECTION } from './dive-sections';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { createHeroHandoff } from './hero-handoff';
 
@@ -102,9 +103,9 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
   // never in the render loop; keep the real DOM for reading and interaction.
   useEffect(() => {
     const handoff = handoffRef.current;
-    const hero = overlayRef.current.sections[0];
-    const work = overlayRef.current.sections[1];
-    if (!hero || !work) {
+    const hero = overlayRef.current.sections.get(HERO_SECTION.id);
+    const entry = overlayRef.current.sections.get(ENTRY_SECTION.id);
+    if (!hero || !entry) {
       return;
     }
     let disposed = false;
@@ -123,7 +124,7 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
         await document.fonts.ready;
         fontCss ??= getFontEmbedCSS(hero, { preferredFontFormat: 'woff2' });
         const css = await fontCss;
-        for (const section of [hero, work]) {
+        for (const section of [hero, entry]) {
           if (disposed || request !== revision) {
             break;
           }
@@ -134,8 +135,8 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
           return;
         }
         handoff.hero?.dispose();
-        handoff.work?.dispose();
-        [handoff.hero, handoff.work] = prepared;
+        handoff.entry?.dispose();
+        [handoff.hero, handoff.entry] = prepared;
         setError(null);
       } catch (cause) {
         prepared.forEach((texture) => texture.dispose());
@@ -160,7 +161,7 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     // REASON: only theme, size and carousel changes alter the chapter snapshot.
     // Dialogs are excluded from it, so opening a card must not recapture it.
     const observer = new MutationObserver(schedule);
-    observer.observe(work, {
+    observer.observe(entry, {
       attributes: true,
       attributeFilter: ['data-active'],
       subtree: true,
@@ -174,16 +175,16 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     // section. Only its outer size invalidates the cached transition; the
     // observer's initial delivery also schedules the first capture once.
     resizeObserver.observe(hero, { box: 'border-box' });
-    resizeObserver.observe(work, { box: 'border-box' });
+    resizeObserver.observe(entry, { box: 'border-box' });
     return () => {
       disposed = true;
       observer.disconnect();
       resizeObserver.disconnect();
       window.clearTimeout(timer);
       handoff.hero?.dispose();
-      handoff.work?.dispose();
+      handoff.entry?.dispose();
       handoff.hero = null;
-      handoff.work = null;
+      handoff.entry = null;
     };
   }, [overlayRef]);
 
