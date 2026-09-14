@@ -111,15 +111,24 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
     let revision = 0;
     let timer = 0;
     let fontCss: Promise<string> | null = null;
+    let capturing = false;
     const capture = async (): Promise<void> => {
-      const request = ++revision;
+      if (disposed || capturing) {
+        return;
+      }
+      capturing = true;
+      const request = revision;
       const prepared: CanvasTexture[] = [];
       try {
         await document.fonts.ready;
         fontCss ??= getFontEmbedCSS(hero, { preferredFontFormat: 'woff2' });
         const css = await fontCss;
-        prepared.push(await captureSection(hero, css));
-        prepared.push(await captureSection(work, css));
+        for (const section of [hero, work]) {
+          if (disposed || request !== revision) {
+            break;
+          }
+          prepared.push(await captureSection(section, css));
+        }
         if (disposed || request !== revision) {
           prepared.forEach((texture) => texture.dispose());
           return;
@@ -133,6 +142,14 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
         if (!disposed && request === revision) {
           setError(cause instanceof Error ? cause.message : String(cause));
         }
+      } finally {
+        capturing = false;
+        // REASON: rapid theme/size changes must not rasterize overlapping
+        // snapshots. Finish the in-flight section, then capture the latest state.
+        if (!disposed && request !== revision) {
+          window.clearTimeout(timer);
+          timer = window.setTimeout(capture, 60);
+        }
       }
     };
     const schedule = (): void => {
@@ -140,12 +157,12 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
       window.clearTimeout(timer);
       timer = window.setTimeout(capture, 60);
     };
-    // REASON: recapture settled content changes (theme, size, the chapter's
-    // carousel and dialogs), never the styles the scene writes every frame.
+    // REASON: only theme, size and carousel changes alter the chapter snapshot.
+    // Dialogs are excluded from it, so opening a card must not recapture it.
     const observer = new MutationObserver(schedule);
     observer.observe(work, {
       attributes: true,
-      attributeFilter: ['data-active', 'open'],
+      attributeFilter: ['data-active'],
       subtree: true,
     });
     observer.observe(document.documentElement, {
