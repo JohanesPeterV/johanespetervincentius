@@ -1,19 +1,21 @@
 import type { CanvasTexture } from 'three';
 import type { HeroHandoff } from './hero-handoff';
 
-export type HandoffSnapshotPair = {
+export type HandoffSnapshotSet = {
   hero: CanvasTexture;
   entry: CanvasTexture;
+  last: CanvasTexture;
 };
 
-type CapturePair = (signal: AbortSignal) => Promise<HandoffSnapshotPair>;
-type SnapshotTarget = Pick<HeroHandoff, 'hero' | 'entry'>;
+type CaptureSet = (signal: AbortSignal) => Promise<HandoffSnapshotSet>;
+type SnapshotTarget = Pick<HeroHandoff, 'hero' | 'entry' | 'last'>;
 
 const CAPTURE_DELAY = 60;
 
-const disposePair = (pair: SnapshotTarget): void => {
-  pair.hero?.dispose();
-  pair.entry?.dispose();
+const disposeSet = (snapshots: SnapshotTarget): void => {
+  snapshots.hero?.dispose();
+  snapshots.entry?.dispose();
+  snapshots.last?.dispose();
 };
 
 export class HandoffSnapshots {
@@ -24,7 +26,7 @@ export class HandoffSnapshots {
 
   constructor(
     private readonly target: SnapshotTarget,
-    private readonly capturePair: CapturePair,
+    private readonly captureSet: CaptureSet,
     private readonly onError: (message: string | null) => void,
   ) {}
 
@@ -44,9 +46,10 @@ export class HandoffSnapshots {
     this.disposed = true;
     this.request?.abort();
     this.clearTimer();
-    disposePair(this.target);
+    disposeSet(this.target);
     this.target.hero = null;
     this.target.entry = null;
+    this.target.last = null;
   }
 
   private clearTimer(): void {
@@ -68,16 +71,17 @@ export class HandoffSnapshots {
     }
     this.running = true;
     try {
-      const pair = await this.capturePair(request.signal);
+      const snapshots = await this.captureSet(request.signal);
       if (request.signal.aborted) {
-        disposePair(pair);
+        disposeSet(snapshots);
         return;
       }
       // REASON: both worlds must switch snapshots together; a partial result
       // would mix the previous theme or viewport with the incoming one.
-      disposePair(this.target);
-      this.target.hero = pair.hero;
-      this.target.entry = pair.entry;
+      disposeSet(this.target);
+      this.target.hero = snapshots.hero;
+      this.target.entry = snapshots.entry;
+      this.target.last = snapshots.last;
       this.onError(null);
     } catch (cause) {
       if (!request.signal.aborted) {

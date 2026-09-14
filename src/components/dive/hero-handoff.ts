@@ -13,6 +13,7 @@ export type HeroHandoff = {
   route: DiveRoute;
   hero: CanvasTexture | null;
   entry: CanvasTexture | null;
+  last: CanvasTexture | null;
   sourceWorld: HandoffWorld | null;
   crossing: HandoffCrossing;
   compositing: boolean;
@@ -30,6 +31,7 @@ export const createHeroHandoff = (route: DiveRoute): HeroHandoff => ({
   route,
   hero: null,
   entry: null,
+  last: null,
   sourceWorld: null,
   crossing: null,
   compositing: false,
@@ -96,6 +98,15 @@ export const entrySectionOpacity = (progress: number): number =>
 export const entryOverlayOpacity = (handoff: HeroHandoff): number =>
   handoff.compositing ? 0 : entrySectionOpacity(handoff.journey);
 
+export const lastOverlayOpacity = (handoff: HeroHandoff): number => {
+  if (handoff.crossing === 'loop') {
+    return handoff.compositing ? 0 : Number(handoff.progress < 0.5);
+  }
+  return handoff.journey >= handoff.route.last.center
+    ? 1
+    : stoneSectionOpacity(handoff.journey, handoff.route.last.center);
+};
+
 // REASON: the crossing wipes the chapter in under the etched edge; its
 // artwork follows the journey instead, settling in after the crossing rather
 // than showing under the wipe.
@@ -123,7 +134,7 @@ export const sampleHeroHandoff = (
     motionMode === 'full' &&
     handoff.sourceWorld !== null &&
     handoff.hero !== null &&
-    (crossing === 'loop' || handoff.entry !== null) &&
+    (crossing === 'loop' ? handoff.last !== null : handoff.entry !== null) &&
     (entering || handoff.compositing);
   handoff.crossing = crossing;
   handoff.progress = crossing === 'loop' ? loopProgress : entryProgress;

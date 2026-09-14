@@ -1,11 +1,12 @@
 import { getFontEmbedCSS } from 'html-to-image';
 import { captureSection } from './capture-section';
-import type { HandoffSnapshotPair } from './handoff-snapshots';
+import type { HandoffSnapshotSet } from './handoff-snapshots';
 
 export const createHandoffCapture = (
   hero: HTMLDivElement,
   entry: HTMLDivElement,
-): ((signal: AbortSignal) => Promise<HandoffSnapshotPair>) => {
+  last: HTMLDivElement,
+): ((signal: AbortSignal) => Promise<HandoffSnapshotSet>) => {
   let fontCss: Promise<string> | null = null;
   return async (signal) => {
     await document.fonts.ready;
@@ -22,7 +23,14 @@ export const createHandoffCapture = (
     try {
       signal.throwIfAborted();
       const entryTexture = await captureSection(entry, css);
-      return { hero: heroTexture, entry: entryTexture };
+      try {
+        signal.throwIfAborted();
+        const lastTexture = await captureSection(last, css, last.scrollTop);
+        return { hero: heroTexture, entry: entryTexture, last: lastTexture };
+      } catch (cause) {
+        entryTexture.dispose();
+        throw cause;
+      }
     } catch (cause) {
       heroTexture.dispose();
       throw cause;

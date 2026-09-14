@@ -17,6 +17,7 @@ import {
 } from 'three';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { HandoffCanvas } from './handoff-canvas';
 
 const FrozenMacbook = () => {
   const { scene } = useGLTF('/models/macbook-ice/macbook-in-ice.glb');
@@ -111,6 +112,7 @@ export default function IceModel() {
       >
         <IceLighting />
         <FrozenMacbook />
+        <HandoffCanvas />
       </Suspense>
       <OrbitControls
         makeDefault

@@ -31,6 +31,7 @@ const preparedHandoff = (t: TestContext, sourceWorld: 'hero' | 'orbital') => {
   t.after(() => texture.dispose());
   state.hero = texture;
   state.entry = texture;
+  state.last = texture;
   state.sourceWorld = sourceWorld;
   return state;
 };
@@ -198,4 +199,37 @@ test('chapter gestures settle monotonically at exactly one adjacent destination 
       }
     }
   }
+});
+
+test('the final chapter stays opaque until the loop wave takes over, including reversal', (t) => {
+  const state = preparedHandoff(t, 'orbital');
+  for (const journey of [
+    route.last.center,
+    route.last.center + 0.2,
+    route.loopStart,
+  ]) {
+    sampleAt(state, journey);
+    assert.equal(handoff.lastOverlayOpacity(state), 1);
+  }
+  for (const phase of [0.1, 0.5, 0.9, 0.5, 0.1]) {
+    sampleAt(state, crossingJourney('loop', phase));
+    assert.equal(state.compositing, true);
+    assert.equal(
+      handoff.lastOverlayOpacity(state),
+      0,
+      'only the wave compositor draws the chapter during a crossing',
+    );
+  }
+  sampleAt(state, route.loopStart);
+  assert.equal(handoff.lastOverlayOpacity(state), 1);
+  state.last = null;
+  sampleAt(state, crossingJourney('loop', 0.25));
+  assert.equal(state.compositing, false);
+  assert.equal(
+    handoff.lastOverlayOpacity(state),
+    1,
+    'without a snapshot keep the chapter solid until the fallback cut',
+  );
+  sampleAt(state, crossingJourney('loop', 0.75));
+  assert.equal(handoff.lastOverlayOpacity(state), 0);
 });

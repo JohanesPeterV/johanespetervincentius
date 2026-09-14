@@ -97,6 +97,7 @@ for (const sourceWorld of ['hero', 'orbital'] as const) {
       (route.loopStart + route.length + LOOP_END) / 2;
     const handoff = createHeroHandoff(route);
     handoff.hero = new CanvasTexture(new EventTarget());
+    handoff.last = new CanvasTexture(new EventTarget());
     handoff.sourceWorld = sourceWorld;
     const timeline = createDiveTimeline(drive, handoff);
     advanceDiveTimeline(timeline, {
@@ -113,5 +114,6 @@ for (const sourceWorld of ['hero', 'orbital'] as const) {
     assert.equal(handoff.journey, journey);
     assert.notEqual(timeline.renderProgress, handoff.journey);
     handoff.hero.dispose();
+    handoff.last.dispose();
   });
 }

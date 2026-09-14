@@ -17,6 +17,7 @@ export const useHeroHandoff = (
   const handoffRef = useRef(createHeroHandoff(route));
   handoffRef.current.route = route;
   const entryId = route.entry.id;
+  const lastId = route.last.id;
   const [error, setError] = useState<string | null>(null);
 
   // REASON: bind DOM changes to the shader's snapshot lifecycle; reduced
@@ -28,16 +29,28 @@ export const useHeroHandoff = (
     }
     const hero = overlayRef.current.sections.get('hero');
     const entry = overlayRef.current.sections.get(entryId);
-    if (!hero || !entry) {
+    const last = overlayRef.current.sections.get(lastId);
+    if (!hero || !entry || !last) {
       return;
     }
     const snapshots = new HandoffSnapshots(
       handoffRef.current,
-      createHandoffCapture(hero, entry),
+      createHandoffCapture(hero, entry, last),
       setError,
     );
-    // REASON: only theme, size and carousel changes alter the chapter snapshot.
-    // Dialogs are excluded from it, so opening a card must not recapture it.
+    // REASON: keep the final canvas pose and reading position current at rest,
+    // then retain that endpoint while the wave crosses or reverses.
+    const invalidateLast = () => {
+      if (
+        last.dataset.visible === 'true' &&
+        handoffRef.current.crossing === null
+      ) {
+        snapshots.invalidate();
+      }
+    };
+    last.addEventListener('dive-canvas-change', invalidateLast);
+    last.addEventListener('scroll', invalidateLast);
+    // REASON: observe content and theme changes, not animation style writes.
     const observer = new MutationObserver(snapshots.invalidate);
     observer.observe(entry, {
       attributes: true,
@@ -53,12 +66,15 @@ export const useHeroHandoff = (
     // Border-box changes also schedule the initial capture once on mount.
     resizeObserver.observe(hero, { box: 'border-box' });
     resizeObserver.observe(entry, { box: 'border-box' });
+    resizeObserver.observe(last, { box: 'border-box' });
     return () => {
+      last.removeEventListener('dive-canvas-change', invalidateLast);
+      last.removeEventListener('scroll', invalidateLast);
       observer.disconnect();
       resizeObserver.disconnect();
       snapshots.dispose();
     };
-  }, [overlayRef, entryId, motionMode]);
+  }, [overlayRef, entryId, lastId, motionMode]);
 
   return { handoffRef, error };
 };

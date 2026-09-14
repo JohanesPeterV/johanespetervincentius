@@ -4,7 +4,7 @@ import { setImmediate } from 'node:timers/promises';
 import { CanvasTexture } from 'three';
 
 import { HandoffSnapshots } from '../src/components/dive/handoff-snapshots';
-import type { HandoffSnapshotPair } from '../src/components/dive/handoff-snapshots';
+import type { HandoffSnapshotSet } from '../src/components/dive/handoff-snapshots';
 
 const deferred = <T>() => {
   let resolve!: (value: T) => void;
@@ -20,17 +20,20 @@ const resourcePair = () => {
   const pair = {
     hero: new CanvasTexture(new EventTarget()),
     entry: new CanvasTexture(new EventTarget()),
+    last: new CanvasTexture(new EventTarget()),
   };
-  const disposed = { hero: 0, entry: 0 };
+  const disposed = { hero: 0, entry: 0, last: 0 };
   pair.hero.addEventListener('dispose', () => disposed.hero++);
   pair.entry.addEventListener('dispose', () => disposed.entry++);
+  pair.last.addEventListener('dispose', () => disposed.last++);
   return { pair, disposed };
 };
 
 const emptyTarget = (): {
   hero: CanvasTexture | null;
   entry: CanvasTexture | null;
-} => ({ hero: null, entry: null });
+  last: CanvasTexture | null;
+} => ({ hero: null, entry: null, last: null });
 
 test('repeated invalidations debounce one atomic pair replacement', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -57,18 +60,18 @@ test('repeated invalidations debounce one atomic pair replacement', async (t) =>
   await setImmediate();
   assert.equal(captures, 1);
   assert.deepEqual(target, next.pair);
-  assert.deepEqual(old.disposed, { hero: 1, entry: 1 });
+  assert.deepEqual(old.disposed, { hero: 1, entry: 1, last: 1 });
   assert.deepEqual(errors, [null]);
   snapshots.dispose();
   snapshots.dispose();
-  assert.deepEqual(next.disposed, { hero: 1, entry: 1 });
+  assert.deepEqual(next.disposed, { hero: 1, entry: 1, last: 1 });
   assert.deepEqual(target, emptyTarget());
 });
 
 test('in-flight captures never overlap; stale results are released before the latest retry', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  const first = deferred<HandoffSnapshotPair>();
-  const second = deferred<HandoffSnapshotPair>();
+  const first = deferred<HandoffSnapshotSet>();
+  const second = deferred<HandoffSnapshotSet>();
   const stale = resourcePair();
   const fresh = resourcePair();
   const target = emptyTarget();
@@ -91,14 +94,14 @@ test('in-flight captures never overlap; stale results are released before the la
   assert.equal(signals.length, 1);
   first.resolve(stale.pair);
   await setImmediate();
-  assert.deepEqual(stale.disposed, { hero: 1, entry: 1 });
+  assert.deepEqual(stale.disposed, { hero: 1, entry: 1, last: 1 });
   assert.deepEqual(target, emptyTarget());
   t.mock.timers.tick(60);
   assert.equal(signals.length, 2);
   second.resolve(fresh.pair);
   await setImmediate();
   assert.deepEqual(target, fresh.pair);
-  assert.deepEqual(fresh.disposed, { hero: 0, entry: 0 });
+  assert.deepEqual(fresh.disposed, { hero: 0, entry: 0, last: 0 });
 });
 
 test('capture failures preserve the last complete pair and clear on successful retry', async (t) => {
@@ -124,18 +127,18 @@ test('capture failures preserve the last complete pair and clear on successful r
   await setImmediate();
   assert.deepEqual(errors, ['font unavailable']);
   assert.deepEqual(target, old.pair);
-  assert.deepEqual(old.disposed, { hero: 0, entry: 0 });
+  assert.deepEqual(old.disposed, { hero: 0, entry: 0, last: 0 });
   snapshots.invalidate();
   t.mock.timers.tick(60);
   await setImmediate();
   assert.deepEqual(errors, ['font unavailable', null]);
   assert.deepEqual(target, fresh.pair);
-  assert.deepEqual(old.disposed, { hero: 1, entry: 1 });
+  assert.deepEqual(old.disposed, { hero: 1, entry: 1, last: 1 });
 });
 
 test("disposed sessions cannot publish late results or release a newer session's textures", async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  const pending = deferred<HandoffSnapshotPair>();
+  const pending = deferred<HandoffSnapshotSet>();
   const stale = resourcePair();
   const fresh = resourcePair();
   const target = emptyTarget();
@@ -168,14 +171,14 @@ test("disposed sessions cannot publish late results or release a newer session's
   t.mock.timers.tick(60);
   assert.equal(captures, 1);
   assert.deepEqual(target, fresh.pair);
-  assert.deepEqual(stale.disposed, { hero: 1, entry: 1 });
-  assert.deepEqual(fresh.disposed, { hero: 0, entry: 0 });
+  assert.deepEqual(stale.disposed, { hero: 1, entry: 1, last: 1 });
+  assert.deepEqual(fresh.disposed, { hero: 0, entry: 0, last: 0 });
   assert.deepEqual(oldErrors, []);
 });
 
 test('a cancelled capture failure does not report an obsolete error', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  const pending = deferred<HandoffSnapshotPair>();
+  const pending = deferred<HandoffSnapshotSet>();
   const errors: (string | null)[] = [];
   const snapshots = new HandoffSnapshots(
     emptyTarget(),

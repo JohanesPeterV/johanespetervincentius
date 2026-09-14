@@ -31,11 +31,26 @@ const inlineSvgStyles = (staged: HTMLElement): void => {
 export const captureSection = async (
   element: HTMLDivElement,
   fontEmbedCSS: string,
+  scrollOffset = 0,
 ): Promise<CanvasTexture> => {
   const clone = element.cloneNode(true);
   if (!(clone instanceof HTMLElement)) {
     throw new Error('Scene content could not be prepared for the transition.');
   }
+  // REASON: cloneNode copies canvas elements but not their rendered pixels.
+  // Copy each live frame before html-to-image rasterizes the staged chapter.
+  const canvases = element.querySelectorAll('canvas');
+  clone.querySelectorAll('canvas').forEach((canvas, index) => {
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error(
+        'The 3D canvas could not be captured for the transition.',
+      );
+    }
+    const source = canvases[index];
+    source.dispatchEvent(new Event('dive-canvas-capture'));
+    context.drawImage(source, 0, 0);
+  });
   const style = getComputedStyle(element);
   Object.assign(clone.style, {
     position: 'relative',
@@ -53,6 +68,13 @@ export const captureSection = async (
   // REASON: the crossing captures the chapter at rest from its top: cards in
   // their slots, the carousel on its active pane, native dialogs closed.
   clone.style.setProperty('--scatter', '0');
+  // REASON: the return crossing cuts the final chapter where the reader left
+  // it; translate its contents because DOM rasterization ignores scrollTop.
+  for (const child of clone.children) {
+    if (child instanceof HTMLElement && scrollOffset !== 0) {
+      child.style.translate = `0 ${-scrollOffset}px`;
+    }
+  }
   // REASON: closed dialogs have no pixels in the crossing. Their interactive
   // content stays in the live DOM, outside this temporary snapshot clone.
   clone.querySelectorAll('dialog').forEach((dialog) => {

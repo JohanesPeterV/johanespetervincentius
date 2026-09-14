@@ -2,6 +2,7 @@ export const heroHandoffFragment = `
 uniform sampler2D uSavedScene;
 uniform sampler2D uHeroContent;
 uniform sampler2D uEntryContent;
+uniform sampler2D uLastContent;
 uniform float uProgress;
 uniform float uReturning;
 uniform float uSourceIsHero;
@@ -45,7 +46,7 @@ vec3 handoffHero(vec2 uv) {
 vec3 handoffOrbital(vec2 uv) {
   vec3 scene = uSourceIsHero > 0.5 ? texture2D(inputBuffer, uv).rgb : texture2D(uSavedScene, uv).rgb;
   if (uReturning > 0.5) {
-    return scene;
+    return handoffOver(scene, texture2D(uLastContent, uv));
   }
   // REASON: the chapter rises into the space the edge has burned open, its top
   // held under the edge's lowest dip, so it is on screen from the first frame

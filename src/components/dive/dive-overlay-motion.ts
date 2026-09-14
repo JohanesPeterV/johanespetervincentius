@@ -3,7 +3,11 @@ import type { DiveRoute } from './dive-route';
 import { ARRIVAL_RISE, arrivalCard } from './arrival';
 import { DescentFrame, cardScatter, stoneSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
-import { heroOverlayOpacity, entryOverlayOpacity } from './hero-handoff';
+import {
+  heroOverlayOpacity,
+  entryOverlayOpacity,
+  lastOverlayOpacity,
+} from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
 export type OverlayNodes = {
@@ -92,16 +96,25 @@ const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
     if (section.id === frame.handoff.route.entry.id) {
       opacity = entryOverlayOpacity(frame.handoff);
     }
+    const last = section.id === frame.handoff.route.last.id;
+    if (
+      last &&
+      (frame.handoff.crossing === 'loop' ||
+        frame.handoff.journey >= section.center)
+    ) {
+      opacity = lastOverlayOpacity(frame.handoff);
+    }
+    const keepMounted = last && frame.handoff.crossing === 'loop';
     element.style.opacity = String(opacity);
     element.inert = opacity < 0.1;
     const visibility = opacity < 0.05 ? 'hidden' : 'visible';
     if (element.style.visibility !== visibility) {
       element.style.visibility = visibility;
     }
-    if (opacity > 0.4 && element.dataset.visible !== 'true') {
+    if ((opacity > 0.4 || keepMounted) && element.dataset.visible !== 'true') {
       element.dataset.visible = 'true';
     }
-    if (opacity < 0.05 && element.dataset.visible !== 'false') {
+    if (opacity < 0.05 && !keepMounted && element.dataset.visible !== 'false') {
       element.dataset.visible = 'false';
       // REASON: the crossing reveals the chapter from its top, so the live
       // panel must hand over from the top as well.
