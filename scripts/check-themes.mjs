@@ -44,20 +44,14 @@ const load = (filename) => {
 const descent = load(resolve(root, 'src/components/dive/descent.ts'));
 const palette = load(resolve(root, 'src/components/dive/dive-palette.ts'));
 const themes = load(resolve(root, 'src/lib/theme-colors.ts'));
-const { baseColors } = load(
+const { baseColors, DEFAULT_BASE_COLOR } = load(
   resolve(root, 'src/registry/registry-base-colors.ts'),
 );
 
 test('authored accents reach UI and scene in both modes', () => {
   for (const base of baseColors) {
-    if ('primary' in base) {
-      const difference = Math.abs(
-        parseFloat(base.primary) - parseFloat(base.secondary),
-      );
-      assert.ok(Math.min(difference, 360 - difference) >= 60, base.label);
-    }
     for (const mode of ['light', 'dark']) {
-      const authored = themes.getBaseColorPalette(base, mode);
+      const authored = base[mode];
       const resolved = themes.getFluidThemeColors(base.name, mode);
       const { cssVars } = themes.getThemeColorValues(base.name, mode);
       assert.equal(cssVars.primary, authored.primary);
@@ -109,9 +103,9 @@ test('theme text, buttons, links, and hover surfaces meet AA in both modes', () 
   }
 });
 
-test('full themes carry their surfaces into CSS and the scene without leaking into accent pairs', () => {
-  const original = themes.getThemeColorValues('blue', 'dark');
-  for (const base of baseColors.filter((base) => 'dark' in base)) {
+test('theme changes carry their own surfaces into CSS and the scene', () => {
+  const original = themes.getThemeColorValues(DEFAULT_BASE_COLOR.name, 'dark');
+  for (const base of baseColors) {
     for (const mode of ['light', 'dark']) {
       const { cssVars } = themes.getThemeColorValues(base.name, mode);
       const scene = palette.getDivePalette(
@@ -130,7 +124,10 @@ test('full themes carry their surfaces into CSS and the scene without leaking in
     }
     assert.notEqual(base.light.background, base.dark.background);
   }
-  assert.deepEqual(themes.getThemeColorValues('blue', 'dark'), original);
+  assert.deepEqual(
+    themes.getThemeColorValues(DEFAULT_BASE_COLOR.name, 'dark'),
+    original,
+  );
 });
 
 test('scene mode comes from the resolved theme rather than color brightness', () => {
@@ -185,26 +182,6 @@ test('palette samples preserve the sRGB contract of descent keyframes', () => {
   }
 });
 
-test('accent pairs retain the shared neutral surfaces', () => {
-  for (const mode of ['light', 'dark']) {
-    const reference = palette.getDivePalette(
-      themes.getFluidThemeColors('blue', mode),
-    );
-    for (const base of baseColors.filter((base) => 'primary' in base)) {
-      const resolved = palette.getDivePalette(
-        themes.getFluidThemeColors(base.name, mode),
-      );
-      assert.equal(resolved.background, reference.background);
-      assert.equal(resolved.surface, reference.surface);
-      assert.equal(resolved.foreground, reference.foreground);
-      if (mode === 'dark') {
-        const color = new Color(resolved.background);
-        assert.ok(color.b >= color.r && color.b >= color.g);
-      }
-    }
-  }
-});
-
 test('space grading stays finite through every seam for all colourways', () => {
   for (const base of baseColors) {
     for (const mode of ['light', 'dark']) {
@@ -240,14 +217,30 @@ test('each colourway has a distinct sky glow and celestial material', () => {
   }
 });
 
-test('warm accents retain cool ambient light instead of a brown sky', () => {
-  for (const mode of ['light', 'dark']) {
-    for (const name of ['red', 'orange', 'yellow']) {
-      const resolved = palette.getDivePalette(
-        themes.getFluidThemeColors(name, mode),
+test('retired custom names fall back to a full theme and never enter shuffle', () => {
+  const retired = [
+    'red',
+    'rose',
+    'orange',
+    'green',
+    'blue',
+    'cobalt',
+    'yellow',
+    'violet',
+  ];
+  const { pickRandomColorway } = load(resolve(root, 'src/hooks/use-config.ts'));
+  for (const name of retired) {
+    assert.ok(!baseColors.some((base) => base.name === name));
+    for (const mode of ['light', 'dark']) {
+      assert.deepEqual(
+        themes.getThemeColorValues(name, mode),
+        themes.getThemeColorValues(DEFAULT_BASE_COLOR.name, mode),
       );
-      const glow = new Color(resolved.glow);
-      assert.ok(glow.b > glow.r, `${name} ${mode} atmosphere stays cool`);
     }
+  }
+  for (const base of baseColors) {
+    const selected = pickRandomColorway(base.name).theme;
+    assert.notEqual(selected, base.name);
+    assert.ok(baseColors.some((candidate) => candidate.name === selected));
   }
 });

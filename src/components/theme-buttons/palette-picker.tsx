@@ -5,7 +5,6 @@ import { useTheme } from 'next-themes';
 import { useEffect, useId, useState } from 'react';
 
 import { pickRandomColorway, useConfig } from '@/hooks/use-config';
-import { getBaseColorPalette } from '@/lib/theme-colors';
 import {
   baseColors,
   DEFAULT_BASE_COLOR,
@@ -39,8 +38,8 @@ export default function PalettePicker() {
       <div className="appearance-control flex items-center p-1">
         <button
           type="button"
-          aria-label="Shuffle colourway"
-          title="Shuffle colourway"
+          aria-label="Shuffle theme"
+          title="Shuffle theme"
           onClick={() =>
             setConfig((current) => pickRandomColorway(current.theme))
           }
@@ -97,20 +96,17 @@ export default function PalettePicker() {
         </div>
         <div className="-m-1.5 min-h-0 overflow-y-auto overscroll-contain p-1.5">
           <div className="mb-2 mt-4 flex items-center justify-between text-xs text-muted-foreground">
-            <span>Colour & theme</span>
+            <span>Theme</span>
             <span>{selected.label}</span>
           </div>
           <div
             role="group"
-            aria-label="Colour and theme"
+            aria-label="Theme"
             className="grid grid-cols-2 gap-1"
           >
             {baseColors.map((baseColor) => {
-              const palette = getBaseColorPalette(baseColor, mode);
-              const preview =
-                'background' in palette
-                  ? `linear-gradient(135deg, hsl(${palette.background}) 50%, hsl(${palette.primary}) 50% 75%, hsl(${palette.secondary}) 75%)`
-                  : `linear-gradient(135deg, hsl(${palette.primary}) 60%, hsl(${palette.secondary}) 60%)`;
+              const palette = baseColor[mode];
+              const preview = `linear-gradient(135deg, hsl(${palette.background}) 50%, hsl(${palette.primary}) 50% 75%, hsl(${palette.secondary}) 75%)`;
               return (
                 <button
                   key={baseColor.name}

@@ -6,29 +6,6 @@ import {
   ThemeMode,
 } from '@/registry/registry-base-colors';
 
-const neutralSurfaces = {
-  light: {
-    // REASON: light mode is riso on paper, so the ground is warm off-white
-    // stock rather than screen white. The card surface stays pure white so it
-    // lifts off the sheet, and every other neutral carries the same warmth so
-    // nothing reads cold against it.
-    background: '38 18% 94%',
-    foreground: '30 8% 9%',
-    surface: '0 0% 100%',
-    muted: '38 14% 89%',
-    mutedForeground: '38 6% 38%',
-    border: '38 12% 83%',
-  },
-  dark: {
-    background: '0 0% 0%',
-    foreground: '0 0% 98%',
-    surface: '240 10% 4%',
-    muted: '240 8% 8%',
-    mutedForeground: '240 6% 72%',
-    border: '240 8% 24%',
-  },
-};
-
 const getLuminance = (hsl: string): number => {
   const hex = hslCssToHex(hsl);
   const [red, green, blue] = [hex >> 16, (hex >> 8) & 255, hex & 255].map(
@@ -57,7 +34,7 @@ const getReadableColor = (
   const direction = getLuminance(backgrounds[0]) < 0.5 ? 1 : -1;
 
   // REASON: small coloured text needs its own contrast adjustment. Applying
-  // this to fills would turn cobalt pastel and citron olive.
+  // this to fills would alter the authored theme accents.
   for (let step = 0; step <= 100; step += 1) {
     const level = Math.max(0, Math.min(100, lightness + step * direction));
     const candidate = `${hue} ${saturation}% ${level}%`;
@@ -73,11 +50,8 @@ const getReadableColor = (
 };
 
 const getColorForeground = (color: string): string => {
-  const ink =
-    getContrast(color, neutralSurfaces.light.foreground) >= 4.5
-      ? neutralSurfaces.light.foreground
-      : '0 0% 0%';
-  const paper = neutralSurfaces.light.surface;
+  const ink = getContrast(color, '30 8% 9%') >= 4.5 ? '30 8% 9%' : '0 0% 0%';
+  const paper = '0 0% 100%';
   return getContrast(color, ink) > getContrast(color, paper) ? ink : paper;
 };
 
@@ -87,53 +61,42 @@ const getBaseColor = (themeName: BaseColor['name']): BaseColor => {
   );
 };
 
-export const getBaseColorPalette = (base: BaseColor, mode: ThemeMode) => {
-  return 'primary' in base ? base : base[mode];
-};
-
 export const getThemeColorValues = (
   themeName: BaseColor['name'],
   resolvedTheme: string | undefined,
 ) => {
   const mode: ThemeMode = resolvedTheme === 'light' ? 'light' : 'dark';
-  const base = getBaseColorPalette(getBaseColor(themeName), mode);
-  const neutral = 'background' in base ? base : neutralSurfaces[mode];
+  const base = getBaseColor(themeName)[mode];
   const [hue, saturation] = base.primary.split(' ').map(parseFloat);
   const accent = `${hue} ${saturation * 0.3}% ${mode === 'light' ? 89 : 18}%`;
-  const surfaces = [neutral.background, neutral.surface, neutral.muted, accent];
+  const surfaces = [base.background, base.surface, base.muted, accent];
   const primaryText = getReadableColor(base.primary, surfaces);
-  const foreground =
-    'background' in base
-      ? getReadableColor(neutral.foreground, surfaces, 7)
-      : neutral.foreground;
-  const mutedForeground =
-    'background' in base
-      ? getReadableColor(neutral.mutedForeground, surfaces)
-      : neutral.mutedForeground;
-  const destructive = getReadableColor('0 72% 50%', [neutral.muted]);
+  const foreground = getReadableColor(base.foreground, surfaces, 7);
+  const mutedForeground = getReadableColor(base.mutedForeground, surfaces);
+  const destructive = getReadableColor('0 72% 50%', [base.muted]);
 
   return {
     mode,
     cssVars: {
-      background: neutral.background,
+      background: base.background,
       foreground,
-      card: neutral.surface,
+      card: base.surface,
       'card-foreground': foreground,
-      popover: neutral.surface,
+      popover: base.surface,
       'popover-foreground': foreground,
       primary: base.primary,
       'primary-foreground': getColorForeground(base.primary),
       'primary-text': primaryText,
       secondary: base.secondary,
       'secondary-foreground': getColorForeground(base.secondary),
-      muted: neutral.muted,
+      muted: base.muted,
       'muted-foreground': mutedForeground,
       accent,
       'accent-foreground': foreground,
       destructive,
       'destructive-foreground': getColorForeground(destructive),
-      border: neutral.border,
-      input: neutral.border,
+      border: base.border,
+      input: base.border,
       ring: primaryText,
       radius: '0.5rem',
     },

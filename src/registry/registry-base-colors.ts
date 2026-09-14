@@ -1,11 +1,8 @@
 export type ThemeMode = 'light' | 'dark';
 
-type ColorPair = {
+export type ThemePalette = {
   primary: string;
   secondary: string;
-};
-
-export type ThemePalette = ColorPair & {
   background: string;
   foreground: string;
   surface: string;
@@ -16,14 +13,6 @@ export type ThemePalette = ColorPair & {
 
 export type BaseColor = {
   name:
-    | 'red'
-    | 'rose'
-    | 'orange'
-    | 'green'
-    | 'blue'
-    | 'cobalt'
-    | 'yellow'
-    | 'violet'
     | 'catppuccin'
     | 'nord'
     | 'dracula'
@@ -33,63 +22,19 @@ export type BaseColor = {
     | 'github'
     | 'night-owl'
     | 'solarized'
-    | 'gruvbox';
+    | 'gruvbox'
+    | 'ayu'
+    | 'everforest'
+    | 'kanagawa'
+    | 'monokai-pro'
+    | 'material'
+    | 'vscode';
   label: string;
-} & (ColorPair | Record<ThemeMode, ThemePalette>);
+} & Record<ThemeMode, ThemePalette>;
 
-export const DEFAULT_BASE_COLOR: BaseColor = {
-  name: 'blue',
-  label: 'Cyan & Ultraviolet',
-  primary: '184 100% 65%',
-  secondary: '260 100% 64%',
-};
-
-// REASON: colour pairs share neutral surfaces; full themes supply both modes.
-// The same registry drives saved preferences, selection, UI, and 3D materials.
+// REASON: one registry supplies full light/dark palettes to preferences, UI,
+// and 3D materials, so a theme always changes the entire scene.
 export const baseColors: BaseColor[] = [
-  {
-    name: 'red',
-    label: 'Cherry & Ice',
-    primary: '350 68% 51%',
-    secondary: '202 64% 76%',
-  },
-  {
-    name: 'rose',
-    label: 'Rose & Sage',
-    primary: '333 56% 54%',
-    secondary: '153 28% 69%',
-  },
-  {
-    name: 'orange',
-    label: 'Persimmon & Ink',
-    primary: '21 83% 55%',
-    secondary: '231 38% 37%',
-  },
-  {
-    name: 'green',
-    label: 'Jade & Lilac',
-    primary: '163 55% 40%',
-    secondary: '274 48% 74%',
-  },
-  DEFAULT_BASE_COLOR,
-  {
-    name: 'cobalt',
-    label: 'Cobalt & Lemon',
-    primary: '226 80% 54%',
-    secondary: '51 94% 68%',
-  },
-  {
-    name: 'yellow',
-    label: 'Citron & Iris',
-    primary: '56 78% 58%',
-    secondary: '252 43% 68%',
-  },
-  {
-    name: 'violet',
-    label: 'Violet & Mint',
-    primary: '266 55% 57%',
-    secondary: '166 43% 72%',
-  },
   {
     name: 'catppuccin',
     label: 'Catppuccin',
@@ -330,4 +275,150 @@ export const baseColors: BaseColor[] = [
       border: '38.571 24.138% 65.882%',
     },
   },
+  {
+    name: 'ayu',
+    label: 'Ayu',
+    dark: {
+      primary: '40.000 75.000% 60.784%',
+      secondary: '202.048 100.000% 67.451%',
+      background: '220.000 27.273% 8.627%',
+      foreground: '46.667 6.569% 73.137%',
+      surface: '222.000 27.778% 7.059%',
+      muted: '222.857 24.138% 11.373%',
+      mutedForeground: '222.000 14.286% 41.176%',
+      border: '222.857 20.588% 13.333%',
+    },
+    light: {
+      primary: '34.954 89.344% 52.157%',
+      secondary: '200.204 79.675% 51.765%',
+      background: '0.000 0.000% 98.824%',
+      foreground: '210.000 5.155% 38.039%',
+      surface: '210.000 16.667% 97.647%',
+      muted: '204.000 14.286% 93.137%',
+      mutedForeground: '215.172 13.122% 56.667%',
+      border: '204.000 14.286% 93.137%',
+    },
+  },
+  {
+    name: 'everforest',
+    label: 'Everforest',
+    dark: {
+      primary: '83.438 33.684% 62.745%',
+      secondary: '172.000 30.612% 61.569%',
+      background: '205.714 13.462% 20.392%',
+      foreground: '40.976 31.783% 74.706%',
+      surface: '198.750 13.333% 23.529%',
+      muted: '198.750 11.594% 27.059%',
+      mutedForeground: '135.000 6.522% 63.922%',
+      border: '204.000 8.671% 33.922%',
+    },
+    light: {
+      primary: '67.500 98.765% 31.765%',
+      secondary: '201.151 54.510% 50.000%',
+      background: '43.846 86.667% 94.118%',
+      foreground: '201.818 10.680% 40.392%',
+      surface: '51.111 55.102% 90.392%',
+      muted: '51.111 45.763% 88.431%',
+      mutedForeground: '116.250 6.780% 53.725%',
+      border: '78.000 14.286% 72.549%',
+    },
+  },
+  {
+    name: 'kanagawa',
+    label: 'Kanagawa',
+    dark: {
+      primary: '220.000 53.571% 67.059%',
+      secondary: '263.158 28.643% 60.980%',
+      background: '240.000 12.676% 13.922%',
+      foreground: '51.176 32.692% 79.608%',
+      surface: '240.000 13.725% 10.000%',
+      muted: '240.000 13.402% 19.020%',
+      mutedForeground: '53.333 4.110% 42.941%',
+      border: '240.000 12.953% 37.843%',
+    },
+    light: {
+      primary: '218.462 33.621% 45.490%',
+      secondary: '264.000 26.570% 40.588%',
+      background: '53.333 67.500% 84.314%',
+      foreground: '240.000 8.696% 36.078%',
+      surface: '50.943 50.476% 79.412%',
+      muted: '51.250 40.678% 76.863%',
+      mutedForeground: '48.750 7.619% 41.176%',
+      border: '225.000 8.000% 80.392%',
+    },
+  },
+  {
+    name: 'monokai-pro',
+    label: 'Monokai Pro',
+    dark: {
+      primary: '345.190 100.000% 69.020%',
+      secondary: '90.000 59.302% 66.275%',
+      background: '285.000 4.545% 17.255%',
+      foreground: '60.000 25.000% 98.431%',
+      surface: '300.000 4.615% 12.745%',
+      muted: '280.000 2.362% 24.902%',
+      mutedForeground: '0.000 0.800% 75.490%',
+      border: '280.000 1.657% 35.490%',
+    },
+    light: {
+      primary: '342.078 71.963% 58.039%',
+      secondary: '153.782 61.026% 38.235%',
+      background: '15.000 44.444% 96.471%',
+      foreground: '290.000 7.692% 15.294%',
+      surface: '15.000 18.182% 91.373%',
+      muted: '8.571 7.368% 81.373%',
+      mutedForeground: '324.000 2.283% 42.941%',
+      border: '350.000 4.478% 73.725%',
+    },
+  },
+  {
+    name: 'material',
+    label: 'Material',
+    dark: {
+      primary: '174.400 41.899% 64.902%',
+      secondary: '84.396 66.423% 73.137%',
+      background: '193.636 22.917% 18.824%',
+      foreground: '200.000 15.328% 73.137%',
+      surface: '192.000 26.316% 14.902%',
+      muted: '190.000 19.672% 23.922%',
+      mutedForeground: '198.367 23.005% 58.235%',
+      border: '193.714 24.823% 27.647%',
+    },
+    light: {
+      primary: '186.792 100.000% 41.569%',
+      secondary: '84.632 40.084% 53.529%',
+      background: '0.000 0.000% 98.039%',
+      foreground: '198.947 18.447% 40.392%',
+      surface: '0.000 0.000% 100.000%',
+      muted: '240.000 2.128% 90.784%',
+      mutedForeground: '199.286 15.054% 63.529%',
+      border: '200.000 31.343% 86.863%',
+    },
+  },
+  {
+    name: 'vscode',
+    label: 'VS Code',
+    dark: {
+      primary: '206.038 100.000% 41.569%',
+      secondary: '167.805 53.247% 54.706%',
+      background: '0.000 0.000% 12.157%',
+      foreground: '0.000 0.000% 80.000%',
+      surface: '0.000 0.000% 9.412%',
+      muted: '0.000 0.000% 16.863%',
+      mutedForeground: '0.000 0.000% 61.569%',
+      border: '0.000 0.000% 23.529%',
+    },
+    light: {
+      primary: '209.022 100.000% 36.078%',
+      secondary: '193.565 60.209% 37.451%',
+      background: '0.000 0.000% 100.000%',
+      foreground: '0.000 0.000% 23.137%',
+      surface: '0.000 0.000% 97.255%',
+      muted: '0.000 0.000% 89.804%',
+      mutedForeground: '0.000 0.000% 38.039%',
+      border: '0.000 0.000% 80.784%',
+    },
+  },
 ];
+
+export const DEFAULT_BASE_COLOR = baseColors[0];
