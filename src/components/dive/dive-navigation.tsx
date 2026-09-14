@@ -1,13 +1,14 @@
 'use client';
 
 import { ReactNode, RefObject, useEffect, useRef } from 'react';
-import { stepDriveToSection } from './camera-motion';
+import { scrollDriveBy, stepDriveToSection } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import {
   canScrollSection,
   captureWheelSection,
   dragInputDelta,
   getScrollableSection,
+  normalizeWheelDelta,
 } from './dive-input';
 import type { PointerDrag, PointerState, WheelGesture } from './dive-input';
 
@@ -41,7 +42,6 @@ export default function DiveNavigation({
   const wheelRef = useRef<WheelGesture>({
     lastEventAt: -Infinity,
     scrollTarget: null,
-    navigating: false,
   });
   const dragRef = useRef<PointerDrag>({
     id: null,
@@ -90,9 +90,6 @@ export default function DiveNavigation({
       return;
     }
     const drag = dragRef.current;
-    if (drag.axis === 'navigating') {
-      return;
-    }
     const delta = dragInputDelta(drag, event);
     if (delta === 0) {
       return;
@@ -109,8 +106,8 @@ export default function DiveNavigation({
       settleReadingSection(drag.scrollTarget, driveRef.current);
       drag.scrollTarget.scrollTop += delta;
     } else {
-      drag.axis = 'navigating';
-      stepDriveToSection(driveRef.current, delta > 0 ? 1 : -1);
+      drag.scrollTarget = null;
+      scrollDriveBy(driveRef.current, delta / 1000);
     }
   };
 
@@ -143,10 +140,10 @@ export default function DiveNavigation({
         return;
       }
       event.preventDefault();
-      if (!wheelRef.current.navigating) {
-        wheelRef.current.navigating = true;
-        stepDriveToSection(driveRef.current, event.deltaY > 0 ? 1 : -1);
-      }
+      scrollDriveBy(
+        driveRef.current,
+        normalizeWheelDelta(event, window.innerHeight) / 2000,
+      );
     };
 
     const root = rootRef.current;

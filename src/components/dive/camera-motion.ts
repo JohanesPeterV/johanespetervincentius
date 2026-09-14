@@ -19,11 +19,11 @@ export const createDrive = (route: DiveRoute): DriveMotion => ({
   idleTime: 0,
 });
 
-const POSITION_FOLLOW_RATE = 7.5;
+const POSITION_FOLLOW_RATE = 5;
 const MAX_TARGET_SPEED = 4.5;
 const POSITION_EPSILON = 0.0004;
 const SNAP_IDLE_DELAY = 0.4;
-const SNAP_RATE = 2.2;
+const SNAP_RATE = 1.4;
 
 // REASON: gravity may only engage after true idle - pulling while wheel
 // deltas still arrive turns slow deliberate scrolling into a rubber band
@@ -83,6 +83,20 @@ export const jumpDriveToSection = (
   center: number,
 ): void => {
   motion.target += motion.route.jumpDelta(motion.target, center);
+};
+
+export const scrollDriveBy = (motion: DriveMotion, delta: number): void => {
+  const target = MathUtils.clamp(
+    motion.target + delta,
+    motion.current - 0.85,
+    motion.current + 0.85,
+  );
+  // REASON: a chapter command can exceed the scroll lead; its next forward
+  // input must not pull the destination backward to the continuous-input cap.
+  if (Math.sign(target - motion.target) === Math.sign(delta)) {
+    motion.target = target;
+  }
+  motion.idleTime = 0;
 };
 
 export const stepDriveToSection = (

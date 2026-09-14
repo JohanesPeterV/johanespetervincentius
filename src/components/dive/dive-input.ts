@@ -9,7 +9,6 @@ export type PointerDrag = {
     | 'pending-vertical'
     | 'horizontal'
     | 'vertical'
-    | 'navigating'
     | 'scrolling';
   scrollTarget: HTMLElement | null;
 };
@@ -17,7 +16,6 @@ export type PointerDrag = {
 export type WheelGesture = {
   lastEventAt: number;
   scrollTarget: HTMLElement | null;
-  navigating: boolean;
 };
 
 export const captureWheelSection = (
@@ -29,7 +27,6 @@ export const captureWheelSection = (
     gesture.scrollTarget = canScrollSection(section, event.deltaY)
       ? section
       : null;
-    gesture.navigating = false;
   }
   gesture.lastEventAt = event.timeStamp;
   // REASON: momentum at a panel edge still belongs to the reading gesture;
@@ -79,4 +76,17 @@ export const canScrollSection = (
   return delta > 0
     ? section.scrollTop + section.clientHeight < section.scrollHeight - 1
     : section.scrollTop > 0;
+};
+
+export const normalizeWheelDelta = (
+  event: { deltaY: number; deltaMode: number },
+  pageHeight: number,
+): number => {
+  if (event.deltaMode === 1) {
+    return event.deltaY * 16;
+  }
+  if (event.deltaMode === 2) {
+    return event.deltaY * pageHeight;
+  }
+  return event.deltaY;
 };
