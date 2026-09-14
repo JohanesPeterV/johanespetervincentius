@@ -19,7 +19,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     status: 'current',
     summary:
-      'Own the platforms behind custom merchandise, corporate gifting, and rewards — from quotes and checkout to inventory, delivery, and accounting.',
+      'Own engineering for custom merchandise, corporate gifting, and client rewards projects — from quotes and checkout to inventory, delivery, and accounting.',
     products: [
       {
         name: 'Smilie',
@@ -34,7 +34,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         name: 'IG Club Rewards',
         href: 'https://ig.smilie.io',
-        description: 'Points & reward redemption',
+        description: 'Client project · reward redemption',
       },
     ],
     positions: [
@@ -42,7 +42,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Senior Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
-          'Work directly with the Founder to build and operate Smilie’s commerce, merchandise, gifting, and rewards platforms. Own architecture, business workflows, and production delivery, replacing legacy WordPress and Airtable processes.',
+          'Work directly with the Founder on Smilie’s commerce and gifting platforms and client rewards projects. Own architecture, business workflows, and production delivery, replacing legacy WordPress and Airtable processes.',
       },
     ],
     showcases: [
@@ -62,9 +62,9 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
           'Connect Stripe payments, company credits, and Xero invoices, with reconciliation and retries that recover failed accounting updates while preserving successful payments.',
       },
       {
-        title: 'Rewards platform',
+        title: 'Client rewards platform',
         description:
-          'Build IG Club Rewards for points-based physical gifts and digital vouchers, including wallets, Qwikcilver integration, activation retries, expiry handling, and redemption reports.',
+          'Develop and maintain IG Club Rewards for a Smilie client, covering points wallets, physical gifts, digital vouchers, Qwikcilver integration, activation retries, expiry handling, and redemption reports.',
       },
       {
         title: 'Catalogue automation',
