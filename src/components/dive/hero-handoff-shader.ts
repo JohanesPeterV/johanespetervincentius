@@ -73,7 +73,10 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float broad = handoffNoise(p * 4.6 + 3.2);
   float medium = handoffNoise(p * 21.0 + broad * 2.8);
   float fine = handoffNoise(p * 110.0 + medium * 3.0);
-  float field = uv.y + (broad - 0.5) * 0.22 + (medium - 0.5) * 0.075
+  // REASON: crossings sweep with the scroll, but the opening follows the loader
+  // into depth, so its edge burns open from the centre toward the viewer.
+  float radius = length(p - vec2(uAspect, 1.0) * 0.5) / length(vec2(uAspect, 1.0) * 0.5);
+  float field = mix(uv.y, radius, uOpening) + (broad - 0.5) * 0.22 + (medium - 0.5) * 0.075
               + (fine - 0.5) * 0.018 + sin(uv.x * 5.0) * 0.055;
   float edge = progress * 1.5 - 0.25 - field;
   float proximity = 1.0 - smoothstep(0.0, 0.2, abs(edge));

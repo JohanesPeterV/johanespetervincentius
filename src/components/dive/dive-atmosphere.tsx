@@ -203,12 +203,10 @@ export default function DiveAtmosphere({
     uniforms.uAppearanceTo.value.set(to.size, to.glow, to.tint);
     uniforms.uTravel.value = reality === 'orbital' ? frame.travel : 0;
     const handoff = handoffRef.current;
-    const departure = Math.max(
+    const departure =
       handoff.crossing === 'loop'
         ? 1 - handoff.progress
-        : heroHandoffProgress(handoff.journey),
-      1 - handoff.arrival,
-    );
+        : heroHandoffProgress(handoff.journey);
     uniforms.uFlow.value = motionMode === 'full' ? departure * departure : 0;
     uniforms.uPointer.value.lerp(interaction.pointer, 1 - Math.exp(-step * 16));
     uniforms.uPointerStrength.value +=
