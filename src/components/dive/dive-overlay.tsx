@@ -1,29 +1,25 @@
 'use client';
 
-import { ComponentType, ReactNode, RefObject } from 'react';
+import { ReactNode, RefObject } from 'react';
 
-import { DIVE_SECTIONS } from './dive-sections';
-import type { ContentSectionId, SectionHeading } from './dive-sections';
-import { DiveStack } from './dive-stack';
-import { DiveWork } from './dive-work';
+import type { DiveRoute } from './dive-route';
+import type { DiveChapter } from './dive-route';
 import type { OverlayNodes } from './dive-overlay-motion';
 
+export type DiveContent = DiveChapter & { content: ReactNode };
+
 type DiveOverlayParams = {
-  children: ReactNode;
+  hero: ReactNode;
+  chapters: readonly DiveContent[];
+  route: DiveRoute;
   overlayRef: RefObject<OverlayNodes>;
   onNavigate: (center: number) => void;
 };
 
-const SECTION_CONTENT: Record<
-  ContentSectionId,
-  ComponentType<SectionHeading>
-> = {
-  work: DiveWork,
-  stack: DiveStack,
-};
-
 export default function DiveOverlay({
-  children,
+  hero,
+  chapters,
+  route,
   overlayRef,
   onNavigate,
 }: DiveOverlayParams) {
@@ -37,7 +33,10 @@ export default function DiveOverlay({
         className="pointer-events-none absolute inset-0 z-10 opacity-0"
       />
       <div className="pointer-events-none absolute inset-0">
-        {DIVE_SECTIONS.map((section) => {
+        {[
+          { id: 'hero', title: route.sections[0].title, content: hero },
+          ...chapters,
+        ].map((section) => {
           const sectionRef = (element: HTMLDivElement | null) => {
             overlayRef.current.sections.set(section.id, element);
           };
@@ -50,11 +49,10 @@ export default function DiveOverlay({
                 ref={sectionRef}
                 className="absolute inset-0 flex items-center justify-center opacity-0 [will-change:transform,opacity] [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
               >
-                {children}
+                {section.content}
               </div>
             );
           }
-          const Content = SECTION_CONTENT[section.id];
           return (
             <div
               key={section.id}
@@ -68,7 +66,7 @@ export default function DiveOverlay({
               className="dive-card-section pointer-events-auto invisible absolute inset-0 overflow-y-auto text-left opacity-0 scrollbar-thin"
             >
               <div className="mx-auto max-w-[1440px] px-6 pb-24 pt-20">
-                <Content title={section.title} subtitle={section.subtitle} />
+                {section.content}
               </div>
             </div>
           );
@@ -78,7 +76,7 @@ export default function DiveOverlay({
         aria-label="Journey chapters"
         className="dive-chrome surface-panel absolute bottom-5 right-5 z-20 flex gap-1 p-1 sm:bottom-7 sm:right-8"
       >
-        {DIVE_SECTIONS.map((section, index) => (
+        {route.sections.map((section, index) => (
           <button
             key={section.id}
             type="button"

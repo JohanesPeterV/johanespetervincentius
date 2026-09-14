@@ -1,13 +1,12 @@
 'use client';
 
 import { STACK_GROUPS } from '@/app/_components/stack';
-import type { SectionHeading } from './dive-sections';
 
-export const DiveStack = ({ title, subtitle }: SectionHeading) => (
+export const DiveStack = () => (
   <>
     <header className="px-4 pb-10">
-      <p className="identity-tag type-meta">{subtitle}</p>
-      <h2 className="work-section-title font-display">{title}</h2>
+      <p className="identity-tag type-meta">What I build with</p>
+      <h2 className="work-section-title font-display">Stack</h2>
     </header>
     <div className="px-4">
       {STACK_GROUPS.map((group) => (

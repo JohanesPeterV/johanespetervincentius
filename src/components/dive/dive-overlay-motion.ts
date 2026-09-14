@@ -1,25 +1,15 @@
-import {
-  CONTENT_SECTIONS,
-  DIVE_SECTIONS,
-  DIVE_START,
-  ENTRY_SECTION,
-} from './dive-sections';
-import type { DiveSectionId } from './dive-sections';
+import { DIVE_START } from './dive-route';
+import type { DiveRoute } from './dive-route';
 import { ARRIVAL_RISE, arrivalCard } from './arrival';
-import {
-  DescentFrame,
-  cardScatter,
-  stoneSectionOpacity,
-  sectionJumpDelta,
-} from './descent';
+import { DescentFrame, cardScatter, stoneSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
 import { heroOverlayOpacity, entryOverlayOpacity } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
 export type OverlayNodes = {
-  chapters: Map<DiveSectionId, HTMLButtonElement | null>;
+  chapters: Map<string, HTMLButtonElement | null>;
   root: HTMLDivElement | null;
-  sections: Map<DiveSectionId, HTMLDivElement | null>;
+  sections: Map<string, HTMLDivElement | null>;
   veil: HTMLDivElement | null;
 };
 
@@ -30,6 +20,7 @@ export type OverlayFrame = {
 };
 
 type OverlayMotion = {
+  route: DiveRoute | null;
   nodes: OverlayNodes;
   progress: number;
   arrival: number;
@@ -38,6 +29,7 @@ type OverlayMotion = {
 
 export const createOverlayMotion = (nodes: OverlayNodes): OverlayMotion => ({
   nodes,
+  route: null,
   progress: Number.NaN,
   arrival: Number.NaN,
   motionMode: null,
@@ -47,11 +39,12 @@ export const overlayNeedsUpdate = (
   previous: OverlayMotion,
   frame: OverlayFrame,
 ): boolean =>
+  frame.handoff.route !== previous.route ||
   frame.handoff.journey !== previous.progress ||
   frame.motionMode !== previous.motionMode ||
   frame.handoff.arrival !== previous.arrival ||
   (frame.handoff.progress > 0 && frame.handoff.progress < 1) ||
-  CONTENT_SECTIONS.some(
+  frame.handoff.route.sections.some(
     (section) =>
       section.animation === 'cards' &&
       stoneSectionOpacity(frame.handoff.journey, section.center) > 0,
@@ -67,21 +60,22 @@ export const updateOverlay = (
     return;
   }
   applyOverlay(motion.nodes, frame);
+  motion.route = frame.handoff.route;
   motion.progress = frame.handoff.journey;
   motion.arrival = frame.handoff.arrival;
   motion.motionMode = frame.motionMode;
 };
 
 const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
-  let activeChapter: DiveSectionId = 'hero';
+  let activeChapter: string = 'hero';
   let nearestDistance = Infinity;
   const card = arrivalCard(frame.handoff.arrival);
   if (nodes.root) {
     nodes.root.style.setProperty('--arrival', String(frame.handoff.arrival));
   }
-  DIVE_SECTIONS.forEach((section) => {
+  frame.handoff.route.sections.forEach((section) => {
     const distance = Math.abs(
-      sectionJumpDelta(frame.handoff.journey, section.center),
+      frame.handoff.route.jumpDelta(frame.handoff.journey, section.center),
     );
     if (distance < nearestDistance) {
       nearestDistance = distance;
@@ -95,7 +89,7 @@ const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
     if (section.id === 'hero') {
       opacity = heroOverlayOpacity(frame.handoff) * card;
     }
-    if (section.id === ENTRY_SECTION.id) {
+    if (section.id === frame.handoff.route.entry.id) {
       opacity = entryOverlayOpacity(frame.handoff);
     }
     element.style.opacity = String(opacity);
@@ -137,7 +131,7 @@ const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
     let opacity = frame.descent.veil;
     if (
       frame.handoff.journey < DIVE_START ||
-      frame.handoff.journey > ENTRY_SECTION.center
+      frame.handoff.journey > frame.handoff.route.entry.center
     ) {
       opacity = 0;
     }

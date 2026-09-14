@@ -1,5 +1,7 @@
 import LinktreeSection, { type CardType } from '@/app/_components/linktree';
 import DiveScene from '@/components/dive/dive-scene';
+import { DiveWork } from '@/components/dive/dive-work';
+import { DiveStack } from '@/components/dive/dive-stack';
 
 type HomeParams = {
   searchParams: Promise<{
@@ -24,9 +26,19 @@ export default async function Home({ searchParams }: HomeParams) {
 
   return (
     <main className="relative h-svh w-full overflow-hidden">
-      <DiveScene>
-        <LinktreeSection cardType={cardType} />
-      </DiveScene>
+      <DiveScene
+        hero={<LinktreeSection cardType={cardType} />}
+        heroTitle={'Johanes Peter\nVincentius'}
+        chapters={[
+          {
+            id: 'work',
+            title: 'Work & Projects',
+            animation: 'cards',
+            content: <DiveWork />,
+          },
+          { id: 'stack', title: 'Stack', content: <DiveStack /> },
+        ]}
+      />
     </main>
   );
 }

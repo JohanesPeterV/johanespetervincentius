@@ -1,19 +1,23 @@
 import { MathUtils } from 'three';
 
-import { DIVE_LENGTH, DIVE_START } from './dive-sections';
-import {
-  nearestSectionDelta,
-  sectionJumpDelta,
-  sectionStepDelta,
-  wrapProgress,
-} from './descent';
+import { DIVE_START } from './dive-route';
+import type { DiveRoute } from './dive-route';
 
 export type DriveMotion = {
+  route: DiveRoute;
   current: number;
   target: number;
   expectedTarget: number;
   idleTime: number;
 };
+
+export const createDrive = (route: DiveRoute): DriveMotion => ({
+  route,
+  current: DIVE_START,
+  target: DIVE_START,
+  expectedTarget: Number.NaN,
+  idleTime: 0,
+});
 
 const POSITION_FOLLOW_RATE = 7.5;
 const MAX_TARGET_SPEED = 4.5;
@@ -37,7 +41,7 @@ const driftTargetToSection = (
   if (motion.idleTime > SNAP_IDLE_DELAY) {
     next = MathUtils.damp(
       target,
-      target + nearestSectionDelta(target),
+      target + motion.route.nearestDelta(target),
       SNAP_RATE,
       delta,
     );
@@ -60,8 +64,10 @@ export const advanceDrive = (motion: DriveMotion, delta: number): void => {
   // REASON: opposite world crossings meet at Hero. Sample its reading pose
   // at least once, even on a slow frame, so the next crossing saves the right world.
   const direction = Math.sign(step);
-  const toHero = wrapProgress((DIVE_START - motion.current) * direction);
-  const nextHero = toHero < 0.0000001 ? DIVE_LENGTH : toHero;
+  const toHero = motion.route.wrapDistance(
+    (DIVE_START - motion.current) * direction,
+  );
+  const nextHero = toHero < 0.0000001 ? motion.route.length : toHero;
   const stopsAtHero = nextHero < Math.abs(step);
   if (stopsAtHero) {
     step = nextHero * direction;
@@ -76,7 +82,7 @@ export const jumpDriveToSection = (
   motion: DriveMotion,
   center: number,
 ): void => {
-  motion.target += sectionJumpDelta(motion.target, center);
+  motion.target += motion.route.jumpDelta(motion.target, center);
 };
 
 export const stepDriveToSection = (
@@ -85,5 +91,5 @@ export const stepDriveToSection = (
 ): void => {
   // REASON: chapter commands choose a destination, not a wheel delta. The
   // longer loop hop must not be truncated by the continuous-input lead cap.
-  motion.target += sectionStepDelta(motion.target, direction);
+  motion.target += motion.route.stepDelta(motion.target, direction);
 };

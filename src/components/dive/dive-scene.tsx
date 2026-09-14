@@ -5,25 +5,33 @@ import { ReactNode, Suspense, useRef } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import PalettePicker from '@/components/theme-buttons/palette-picker';
 
-import { DIVE_START } from './dive-sections';
+import { DIVE_START, DiveRoute } from './dive-route';
 import type { PointerState } from './dive-input';
 import DiveNavigation from './dive-navigation';
-import type { DriveMotion } from './camera-motion';
+import { createDrive } from './camera-motion';
 import DiveCanvas from './dive-canvas';
 import { jumpDriveToSection } from './camera-motion';
 import { useDivePalette } from './use-dive-palette';
 import DiveOverlay from './dive-overlay';
+import type { DiveContent } from './dive-overlay';
 import DiveLoader from './dive-loader';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { useHeroHandoff } from './use-hero-handoff';
 
-export default function DiveScene({ children }: { children: ReactNode }) {
-  const driveRef = useRef<DriveMotion>({
-    current: DIVE_START,
-    target: DIVE_START,
-    expectedTarget: Number.NaN,
-    idleTime: 0,
-  });
+type DiveSceneProps = {
+  hero: ReactNode;
+  heroTitle: string;
+  chapters: readonly [DiveContent, ...DiveContent[]];
+};
+
+export default function DiveScene({
+  hero,
+  heroTitle,
+  chapters,
+}: DiveSceneProps) {
+  const route = new DiveRoute(heroTitle, chapters);
+  const driveRef = useRef(createDrive(route));
+  driveRef.current.route = route;
   const progressRef = useRef(DIVE_START);
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
   const overlayRef = useRef<OverlayNodes>({
@@ -32,7 +40,7 @@ export default function DiveScene({ children }: { children: ReactNode }) {
     sections: new Map(),
     veil: null,
   });
-  const { handoffRef, error: handoffError } = useHeroHandoff(overlayRef);
+  const { handoffRef, error: handoffError } = useHeroHandoff(overlayRef, route);
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const motionMode = reducedMotion ? 'reduced' : 'full';
   const palette = useDivePalette();
@@ -65,11 +73,12 @@ export default function DiveScene({ children }: { children: ReactNode }) {
         <PalettePicker />
       </div>
       <DiveOverlay
+        hero={hero}
+        chapters={chapters}
+        route={route}
         overlayRef={overlayRef}
         onNavigate={(center) => jumpDriveToSection(driveRef.current, center)}
-      >
-        {children}
-      </DiveOverlay>
+      />
       {handoffError ? (
         <p
           role="status"

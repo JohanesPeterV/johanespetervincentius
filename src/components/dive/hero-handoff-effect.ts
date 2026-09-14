@@ -68,7 +68,7 @@ export default class HeroHandoffEffect extends Effect {
     // during a crossing; orbital artwork depends on the other endpoint's pose.
     if (handoff.crossing === null) {
       this.source.camera.copy(this.camera, false);
-      handoff.sourceWorld = worldAtProgress(handoff.journey);
+      handoff.sourceWorld = worldAtProgress(handoff.journey, handoff.route);
       // REASON: Hero is rendered live during the crossing, so only the
       // camera-bound orbital endpoint needs a full-screen snapshot each frame.
       if (handoff.sourceWorld === 'orbital') {

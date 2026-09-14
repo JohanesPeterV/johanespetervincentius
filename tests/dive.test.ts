@@ -9,18 +9,11 @@ import {
 } from '../src/components/dive/camera-motion';
 import type { DriveMotion } from '../src/components/dive/camera-motion';
 import {
-  DIVE_LENGTH,
-  DIVE_SECTIONS,
   DIVE_START,
-  ENTRY_SECTION,
-  LAST_SECTION,
-} from '../src/components/dive/dive-sections';
-import {
+  DiveRoute,
   LOOP_END,
-  LOOP_START,
-  sectionJumpDelta,
-  wrapJourney,
-} from '../src/components/dive/descent';
+} from '../src/components/dive/dive-route';
+
 import { dragInputDelta } from '../src/components/dive/dive-input';
 import type { PointerDrag } from '../src/components/dive/dive-input';
 import {
@@ -30,7 +23,13 @@ import {
   sampleHeroHandoff,
 } from '../src/components/dive/hero-handoff';
 
+const route = new DiveRoute('Hero', [
+  { id: 'work', title: 'Work', animation: 'cards' },
+  { id: 'stack', title: 'Stack' },
+]);
+
 const createDrive = (): DriveMotion => ({
+  route,
   current: DIVE_START,
   target: DIVE_START,
   expectedTarget: Number.NaN,
@@ -43,54 +42,54 @@ const near = (actual: number, expected: number): void => {
 
 test('chapter poses retain the authored spacing and return gap', () => {
   near(DIVE_START, 0.95);
-  near(ENTRY_SECTION.center, 1.95);
-  for (let index = 2; index < DIVE_SECTIONS.length; index++) {
-    near(DIVE_SECTIONS[index].center - DIVE_SECTIONS[index - 1].center, 0.6);
+  near(route.entry.center, 1.95);
+  for (let index = 2; index < route.sections.length; index++) {
+    near(route.sections[index].center - route.sections[index - 1].center, 0.6);
   }
   assert.equal(
-    new Set(DIVE_SECTIONS.map(({ id }) => id)).size,
-    DIVE_SECTIONS.length,
+    new Set(route.sections.map(({ id }) => id)).size,
+    route.sections.length,
   );
-  const openingGap = ENTRY_SECTION.center - DIVE_START;
-  const returnGap = DIVE_START + DIVE_LENGTH - LAST_SECTION.center;
+  const openingGap = route.entry.center - DIVE_START;
+  const returnGap = DIVE_START + route.length - route.last.center;
   near(returnGap, openingGap);
-  assert.ok(LOOP_START > LAST_SECTION.center);
-  assert.ok(LOOP_END + DIVE_LENGTH > LOOP_START);
+  assert.ok(route.loopStart > route.last.center);
+  assert.ok(LOOP_END + route.length > route.loopStart);
 });
 
 test('chapter steps keep their direction and reach every stop across repeated laps', () => {
   const directions: (1 | -1)[] = [1, -1];
   for (const direction of directions) {
     const drive = createDrive();
-    for (let step = 1; step <= DIVE_SECTIONS.length * 6; step++) {
+    for (let step = 1; step <= route.sections.length * 6; step++) {
       const previous = drive.target;
       stepDriveToSection(drive, direction);
       assert.equal(Math.sign(drive.target - previous), direction);
       const index =
-        (((step * direction) % DIVE_SECTIONS.length) + DIVE_SECTIONS.length) %
-        DIVE_SECTIONS.length;
-      const destination = DIVE_SECTIONS[index].center;
-      near(sectionJumpDelta(drive.target, destination), 0);
+        (((step * direction) % route.sections.length) + route.sections.length) %
+        route.sections.length;
+      const destination = route.sections[index].center;
+      near(route.jumpDelta(drive.target, destination), 0);
       for (let frame = 0; frame < 600; frame++) {
         advanceDrive(drive, 1 / 60);
       }
-      near(sectionJumpDelta(drive.current, destination), 0);
+      near(route.jumpDelta(drive.current, destination), 0);
     }
   }
 });
 
 test('chapter buttons choose the nearest equivalent destination on any lap', () => {
   for (let lap = -5; lap <= 5; lap++) {
-    for (const source of DIVE_SECTIONS) {
-      for (const destination of DIVE_SECTIONS) {
+    for (const source of route.sections) {
+      for (const destination of route.sections) {
         const drive = createDrive();
-        drive.current = source.center + lap * DIVE_LENGTH;
+        drive.current = source.center + lap * route.length;
         drive.target = drive.current;
         jumpDriveToSection(drive, destination.center);
         assert.ok(
-          Math.abs(drive.target - drive.current) <= DIVE_LENGTH / 2 + 0.000001,
+          Math.abs(drive.target - drive.current) <= route.length / 2 + 0.000001,
         );
-        near(sectionJumpDelta(drive.target, destination.center), 0);
+        near(route.jumpDelta(drive.target, destination.center), 0);
       }
     }
   }
@@ -126,7 +125,7 @@ test('horizontal card drags and small movements do not navigate the journey', ()
 });
 
 test('the entry crossing retains its outgoing world when input reverses', () => {
-  const handoff = createHeroHandoff();
+  const handoff = createHeroHandoff(route);
   handoff.hero = new CanvasTexture(new EventTarget());
   handoff.entry = new CanvasTexture(new EventTarget());
   handoff.sourceWorld = 'hero';
@@ -145,23 +144,23 @@ test('the entry crossing retains its outgoing world when input reverses', () => 
 });
 
 test('reduced motion releases the compositor at both crossings on repeated laps', () => {
-  const handoff = createHeroHandoff();
+  const handoff = createHeroHandoff(route);
   handoff.hero = new CanvasTexture(new EventTarget());
   handoff.entry = new CanvasTexture(new EventTarget());
   handoff.sourceWorld = 'hero';
   for (let lap = -3; lap <= 3; lap++) {
-    handoff.journey = wrapJourney(
-      (HANDOFF_START + HANDOFF_END) / 2 + lap * DIVE_LENGTH,
+    handoff.journey = route.wrap(
+      (HANDOFF_START + HANDOFF_END) / 2 + lap * route.length,
     );
     sampleHeroHandoff(handoff, 'reduced');
     assert.equal(handoff.compositing, false);
-    handoff.journey = wrapJourney(
-      (LOOP_START + LOOP_END + DIVE_LENGTH) / 2 + lap * DIVE_LENGTH,
+    handoff.journey = route.wrap(
+      (route.loopStart + LOOP_END + route.length) / 2 + lap * route.length,
     );
     const position = sampleHeroHandoff(handoff, 'reduced');
     assert.equal(handoff.crossing, 'loop');
     assert.equal(handoff.compositing, false);
-    assert.ok(position === LOOP_START || position === LOOP_END);
+    assert.ok(position === route.loopStart || position === LOOP_END);
   }
   handoff.hero.dispose();
   handoff.entry.dispose();

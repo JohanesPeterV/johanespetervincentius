@@ -1,7 +1,6 @@
 import { ARRIVAL_DURATION } from './arrival';
 import { advanceDrive } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
-import { wrapJourney } from './descent';
 import type { MotionMode } from './descent';
 import { sampleHeroHandoff } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
@@ -58,7 +57,7 @@ export const advanceDiveTimeline = (
   timeline.delta = delta;
   timeline.step = drive.current - previous;
   timeline.velocity = delta > 0 ? timeline.step / (delta * BASELINE_FPS) : 0;
-  handoff.journey = wrapJourney(drive.current);
+  handoff.journey = drive.route.wrap(drive.current);
   // REASON: during a crossing, the camera holds an endpoint while the HTML
   // follows the journey. Sampling once keeps every renderer on the same frame.
   timeline.renderProgress = sampleHeroHandoff(handoff, tick.motionMode);

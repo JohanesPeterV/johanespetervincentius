@@ -15,7 +15,6 @@ import {
 } from 'three';
 
 import type { DivePalette } from './dive-palette';
-import { sectionTravel } from './descent';
 import type { MotionMode } from './descent';
 import { heroHandoffProgress } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
@@ -202,7 +201,9 @@ export default function DiveAtmosphere({
     uniforms.uAppearanceFrom.value.set(from.size, from.glow, from.tint);
     uniforms.uAppearanceTo.value.set(to.size, to.glow, to.tint);
     uniforms.uTravel.value =
-      reality === 'orbital' ? sectionTravel(progressRef.current) : 0;
+      reality === 'orbital'
+        ? handoffRef.current.route.travel(progressRef.current)
+        : 0;
     const handoff = handoffRef.current;
     const departure = Math.max(
       handoff.crossing === 'loop'

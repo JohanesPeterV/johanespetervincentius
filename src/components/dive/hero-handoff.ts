@@ -1,21 +1,16 @@
 import { MathUtils } from 'three';
 import type { CanvasTexture } from 'three';
 
-import { DIVE_LENGTH, DIVE_START, ENTRY_SECTION } from './dive-sections';
-
-import {
-  LOOP_END,
-  LOOP_START,
-  stoneSectionOpacity,
-  wrapProgress,
-  wrapJourney,
-} from './descent';
+import { DIVE_START, ENTRY_CENTER, LOOP_END } from './dive-route';
+import type { DiveRoute } from './dive-route';
+import { stoneSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
 
 type HandoffWorld = 'hero' | 'orbital';
 type HandoffCrossing = 'entry' | 'loop' | null;
 
 export type HeroHandoff = {
+  route: DiveRoute;
   hero: CanvasTexture | null;
   entry: CanvasTexture | null;
   sourceWorld: HandoffWorld | null;
@@ -29,9 +24,10 @@ export type HeroHandoff = {
 };
 
 export const HANDOFF_START = DIVE_START + 0.1;
-export const HANDOFF_END = ENTRY_SECTION.center - 0.1;
+export const HANDOFF_END = ENTRY_CENTER - 0.1;
 
-export const createHeroHandoff = (): HeroHandoff => ({
+export const createHeroHandoff = (route: DiveRoute): HeroHandoff => ({
+  route,
   hero: null,
   entry: null,
   sourceWorld: null,
@@ -59,17 +55,23 @@ export const heroHandoffProgress = (progress: number): number =>
     (progress - HANDOFF_START) / (HANDOFF_END - HANDOFF_START),
   );
 
-export const loopHandoffProgress = (progress: number): number => {
-  const wrapped = wrapProgress(progress);
+export const loopHandoffProgress = (handoff: HeroHandoff): number => {
+  const { route } = handoff;
+  const wrapped = route.wrapDistance(handoff.journey);
   const unwrapped =
-    wrapped < (LOOP_START + LOOP_END) / 2 ? wrapped + DIVE_LENGTH : wrapped;
+    wrapped < (route.loopStart + LOOP_END) / 2
+      ? wrapped + route.length
+      : wrapped;
   return clampHandoffProgress(
-    (unwrapped - LOOP_START) / (DIVE_LENGTH + LOOP_END - LOOP_START),
+    (unwrapped - route.loopStart) / (route.length + LOOP_END - route.loopStart),
   );
 };
 
-export const worldAtProgress = (progress: number): HandoffWorld =>
-  wrapJourney(progress) >= (HANDOFF_START + HANDOFF_END) / 2
+export const worldAtProgress = (
+  progress: number,
+  route: DiveRoute,
+): HandoffWorld =>
+  route.wrap(progress) >= (HANDOFF_START + HANDOFF_END) / 2
     ? 'orbital'
     : 'hero';
 
@@ -89,7 +91,7 @@ export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
 export const entrySectionOpacity = (progress: number): number =>
   progress <= HANDOFF_END
     ? Number(heroHandoffProgress(progress) >= 0.5)
-    : stoneSectionOpacity(progress, ENTRY_SECTION.center);
+    : stoneSectionOpacity(progress, ENTRY_CENTER);
 
 export const entryOverlayOpacity = (handoff: HeroHandoff): number =>
   handoff.compositing ? 0 : entrySectionOpacity(handoff.journey);
@@ -98,14 +100,15 @@ export const entryOverlayOpacity = (handoff: HeroHandoff): number =>
 // artwork follows the journey instead, settling in after the crossing rather
 // than showing under the wipe.
 export const orbitalArrival = (journey: number): number =>
-  MathUtils.smootherstep(journey, HANDOFF_END, ENTRY_SECTION.center);
+  MathUtils.smootherstep(journey, HANDOFF_END, ENTRY_CENTER);
 
 export const sampleHeroHandoff = (
   handoff: HeroHandoff,
   motionMode: MotionMode,
 ): number => {
+  const { route } = handoff;
   const entryProgress = heroHandoffProgress(handoff.journey);
-  const loopProgress = loopHandoffProgress(handoff.journey);
+  const loopProgress = loopHandoffProgress(handoff);
   let crossing: HandoffCrossing = null;
   if (loopProgress > 0 && loopProgress < 1) {
     crossing = 'loop';
@@ -128,12 +131,12 @@ export const sampleHeroHandoff = (
     // REASON: render the other endpoint behind the etched edge, never the
     // numeric wrap's resetting camera. The source identity survives reversals.
     if (handoff.sourceWorld === 'hero') {
-      return crossing === 'loop' ? LOOP_START : HANDOFF_END;
+      return crossing === 'loop' ? route.loopStart : HANDOFF_END;
     }
     return crossing === 'loop' ? LOOP_END : HANDOFF_START;
   }
   if (crossing === 'loop') {
-    return loopProgress < 0.5 ? LOOP_START : LOOP_END;
+    return loopProgress < 0.5 ? route.loopStart : LOOP_END;
   }
   return handoff.journey;
 };

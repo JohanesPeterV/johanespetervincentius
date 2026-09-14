@@ -39,7 +39,9 @@ export default function SpaceWorld({
     // REASON: the compositor keeps Hero live on either side of a crossing.
     // Main-pass visibility follows rendered progress, so an
     // etched edge separates two complete scenes instead of shared decoration.
-    const secondWorld = worldAtProgress(progressRef.current) === 'orbital';
+    const secondWorld =
+      worldAtProgress(progressRef.current, handoffRef.current.route) ===
+      'orbital';
     if (firstWorldRef.current) {
       firstWorldRef.current.visible = !secondWorld;
     }

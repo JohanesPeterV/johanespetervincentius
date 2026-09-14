@@ -9,7 +9,7 @@
     "lint": "next lint --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:dive": "tsc --module commonjs --moduleResolution node --target es2020 --esModuleInterop --strict --skipLibCheck --outDir .next-build/dive-tests tests/dive*.test.ts && node --test .next-build/dive-tests/tests/dive*.test.js",
+    "test:dive": "tsc --module commonjs --moduleResolution node --jsx react-jsx --target es2020 --esModuleInterop --strict --skipLibCheck --outDir .next-build/dive-tests tests/dive*.test.ts && node --test .next-build/dive-tests/tests/dive*.test.js",
     "check:sizes": "bash scripts/check-file-sizes.sh",
     "prepare": "lefthook install"
   },

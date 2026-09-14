@@ -3,8 +3,6 @@
 import { ReactNode, RefObject, useEffect, useRef } from 'react';
 import { stepDriveToSection } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
-import { DIVE_SECTIONS } from './dive-sections';
-import { sectionJumpDelta } from './descent';
 import {
   canScrollSection,
   captureWheelSection,
@@ -26,10 +24,10 @@ const settleReadingSection = (
 ): void => {
   const id = section.closest<HTMLElement>('[data-dive-section]')?.dataset
     .diveSection;
-  const chapter = DIVE_SECTIONS.find((candidate) => candidate.id === id);
+  const chapter = drive.route.sections.find((candidate) => candidate.id === id);
   if (chapter) {
     drive.target =
-      drive.current + sectionJumpDelta(drive.current, chapter.center);
+      drive.current + drive.route.jumpDelta(drive.current, chapter.center);
   }
 };
 

@@ -1,6 +1,6 @@
 import { PerspectiveCamera } from 'three';
 
-import { DIVE_START } from './dive-sections';
+import { DIVE_START } from './dive-route';
 import { createDescentFrame, writeDescentFrame } from './descent';
 
 export const createSpaceOrigin = (): PerspectiveCamera => {

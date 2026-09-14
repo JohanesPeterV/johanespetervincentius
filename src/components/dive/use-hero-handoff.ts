@@ -4,7 +4,7 @@ import { getFontEmbedCSS, toCanvas } from 'html-to-image';
 import { RefObject, useEffect, useRef, useState } from 'react';
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
-import { ENTRY_SECTION, HERO_SECTION } from './dive-sections';
+import type { DiveRoute } from './dive-route';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { createHeroHandoff } from './hero-handoff';
 
@@ -94,8 +94,13 @@ const captureSection = async (
   }
 };
 
-export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
-  const handoffRef = useRef(createHeroHandoff());
+export const useHeroHandoff = (
+  overlayRef: RefObject<OverlayNodes>,
+  route: DiveRoute,
+) => {
+  const handoffRef = useRef(createHeroHandoff(route));
+  handoffRef.current.route = route;
+  const entryId = route.entry.id;
   const [error, setError] = useState<string | null>(null);
 
   // REASON: the shader needs cached pixels of the actual DOM, including the
@@ -103,8 +108,8 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
   // never in the render loop; keep the real DOM for reading and interaction.
   useEffect(() => {
     const handoff = handoffRef.current;
-    const hero = overlayRef.current.sections.get(HERO_SECTION.id);
-    const entry = overlayRef.current.sections.get(ENTRY_SECTION.id);
+    const hero = overlayRef.current.sections.get('hero');
+    const entry = overlayRef.current.sections.get(entryId);
     if (!hero || !entry) {
       return;
     }
@@ -186,7 +191,7 @@ export const useHeroHandoff = (overlayRef: RefObject<OverlayNodes>) => {
       handoff.hero = null;
       handoff.entry = null;
     };
-  }, [overlayRef]);
+  }, [overlayRef, entryId]);
 
   return { handoffRef, error };
 };

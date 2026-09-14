@@ -5,11 +5,7 @@ import { CanvasTexture } from 'three';
 import { ARRIVAL_DURATION } from '../src/components/dive/arrival';
 import type { DriveMotion } from '../src/components/dive/camera-motion';
 import { createDescentFrame } from '../src/components/dive/descent';
-import {
-  DIVE_START,
-  ENTRY_SECTION,
-  LAST_SECTION,
-} from '../src/components/dive/dive-sections';
+import { DIVE_START, DiveRoute } from '../src/components/dive/dive-route';
 import {
   advanceDiveTimeline,
   createDiveTimeline,
@@ -26,7 +22,13 @@ import {
   HANDOFF_END,
 } from '../src/components/dive/hero-handoff';
 
+const route = new DiveRoute('Hero', [
+  { id: 'work', title: 'Work', animation: 'cards' },
+  { id: 'stack', title: 'Stack' },
+]);
+
 const createDrive = (): DriveMotion => ({
+  route,
   current: DIVE_START,
   target: DIVE_START,
   expectedTarget: Number.NaN,
@@ -39,9 +41,9 @@ const near = (actual: number, expected: number): void => {
 
 test('loading preserves queued navigation until the scene is live', () => {
   const drive = createDrive();
-  const handoff = createHeroHandoff();
+  const handoff = createHeroHandoff(route);
   const timeline = createDiveTimeline(drive, handoff);
-  drive.target = ENTRY_SECTION.center;
+  drive.target = route.entry.center;
   const queued = { ...drive };
   for (let index = 0; index < 60; index++) {
     advanceDiveTimeline(timeline, {
@@ -68,8 +70,8 @@ test('loading preserves queued navigation until the scene is live', () => {
 
 test('long frames cap movement and arrival together; zero time has finite velocity', () => {
   const drive = createDrive();
-  drive.target = ENTRY_SECTION.center;
-  const handoff = createHeroHandoff();
+  drive.target = route.entry.center;
+  const handoff = createHeroHandoff(route);
   const timeline = createDiveTimeline(drive, handoff);
   advanceDiveTimeline(timeline, {
     delta: 30,
@@ -92,7 +94,7 @@ test('long frames cap movement and arrival together; zero time has finite veloci
 });
 
 test('the opening advances by elapsed live time and remains complete', () => {
-  const handoff = createHeroHandoff();
+  const handoff = createHeroHandoff(route);
   const timeline = createDiveTimeline(createDrive(), handoff);
   for (let index = 0; index < 168; index++) {
     advanceDiveTimeline(timeline, {
@@ -112,8 +114,8 @@ test('the opening advances by elapsed live time and remains complete', () => {
 
 test('reduced motion still waits for loading, then settles the current command', () => {
   const drive = createDrive();
-  drive.target = LAST_SECTION.center;
-  const handoff = createHeroHandoff();
+  drive.target = route.last.center;
+  const handoff = createHeroHandoff(route);
   const timeline = createDiveTimeline(drive, handoff);
   advanceDiveTimeline(timeline, {
     delta: 1 / 60,
@@ -129,7 +131,7 @@ test('reduced motion still waits for loading, then settles the current command',
   });
   assert.equal(drive.current, drive.target);
   assert.equal(handoff.arrival, 1);
-  drive.target = ENTRY_SECTION.center;
+  drive.target = route.entry.center;
   advanceDiveTimeline(timeline, {
     delta: 1 / 60,
     stage: 'live',
@@ -142,7 +144,7 @@ test('reduced motion still waits for loading, then settles the current command',
 test('a composited crossing keeps camera progress separate from the live journey', () => {
   const drive = createDrive();
   drive.current = drive.target = (HANDOFF_START + HANDOFF_END) / 2;
-  const handoff = createHeroHandoff();
+  const handoff = createHeroHandoff(route);
   handoff.hero = new CanvasTexture(new EventTarget());
   handoff.entry = new CanvasTexture(new EventTarget());
   handoff.sourceWorld = 'hero';
@@ -176,7 +178,7 @@ test('overlay refreshes first paint, arrival, journey, and motion-mode changes',
   });
   const frame: OverlayFrame = {
     descent: createDescentFrame(),
-    handoff: createHeroHandoff(),
+    handoff: createHeroHandoff(route),
     motionMode: 'full',
   };
   assert.equal(overlayNeedsUpdate(motion, frame), true);
@@ -189,7 +191,7 @@ test('overlay refreshes first paint, arrival, journey, and motion-mode changes',
   frame.motionMode = 'reduced';
   assert.equal(overlayNeedsUpdate(motion, frame), true);
   updateOverlay(motion, frame);
-  frame.handoff.journey = LAST_SECTION.center;
+  frame.handoff.journey = route.last.center;
   assert.equal(overlayNeedsUpdate(motion, frame), true);
 });
 
@@ -202,14 +204,14 @@ test('resting cards and active crossings keep updating; resting static text does
   });
   const frame: OverlayFrame = {
     descent: createDescentFrame(),
-    handoff: createHeroHandoff(),
+    handoff: createHeroHandoff(route),
     motionMode: 'full',
   };
   frame.handoff.arrival = 1;
-  frame.handoff.journey = ENTRY_SECTION.center;
+  frame.handoff.journey = route.entry.center;
   updateOverlay(motion, frame);
   assert.equal(overlayNeedsUpdate(motion, frame), true);
-  frame.handoff.journey = LAST_SECTION.center;
+  frame.handoff.journey = route.last.center;
   updateOverlay(motion, frame);
   assert.equal(overlayNeedsUpdate(motion, frame), false);
   frame.handoff.progress = 0.5;

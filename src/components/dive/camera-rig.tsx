@@ -16,7 +16,6 @@ import {
   aberrationStrength,
   createDescentFrame,
   rushFov,
-  sectionTravel,
   writeDescentFrame,
 } from './descent';
 import type { DescentFrame, MotionMode } from './descent';
@@ -97,8 +96,9 @@ export default function CameraRig({
     const handoff = handoffRef.current;
     const approach = arrivalApproach(handoff.arrival);
     progressRef.current = progress;
-    const frame = writeDescentFrame(descentFrame, progress);
-    applyDivePalette(frame, palette, progress);
+    const sceneProgress = driveRef.current.route.sceneProgress(progress);
+    const frame = writeDescentFrame(descentFrame, sceneProgress);
+    applyDivePalette(frame, palette, sceneProgress);
     if (motionMode === 'reduced') {
       frame.position[0] = 0;
       frame.position[1] = 3.5;
@@ -136,7 +136,7 @@ export default function CameraRig({
     const transitionZone =
       motionMode === 'reduced' || handoff.crossing !== null
         ? 0
-        : sectionTravel(progress);
+        : driveRef.current.route.travel(progress);
     const targetRoll =
       Math.max(-0.012, Math.min(0.012, -driveStep * 0.12)) * transitionZone;
     rollRef.current = MathUtils.damp(

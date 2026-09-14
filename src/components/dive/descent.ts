@@ -1,11 +1,4 @@
 import { RAW_DESCENT_KEYS } from './descent-keys';
-import {
-  DIVE_LENGTH,
-  DIVE_START,
-  DIVE_SECTIONS,
-  LAST_SECTION,
-} from './dive-sections';
-
 export type DescentFrame = {
   position: [number, number, number];
   look: [number, number, number];
@@ -90,15 +83,6 @@ export const createDescentFrame = (): DescentFrame => ({
   veilColor: [0, 0, 0],
 });
 
-export const wrapProgress = (value: number): number => {
-  const wrapped = ((value % DIVE_LENGTH) + DIVE_LENGTH) % DIVE_LENGTH;
-  // REASON: complete laps can round to just below the end instead of zero;
-  // both sides of the numeric seam must select the same rendered world.
-  return wrapped < 0.000000001 || DIVE_LENGTH - wrapped < 0.000000001
-    ? 0
-    : wrapped;
-};
-
 const WORLD_ENTER_AT = 1.3;
 const WORLD_ACCELERATION_SPAN = 0.38;
 const WORLD_RISE_RATE = 20;
@@ -119,7 +103,7 @@ export const writeDescentFrame = (
   target: DescentFrame,
   progress: number,
 ): DescentFrame => {
-  const wrapped = wrapJourney(progress);
+  const wrapped = progress;
   let start = DESCENT_KEYS[0];
   let end = DESCENT_KEYS[DESCENT_KEYS.length - 1];
   for (let index = 0; index < DESCENT_KEYS.length - 1; index++) {
@@ -164,65 +148,6 @@ export const cardScatter = (progress: number, center: number): number =>
     center + SCATTER_START + SCATTER_SPAN,
     progress,
   );
-
-const HERO_READING_HALF = 0.1;
-
-export const LOOP_START = LAST_SECTION.center + SCATTER_START + SCATTER_SPAN;
-export const LOOP_END = DIVE_START - HERO_READING_HALF;
-
-// REASON: journey coordinates wrap at Hero's arrival, keeping the authored
-// chapter poses intact when the return gap matches the opening gap.
-export const wrapJourney = (value: number): number =>
-  LOOP_END + wrapProgress(value - LOOP_END);
-
-export const sectionTravel = (progress: number): number => {
-  let travel = 1;
-  for (const section of DIVE_SECTIONS) {
-    const distance = Math.abs(
-      wrapProgress(progress - section.center + DIVE_LENGTH / 2) -
-        DIVE_LENGTH / 2,
-    );
-    travel = Math.min(travel, smootherstep(0.08, 0.3, distance));
-  }
-  return travel;
-};
-
-export const sectionJumpDelta = (progress: number, center: number): number =>
-  wrapProgress(center - progress + DIVE_LENGTH / 2) - DIVE_LENGTH / 2;
-
-const SECTION_STEP_EPSILON = 0.05;
-
-const SNAP_CENTERS: number[] = DIVE_SECTIONS.map((section) => section.center);
-
-export const sectionStepDelta = (
-  progress: number,
-  direction: 1 | -1,
-): number => {
-  const wrapped = wrapProgress(progress);
-  let nearest = DIVE_LENGTH;
-  for (const center of SNAP_CENTERS) {
-    const forward = wrapProgress((center - wrapped) * direction);
-    if (forward > SECTION_STEP_EPSILON && forward < nearest) {
-      nearest = forward;
-    }
-  }
-  return direction * nearest;
-};
-
-export const nearestSectionDelta = (progress: number): number => {
-  const wrapped = wrapProgress(progress);
-  let best = 0;
-  let bestDistance = DIVE_LENGTH;
-  for (const center of SNAP_CENTERS) {
-    const forward = wrapProgress(center - wrapped);
-    const delta = forward > DIVE_LENGTH / 2 ? forward - DIVE_LENGTH : forward;
-    if (Math.abs(delta) < bestDistance) {
-      bestDistance = Math.abs(delta);
-      best = delta;
-    }
-  }
-  return best;
-};
 
 export const aberrationStrength = (velocity: number): number => {
   return Math.min(0.0011, Math.abs(velocity) * 0.008);
