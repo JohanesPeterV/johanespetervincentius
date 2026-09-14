@@ -79,6 +79,8 @@ const captureSection = async (
     inlineSvgStyles(clone);
     const canvas = await toCanvas(clone, {
       fontEmbedCSS,
+      // REASON: Next.js image URLs identify each source in query parameters.
+      includeQueryParams: true,
       pixelRatio: Math.min(window.devicePixelRatio, 1.5),
     });
     const texture = new CanvasTexture(canvas);
