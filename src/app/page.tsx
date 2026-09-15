@@ -2,7 +2,7 @@ import LinktreeSection, { type CardType } from '@/app/_components/linktree';
 import DiveScene from '@/components/dive/dive-scene';
 import { DiveWork } from '@/components/dive/dive-work';
 import { DiveStack } from '@/components/dive/dive-stack';
-import { DiveIce } from '@/components/dive/dive-ice';
+import { DiveSkills } from '@/components/dive/dive-skills';
 
 type HomeParams = {
   searchParams: Promise<{
@@ -33,7 +33,7 @@ export default async function Home({ searchParams }: HomeParams) {
         chapters={[
           { id: 'work', title: 'Work & Projects', content: <DiveWork /> },
           { id: 'stack', title: 'Stack', content: <DiveStack /> },
-          { id: 'ice', title: 'Frozen in time', content: <DiveIce /> },
+          { id: 'skills', title: 'Skills', content: <DiveSkills /> },
         ]}
       />
     </main>

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Center,
   Environment,
   Html,
   OrbitControls,
@@ -82,7 +83,6 @@ const IceLighting = () => (
 
 export default function IceModel() {
   const { tier } = useDetectGPU();
-  const mobile = useMediaQuery('(max-width: 640px)');
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   return (
@@ -93,7 +93,7 @@ export default function IceModel() {
         fov: 32,
         near: 0.05,
         far: 100,
-        position: mobile ? [3.7, 3.4, 11.5] : [2.2, 2, 6.8],
+        position: [2.2, 2, 6.8],
       }}
       gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
       fallback={<p role="alert">WebGL is needed to view this 3D model.</p>}
@@ -111,7 +111,9 @@ export default function IceModel() {
         }
       >
         <IceLighting />
-        <FrozenMacbook />
+        <Center>
+          <FrozenMacbook />
+        </Center>
         <HandoffCanvas />
       </Suspense>
       <OrbitControls
