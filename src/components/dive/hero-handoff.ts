@@ -23,8 +23,7 @@ export type HeroHandoff = {
   compositing: boolean;
   progress: number;
   journey: number;
-  // REASON: the opening is the first crossing, from the void into Hero, so it
-  // rides the shared transition state every layer already samples per frame.
+  // REASON: the loader, camera, and content share one arrival clock.
   arrival: number;
 };
 

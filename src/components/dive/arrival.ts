@@ -11,11 +11,6 @@ export const ARRIVAL_RISE = 40;
 export const arrivalApproach = (arrival: number): number =>
   1 - MathUtils.smootherstep(arrival, 0, 1);
 
-// REASON: the etched edge clears the frame before the card lands, so the
-// reveal runs on the first three quarters of the opening.
-export const arrivalReveal = (arrival: number): number =>
-  MathUtils.smoothstep(arrival, 0, 0.75);
-
 export const arrivalLids = (arrival: number): number =>
   1 - MathUtils.smoothstep(arrival, 0.3, 0.7);
 

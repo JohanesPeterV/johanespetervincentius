@@ -7,7 +7,6 @@ import {
 import { Color, HalfFloatType, Uniform, WebGLRenderTarget } from 'three';
 import type { Camera, Scene, Texture, WebGLRenderer } from 'three';
 
-import { arrivalReveal } from './arrival';
 import { worldAtProgress } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 import { heroHandoffFragment } from './hero-handoff-shader';
@@ -19,7 +18,6 @@ export default class HeroHandoffEffect extends Effect {
   private readonly source: { camera: Camera; target: WebGLRenderTarget };
   private readonly copy: CopyPass;
   private readonly active = new Uniform(0);
-  private readonly opening = new Uniform(0);
   private readonly progress = new Uniform(0);
   private readonly returning = new Uniform(0);
   private readonly sourceIsHero = new Uniform(0);
@@ -53,7 +51,6 @@ export default class HeroHandoffEffect extends Effect {
     this.uniforms.set('uReturning', this.returning);
     this.uniforms.set('uSourceIsHero', this.sourceIsHero);
     this.uniforms.set('uActive', this.active);
-    this.uniforms.set('uOpening', this.opening);
     this.uniforms.set('uAspect', this.aspect);
     this.uniforms.set('uInk', new Uniform(this.ink));
     this.uniforms.set('uPaper', new Uniform(this.paper));
@@ -81,14 +78,8 @@ export default class HeroHandoffEffect extends Effect {
       this.copy.setSize(inputBuffer.width, inputBuffer.height);
       this.renderHero(renderer);
     }
-    // REASON: the opening is the first crossing, from the void into Hero; the
-    // same etched edge reveals the live scene over the background.
-    const opening = handoff.crossing === null && handoff.arrival < 1;
-    this.active.value = Number(handoff.compositing || opening);
-    this.opening.value = Number(opening);
-    this.progress.value = opening
-      ? arrivalReveal(handoff.arrival)
-      : handoff.progress;
+    this.active.value = Number(handoff.compositing);
+    this.progress.value = handoff.progress;
     this.returning.value = Number(handoff.crossing === 'loop');
     this.sourceIsHero.value = Number(handoff.sourceWorld === 'hero');
     this.aspect.value = inputBuffer.width / inputBuffer.height;

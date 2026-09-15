@@ -7,7 +7,6 @@ uniform float uProgress;
 uniform float uReturning;
 uniform float uSourceIsHero;
 uniform float uActive;
-uniform float uOpening;
 uniform float uAspect;
 uniform vec3 uInk;
 uniform vec3 uPaper;
@@ -74,10 +73,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   float broad = handoffNoise(p * 4.6 + 3.2);
   float medium = handoffNoise(p * 21.0 + broad * 2.8);
   float fine = handoffNoise(p * 110.0 + medium * 3.0);
-  // REASON: crossings sweep with the scroll, but the opening follows the loader
-  // into depth, so its edge burns open from the centre toward the viewer.
-  float radius = length(p - vec2(uAspect, 1.0) * 0.5) / length(vec2(uAspect, 1.0) * 0.5);
-  float field = mix(uv.y, radius, uOpening) + (broad - 0.5) * 0.22 + (medium - 0.5) * 0.075
+  float field = uv.y + (broad - 0.5) * 0.22 + (medium - 0.5) * 0.075
               + (fine - 0.5) * 0.018 + sin(uv.x * 5.0) * 0.055;
   float edge = progress * 1.5 - 0.25 - field;
   float proximity = 1.0 - smoothstep(0.0, 0.2, abs(edge));
@@ -87,10 +83,6 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   vec2 toUv = (uv - 0.5) / (1.0 + (1.0 - progress) * 0.055) + 0.5 - refraction;
   vec3 from = uReturning > 0.5 ? handoffOrbital(fromUv) : handoffHero(fromUv);
   vec3 next = uReturning > 0.5 ? handoffHero(toUv) : handoffOrbital(toUv);
-  if (uOpening > 0.5) {
-    from = uPaper;
-    next = texture2D(inputBuffer, toUv).rgb;
-  }
 
   float luma = dot(from, luminance);
   float lines = clamp(length(vec2(dFdx(luma), dFdy(luma))) * 16.0, 0.0, 1.8);
@@ -113,9 +105,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
     color = mix(color, edgeColor, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
     color += uPaper * (rim * 0.22 + fringe * 0.06 + sheen * glint * 0.28) * envelope;
   } else {
-    // REASON: burning out of the void there is no scene behind the edge to
-    // keep it quiet, so the opening lets the second ink glow along the line.
-    vec3 dim = mix(uPaper, uPrism, mix(0.04, 0.6, uOpening));
+    vec3 dim = mix(uPaper, uPrism, 0.04);
     color = mix(color, dim, (rim * 0.55 + fringe * 0.18 + sheen * 0.12) * envelope);
   }
   outputColor = vec4(max(color, 0.0), 1.0);
