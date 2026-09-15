@@ -65,9 +65,6 @@ export const captureSection = async (
     fontFamily: style.fontFamily,
     color: style.color,
   });
-  // REASON: the crossing captures the chapter at rest from its top: cards in
-  // their slots, the carousel on its active pane, native dialogs closed.
-  clone.style.setProperty('--scatter', '0');
   // REASON: the return crossing cuts the final chapter where the reader left
   // it; translate its contents because DOM rasterization ignores scrollTop.
   for (const child of clone.children) {
@@ -80,6 +77,7 @@ export const captureSection = async (
   clone.querySelectorAll('dialog').forEach((dialog) => {
     dialog.remove();
   });
+  // REASON: the crossing captures the carousel at rest on its active pane.
   clone.querySelectorAll<HTMLElement>('[data-active]').forEach((panel) => {
     panel.style.translate = 'none';
     panel.style.transition = 'none';

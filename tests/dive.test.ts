@@ -24,7 +24,7 @@ import {
 } from '../src/components/dive/hero-handoff';
 
 const route = new DiveRoute('Hero', [
-  { id: 'work', title: 'Work', animation: 'cards' },
+  { id: 'work', title: 'Work' },
   { id: 'stack', title: 'Stack' },
 ]);
 

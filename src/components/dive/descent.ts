@@ -137,18 +137,6 @@ export const stoneSectionOpacity = (
   return fadeIn * fadeOut;
 };
 
-// REASON: leaving a card chapter flings its cards off along the scroll, so
-// idling before the fling gathers them back and past it commits the scatter
-const SCATTER_START = 0.05;
-const SCATTER_SPAN = 0.3;
-
-export const cardScatter = (progress: number, center: number): number =>
-  smootherstep(
-    center + SCATTER_START,
-    center + SCATTER_START + SCATTER_SPAN,
-    progress,
-  );
-
 export const aberrationStrength = (velocity: number): number => {
   return Math.min(0.0011, Math.abs(velocity) * 0.008);
 };

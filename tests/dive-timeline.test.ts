@@ -23,7 +23,7 @@ import {
 } from '../src/components/dive/hero-handoff';
 
 const route = new DiveRoute('Hero', [
-  { id: 'work', title: 'Work', animation: 'cards' },
+  { id: 'work', title: 'Work' },
   { id: 'stack', title: 'Stack' },
 ]);
 
@@ -195,7 +195,7 @@ test('overlay refreshes first paint, arrival, journey, and motion-mode changes',
   assert.equal(overlayNeedsUpdate(motion, frame), true);
 });
 
-test('resting cards and active crossings keep updating; resting static text does not', () => {
+test('active crossings keep updating; resting chapters do not', () => {
   const motion = createOverlayMotion({
     chapters: new Map(),
     sections: new Map(),
@@ -209,9 +209,6 @@ test('resting cards and active crossings keep updating; resting static text does
   };
   frame.handoff.arrival = 1;
   frame.handoff.journey = route.entry.center;
-  updateOverlay(motion, frame);
-  assert.equal(overlayNeedsUpdate(motion, frame), true);
-  frame.handoff.journey = route.last.center;
   updateOverlay(motion, frame);
   assert.equal(overlayNeedsUpdate(motion, frame), false);
   frame.handoff.progress = 0.5;

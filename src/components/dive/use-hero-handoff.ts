@@ -62,8 +62,8 @@ export const useHeroHandoff = (
       attributeFilter: ['class', 'style'],
     });
     const resizeObserver = new ResizeObserver(snapshots.invalidate);
-    // REASON: card scatter can change scrollbars without resizing the section.
-    // Border-box changes also schedule the initial capture once on mount.
+    // REASON: border-box changes schedule the initial capture once on mount
+    // and ignore scrollbar toggles inside a section.
     resizeObserver.observe(hero, { box: 'border-box' });
     resizeObserver.observe(entry, { box: 'border-box' });
     resizeObserver.observe(last, { box: 'border-box' });

@@ -1,7 +1,6 @@
 export type DiveChapter = {
   id: string;
   title: string;
-  animation?: 'cards' | 'static';
 };
 
 export type DiveSection = DiveChapter & { center: number };
@@ -33,7 +32,6 @@ export class DiveRoute {
       return {
         id: chapter.id,
         title: chapter.title,
-        animation: chapter.animation,
         center: ENTRY_CENTER + index * CHAPTER_GAP,
       };
     });

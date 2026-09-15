@@ -31,12 +31,7 @@ export default async function Home({ searchParams }: HomeParams) {
         hero={<LinktreeSection cardType={cardType} />}
         heroTitle={'Johanes Peter\nVincentius'}
         chapters={[
-          {
-            id: 'work',
-            title: 'Work & Projects',
-            animation: 'cards',
-            content: <DiveWork />,
-          },
+          { id: 'work', title: 'Work & Projects', content: <DiveWork /> },
           { id: 'stack', title: 'Stack', content: <DiveStack /> },
           { id: 'ice', title: 'Frozen in time', content: <DiveIce /> },
         ]}

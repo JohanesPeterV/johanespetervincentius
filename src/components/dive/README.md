@@ -1,16 +1,15 @@
 # Dive scene
 
 The page owns the content. `src/app/page.tsx` supplies Hero and an ordered list
-of chapters to `DiveScene`; each chapter declares its ID, navigation title,
-content element, and optional card animation. There is no renderer registry or
-second chapter list inside the animation engine.
+of chapters to `DiveScene`; each chapter declares its ID, navigation title, and
+content element. There is no renderer registry or second chapter list inside
+the animation engine.
 
 ## Change content
 
 Edit the content component directly. Add, remove, or reorder chapters in the
 page's `chapters` array. Keep at least one chapter and use unique, nonempty IDs;
-`hero` is reserved. Choose `animation: 'cards'` for content with scatter motion.
-Ordinary content needs no animation setting or camera props.
+`hero` is reserved. Content scrolls normally and needs no camera props.
 
 The overlay owns the scrollable region, spacing, accessibility state, and
 chapter buttons. `DiveRoute` derives positions, navigation stops, entry capture,
@@ -30,7 +29,7 @@ route; there is no global portfolio layout in the motion functions.
 | Frame scheduling and HTML synchronization               | `dive-director.tsx`                         |
 | Shared render frame and world selection                 | `dive-frame.ts`                             |
 | Camera, lighting, and optics                            | `camera-rig.tsx`                            |
-| HTML visibility, focus, scatter, and refresh policy     | `dive-overlay-motion.ts`                    |
+| HTML visibility, focus, and refresh policy              | `dive-overlay-motion.ts`                    |
 | Snapshot observers and motion-mode binding              | `use-hero-handoff.ts`                       |
 | Snapshot scheduling, publication, and disposal          | `handoff-snapshots.ts`                      |
 | Font cache and paired capture                           | `capture-handoff.ts`                        |

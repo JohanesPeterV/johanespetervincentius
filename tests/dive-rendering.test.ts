@@ -19,7 +19,7 @@ import HeroHandoffEffect from '../src/components/dive/hero-handoff-effect';
 import * as motion from '../src/components/dive/camera-motion';
 
 const route = new DiveRoute('Hero', [
-  { id: 'work', title: 'Work', animation: 'cards' },
+  { id: 'work', title: 'Work' },
   { id: 'stack', title: 'Stack' },
 ]);
 const DIVE_LENGTH = route.length;

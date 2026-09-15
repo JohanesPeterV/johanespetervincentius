@@ -1,7 +1,7 @@
 import { DIVE_START } from './dive-route';
 import type { DiveRoute } from './dive-route';
 import { ARRIVAL_RISE, arrivalCard } from './arrival';
-import { DescentFrame, cardScatter, stoneSectionOpacity } from './descent';
+import { DescentFrame, stoneSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
 import {
   heroOverlayOpacity,
@@ -47,18 +47,13 @@ export const overlayNeedsUpdate = (
   frame.handoff.journey !== previous.progress ||
   frame.motionMode !== previous.motionMode ||
   frame.handoff.arrival !== previous.arrival ||
-  (frame.handoff.progress > 0 && frame.handoff.progress < 1) ||
-  frame.handoff.route.sections.some(
-    (section) =>
-      section.animation === 'cards' &&
-      stoneSectionOpacity(frame.handoff.journey, section.center) > 0,
-  );
+  (frame.handoff.progress > 0 && frame.handoff.progress < 1);
 
 export const updateOverlay = (
   motion: OverlayMotion,
   frame: OverlayFrame,
 ): void => {
-  // REASON: resting text needs no repeated DOM writes, but card and crossing
+  // REASON: resting chapters need no repeated DOM writes, but crossing
   // animations still need refreshes when the rendered camera is held still.
   if (!overlayNeedsUpdate(motion, frame)) {
     return;
@@ -122,12 +117,6 @@ const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
     }
     if (section.id === 'hero') {
       element.style.transform = `translate3d(0, ${(1 - card) * ARRIVAL_RISE}px, 0)`;
-    } else {
-      const scatter =
-        frame.motionMode === 'reduced'
-          ? 0
-          : cardScatter(frame.handoff.journey, section.center);
-      element.style.setProperty('--scatter', String(scatter));
     }
   });
   nodes.chapters.forEach((element, id) => {
