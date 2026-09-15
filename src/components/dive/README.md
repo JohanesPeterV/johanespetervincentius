@@ -41,6 +41,11 @@ chapters and places the finale after the last one. Adding a chapter therefore
 reuses existing choreography; bespoke 3D artwork still belongs to the world
 components and camera keys.
 
+Neighbouring chapters scroll past each other like one page: the journey
+between their centres moves one viewport, and a chapter in transit shows the
+edge that meets its neighbour. The hero burn and the loop wave own the two
+outer crossings.
+
 Keep three positions distinct: the drive can accumulate multiple laps, the
 handoff journey wraps into the current route, and the rendered position may
 hold a crossing endpoint. `sceneProgress` maps that rendered position onto

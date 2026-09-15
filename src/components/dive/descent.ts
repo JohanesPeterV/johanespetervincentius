@@ -128,15 +128,6 @@ export const writeDescentFrame = (
   return target;
 };
 
-export const stoneSectionOpacity = (
-  progress: number,
-  center: number,
-): number => {
-  const fadeIn = smootherstep(center - 0.34, center - 0.16, progress);
-  const fadeOut = 1 - smootherstep(center + 0.16, center + 0.34, progress);
-  return fadeIn * fadeOut;
-};
-
 export const aberrationStrength = (velocity: number): number => {
   return Math.min(0.0011, Math.abs(velocity) * 0.008);
 };

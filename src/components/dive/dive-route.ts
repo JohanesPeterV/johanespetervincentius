@@ -9,6 +9,14 @@ export const DIVE_START = 0.95;
 export const ENTRY_CENTER = DIVE_START + 1;
 export const CHAPTER_GAP = 0.6;
 export const LOOP_END = DIVE_START - 0.1;
+export const READING_RANGE = 0.05;
+
+export const chapterScroll = (progress: number, center: number): number => {
+  // REASON: chapter centres are float sums; a resting neighbour must sit
+  // exactly one viewport away, or it counts as visible off-screen.
+  const scroll = Math.round(((progress - center) / CHAPTER_GAP) * 1e6) / 1e6;
+  return Math.min(1, Math.max(-1, scroll));
+};
 
 export class DiveRoute {
   readonly sections: readonly DiveSection[];

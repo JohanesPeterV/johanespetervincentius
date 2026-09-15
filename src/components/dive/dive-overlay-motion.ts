@@ -1,8 +1,7 @@
-import { DIVE_START } from './dive-route';
+import { DIVE_START, READING_RANGE, chapterScroll } from './dive-route';
 import type { DiveRoute } from './dive-route';
 import { ARRIVAL_RISE, arrivalCard } from './arrival';
-import { DescentFrame, stoneSectionOpacity } from './descent';
-import type { MotionMode } from './descent';
+import type { DescentFrame, MotionMode } from './descent';
 import {
   heroOverlayOpacity,
   entryOverlayOpacity,
@@ -84,19 +83,20 @@ const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
     if (!element) {
       return;
     }
-    let opacity = stoneSectionOpacity(frame.handoff.journey, section.center);
+    const scroll = chapterScroll(frame.handoff.journey, section.center);
+    const last = section.id === frame.handoff.route.last.id;
+    const beforeEntry =
+      section.id === frame.handoff.route.entry.id && scroll < 0;
+    const afterLast =
+      last && (frame.handoff.crossing === 'loop' || scroll >= 0);
+    let opacity = Number(Math.abs(scroll) < 1);
     if (section.id === 'hero') {
       opacity = heroOverlayOpacity(frame.handoff) * card;
     }
     if (section.id === frame.handoff.route.entry.id) {
       opacity = entryOverlayOpacity(frame.handoff);
     }
-    const last = section.id === frame.handoff.route.last.id;
-    if (
-      last &&
-      (frame.handoff.crossing === 'loop' ||
-        frame.handoff.journey >= section.center)
-    ) {
+    if (afterLast) {
       opacity = lastOverlayOpacity(frame.handoff);
     }
     const keepMounted = last && frame.handoff.crossing === 'loop';
@@ -117,6 +117,19 @@ const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
     }
     if (section.id === 'hero') {
       element.style.transform = `translate3d(0, ${(1 - card) * ARRIVAL_RISE}px, 0)`;
+      return;
+    }
+    // REASON: neighbouring chapters scroll past each other as one page, so a
+    // chapter in transit shows the edge that meets its neighbour. The hero
+    // burn and the loop wave own the outer crossings.
+    const offset = beforeEntry || afterLast ? 0 : scroll;
+    element.style.transform = `translate3d(0, ${-offset * 100}%, 0)`;
+    if (
+      !afterLast &&
+      opacity > 0 &&
+      Math.abs(frame.handoff.journey - section.center) > READING_RANGE
+    ) {
+      element.scrollTop = scroll > 0 ? element.scrollHeight : 0;
     }
   });
   nodes.chapters.forEach((element, id) => {

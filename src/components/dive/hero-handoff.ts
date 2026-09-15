@@ -1,9 +1,13 @@
 import { MathUtils } from 'three';
 import type { CanvasTexture } from 'three';
 
-import { DIVE_START, ENTRY_CENTER, LOOP_END } from './dive-route';
+import {
+  DIVE_START,
+  ENTRY_CENTER,
+  LOOP_END,
+  chapterScroll,
+} from './dive-route';
 import type { DiveRoute } from './dive-route';
-import { stoneSectionOpacity } from './descent';
 import type { MotionMode } from './descent';
 
 type HandoffWorld = 'hero' | 'orbital';
@@ -93,7 +97,7 @@ export const heroOverlayOpacity = (handoff: HeroHandoff): number => {
 export const entrySectionOpacity = (progress: number): number =>
   progress <= HANDOFF_END
     ? Number(heroHandoffProgress(progress) >= 0.5)
-    : stoneSectionOpacity(progress, ENTRY_CENTER);
+    : Number(chapterScroll(progress, ENTRY_CENTER) < 1);
 
 export const entryOverlayOpacity = (handoff: HeroHandoff): number =>
   handoff.compositing ? 0 : entrySectionOpacity(handoff.journey);
@@ -102,9 +106,7 @@ export const lastOverlayOpacity = (handoff: HeroHandoff): number => {
   if (handoff.crossing === 'loop') {
     return handoff.compositing ? 0 : Number(handoff.progress < 0.5);
   }
-  return handoff.journey >= handoff.route.last.center
-    ? 1
-    : stoneSectionOpacity(handoff.journey, handoff.route.last.center);
+  return Number(chapterScroll(handoff.journey, handoff.route.last.center) > -1);
 };
 
 // REASON: the crossing wipes the chapter in under the etched edge; its

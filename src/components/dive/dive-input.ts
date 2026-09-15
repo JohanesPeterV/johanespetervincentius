@@ -1,4 +1,5 @@
 import type { DriveMotion } from './camera-motion';
+import { READING_RANGE } from './dive-route';
 
 export type PointerState = { x: number; y: number };
 
@@ -66,8 +67,10 @@ export const getReadingSection = (
   // the journey while the camera is still travelling between reading poses.
   if (
     !chapter ||
-    Math.abs(drive.route.jumpDelta(drive.current, chapter.center)) > 0.05 ||
-    Math.abs(drive.route.jumpDelta(drive.target, chapter.center)) > 0.05
+    Math.abs(drive.route.jumpDelta(drive.current, chapter.center)) >
+      READING_RANGE ||
+    Math.abs(drive.route.jumpDelta(drive.target, chapter.center)) >
+      READING_RANGE
   ) {
     return null;
   }

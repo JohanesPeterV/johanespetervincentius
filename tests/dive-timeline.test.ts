@@ -5,7 +5,11 @@ import { CanvasTexture } from 'three';
 import { ARRIVAL_DURATION } from '../src/components/dive/arrival';
 import type { DriveMotion } from '../src/components/dive/camera-motion';
 import { createDescentFrame } from '../src/components/dive/descent';
-import { DIVE_START, DiveRoute } from '../src/components/dive/dive-route';
+import {
+  CHAPTER_GAP,
+  DIVE_START,
+  DiveRoute,
+} from '../src/components/dive/dive-route';
 import {
   advanceDiveTimeline,
   createDiveTimeline,
@@ -217,4 +221,48 @@ test('active crossings keep updating; resting chapters do not', () => {
   assert.equal(overlayNeedsUpdate(motion, frame), true);
   frame.handoff.progress = 1;
   assert.equal(overlayNeedsUpdate(motion, frame), false);
+});
+
+const createPanel = () => ({
+  dataset: {},
+  inert: false,
+  scrollHeight: 2400,
+  scrollTop: 600,
+  style: { opacity: '', transform: '', visibility: '' },
+});
+
+const panelOffset = (panel: ReturnType<typeof createPanel>): number =>
+  Number.parseFloat(panel.style.transform.slice('translate3d(0, '.length));
+
+test('neighbouring chapters scroll past each other instead of fading', () => {
+  const work = createPanel();
+  const stack = createPanel();
+  const motion = createOverlayMotion({
+    chapters: new Map(),
+    sections: new Map([
+      ['work', work as unknown as HTMLDivElement],
+      ['stack', stack as unknown as HTMLDivElement],
+    ]),
+    root: null,
+    veil: null,
+  });
+  const frame: OverlayFrame = {
+    descent: createDescentFrame(),
+    handoff: createHeroHandoff(route),
+    motionMode: 'full',
+  };
+  frame.handoff.arrival = 1;
+  frame.handoff.journey = route.entry.center;
+  updateOverlay(motion, frame);
+  assert.equal(stack.style.opacity, '0');
+  frame.handoff.journey = route.entry.center + CHAPTER_GAP / 2;
+  updateOverlay(motion, frame);
+  assert.deepEqual([work.style.opacity, stack.style.opacity], ['1', '1']);
+  near(panelOffset(work), -50);
+  near(panelOffset(stack), 50);
+  assert.deepEqual([work.scrollTop, stack.scrollTop], [work.scrollHeight, 0]);
+  frame.handoff.journey = HANDOFF_END + 0.02;
+  updateOverlay(motion, frame);
+  near(panelOffset(work), 0);
+  assert.equal(work.scrollTop, 0);
 });
