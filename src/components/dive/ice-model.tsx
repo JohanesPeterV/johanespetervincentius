@@ -3,7 +3,6 @@
 import { Environment, Html, useDetectGPU, useGLTF } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useEffect, useState } from 'react';
-import type { RefObject } from 'react';
 import {
   ACESFilmicToneMapping,
   Mesh,
@@ -75,11 +74,7 @@ const IceLighting = () => (
   />
 );
 
-export default function IceModel({
-  progressRef,
-}: {
-  progressRef: RefObject<number>;
-}) {
+export default function IceModel() {
   const { tier } = useDetectGPU();
 
   return (
@@ -108,7 +103,7 @@ export default function IceModel({
         }
       >
         <IceLighting />
-        <IceScrollRotation progressRef={progressRef}>
+        <IceScrollRotation>
           <FrozenMacbook />
         </IceScrollRotation>
         <HandoffCanvas />

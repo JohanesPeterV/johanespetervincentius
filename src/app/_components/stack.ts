@@ -67,7 +67,7 @@ import {
   TbSql,
 } from 'react-icons/tb';
 
-type StackGroup = {
+export type StackGroup = {
   id: string;
   title: string;
   description: string;
