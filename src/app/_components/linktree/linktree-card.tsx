@@ -12,9 +12,7 @@ export default function LinktreeCard() {
           <ProfileAvatar />
           <div className="flex flex-col items-center gap-3">
             <h2 className="profile-card-name">Johanes Peter Vincentius</h2>
-            <p className="text-sm text-muted-foreground">
-              Building things for the web
-            </p>
+            <p className="text-sm text-muted-foreground">I build apps.</p>
           </div>
         </div>
         <nav aria-label="Find me online" className="flex w-full flex-col gap-3">
