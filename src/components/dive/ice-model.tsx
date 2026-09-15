@@ -1,15 +1,9 @@
 'use client';
 
-import {
-  Center,
-  Environment,
-  Html,
-  OrbitControls,
-  useDetectGPU,
-  useGLTF,
-} from '@react-three/drei';
+import { Environment, Html, useDetectGPU, useGLTF } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useEffect, useState } from 'react';
+import type { RefObject } from 'react';
 import {
   ACESFilmicToneMapping,
   Mesh,
@@ -17,8 +11,8 @@ import {
   ShaderChunk,
 } from 'three';
 
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { HandoffCanvas } from './handoff-canvas';
+import { IceScrollRotation } from './ice-scroll-rotation';
 
 const FrozenMacbook = () => {
   const { scene } = useGLTF('/models/macbook-ice/macbook-in-ice.glb');
@@ -81,9 +75,12 @@ const IceLighting = () => (
   />
 );
 
-export default function IceModel() {
+export default function IceModel({
+  progressRef,
+}: {
+  progressRef: RefObject<number>;
+}) {
   const { tier } = useDetectGPU();
-  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   return (
     <Canvas
@@ -111,17 +108,11 @@ export default function IceModel() {
         }
       >
         <IceLighting />
-        <Center>
+        <IceScrollRotation progressRef={progressRef}>
           <FrozenMacbook />
-        </Center>
+        </IceScrollRotation>
         <HandoffCanvas />
       </Suspense>
-      <OrbitControls
-        makeDefault
-        enablePan={false}
-        enableZoom={false}
-        enableDamping={!reducedMotion}
-      />
     </Canvas>
   );
 }
