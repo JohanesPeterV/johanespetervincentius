@@ -7,52 +7,20 @@ export type DriveMotion = {
   route: DiveRoute;
   current: number;
   target: number;
-  expectedTarget: number;
-  idleTime: number;
 };
 
 export const createDrive = (route: DiveRoute): DriveMotion => ({
   route,
   current: DIVE_START,
   target: DIVE_START,
-  expectedTarget: Number.NaN,
-  idleTime: 0,
 });
 
 const POSITION_FOLLOW_RATE = 5;
 const MAX_TARGET_SPEED = 4.5;
 const POSITION_EPSILON = 0.0004;
-const SNAP_IDLE_DELAY = 0.4;
-const SNAP_RATE = 1.4;
-
-// REASON: gravity may only engage after true idle - pulling while wheel
-// deltas still arrive turns slow deliberate scrolling into a rubber band
-const driftTargetToSection = (
-  motion: DriveMotion,
-  target: number,
-  delta: number,
-): number => {
-  if (target === motion.expectedTarget) {
-    motion.idleTime += delta;
-  } else {
-    motion.idleTime = 0;
-  }
-  let next = target;
-  if (motion.idleTime > SNAP_IDLE_DELAY) {
-    next = MathUtils.damp(
-      target,
-      target + motion.route.nearestDelta(target),
-      SNAP_RATE,
-      delta,
-    );
-  }
-  motion.expectedTarget = next;
-  return next;
-};
 
 export const advanceDrive = (motion: DriveMotion, delta: number): void => {
-  const resolved = driftTargetToSection(motion, motion.target, delta);
-  motion.target = resolved;
+  const resolved = motion.target;
   const followed = MathUtils.damp(
     motion.current,
     resolved,
@@ -96,7 +64,6 @@ export const scrollDriveBy = (motion: DriveMotion, delta: number): void => {
   if (Math.sign(target - motion.target) === Math.sign(delta)) {
     motion.target = target;
   }
-  motion.idleTime = 0;
 };
 
 export const stepDriveToSection = (

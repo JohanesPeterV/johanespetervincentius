@@ -33,7 +33,7 @@ export const IceScrollRotation = ({ children }: { children: ReactNode }) => {
     };
   }, [gl, invalidate]);
 
-  useFrame((_, delta) => {
+  useFrame(() => {
     const group = groupRef.current;
     if (!group) {
       return;
@@ -44,13 +44,7 @@ export const IceScrollRotation = ({ children }: { children: ReactNode }) => {
       0,
       1,
     );
-    const angle = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
-    group.rotation.y = reducedMotion
-      ? angle
-      : MathUtils.damp(group.rotation.y, angle, 12, Math.min(delta, 0.05));
-    if (Math.abs(group.rotation.y - angle) > 0.001) {
-      invalidate();
-    }
+    group.rotation.y = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
   });
 
   return (

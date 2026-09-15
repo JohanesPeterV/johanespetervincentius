@@ -56,17 +56,19 @@ test('large scroll bursts stay bounded and do not reverse a chapter command', ()
   assert.equal(drive.target, destination);
 });
 
-test('idle scrolling settles at the nearest chapter after input ends', () => {
+test('pausing between chapters preserves the scroll position without snapping', () => {
   const drive = createDrive(route);
   for (let frame = 0; frame < 60; frame++) {
     scrollDriveBy(drive, 0.012);
     advanceDrive(drive, 1 / 60);
   }
   assert.ok(drive.current < route.entry.center);
+  const stoppedTarget = drive.target;
   for (let frame = 0; frame < 600; frame++) {
     advanceDrive(drive, 1 / 60);
   }
-  assert.ok(Math.abs(drive.current - route.entry.center) < 1e-6);
+  assert.equal(drive.target, stoppedTarget);
+  assert.equal(drive.current, stoppedTarget);
 });
 
 test('wheel pixel, line and page units retain proportional distance', () => {

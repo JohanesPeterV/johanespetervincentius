@@ -42,8 +42,8 @@ export const StackIceExhibit = ({ group, index }: StackIceExhibitProps) => {
   const stageRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
 
-  // REASON: only nearby exhibits need a WebGL context. Intersection follows
-  // both native scrolling and chapter movement; visibility covers the loop fade.
+  // REASON: measure within the chapter so offscreen ancestors do not defer
+  // loading until entry. Only nearby exhibits in a nearby chapter need a canvas.
   useEffect(() => {
     const stage = stageRef.current;
     const chapter = stage?.closest('[data-dive-section]');
@@ -52,20 +52,20 @@ export const StackIceExhibit = ({ group, index }: StackIceExhibitProps) => {
     }
     let nearby = false;
     const updateVisibility = () => {
-      setActive(nearby && chapter.getAttribute('data-visible') === 'true');
+      setActive(nearby && chapter.getAttribute('data-nearby') === 'true');
     };
     const intersection = new IntersectionObserver(
       ([entry]) => {
         nearby = entry.isIntersecting;
         updateVisibility();
       },
-      { rootMargin: '25% 0px' },
+      { root: chapter, rootMargin: '50% 0px' },
     );
     intersection.observe(stage);
     const visibility = new MutationObserver(updateVisibility);
     visibility.observe(chapter, {
       attributes: true,
-      attributeFilter: ['data-visible'],
+      attributeFilter: ['data-nearby'],
     });
     return () => {
       intersection.disconnect();
@@ -76,7 +76,7 @@ export const StackIceExhibit = ({ group, index }: StackIceExhibitProps) => {
   return (
     <section
       aria-labelledby={`skill-${group.id}`}
-      className="grid min-h-svh items-center gap-8 py-16 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,1fr)] lg:gap-16"
+      className="grid min-h-svh grid-cols-1 items-center gap-8 py-16 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,1fr)] lg:gap-16"
     >
       <div
         ref={stageRef}

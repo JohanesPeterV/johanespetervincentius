@@ -1,4 +1,9 @@
-import { DIVE_START, READING_RANGE, chapterScroll } from './dive-route';
+import {
+  CHAPTER_GAP,
+  DIVE_START,
+  READING_RANGE,
+  chapterScroll,
+} from './dive-route';
 import type { DiveRoute } from './dive-route';
 import { ARRIVAL_RISE, arrivalCard } from './arrival';
 import type { DescentFrame, MotionMode } from './descent';
@@ -100,6 +105,14 @@ const applyOverlay = (nodes: OverlayNodes, frame: OverlayFrame): void => {
       opacity = lastOverlayOpacity(frame.handoff);
     }
     const keepMounted = last && frame.handoff.crossing === 'loop';
+    // REASON: prepare a neighbouring chapter's canvas before it enters the
+    // viewport; visibility is too late to load and compile its 3D assets.
+    const nearby = String(
+      distance <= CHAPTER_GAP + READING_RANGE || keepMounted,
+    );
+    if (element.dataset.nearby !== nearby) {
+      element.dataset.nearby = nearby;
+    }
     element.style.opacity = String(opacity);
     element.inert = opacity < 0.1;
     const visibility = opacity < 0.05 ? 'hidden' : 'visible';

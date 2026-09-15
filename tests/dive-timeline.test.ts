@@ -35,8 +35,6 @@ const createDrive = (): DriveMotion => ({
   route,
   current: DIVE_START,
   target: DIVE_START,
-  expectedTarget: Number.NaN,
-  idleTime: 0,
 });
 
 const near = (actual: number, expected: number): void => {
@@ -255,6 +253,8 @@ test('neighbouring chapters scroll past each other instead of fading', () => {
   frame.handoff.journey = route.entry.center;
   updateOverlay(motion, frame);
   assert.equal(stack.style.opacity, '0');
+  assert.deepEqual(stack.dataset, { nearby: 'true', visible: 'false' });
+  near(panelOffset(stack), 100);
   frame.handoff.journey = route.entry.center + CHAPTER_GAP / 2;
   updateOverlay(motion, frame);
   assert.deepEqual([work.style.opacity, stack.style.opacity], ['1', '1']);
