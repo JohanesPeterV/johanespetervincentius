@@ -1,8 +1,8 @@
 import type { DivePalette } from './dive-palette';
-import { createStarGeometry } from './starfield-geometry';
+import { createStarPositions } from './star-shape';
 
 type Point = { x: number; y: number; z: number };
-type LoadingFrame = {
+export type LoadingFrame = {
   width: number;
   height: number;
   time: number;
@@ -11,20 +11,22 @@ type LoadingFrame = {
   palette: DivePalette;
 };
 
+type LoadingContext =
+  | CanvasRenderingContext2D
+  | OffscreenCanvasRenderingContext2D;
+
 const createStarFaces = (): Point[][] => {
-  const geometry = createStarGeometry();
-  const positions = geometry.getAttribute('position');
+  const positions = createStarPositions();
   const faces: Point[][] = [];
-  for (let index = 0; index < positions.count; index += 3) {
+  for (let index = 0; index < positions.length; index += 9) {
     faces.push(
-      [0, 1, 2].map((offset) => ({
-        x: positions.getX(index + offset),
-        y: positions.getY(index + offset),
-        z: positions.getZ(index + offset),
+      [0, 3, 6].map((corner) => ({
+        x: positions[index + corner],
+        y: positions[index + corner + 1],
+        z: positions[index + corner + 2],
       })),
     );
   }
-  geometry.dispose();
   return faces;
 };
 
@@ -52,10 +54,7 @@ const rotate = (point: Point, time: number): Point => {
   };
 };
 
-const traceFace = (
-  context: CanvasRenderingContext2D,
-  points: Point[],
-): void => {
+const traceFace = (context: LoadingContext, points: Point[]): void => {
   context.beginPath();
   points.forEach((point, index) => {
     if (index === 0) {
@@ -68,7 +67,7 @@ const traceFace = (
 };
 
 export const drawLoadingStar = (
-  context: CanvasRenderingContext2D,
+  context: LoadingContext,
   frame: LoadingFrame,
 ): void => {
   const { width, height, time, progress, exit, palette } = frame;
