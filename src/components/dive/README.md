@@ -46,6 +46,11 @@ between their centres moves one viewport, and a chapter in transit shows the
 edge that meets its neighbour. The hero burn and the loop wave own the two
 outer crossings.
 
+Wheel and vertical drag follow the input distance, then settle to the nearest
+chapter after wheel idle or drag release. Overflowing chapters consume reading
+scroll first; snapping aligns the chapter without resetting its reading position.
+New journey input interrupts an unfinished snap at the visible position.
+
 Keep three positions distinct: the drive can accumulate multiple laps, the
 handoff journey wraps into the current route, and the rendered position may
 hold a crossing endpoint. `sceneProgress` maps that rendered position onto

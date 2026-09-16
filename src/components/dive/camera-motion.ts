@@ -7,12 +7,14 @@ export type DriveMotion = {
   route: DiveRoute;
   current: number;
   target: number;
+  settling: boolean;
 };
 
 export const createDrive = (route: DiveRoute): DriveMotion => ({
   route,
   current: DIVE_START,
   target: DIVE_START,
+  settling: false,
 });
 
 const POSITION_FOLLOW_RATE = 5;
@@ -43,17 +45,33 @@ export const advanceDrive = (motion: DriveMotion, delta: number): void => {
   motion.current += step;
   if (!stopsAtHero && Math.abs(resolved - motion.current) < POSITION_EPSILON) {
     motion.current = resolved;
+    motion.settling = false;
   }
+};
+
+export const settleDriveToSection = (motion: DriveMotion): void => {
+  motion.target += motion.route.nearestDelta(motion.target);
+  motion.settling = true;
 };
 
 export const jumpDriveToSection = (
   motion: DriveMotion,
   center: number,
 ): void => {
+  motion.settling = false;
   motion.target += motion.route.jumpDelta(motion.target, center);
 };
 
 export const scrollDriveBy = (motion: DriveMotion, delta: number): void => {
+  if (delta === 0) {
+    return;
+  }
+  // REASON: new input takes over at the visible position, so reversing an
+  // unfinished snap never jumps toward its old destination first.
+  if (motion.settling) {
+    motion.target = motion.current;
+    motion.settling = false;
+  }
   const target = MathUtils.clamp(
     motion.target + delta,
     motion.current - 0.85,
@@ -72,5 +90,6 @@ export const stepDriveToSection = (
 ): void => {
   // REASON: chapter commands choose a destination, not a wheel delta. The
   // longer loop hop must not be truncated by the continuous-input lead cap.
+  motion.settling = false;
   motion.target += motion.route.stepDelta(motion.target, direction);
 };

@@ -1,7 +1,11 @@
 'use client';
 
 import { ReactNode, RefObject, useEffect, useRef } from 'react';
-import { scrollDriveBy, stepDriveToSection } from './camera-motion';
+import {
+  scrollDriveBy,
+  settleDriveToSection,
+  stepDriveToSection,
+} from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import {
   canScrollSection,
@@ -99,6 +103,9 @@ export default function DiveNavigation({
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     if (dragRef.current.id === event.pointerId) {
+      if (dragRef.current.axis === 'vertical') {
+        settleDriveToSection(driveRef.current);
+      }
       dragRef.current.id = null;
       dragRef.current.scrollTarget = null;
     }
@@ -107,6 +114,8 @@ export default function DiveNavigation({
   // REASON: one wheel delta can finish reading a panel and continue the
   // journey; a non-passive listener prevents the browser applying it twice.
   useEffect(() => {
+    let snapTimer: ReturnType<typeof setTimeout> | undefined;
+    const cancelSnap = (): void => clearTimeout(snapTimer);
     const handleWheel = (event: WheelEvent): void => {
       if (
         event.ctrlKey ||
@@ -115,6 +124,7 @@ export default function DiveNavigation({
       ) {
         return;
       }
+      cancelSnap();
       event.preventDefault();
       const remaining = scrollSectionBy(
         getReadingSection(event.target, driveRef.current),
@@ -123,11 +133,23 @@ export default function DiveNavigation({
       if (remaining !== 0) {
         scrollDriveBy(driveRef.current, remaining / 1000);
       }
+      // REASON: align the screen even if reading consumed the final delta;
+      // settling the drive leaves the panel's own scroll position intact.
+      snapTimer = setTimeout(() => {
+        if (dragRef.current.id === null) {
+          settleDriveToSection(driveRef.current);
+        }
+      }, 220);
     };
 
     const root = rootRef.current;
     root?.addEventListener('wheel', handleWheel, { passive: false });
-    return () => root?.removeEventListener('wheel', handleWheel);
+    root?.addEventListener('pointerdown', cancelSnap);
+    return () => {
+      cancelSnap();
+      root?.removeEventListener('wheel', handleWheel);
+      root?.removeEventListener('pointerdown', cancelSnap);
+    };
   }, [driveRef]);
 
   // REASON: arrow-key navigation needs window-level key events - the
@@ -178,6 +200,7 @@ export default function DiveNavigation({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
+      onLostPointerCapture={handlePointerEnd}
       className="fixed inset-0 touch-none cursor-grab overflow-hidden bg-background text-foreground active:cursor-grabbing"
     >
       {children}
