@@ -1,12 +1,24 @@
 'use client';
 
 import { Center } from '@react-three/drei';
+import type { OnCenterCallbackProps } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Group, MathUtils } from 'three';
+import { Group, MathUtils, PerspectiveCamera } from 'three';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
+
+const distanceToFitSphere = (
+  radius: number,
+  camera: PerspectiveCamera,
+): number => {
+  const verticalHalfFov = MathUtils.degToRad(camera.fov / 2);
+  const horizontalHalfFov = Math.atan(
+    Math.tan(verticalHalfFov) * camera.aspect,
+  );
+  return radius / Math.sin(Math.min(verticalHalfFov, horizontalHalfFov));
+};
 
 export const IceScrollRotation = ({
   children,
@@ -17,6 +29,8 @@ export const IceScrollRotation = ({
 }) => {
   const groupRef = useRef<Group>(null);
   const previousProgress = useRef(-1);
+  const [centeredExhibit, setCenteredExhibit] =
+    useState<OnCenterCallbackProps | null>(null);
   const { gl, invalidate } = useThree();
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
@@ -40,10 +54,17 @@ export const IceScrollRotation = ({
     };
   }, [gl, invalidate]);
 
-  useFrame(() => {
+  useFrame(({ camera }) => {
     const group = groupRef.current;
     if (!group) {
       return;
+    }
+    // REASON: the ice turns a full circle, so frame its rotation-invariant
+    // bounding sphere on the canvas's narrower axis to keep every angle whole.
+    if (centeredExhibit && camera instanceof PerspectiveCamera) {
+      camera.position.setLength(
+        distanceToFitSphere(centeredExhibit.boundingSphere.radius, camera),
+      );
     }
     const bounds = gl.domElement.getBoundingClientRect();
     const progress = MathUtils.clamp(
@@ -60,7 +81,9 @@ export const IceScrollRotation = ({
 
   return (
     <group ref={groupRef}>
-      <Center>{children}</Center>
+      {/* REASON: Center re-measures every vertex of the 858k-vertex model when
+      onCentered changes identity; the state setter stays stable. */}
+      <Center onCentered={setCenteredExhibit}>{children}</Center>
     </group>
   );
 };
