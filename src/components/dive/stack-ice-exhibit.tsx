@@ -4,12 +4,8 @@ import dynamic from 'next/dynamic';
 import { Component, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import type { StackGroup } from '@/app/_components/stack';
-
-type StackIceExhibitProps = {
-  group: StackGroup;
-  index: number;
-};
+import { STACK_GROUPS } from '@/app/_components/stack';
+import { iceSkillIndex } from './ice-skill-index';
 
 const IceModel = dynamic(() => import('./ice-model'), {
   ssr: false,
@@ -38,73 +34,84 @@ class IceModelBoundary extends Component<
   }
 }
 
-export const StackIceExhibit = ({ group, index }: StackIceExhibitProps) => {
-  const stageRef = useRef<HTMLDivElement>(null);
+export const StackIceExhibit = () => {
+  const sectionRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState(false);
+  const [groupIndex, setGroupIndex] = useState(0);
 
-  // REASON: measure within the chapter so offscreen ancestors do not defer
-  // loading until entry. Only nearby exhibits in a nearby chapter need a canvas.
+  // REASON: preload near the chapter, then keep this one demand canvas alive.
+  // Recreating its WebGL context on return makes the ice disappear during entry.
   useEffect(() => {
-    const stage = stageRef.current;
-    const chapter = stage?.closest('[data-dive-section]');
-    if (!stage || !chapter) {
+    const chapter = sectionRef.current?.closest('[data-dive-section]');
+    if (!chapter) {
       return;
     }
-    let nearby = false;
     const updateVisibility = () => {
-      setActive(nearby && chapter.getAttribute('data-nearby') === 'true');
+      if (chapter.getAttribute('data-nearby') === 'true') {
+        setActive(true);
+      }
     };
-    const intersection = new IntersectionObserver(
-      ([entry]) => {
-        nearby = entry.isIntersecting;
-        updateVisibility();
-      },
-      { root: chapter, rootMargin: '50% 0px' },
-    );
-    intersection.observe(stage);
+    updateVisibility();
     const visibility = new MutationObserver(updateVisibility);
     visibility.observe(chapter, {
       attributes: true,
       attributeFilter: ['data-nearby'],
     });
     return () => {
-      intersection.disconnect();
       visibility.disconnect();
     };
   }, []);
 
   return (
     <section
-      aria-labelledby={`skill-${group.id}`}
+      ref={sectionRef}
+      aria-labelledby={`skill-${STACK_GROUPS[groupIndex].id}`}
       className="grid min-h-svh grid-cols-1 items-center gap-8 py-16 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,1fr)] lg:gap-16"
     >
-      <div
-        ref={stageRef}
-        className="pointer-events-none relative h-[38svh] min-h-56 lg:h-[65svh]"
-      >
-        <IceModelBoundary>{active ? <IceModel /> : null}</IceModelBoundary>
+      <div className="pointer-events-none relative h-[38svh] min-h-56 lg:h-[65svh]">
+        <IceModelBoundary>
+          {active ? (
+            <IceModel
+              onScrollProgress={(progress) =>
+                setGroupIndex(iceSkillIndex(progress, STACK_GROUPS.length))
+              }
+            />
+          ) : null}
+        </IceModelBoundary>
       </div>
-      <div>
-        <p className="identity-tag type-meta">
-          {String(index + 1).padStart(2, '0')} / STACK
-        </p>
-        <h3
-          id={`skill-${group.id}`}
-          className="work-section-title font-display"
-        >
-          {group.title}
-        </h3>
-        <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
-          {group.description}
-        </p>
-        <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
-          {group.technologies.map(({ name, icon: Icon }) => (
-            <li key={name} className="stack-technology flex items-center gap-3">
-              <Icon aria-hidden="true" className="stack-icon shrink-0" />
-              <span className="min-w-0 break-words">{name}</span>
-            </li>
-          ))}
-        </ul>
+      <div className="grid min-w-0">
+        {STACK_GROUPS.map((group, index) => (
+          <div
+            key={group.id}
+            aria-hidden={index !== groupIndex}
+            inert={index !== groupIndex}
+            className={`col-start-1 row-start-1 ${index !== groupIndex ? 'invisible pointer-events-none' : ''}`}
+          >
+            <p className="identity-tag type-meta">
+              {group.id === 'main' ? 'My core stack' : 'Also work with'}
+            </p>
+            <h3
+              id={`skill-${group.id}`}
+              className="work-section-title font-display"
+            >
+              {group.title}
+            </h3>
+            <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
+              {group.description}
+            </p>
+            <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
+              {group.technologies.map(({ name, icon: Icon }) => (
+                <li
+                  key={name}
+                  className="stack-technology flex items-center gap-3"
+                >
+                  <Icon aria-hidden="true" className="stack-icon shrink-0" />
+                  <span className="min-w-0 break-words">{name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </section>
   );

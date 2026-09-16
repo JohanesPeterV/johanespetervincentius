@@ -74,7 +74,11 @@ const IceLighting = () => (
   />
 );
 
-export default function IceModel() {
+export default function IceModel({
+  onScrollProgress,
+}: {
+  onScrollProgress: (progress: number) => void;
+}) {
   const { tier } = useDetectGPU();
 
   return (
@@ -103,7 +107,7 @@ export default function IceModel() {
         }
       >
         <IceLighting />
-        <IceScrollRotation>
+        <IceScrollRotation onScrollProgress={onScrollProgress}>
           <FrozenMacbook />
         </IceScrollRotation>
         <HandoffCanvas />

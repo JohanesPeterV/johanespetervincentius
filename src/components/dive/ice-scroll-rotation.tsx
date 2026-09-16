@@ -8,8 +8,15 @@ import { Group, MathUtils } from 'three';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
 
-export const IceScrollRotation = ({ children }: { children: ReactNode }) => {
+export const IceScrollRotation = ({
+  children,
+  onScrollProgress,
+}: {
+  children: ReactNode;
+  onScrollProgress: (progress: number) => void;
+}) => {
   const groupRef = useRef<Group>(null);
+  const previousProgress = useRef(-1);
   const { gl, invalidate } = useThree();
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
@@ -45,6 +52,10 @@ export const IceScrollRotation = ({ children }: { children: ReactNode }) => {
       1,
     );
     group.rotation.y = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
+    if (progress !== previousProgress.current) {
+      previousProgress.current = progress;
+      onScrollProgress(progress);
+    }
   });
 
   return (
