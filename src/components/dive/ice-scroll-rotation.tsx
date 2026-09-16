@@ -22,13 +22,13 @@ const distanceToFitSphere = (
 
 export const IceScrollRotation = ({
   children,
-  onScrollProgress,
+  turn,
 }: {
   children: ReactNode;
-  onScrollProgress: (progress: number) => void;
+  turn: number;
 }) => {
   const groupRef = useRef<Group>(null);
-  const previousProgress = useRef(-1);
+  const turnAngle = useRef(0);
   const [centeredExhibit, setCenteredExhibit] =
     useState<OnCenterCallbackProps | null>(null);
   const { gl, invalidate } = useThree();
@@ -54,7 +54,11 @@ export const IceScrollRotation = ({
     };
   }, [gl, invalidate]);
 
-  useFrame(({ camera }) => {
+  // REASON: the demand canvas renders only on request; a newly picked group
+  // needs a frame to start turning the ice toward it.
+  useEffect(() => invalidate(), [turn, invalidate]);
+
+  useFrame(({ camera }, delta) => {
     const group = groupRef.current;
     if (!group) {
       return;
@@ -72,11 +76,17 @@ export const IceScrollRotation = ({
       0,
       1,
     );
-    group.rotation.y = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
-    if (progress !== previousProgress.current) {
-      previousProgress.current = progress;
-      onScrollProgress(progress);
+    const targetTurn = turn * Math.PI * 2;
+    // REASON: an idle demand canvas reports the whole pause as its next delta;
+    // capping it keeps the first turn after a pause animated instead of snapping.
+    turnAngle.current = reducedMotion
+      ? targetTurn
+      : MathUtils.damp(turnAngle.current, targetTurn, 4, Math.min(delta, 0.05));
+    if (Math.abs(targetTurn - turnAngle.current) > 0.001) {
+      invalidate();
     }
+    const scrollAngle = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
+    group.rotation.y = scrollAngle + turnAngle.current;
   });
 
   return (

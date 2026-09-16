@@ -5,7 +5,6 @@ import { Component, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { STACK_GROUPS } from '@/app/_components/stack';
-import { iceSkillIndex } from './ice-skill-index';
 
 const IceModel = dynamic(() => import('./ice-model'), {
   ssr: false,
@@ -70,48 +69,66 @@ export const StackIceExhibit = () => {
     >
       <div className="pointer-events-none relative h-[38svh] min-h-56 lg:h-[65svh]">
         <IceModelBoundary>
-          {active ? (
-            <IceModel
-              onScrollProgress={(progress) =>
-                setGroupIndex(iceSkillIndex(progress, STACK_GROUPS.length))
-              }
-            />
-          ) : null}
+          {active ? <IceModel turn={groupIndex / STACK_GROUPS.length} /> : null}
         </IceModelBoundary>
       </div>
-      <div className="grid min-w-0">
-        {STACK_GROUPS.map((group, index) => (
-          <div
-            key={group.id}
-            aria-hidden={index !== groupIndex}
-            inert={index !== groupIndex}
-            className={`col-start-1 row-start-1 ${index !== groupIndex ? 'invisible pointer-events-none' : ''}`}
-          >
-            <p className="identity-tag type-meta">
-              {group.id === 'main' ? 'My core stack' : 'Also work with'}
-            </p>
-            <h3
-              id={`skill-${group.id}`}
-              className="work-section-title font-display"
+      <div className="grid min-w-0 gap-8">
+        <div
+          role="group"
+          aria-label="Stack groups"
+          className="grid grid-cols-2 gap-1"
+        >
+          {STACK_GROUPS.map((group, index) => (
+            <button
+              key={group.id}
+              type="button"
+              aria-pressed={index === groupIndex}
+              aria-controls={`skill-${group.id}-detail`}
+              onClick={() => setGroupIndex(index)}
+              className="choice-control type-meta flex min-h-11 items-center gap-3 px-3 py-2 text-left"
             >
-              {group.title}
-            </h3>
-            <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
-              {group.description}
-            </p>
-            <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
-              {group.technologies.map(({ name, icon: Icon }) => (
-                <li
-                  key={name}
-                  className="stack-technology flex items-center gap-3"
-                >
-                  <Icon aria-hidden="true" className="stack-icon shrink-0" />
-                  <span className="min-w-0 break-words">{name}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+              <span className="text-muted-foreground">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span>{group.title}</span>
+            </button>
+          ))}
+        </div>
+        <div aria-live="polite" className="grid">
+          {STACK_GROUPS.map((group, index) => (
+            <div
+              key={group.id}
+              id={`skill-${group.id}-detail`}
+              aria-hidden={index !== groupIndex}
+              inert={index !== groupIndex}
+              className={`col-start-1 row-start-1 ${index !== groupIndex ? 'invisible pointer-events-none' : ''}`}
+            >
+              <p className="identity-tag type-meta">
+                {group.id === 'main' ? 'My core stack' : 'Also work with'}
+              </p>
+              <h3
+                id={`skill-${group.id}`}
+                className="work-section-title font-display"
+              >
+                {group.title}
+              </h3>
+              <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
+                {group.description}
+              </p>
+              <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
+                {group.technologies.map(({ name, icon: Icon }) => (
+                  <li
+                    key={name}
+                    className="stack-technology flex items-center gap-3"
+                  >
+                    <Icon aria-hidden="true" className="stack-icon shrink-0" />
+                    <span className="min-w-0 break-words">{name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
