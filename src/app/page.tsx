@@ -1,6 +1,7 @@
 import LinktreeSection, { type CardType } from '@/app/_components/linktree';
 import DiveScene from '@/components/dive/dive-scene';
 import { DiveWork } from '@/components/dive/dive-work';
+import { DiveProjects } from '@/components/dive/dive-projects';
 import { DiveStack } from '@/components/dive/dive-stack';
 import { DiveSkills } from '@/components/dive/dive-skills';
 
@@ -31,7 +32,8 @@ export default async function Home({ searchParams }: HomeParams) {
         hero={<LinktreeSection cardType={cardType} />}
         heroTitle={'Johanes Peter\nVincentius'}
         chapters={[
-          { id: 'work', title: 'Work & Projects', content: <DiveWork /> },
+          { id: 'work', title: 'Work', content: <DiveWork /> },
+          { id: 'projects', title: 'Projects', content: <DiveProjects /> },
           { id: 'skills', title: 'Skills', content: <DiveSkills /> },
           { id: 'stack', title: 'Stack', content: <DiveStack /> },
         ]}
