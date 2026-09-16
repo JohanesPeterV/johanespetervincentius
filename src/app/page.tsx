@@ -32,8 +32,8 @@ export default async function Home({ searchParams }: HomeParams) {
         heroTitle={'Johanes Peter\nVincentius'}
         chapters={[
           { id: 'work', title: 'Work & Projects', content: <DiveWork /> },
-          { id: 'stack', title: 'Stack', content: <DiveStack /> },
           { id: 'skills', title: 'Skills', content: <DiveSkills /> },
+          { id: 'stack', title: 'Stack', content: <DiveStack /> },
         ]}
       />
     </main>
