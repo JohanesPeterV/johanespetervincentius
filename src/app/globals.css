@@ -215,6 +215,7 @@
 
   .profile-card {
     border-radius: 1.5rem;
+    backdrop-filter: blur(40px);
   }
 
   .appearance-trigger,
