@@ -47,7 +47,7 @@ export default function DiveOverlay({
                 data-dive-section={section.id}
                 data-visible="true"
                 ref={sectionRef}
-                className="absolute inset-0 flex items-center justify-center opacity-0 [will-change:transform,opacity] [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
+                className="absolute inset-0 flex items-center justify-center opacity-0 [will-change:transform] [&_a]:pointer-events-auto [&_button]:pointer-events-auto"
               >
                 {section.content}
               </div>
