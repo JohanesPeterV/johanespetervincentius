@@ -29,6 +29,7 @@ export const IceScrollRotation = ({
 }) => {
   const groupRef = useRef<Group>(null);
   const turnAngle = useRef(0);
+  const scrollAngle = useRef(0);
   const [centeredExhibit, setCenteredExhibit] =
     useState<OnCenterCallbackProps | null>(null);
   const { gl, invalidate } = useThree();
@@ -77,16 +78,28 @@ export const IceScrollRotation = ({
       1,
     );
     const targetTurn = turn * Math.PI * 2;
+    const targetScroll = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
     // REASON: an idle demand canvas reports the whole pause as its next delta;
     // capping it keeps the first turn after a pause animated instead of snapping.
+    const step = Math.min(delta, 1 / 30);
     turnAngle.current = reducedMotion
       ? targetTurn
-      : MathUtils.damp(turnAngle.current, targetTurn, 4, Math.min(delta, 0.05));
-    if (Math.abs(targetTurn - turnAngle.current) > 0.001) {
+      : MathUtils.damp(turnAngle.current, targetTurn, 4, step);
+    // REASON: wheel input moves the chapter in whole steps; easing the scroll
+    // angle turns the ice through each step instead of jumping between poses.
+    scrollAngle.current = MathUtils.damp(
+      scrollAngle.current,
+      targetScroll,
+      10,
+      step,
+    );
+    if (
+      Math.abs(targetTurn - turnAngle.current) > 0.001 ||
+      Math.abs(targetScroll - scrollAngle.current) > 0.001
+    ) {
       invalidate();
     }
-    const scrollAngle = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
-    group.rotation.y = scrollAngle + turnAngle.current;
+    group.rotation.y = scrollAngle.current + turnAngle.current;
   });
 
   return (
