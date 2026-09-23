@@ -80,7 +80,12 @@ export default function IceModel({ turn }: { turn: number }) {
   return (
     <Canvas
       frameloop="demand"
-      dpr={tier < 2 ? 1 : 1.5}
+      dpr={tier < 2 ? 0.8 : 1}
+      onCreated={({ gl }) => {
+        // REASON: the ice refracts a second render of the whole model; a smaller
+        // transmission buffer avoids a full-resolution extra pass while turning.
+        gl.transmissionResolutionScale = tier < 2 ? 0.5 : 0.75;
+      }}
       camera={{
         fov: 32,
         near: 0.05,
