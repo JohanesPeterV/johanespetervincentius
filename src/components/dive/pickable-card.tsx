@@ -97,6 +97,29 @@ export const PickableCard = ({
 
   return (
     <div className={cardClasses[variant].slot} data-current={current}>
+      {variant === 'work' ? (
+        <svg
+          className="work-card-strings"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path className="work-string-left" d="M 20 0 C 20 30 13 65 18 100" />
+          <path className="work-string-right" d="M 80 0 C 80 30 87 65 82 100" />
+          <path
+            className="work-string-left work-string-glint"
+            d="M 20 0 C 20 30 13 65 18 100"
+            pathLength="100"
+          />
+          <path
+            className="work-string-right work-string-glint"
+            d="M 80 0 C 80 30 87 65 82 100"
+            pathLength="100"
+          />
+          <circle cx="20" cy="1" r="1" />
+          <circle cx="80" cy="1" r="1" />
+        </svg>
+      ) : null}
       <button
         ref={cardRef}
         type="button"

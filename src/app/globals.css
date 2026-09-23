@@ -518,6 +518,7 @@
 
   .work-card-slot {
     --card-angle: -6deg;
+    --motion-delay: 0s;
     position: relative;
     top: 10%;
     height: 84%;
@@ -527,18 +528,21 @@
 
   .work-card-slot:nth-child(2) {
     --card-angle: 5deg;
+    --motion-delay: -1.375s;
     top: 0;
     z-index: 2;
   }
 
   .work-card-slot:nth-child(3) {
     --card-angle: -5deg;
+    --motion-delay: -2.75s;
     top: 10%;
     z-index: 3;
   }
 
   .work-card-slot:nth-child(4) {
     --card-angle: 4deg;
+    --motion-delay: -4.125s;
     top: 0;
     z-index: 1;
   }
@@ -566,46 +570,95 @@
     padding: clamp(0.75rem, 1.5vw, 1.5rem);
     cursor: pointer;
     transform: rotate(var(--card-angle));
-    animation: work-card-float 6s ease-in-out infinite alternate;
+    animation: work-card-swing 5.5s ease-in-out infinite alternate;
+    animation-delay: var(--motion-delay);
     transition:
       transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
       border-color 200ms,
       opacity 200ms;
   }
 
-  .work-card::before,
-  .work-card::after {
-    content: '';
+  .work-card-strings {
     position: absolute;
     top: -7rem;
-    width: 1px;
+    left: 0;
+    width: 100%;
     height: 7rem;
-    background: hsl(var(--primary-text) / 0.5);
+    overflow: visible;
     pointer-events: none;
-    transform-origin: bottom;
+    transform-origin: top;
+    transition:
+      transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 350ms;
   }
 
-  .work-card::before {
-    left: 18%;
-    transform: rotate(22deg);
+  .work-card-strings path {
+    fill: none;
+    stroke: hsl(var(--primary-text) / 0.55);
+    stroke-width: 1.2;
+    vector-effect: non-scaling-stroke;
   }
 
-  .work-card::after {
-    right: 18%;
-    transform: rotate(-22deg);
+  .work-card-strings circle {
+    fill: hsl(var(--primary-text) / 0.8);
   }
 
-  .work-card-slot:nth-child(even) .work-card {
-    animation-delay: -3s;
+  .work-card-strings .work-string-glint {
+    stroke: hsl(var(--primary));
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 8 92;
   }
 
-  @keyframes work-card-float {
+  .work-string-left {
+    animation: work-string-left 5.5s ease-in-out infinite alternate;
+  }
+
+  .work-string-right {
+    animation: work-string-right 5.5s ease-in-out infinite alternate;
+  }
+
+  .work-string-left.work-string-glint {
+    animation:
+      work-string-left 5.5s ease-in-out infinite alternate,
+      work-string-glint 4s linear infinite;
+  }
+
+  .work-string-right.work-string-glint {
+    animation:
+      work-string-right 5.5s ease-in-out infinite alternate,
+      work-string-glint 4s linear infinite;
+  }
+
+  .work-card-strings path {
+    animation-delay: var(--motion-delay);
+  }
+
+  @keyframes work-string-glint {
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+
+  @keyframes work-card-swing {
     from {
-      translate: 0 -3px;
+      transform: translateY(-3px) rotate(calc(var(--card-angle) - 1.5deg));
     }
 
     to {
-      translate: 0 4px;
+      transform: translateY(4px) rotate(calc(var(--card-angle) + 1.5deg));
+    }
+  }
+
+  @keyframes work-string-left {
+    to {
+      d: path('M 20 0 C 27 30 18 65 18 100');
+    }
+  }
+
+  @keyframes work-string-right {
+    to {
+      d: path('M 80 0 C 73 30 82 65 82 100');
     }
   }
 
@@ -652,18 +705,29 @@
 
   @media (hover: hover) {
     .work-card:hover {
+      animation: none;
       transform: translateY(-16px) rotate(var(--card-angle)) scale(1.035);
       border-color: hsl(var(--primary-text));
+    }
+
+    .work-card-slot:has(.work-card:hover) .work-card-strings {
+      transform: scaleY(0.86);
     }
   }
 
   .work-card:focus-visible {
+    animation: none;
     outline: 2px solid hsl(var(--ring));
     outline-offset: 5px;
   }
 
   .work-card-slot:has(dialog[open]) .work-card {
     opacity: 0.15;
+  }
+
+  .work-card-slot:has(dialog[open]) .work-card-strings {
+    transform: scaleY(0.35);
+    opacity: 0.25;
   }
 
   .card-detail {
@@ -858,6 +922,10 @@
       top: 0;
       height: 20rem;
     }
+
+    .work-card-slot:nth-child(n + 3) .work-card-strings {
+      display: none;
+    }
   }
 
   @media (max-width: 767px) {
@@ -873,10 +941,8 @@
       height: auto;
     }
 
-    .work-card::before,
-    .work-card::after {
-      top: -2rem;
-      height: 2rem;
+    .work-card-strings {
+      display: none;
     }
 
     .work-card-slot:nth-child(even) {
@@ -1048,6 +1114,14 @@
 
     .work-card {
       animation: none;
+    }
+
+    .work-card-strings path {
+      animation: none;
+    }
+
+    .work-string-glint {
+      display: none;
     }
 
     .project-preview-window,
