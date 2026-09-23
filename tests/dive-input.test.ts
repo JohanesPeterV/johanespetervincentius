@@ -9,6 +9,7 @@ import {
   stepDriveToSection,
 } from '../src/components/dive/camera-motion';
 import {
+  journeyDeltaForScroll,
   normalizeWheelDelta,
   scrollSectionBy,
 } from '../src/components/dive/dive-input';
@@ -129,10 +130,10 @@ test('reading a tall section keeps its screen and scroll position after snapping
     assert.ok(Math.abs(drive.current - route.entry.center) < 1e-9);
   }
   assert.equal(panel.scrollTop, 1400);
-  const overflow = scrollSectionBy(panel, 550);
-  assert.equal(overflow, 350);
+  const overflow = scrollSectionBy(panel, 650);
+  assert.equal(overflow, 450);
   assert.equal(panel.scrollTop, 1600);
-  scrollDriveBy(drive, overflow / 1000);
+  scrollDriveBy(drive, journeyDeltaForScroll(overflow, 800));
   settleDriveToSection(drive);
   for (let frame = 0; frame < 180; frame++) {
     advanceDrive(drive, 1 / 60);
@@ -184,11 +185,26 @@ test('overflow continues toward Stack within the same reading gesture', () => {
   const drive = createDrive(route);
   drive.current = route.entry.center;
   drive.target = drive.current;
-  for (let input = 0; input < 10; input++) {
+  for (let input = 0; input < 12; input++) {
     const remaining = scrollSectionBy(panel, 40);
-    scrollDriveBy(drive, remaining / 1000);
+    scrollDriveBy(drive, journeyDeltaForScroll(remaining, 800));
     advanceDrive(drive, 1 / 60);
   }
   assert.ok(drive.target > (route.entry.center + route.sections[2].center) / 2);
   assert.ok(drive.target < route.sections[2].center);
+});
+
+test('the reading-to-journey handoff preserves the remaining wheel distance', () => {
+  const panel = { scrollTop: 590, scrollHeight: 1400, clientHeight: 800 };
+  const drive = createDrive(route);
+  drive.current = route.entry.center;
+  drive.target = drive.current;
+
+  const remaining = scrollSectionBy(panel, 40);
+  scrollDriveBy(drive, journeyDeltaForScroll(remaining, 800));
+  advanceDrive(drive, 1 / 60);
+
+  assert.equal(panel.scrollTop, 600);
+  assert.equal(remaining, 30);
+  assert.ok(Math.abs(drive.current - route.entry.center - 0.0225) < 1e-9);
 });

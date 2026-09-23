@@ -1,5 +1,5 @@
 import type { DriveMotion } from './camera-motion';
-import { READING_RANGE } from './dive-route';
+import { CHAPTER_GAP, READING_RANGE } from './dive-route';
 
 export type PointerState = { x: number; y: number };
 
@@ -93,6 +93,11 @@ export const scrollSectionBy = (
   section.scrollTop = next;
   return requested - next;
 };
+
+export const journeyDeltaForScroll = (
+  pixels: number,
+  viewportHeight: number,
+): number => (pixels / viewportHeight) * CHAPTER_GAP;
 
 export const normalizeWheelDelta = (
   event: { deltaY: number; deltaMode: number },

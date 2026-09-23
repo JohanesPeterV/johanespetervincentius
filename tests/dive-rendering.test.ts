@@ -177,6 +177,7 @@ test('chapter gestures settle monotonically at exactly one adjacent destination 
           current,
           target: current,
           settling: false,
+          inputDriven: false,
         };
         const destination = current + route.stepDelta(current, direction);
         motion.stepDriveToSection(drive, direction);

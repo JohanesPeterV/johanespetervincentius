@@ -8,6 +8,7 @@ export type DriveMotion = {
   current: number;
   target: number;
   settling: boolean;
+  inputDriven: boolean;
 };
 
 export const createDrive = (route: DiveRoute): DriveMotion => ({
@@ -15,6 +16,7 @@ export const createDrive = (route: DiveRoute): DriveMotion => ({
   current: DIVE_START,
   target: DIVE_START,
   settling: false,
+  inputDriven: false,
 });
 
 const POSITION_FOLLOW_RATE = 5;
@@ -23,12 +25,11 @@ const POSITION_EPSILON = 0.0004;
 
 export const advanceDrive = (motion: DriveMotion, delta: number): void => {
   const resolved = motion.target;
-  const followed = MathUtils.damp(
-    motion.current,
-    resolved,
-    POSITION_FOLLOW_RATE,
-    delta,
-  );
+  // REASON: wheel and drag already move a chapter's reading scroll directly;
+  // follow their overflow directly too so the handoff keeps the same speed.
+  const followed = motion.inputDriven
+    ? resolved
+    : MathUtils.damp(motion.current, resolved, POSITION_FOLLOW_RATE, delta);
   const maxStep = MAX_TARGET_SPEED * delta;
   let step = MathUtils.clamp(followed - motion.current, -maxStep, maxStep);
   // REASON: opposite world crossings meet at Hero. Sample its reading pose
@@ -52,6 +53,7 @@ export const advanceDrive = (motion: DriveMotion, delta: number): void => {
 export const settleDriveToSection = (motion: DriveMotion): void => {
   motion.target += motion.route.nearestDelta(motion.target);
   motion.settling = true;
+  motion.inputDriven = false;
 };
 
 export const jumpDriveToSection = (
@@ -59,6 +61,7 @@ export const jumpDriveToSection = (
   center: number,
 ): void => {
   motion.settling = false;
+  motion.inputDriven = false;
   motion.target += motion.route.jumpDelta(motion.target, center);
 };
 
@@ -81,6 +84,7 @@ export const scrollDriveBy = (motion: DriveMotion, delta: number): void => {
   // input must not pull the destination backward to the continuous-input cap.
   if (Math.sign(target - motion.target) === Math.sign(delta)) {
     motion.target = target;
+    motion.inputDriven = true;
   }
 };
 
@@ -91,5 +95,6 @@ export const stepDriveToSection = (
   // REASON: chapter commands choose a destination, not a wheel delta. The
   // longer loop hop must not be truncated by the continuous-input lead cap.
   motion.settling = false;
+  motion.inputDriven = false;
   motion.target += motion.route.stepDelta(motion.target, direction);
 };

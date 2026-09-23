@@ -12,6 +12,7 @@ import {
   dragInputDelta,
   getReadingSection,
   getScrollableSection,
+  journeyDeltaForScroll,
   normalizeWheelDelta,
   scrollSectionBy,
 } from './dive-input';
@@ -92,7 +93,10 @@ export default function DiveNavigation({
     );
     if (remaining !== 0) {
       drag.scrollTarget = null;
-      scrollDriveBy(driveRef.current, remaining / 1000);
+      scrollDriveBy(
+        driveRef.current,
+        journeyDeltaForScroll(remaining, window.innerHeight),
+      );
     }
   };
 
@@ -131,7 +135,10 @@ export default function DiveNavigation({
         normalizeWheelDelta(event, window.innerHeight),
       );
       if (remaining !== 0) {
-        scrollDriveBy(driveRef.current, remaining / 1000);
+        scrollDriveBy(
+          driveRef.current,
+          journeyDeltaForScroll(remaining, window.innerHeight),
+        );
       }
       // REASON: align the screen even if reading consumed the final delta;
       // settling the drive leaves the panel's own scroll position intact.

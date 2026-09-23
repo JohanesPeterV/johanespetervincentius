@@ -36,6 +36,7 @@ const createDrive = (): DriveMotion => ({
   current: DIVE_START,
   target: DIVE_START,
   settling: false,
+  inputDriven: false,
 });
 
 const near = (actual: number, expected: number): void => {
