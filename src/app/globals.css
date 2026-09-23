@@ -510,13 +510,12 @@
   .work-card-spread {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
+    gap: 0.75rem;
     margin: 1rem 1.5rem;
     height: 24rem;
     isolation: isolate;
   }
 
-  /* Cards only touch at their corners so every face stays readable. */
   .work-card-slot {
     --card-angle: -6deg;
     position: relative;
@@ -567,10 +566,47 @@
     padding: clamp(0.75rem, 1.5vw, 1.5rem);
     cursor: pointer;
     transform: rotate(var(--card-angle));
+    animation: work-card-float 6s ease-in-out infinite alternate;
     transition:
       transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
       border-color 200ms,
       opacity 200ms;
+  }
+
+  .work-card::before,
+  .work-card::after {
+    content: '';
+    position: absolute;
+    top: -7rem;
+    width: 1px;
+    height: 7rem;
+    background: hsl(var(--primary-text) / 0.5);
+    pointer-events: none;
+    transform-origin: bottom;
+  }
+
+  .work-card::before {
+    left: 18%;
+    transform: rotate(22deg);
+  }
+
+  .work-card::after {
+    right: 18%;
+    transform: rotate(-22deg);
+  }
+
+  .work-card-slot:nth-child(even) .work-card {
+    animation-delay: -3s;
+  }
+
+  @keyframes work-card-float {
+    from {
+      translate: 0 -3px;
+    }
+
+    to {
+      translate: 0 4px;
+    }
   }
 
   .work-current-label {
@@ -837,6 +873,12 @@
       height: auto;
     }
 
+    .work-card::before,
+    .work-card::after {
+      top: -2rem;
+      height: 2rem;
+    }
+
     .work-card-slot:nth-child(even) {
       --card-angle: 1deg;
     }
@@ -1002,6 +1044,10 @@
     .project-preview-window,
     .project-preview-toggle {
       transition: none;
+    }
+
+    .work-card {
+      animation: none;
     }
 
     .project-preview-window,
