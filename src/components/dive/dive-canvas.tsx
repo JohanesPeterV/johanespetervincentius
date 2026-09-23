@@ -26,11 +26,22 @@ type DiveCanvasParams = {
 };
 
 const LoadedSignal = ({ stageRef }: { stageRef: RefObject<DiveStage> }) => {
-  // REASON: the director must wait for the first mounted scene before advancing
-  // the shared progress, including when the GPU probe suspends canvas creation.
+  const firstFrameRef = useRef<number | null>(null);
+  // REASON: a mounted scene can still block on its first WebGL render, so the
+  // arrival waits until a complete scene frame has reached the renderer.
   useEffect(() => {
-    stageRef.current = 'live';
+    stageRef.current = 'loading';
+    return () => {
+      stageRef.current = 'loading';
+    };
   }, [stageRef]);
+  useFrame(({ gl }) => {
+    if (firstFrameRef.current === null) {
+      firstFrameRef.current = gl.info.render.frame;
+    } else if (gl.info.render.frame > firstFrameRef.current) {
+      stageRef.current = 'live';
+    }
+  }, -4);
   return null;
 };
 

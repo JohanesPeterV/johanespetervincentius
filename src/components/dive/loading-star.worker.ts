@@ -7,6 +7,7 @@ export type LoadingStarMessage = {
   frame: Omit<LoadingFrame, 'time'>;
   dpr: number;
   motionMode: MotionMode;
+  exiting: boolean;
 };
 
 let canvas: OffscreenCanvas | undefined;
@@ -23,7 +24,7 @@ const render = (now: number): void => {
     ...state.frame,
     time: state.motionMode === 'reduced' ? 0 : (now - started) / 1000,
   });
-  if (state.motionMode === 'full') {
+  if (state.motionMode === 'full' && !state.exiting) {
     animation = requestAnimationFrame(render);
   }
 };
@@ -46,6 +47,10 @@ self.onmessage = ({ data }: MessageEvent<LoadingStarMessage>): void => {
     canvas.width = width;
     canvas.height = height;
     context.setTransform(data.dpr, 0, 0, data.dpr, 0, 0);
+  }
+  if (data.exiting) {
+    cancelAnimationFrame(animation);
+    return;
   }
   // REASON: full motion keeps its own loop alive, so only the arriving canvas
   // starts it; reduced motion instead draws one frame per update.

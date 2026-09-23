@@ -8,6 +8,7 @@ import type { DivePalette } from './dive-palette';
 import type { HeroHandoff } from './hero-handoff';
 import { drawLoadingStar } from './loading-star';
 import type { LoadingStarMessage } from './loading-star.worker';
+import { arrivalCard } from './arrival';
 
 type DiveLoaderProps = {
   handoffRef: RefObject<HeroHandoff>;
@@ -83,7 +84,7 @@ export default function DiveLoader({
     let progress = 0;
     const started = performance.now();
     let lastPercentage = -1;
-    let lastExit = -1;
+    let exiting = false;
     let resized = true;
     const resize = new ResizeObserver(() => {
       width = root.clientWidth;
@@ -96,7 +97,7 @@ export default function DiveLoader({
 
     const render = (now: number): void => {
       const arrival = handoffRef.current.arrival;
-      const exit = Math.min(1, arrival / 0.6);
+      const exit = arrivalCard(arrival);
       if (exit === 1) {
         root.hidden = true;
         resize.disconnect();
@@ -112,30 +113,30 @@ export default function DiveLoader({
         width,
         height,
         progress: percentage / 100,
-        exit,
         palette,
       };
-      if (percentage !== lastPercentage || exit !== lastExit || resized) {
+      root.style.setProperty('--loader-exit', String(exit));
+      if (!exiting && (percentage !== lastPercentage || exit > 0 || resized)) {
         count.textContent = String(percentage).padStart(3, '0');
-        root.style.setProperty('--loader-exit', String(exit));
         const message: LoadingStarMessage = {
           canvas: offscreen,
           frame: drawing,
           dpr,
           motionMode,
+          exiting: exit > 0,
         };
         worker?.postMessage(message, offscreen ? [offscreen] : []);
         offscreen = undefined;
         lastPercentage = percentage;
-        lastExit = exit;
         resized = false;
       }
-      if (context) {
+      if (context && exit === 0) {
         drawLoadingStar(context, {
           ...drawing,
           time: motionMode === 'reduced' ? 0 : (now - started) / 1000,
         });
       }
+      exiting = exit > 0;
       frame = requestAnimationFrame(render);
     };
     frame = requestAnimationFrame(render);
@@ -157,7 +158,7 @@ export default function DiveLoader({
       <div
         ref={canvasHostRef}
         aria-hidden
-        className="absolute inset-0 h-full w-full"
+        className="absolute inset-0 h-full w-full opacity-[calc(1-var(--loader-exit))]"
       />
       <div aria-hidden className="dive-loader-caption dive-loader-identity">
         Johanes Peter

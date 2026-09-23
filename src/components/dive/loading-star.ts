@@ -7,7 +7,6 @@ export type LoadingFrame = {
   height: number;
   time: number;
   progress: number;
-  exit: number;
   palette: DivePalette;
 };
 
@@ -70,7 +69,7 @@ export const drawLoadingStar = (
   context: LoadingContext,
   frame: LoadingFrame,
 ): void => {
-  const { width, height, time, progress, exit, palette } = frame;
+  const { width, height, time, progress, palette } = frame;
   context.clearRect(0, 0, width, height);
   const size = Math.min(width * 0.52, height * 0.55, 440);
   const assemble = (1 - progress) * 0.46;
@@ -78,8 +77,8 @@ export const drawLoadingStar = (
     const rotated = rotate(point, time);
     const perspective = 3.2 / (3.2 - rotated.z);
     return {
-      x: width / 2 + rotated.x * size * perspective * (1 + exit * 0.6),
-      y: height * 0.46 - rotated.y * size * perspective * (1 + exit * 0.6),
+      x: width / 2 + rotated.x * size * perspective,
+      y: height * 0.46 - rotated.y * size * perspective,
       z: rotated.z,
     };
   };
@@ -96,7 +95,7 @@ export const drawLoadingStar = (
   context.lineWidth = 0.6;
   context.font = '9px monospace';
   nodes.forEach((node, index) => {
-    context.globalAlpha = (0.13 + (node.z + 1) * 0.1) * (1 - exit);
+    context.globalAlpha = 0.13 + (node.z + 1) * 0.1;
     context.fillRect(node.x - 1, node.y - 1, 2, 2);
     if (index % 4 === 0) {
       context.fillText(
@@ -112,7 +111,7 @@ export const drawLoadingStar = (
       if (distance > size * 0.3 || distance < size * 0.12) {
         return;
       }
-      context.globalAlpha = 0.12 * (1 - distance / (size * 0.35)) * (1 - exit);
+      context.globalAlpha = 0.12 * (1 - distance / (size * 0.35));
       context.beginPath();
       context.moveTo(node.x, node.y);
       context.lineTo(next.x, next.y);
@@ -129,8 +128,7 @@ export const drawLoadingStar = (
       }),
       { x: 0, y: 0, z: 0 },
     );
-    const separation =
-      assemble * (1 + Math.sin(index * 12.3) * 0.4) + exit * 1.8;
+    const separation = assemble * (1 + Math.sin(index * 12.3) * 0.4);
     const points = face.map((point) =>
       project({
         x: point.x + center.x * separation,
@@ -151,17 +149,17 @@ export const drawLoadingStar = (
     traceFace(context, points);
     const ink = index % 5 === 0 ? palette.glow : palette.accent;
     context.fillStyle = ink;
-    context.globalAlpha = (0.015 + front * 0.035 + scan * 0.08) * (1 - exit);
+    context.globalAlpha = 0.015 + front * 0.035 + scan * 0.08;
     context.fill();
     context.strokeStyle = palette.foreground;
     context.lineWidth = 0.65;
-    context.globalAlpha = (0.2 + front * 0.6) * (1 - exit);
+    context.globalAlpha = 0.2 + front * 0.6;
     context.stroke();
     context.strokeStyle = ink;
-    context.globalAlpha = scan * 0.75 * (1 - exit);
+    context.globalAlpha = scan * 0.75;
     context.stroke();
     context.fillStyle = palette.foreground;
-    context.globalAlpha = (0.25 + front * 0.6) * (1 - exit);
+    context.globalAlpha = 0.25 + front * 0.6;
     points.forEach((point) => context.fillRect(point.x - 1, point.y - 1, 2, 2));
   });
   context.globalAlpha = 1;
