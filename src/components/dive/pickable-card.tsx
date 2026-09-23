@@ -28,7 +28,12 @@ const getPickupTransform = (
   const target = dialog.getBoundingClientRect();
   const x = source.left + source.width / 2 - target.left - target.width / 2;
   const y = source.top + source.height / 2 - target.top - target.height / 2;
-  const matrix = new DOMMatrixReadOnly(getComputedStyle(card).transform);
+  const parentTransform = card.parentElement
+    ? getComputedStyle(card.parentElement).transform
+    : 'none';
+  const matrix = new DOMMatrixReadOnly(parentTransform).multiply(
+    new DOMMatrixReadOnly(getComputedStyle(card).transform),
+  );
   const angle = Math.atan2(matrix.b, matrix.a);
   const scale = Math.hypot(matrix.a, matrix.b);
   return `translate(${x}px, ${y}px) rotate(${angle}rad) scale(${(card.offsetWidth * scale) / target.width}, ${(card.offsetHeight * scale) / target.height})`;
@@ -97,39 +102,33 @@ export const PickableCard = ({
 
   return (
     <div className={cardClasses[variant].slot} data-current={current}>
-      {variant === 'work' ? (
-        <svg
-          className="work-card-strings"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden="true"
+      <div className={variant === 'work' ? 'work-card-hanger' : 'contents'}>
+        <button
+          ref={cardRef}
+          type="button"
+          className={`${cardClasses[variant].button} surface-panel flex h-full w-full flex-col text-left`}
+          aria-label={`Pick up ${title}${current ? ', current role' : ''}`}
+          aria-haspopup="dialog"
+          onClick={handlePick}
         >
-          <path className="work-string-left" d="M 20 0 C 20 30 13 65 18 100" />
-          <path className="work-string-right" d="M 80 0 C 80 30 87 65 82 100" />
-          <path
-            className="work-string-left work-string-glint"
-            d="M 20 0 C 20 30 13 65 18 100"
-            pathLength="100"
-          />
-          <path
-            className="work-string-right work-string-glint"
-            d="M 80 0 C 80 30 87 65 82 100"
-            pathLength="100"
-          />
-          <circle cx="20" cy="1" r="1" />
-          <circle cx="80" cy="1" r="1" />
-        </svg>
-      ) : null}
-      <button
-        ref={cardRef}
-        type="button"
-        className={`${cardClasses[variant].button} surface-panel flex h-full w-full flex-col text-left`}
-        aria-label={`Pick up ${title}${current ? ', current role' : ''}`}
-        aria-haspopup="dialog"
-        onClick={handlePick}
-      >
-        {face}
-      </button>
+          {face}
+        </button>
+        {variant === 'work' ? (
+          <>
+            <svg
+              className="work-card-strings"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M 50 0 L 18 100 M 50 0 L 82 100" />
+              <circle cx="18" cy="100" r="1.25" />
+              <circle cx="82" cy="100" r="1.25" />
+            </svg>
+            <span className="work-card-pivot" aria-hidden="true" />
+          </>
+        ) : null}
+      </div>
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}

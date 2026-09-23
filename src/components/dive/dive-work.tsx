@@ -10,6 +10,7 @@ export const DiveWork = () => (
       <h2 className="work-section-title font-display">Work</h2>
     </header>
     <div className="work-card-spread relative">
+      <span className="work-card-rail" aria-hidden="true" />
       {WORK_EXPERIENCES.map((job, index) => (
         <WorkExperienceCard key={job.company} job={job} index={index} />
       ))}
