@@ -30,6 +30,12 @@ export type HeroHandoff = {
 export const HANDOFF_START = DIVE_START + 0.1;
 export const HANDOFF_END = ENTRY_CENTER - 0.1;
 
+// REASON: the crossing draws the page through the 3D canvas, so it renders at
+// the page's own pixel ratio; the throttled scene ratio would soften its text.
+// Phones report 3x, but the crossing already renders both worlds.
+export const handoffPixelRatio = (): number =>
+  Math.min(window.devicePixelRatio, 2);
+
 export const createHeroHandoff = (route: DiveRoute): HeroHandoff => ({
   route,
   hero: null,

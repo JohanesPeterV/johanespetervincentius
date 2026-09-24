@@ -1,6 +1,8 @@
 import { toCanvas } from 'html-to-image';
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
+import { handoffPixelRatio } from './hero-handoff';
+
 // REASON: html-to-image deep-clones <svg> without inlining its descendants'
 // computed styles, so strokes and fills that come from stylesheets vanish
 // from the snapshot (the profile avatar frame). Read them off the staged
@@ -95,7 +97,7 @@ export const captureSection = async (
       fontEmbedCSS,
       // REASON: Next.js image URLs identify each source in query parameters.
       includeQueryParams: true,
-      pixelRatio: Math.min(window.devicePixelRatio, 1.5),
+      pixelRatio: handoffPixelRatio(),
     });
     const texture = new CanvasTexture(canvas);
     texture.colorSpace = SRGBColorSpace;

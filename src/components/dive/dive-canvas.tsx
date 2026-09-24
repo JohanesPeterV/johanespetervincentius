@@ -14,6 +14,7 @@ import SpaceWorld from './space-world';
 import type { MotionMode } from './descent';
 import type { OverlayNodes } from './dive-overlay-motion';
 import type { DivePalette } from './dive-palette';
+import { handoffPixelRatio } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
 type DiveCanvasParams = {
@@ -45,10 +46,18 @@ const LoadedSignal = ({ stageRef }: { stageRef: RefObject<DiveStage> }) => {
   return null;
 };
 
-const AdaptiveResolution = ({ maxDpr }: { maxDpr: number }) => {
+const AdaptiveResolution = ({
+  maxDpr,
+  handoffRef,
+}: {
+  maxDpr: number;
+  handoffRef: RefObject<HeroHandoff>;
+}) => {
   const [qualityDpr, setQualityDpr] = useState(maxDpr);
   useFrame(({ performance, viewport, setDpr }) => {
-    const dpr = qualityDpr * performance.current;
+    const dpr = handoffRef.current.compositing
+      ? handoffPixelRatio()
+      : qualityDpr * performance.current;
     if (viewport.dpr !== dpr) {
       setDpr(dpr);
     }
@@ -85,7 +94,7 @@ export default function DiveCanvas({
       gl={{ toneMappingExposure: palette.exposure }}
       performance={{ min: 0.72, debounce: 350 }}
     >
-      <AdaptiveResolution maxDpr={dpr} />
+      <AdaptiveResolution maxDpr={dpr} handoffRef={handoffRef} />
       <color attach="background" args={[palette.background]} />
       <fogExp2 attach="fog" args={[palette.background, palette.fogDensity]} />
       <Suspense fallback={null}>
