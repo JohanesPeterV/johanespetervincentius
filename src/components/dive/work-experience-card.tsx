@@ -1,31 +1,35 @@
-import { ArrowUpRight } from 'lucide-react';
-import Image from 'next/image';
-
 import type { WorkExperience } from '@/app/_components/work-experience/work-experiences';
-import { PickableCard } from './pickable-card';
 
 type WorkExperienceCardProps = {
   job: WorkExperience;
   index: number;
+  selectedCompany: string;
+  onSelect: (company: string) => void;
 };
 
-export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
+export const WorkExperienceCard = ({
+  job,
+  index,
+  selectedCompany,
+  onSelect,
+}: WorkExperienceCardProps) => {
   const current = job.status === 'current';
   return (
-    <PickableCard
-      title={job.company}
-      variant="work"
-      status={job.status}
-      caption={`0${index + 1} / WORK`}
-      face={
-        <>
+    <div className="work-card-slot">
+      <div className="work-card-hanger">
+        <button
+          type="button"
+          className="work-card surface-panel flex h-full w-full flex-col text-left"
+          aria-label={`${job.company}${current ? ', current role' : ''}`}
+          aria-pressed={job.company === selectedCompany}
+          aria-controls={`work-detail-${index}`}
+          onClick={() => onSelect(job.company)}
+        >
           <span className="type-meta flex w-full items-center justify-between gap-2">
             <span className="text-muted-foreground">0{index + 1}</span>
             {current ? (
               <span className="work-current-label">Current role</span>
-            ) : (
-              <ArrowUpRight size={16} aria-hidden />
-            )}
+            ) : null}
           </span>
           <span className="card-face-title font-display">{job.company}</span>
           <span className="work-card-role type-label text-muted-foreground">
@@ -43,62 +47,19 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           <span className="work-card-period type-meta mt-auto text-muted-foreground">
             {job.positions[0].workPeriod}
           </span>
-        </>
-      }
-    >
-      {job.positions.map((position) => (
-        <div key={position.name} className="mt-5">
-          <h4 className="type-label">{position.name}</h4>
-          <p className="type-meta mt-1 text-muted-foreground">
-            {position.workPeriod}
-          </p>
-          <p className="work-description mt-5 text-muted-foreground">
-            {position.description}
-          </p>
-        </div>
-      ))}
-      {job.deliverables ? (
-        <ul className="work-deliverables mt-7 grid gap-6 sm:grid-cols-2">
-          {job.deliverables.map((deliverable) => (
-            <li key={deliverable.screenshot.src}>
-              <a
-                className="work-deliverable grid gap-3"
-                href={deliverable.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Image
-                  src={deliverable.screenshot.src}
-                  alt={deliverable.screenshot.alt}
-                  width={1200}
-                  height={750}
-                  sizes="(min-width: 640px) 21rem, 90vw"
-                  className="work-deliverable-shot h-auto w-full"
-                />
-                <span className="flex items-center justify-between gap-4">
-                  <span className="grid gap-1">
-                    <span className="type-label">{deliverable.name}</span>
-                    <span className="type-meta text-muted-foreground">
-                      {deliverable.description}
-                    </span>
-                  </span>
-                  <ArrowUpRight size={18} aria-hidden />
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      <ul className="work-contributions mt-7 grid gap-6 sm:grid-cols-2">
-        {job.showcases.map((showcase) => (
-          <li key={showcase.title}>
-            <h4 className="type-label mb-2">{showcase.title}</h4>
-            <p className="work-description text-muted-foreground">
-              {showcase.description}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </PickableCard>
+        </button>
+        <svg
+          className="work-card-strings"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M 50 0 L 18 100 M 50 0 L 82 100" />
+          <circle cx="18" cy="100" r="1.25" />
+          <circle cx="82" cy="100" r="1.25" />
+        </svg>
+        <span className="work-card-pivot" aria-hidden="true" />
+      </div>
+    </div>
   );
 };

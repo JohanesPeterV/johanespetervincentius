@@ -12,7 +12,6 @@ type ProjectCardProps = {
 export const ProjectCard = ({ project, index }: ProjectCardProps) => (
   <PickableCard
     title={project.title}
-    variant="project"
     caption={`0${index} / PROJECT`}
     face={
       <>

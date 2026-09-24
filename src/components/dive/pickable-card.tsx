@@ -3,21 +3,13 @@
 import { X } from 'lucide-react';
 import { ReactNode, useId, useRef } from 'react';
 
-import type { WorkExperience } from '@/app/_components/work-experience/work-experiences';
 import { Button } from '@/components/ui/button';
 
 type PickableCardProps = {
   title: string;
-  variant: 'work' | 'project';
-  status?: WorkExperience['status'];
   caption: string;
   face: ReactNode;
   children: ReactNode;
-};
-
-const cardClasses = {
-  work: { slot: 'work-card-slot', button: 'work-card' },
-  project: { slot: 'project-card-slot', button: 'project-card' },
 };
 
 const getPickupTransform = (
@@ -28,12 +20,7 @@ const getPickupTransform = (
   const target = dialog.getBoundingClientRect();
   const x = source.left + source.width / 2 - target.left - target.width / 2;
   const y = source.top + source.height / 2 - target.top - target.height / 2;
-  const parentTransform = card.parentElement
-    ? getComputedStyle(card.parentElement).transform
-    : 'none';
-  const matrix = new DOMMatrixReadOnly(parentTransform).multiply(
-    new DOMMatrixReadOnly(getComputedStyle(card).transform),
-  );
+  const matrix = new DOMMatrixReadOnly(getComputedStyle(card).transform);
   const angle = Math.atan2(matrix.b, matrix.a);
   const scale = Math.hypot(matrix.a, matrix.b);
   return `translate(${x}px, ${y}px) rotate(${angle}rad) scale(${(card.offsetWidth * scale) / target.width}, ${(card.offsetHeight * scale) / target.height})`;
@@ -41,8 +28,6 @@ const getPickupTransform = (
 
 export const PickableCard = ({
   title,
-  variant,
-  status,
   caption,
   face,
   children,
@@ -50,7 +35,6 @@ export const PickableCard = ({
   const cardRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const animationRef = useRef<Animation | null>(null);
-  const current = status === 'current';
   const titleId = useId();
 
   const handlePick = (): void => {
@@ -101,34 +85,17 @@ export const PickableCard = ({
   };
 
   return (
-    <div className={cardClasses[variant].slot} data-current={current}>
-      <div className={variant === 'work' ? 'work-card-hanger' : 'contents'}>
-        <button
-          ref={cardRef}
-          type="button"
-          className={`${cardClasses[variant].button} surface-panel flex h-full w-full flex-col text-left`}
-          aria-label={`Pick up ${title}${current ? ', current role' : ''}`}
-          aria-haspopup="dialog"
-          onClick={handlePick}
-        >
-          {face}
-        </button>
-        {variant === 'work' ? (
-          <>
-            <svg
-              className="work-card-strings"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <path d="M 50 0 L 18 100 M 50 0 L 82 100" />
-              <circle cx="18" cy="100" r="1.25" />
-              <circle cx="82" cy="100" r="1.25" />
-            </svg>
-            <span className="work-card-pivot" aria-hidden="true" />
-          </>
-        ) : null}
-      </div>
+    <div className="project-card-slot">
+      <button
+        ref={cardRef}
+        type="button"
+        className="project-card surface-panel flex h-full w-full flex-col text-left"
+        aria-label={`Pick up ${title}`}
+        aria-haspopup="dialog"
+        onClick={handlePick}
+      >
+        {face}
+      </button>
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
@@ -158,11 +125,8 @@ export const PickableCard = ({
         onPointerDown={(event) => event.stopPropagation()}
       >
         <header className="flex items-center justify-between gap-4">
-          <span className="type-meta flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground">
-            <span className="whitespace-nowrap">{caption}</span>
-            {current ? (
-              <span className="work-current-label">Current role</span>
-            ) : null}
+          <span className="type-meta whitespace-nowrap text-muted-foreground">
+            {caption}
           </span>
           <Button
             variant="ghost"
