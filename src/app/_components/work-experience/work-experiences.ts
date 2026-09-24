@@ -2,7 +2,12 @@ export type WorkExperience = {
   company: string;
   status: 'current' | 'past';
   summary?: string;
-  products?: { name: string; href: string; description: string }[];
+  deliverables?: {
+    name: string;
+    href: string;
+    description: string;
+    screenshot: { src: string; alt: string };
+  }[];
   positions: {
     name: string;
     workPeriod: string;
@@ -20,16 +25,24 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     status: 'current',
     summary:
       'Own engineering for custom merchandise, corporate gifting, and rewards systems — from quotes and checkout to inventory, delivery, and accounting.',
-    products: [
+    deliverables: [
       {
         name: 'Smilie',
         href: 'https://smilie.io',
         description: 'Corporate gifting & commerce',
+        screenshot: {
+          src: '/work/smilie-quote.webp',
+          alt: 'Smilie product page with quantity-tier pricing and a live quote total',
+        },
       },
       {
         name: 'Gift Management',
         href: 'https://gms.smilie.io',
         description: 'Merchandise, gifting & fulfilment',
+        screenshot: {
+          src: '/work/smilie-gms-recipients.webp',
+          alt: 'Gift Management checkout step allocating gift boxes to recipients',
+        },
       },
     ],
     positions: [
@@ -76,6 +89,26 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'TableLink',
     status: 'past',
+    deliverables: [
+      {
+        name: 'Customer Requests',
+        href: 'https://dashboard.table.link',
+        description: 'Live screen takeover & song queues',
+        screenshot: {
+          src: '/work/tablelink-screen-takeover.webp',
+          alt: 'TableLink screen takeover queue with guest messages, tips, and staff actions',
+        },
+      },
+      {
+        name: 'Request settings',
+        href: 'https://dashboard.table.link',
+        description: 'Schedules, pricing & tip rules',
+        screenshot: {
+          src: '/work/tablelink-request-settings.webp',
+          alt: 'TableLink screen takeover settings with a weekly schedule',
+        },
+      },
+    ],
     positions: [
       {
         name: 'Senior Software Engineer',
@@ -105,6 +138,17 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Farmio',
     status: 'past',
+    deliverables: [
+      {
+        name: 'Farmio',
+        href: 'https://farmio.io/en/merchant/',
+        description: 'B2B food supply ordering',
+        screenshot: {
+          src: '/work/farmio-merchant-portal.webp',
+          alt: 'Farmio merchant portal with order history and an invoice',
+        },
+      },
+    ],
     positions: [
       {
         name: 'Software Engineer',

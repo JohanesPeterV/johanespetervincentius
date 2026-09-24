@@ -487,24 +487,27 @@
     line-height: 1.6;
   }
 
-  .work-product-links {
-    border-top: 1px solid hsl(var(--border));
-    padding-top: 1rem;
-  }
-
-  .work-product-link {
-    min-height: 3.5rem;
-    padding-block: 0.5rem;
+  .work-deliverable {
     transition: color 200ms;
   }
 
-  .work-product-link:hover {
+  .work-deliverable:hover {
     color: hsl(var(--primary-text));
   }
 
-  .work-product-link:focus-visible {
+  .work-deliverable:focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 5px;
+  }
+
+  .work-deliverable-shot {
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    transition: border-color 200ms;
+  }
+
+  .work-deliverable:hover .work-deliverable-shot {
+    border-color: hsl(var(--primary-text));
   }
 
   .work-card-spread {

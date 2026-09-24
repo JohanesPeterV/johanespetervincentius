@@ -1,4 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
 
 import type { WorkExperience } from '@/app/_components/work-experience/work-experiences';
 import { PickableCard } from './pickable-card';
@@ -56,6 +57,38 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           </p>
         </div>
       ))}
+      {job.deliverables ? (
+        <ul className="work-deliverables mt-7 grid gap-6 sm:grid-cols-2">
+          {job.deliverables.map((deliverable) => (
+            <li key={deliverable.screenshot.src}>
+              <a
+                className="work-deliverable grid gap-3"
+                href={deliverable.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src={deliverable.screenshot.src}
+                  alt={deliverable.screenshot.alt}
+                  width={1200}
+                  height={750}
+                  sizes="(min-width: 640px) 21rem, 90vw"
+                  className="work-deliverable-shot h-auto w-full"
+                />
+                <span className="flex items-center justify-between gap-4">
+                  <span className="grid gap-1">
+                    <span className="type-label">{deliverable.name}</span>
+                    <span className="type-meta text-muted-foreground">
+                      {deliverable.description}
+                    </span>
+                  </span>
+                  <ArrowUpRight size={18} aria-hidden />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <ul className="work-contributions mt-7 grid gap-6 sm:grid-cols-2">
         {job.showcases.map((showcase) => (
           <li key={showcase.title}>
@@ -66,28 +99,6 @@ export const WorkExperienceCard = ({ job, index }: WorkExperienceCardProps) => {
           </li>
         ))}
       </ul>
-      {job.products ? (
-        <ul className="work-product-links mt-7 grid gap-3 sm:grid-cols-3 sm:gap-6">
-          {job.products.map((product) => (
-            <li key={product.href}>
-              <a
-                className="work-product-link flex items-center justify-between gap-4"
-                href={product.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="grid gap-1">
-                  <span className="type-label">{product.name}</span>
-                  <span className="type-meta text-muted-foreground">
-                    {product.description}
-                  </span>
-                </span>
-                <ArrowUpRight size={18} aria-hidden />
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : null}
     </PickableCard>
   );
 };
