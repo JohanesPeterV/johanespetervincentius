@@ -9,12 +9,11 @@ import {
 import type { DriveMotion } from './camera-motion';
 import {
   canScrollSection,
+  createReadingInput,
   dragInputDelta,
-  getReadingSection,
   getScrollableSection,
   journeyDeltaForScroll,
   normalizeWheelDelta,
-  scrollSectionBy,
 } from './dive-input';
 import type { PointerDrag, PointerState } from './dive-input';
 
@@ -39,6 +38,13 @@ export default function DiveNavigation({
     axis: 'pending-vertical',
     scrollTarget: null,
   });
+  const readingInputRef = useRef<ReturnType<typeof createReadingInput> | null>(
+    null,
+  );
+  if (readingInputRef.current === null) {
+    readingInputRef.current = createReadingInput(driveRef.current);
+  }
+  const readingInput = readingInputRef.current;
   const handlePointerDown = (
     event: React.PointerEvent<HTMLDivElement>,
   ): void => {
@@ -87,10 +93,7 @@ export default function DiveNavigation({
     if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.setPointerCapture(event.pointerId);
     }
-    const remaining = scrollSectionBy(
-      getReadingSection(drag.scrollTarget, driveRef.current),
-      delta,
-    );
+    const remaining = readingInput.scroll(drag.scrollTarget, delta);
     if (remaining !== 0) {
       drag.scrollTarget = null;
       scrollDriveBy(
@@ -130,8 +133,8 @@ export default function DiveNavigation({
       }
       cancelSnap();
       event.preventDefault();
-      const remaining = scrollSectionBy(
-        getReadingSection(event.target, driveRef.current),
+      const remaining = readingInput.scroll(
+        event.target,
         normalizeWheelDelta(event, window.innerHeight),
       );
       if (remaining !== 0) {
@@ -154,10 +157,11 @@ export default function DiveNavigation({
     root?.addEventListener('pointerdown', cancelSnap);
     return () => {
       cancelSnap();
+      readingInput.dispose();
       root?.removeEventListener('wheel', handleWheel);
       root?.removeEventListener('pointerdown', cancelSnap);
     };
-  }, [driveRef]);
+  }, [driveRef, readingInput]);
 
   // REASON: arrow-key navigation needs window-level key events - the
   // full-screen div is never focused, so an onKeyDown prop would not fire

@@ -12,6 +12,7 @@ import {
   journeyDeltaForScroll,
   normalizeWheelDelta,
   scrollSectionBy,
+  splitReadingInput,
 } from '../src/components/dive/dive-input';
 import { DiveRoute } from '../src/components/dive/dive-route';
 
@@ -207,4 +208,26 @@ test('the reading-to-journey handoff preserves the remaining wheel distance', ()
   assert.equal(panel.scrollTop, 600);
   assert.equal(remaining, 30);
   assert.ok(Math.abs(drive.current - route.entry.center - 0.0225) < 1e-9);
+});
+
+test('reverse entry finishes chapter travel before the panel starts scrolling', () => {
+  assert.deepEqual(splitReadingInput(-40, -0.03, 800), {
+    travelPixels: -40,
+    readingPixels: 0,
+  });
+  assert.deepEqual(splitReadingInput(-40, 0.03, 800), {
+    travelPixels: -40,
+    readingPixels: 0,
+  });
+});
+
+test('reverse entry splits one wheel step at the chapter center', () => {
+  assert.deepEqual(splitReadingInput(-40, -0.015, 800), {
+    travelPixels: -20,
+    readingPixels: -20,
+  });
+  assert.deepEqual(splitReadingInput(-40, 0, 800), {
+    travelPixels: 0,
+    readingPixels: -40,
+  });
 });
