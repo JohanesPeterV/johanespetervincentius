@@ -516,11 +516,9 @@
     isolation: isolate;
   }
 
-  .work-card-rail {
-    position: absolute;
-    top: -3.6rem;
-    left: calc(50% - 50vw);
-    width: 100vw;
+  .work-screen-edge {
+    position: fixed;
+    inset: 0 0 auto;
     height: 1px;
     background: hsl(var(--primary-text) / 0.4);
     pointer-events: none;
@@ -557,10 +555,6 @@
     z-index: 4;
   }
 
-  .work-card-slot:nth-child(even) .work-card-hanger {
-    --cord-length: 3.6rem;
-  }
-
   .work-card-slot[data-current='true'] .work-card {
     border-color: hsl(var(--primary-text));
   }
@@ -580,7 +574,7 @@
   }
 
   .work-card-hanger {
-    --cord-length: 6rem;
+    --cord-length: 0px;
     position: relative;
     height: 100%;
     transform: rotate(var(--card-angle));
@@ -632,11 +626,11 @@
   @keyframes work-card-sway {
     0%,
     100% {
-      transform: rotate(calc(var(--card-angle) - 2deg));
+      transform: rotate(calc(var(--card-angle) - 1.5deg));
     }
 
     42% {
-      transform: rotate(calc(var(--card-angle) + 2deg));
+      transform: rotate(calc(var(--card-angle) + 1.5deg));
     }
 
     68% {
@@ -903,7 +897,7 @@
       transform-origin: center;
     }
 
-    .work-card-rail,
+    .work-screen-edge,
     .work-card-strings,
     .work-card-pivot {
       display: none;
