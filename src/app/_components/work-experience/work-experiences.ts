@@ -108,6 +108,24 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
           alt: 'TableLink screen takeover settings with a weekly schedule',
         },
       },
+      {
+        name: 'CRM members',
+        href: 'https://dashboard.table.link',
+        description: 'Rankings, spending & Excel export',
+        screenshot: {
+          src: '/work/tablelink-crm-members.webp',
+          alt: 'TableLink CRM member table with rankings and total spending',
+        },
+      },
+      {
+        name: 'Design system',
+        href: 'https://dashboard.table.link',
+        description: 'shadcn components documented in Storybook',
+        screenshot: {
+          src: '/work/tablelink-design-system.webp',
+          alt: 'TableLink Storybook showing the multi-select component',
+        },
+      },
     ],
     positions: [
       {
@@ -146,6 +164,15 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         screenshot: {
           src: '/work/farmio-merchant-portal.webp',
           alt: 'Farmio merchant portal with order history and an invoice',
+        },
+      },
+      {
+        name: 'Farmio Fresh',
+        href: 'https://apps.apple.com/sg/app/farmio-fresh/id6475751161',
+        description: 'Mobile ordering app',
+        screenshot: {
+          src: '/work/farmio-fresh-app.webp',
+          alt: 'Farmio Fresh app screens for cart, notifications, dashboard, and suppliers',
         },
       },
     ],
