@@ -14,6 +14,7 @@ export const POMODORO_PLANTER = {
   technologies: ['Next.js', 'TypeScript', 'Convex', 'Clerk'],
   link: 'https://pomoplanter.com',
   previewLink: 'https://www.pomoplanter.com/yard/akyejevz8umyfnb4',
+  accountCountUrl: 'https://www.pomoplanter.com/api/account-count',
   image: '/projects/pomoplanter-morning.webp',
   screenshots: [
     {

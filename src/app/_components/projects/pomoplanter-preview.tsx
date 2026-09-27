@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
+import { PomoplanterAccountCount } from './pomoplanter-account-count';
 import { POMODORO_PLANTER } from './projects';
 
 export const PomoplanterPreview = () => {
@@ -45,6 +46,7 @@ export const PomoplanterPreview = () => {
       <figcaption className="flex items-center justify-between gap-3">
         <span className="text-[0.6rem] tracking-widest opacity-60">
           LIVE PRODUCT
+          <PomoplanterAccountCount />
         </span>
         <div className="flex" aria-label="Preview appearance">
           {POMODORO_PLANTER.screenshots.map((screenshot, index) => (
