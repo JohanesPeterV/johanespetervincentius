@@ -14,7 +14,7 @@ import {
 
 import { aberrationStrength, rushFov } from './descent';
 import type { MotionMode } from './descent';
-import { ARRIVAL_ABERRATION, ARRIVAL_DOLLY, ARRIVAL_LENS } from './arrival';
+import { ARRIVAL_DOLLY } from './arrival';
 import type { DiveFrame } from './dive-frame';
 import type { DivePalette } from './dive-palette';
 import DivePostprocessing from './dive-postprocessing';
@@ -73,13 +73,14 @@ export default function CameraRig({
     camera.position.set(
       descent.position[0] + parallax.x * 0.3,
       descent.position[1] - parallax.y * 0.15,
-      descent.position[2] + approach * ARRIVAL_DOLLY,
+      descent.position[2],
     );
     camera.lookAt(
       descent.look[0] + parallax.x * 0.28,
       descent.look[1] - parallax.y * 0.16,
       descent.look[2],
     );
+    camera.translateZ(approach * ARRIVAL_DOLLY);
     const targetRoll =
       Math.max(-0.012, Math.min(0.012, -driveStep * 0.12)) * transitionZone;
     rollRef.current = MathUtils.damp(
@@ -90,8 +91,7 @@ export default function CameraRig({
     );
     camera.rotateZ(rollRef.current);
     if (camera instanceof PerspectiveCamera) {
-      const targetFov =
-        rushFov(driveStep * transitionZone) + approach * ARRIVAL_LENS;
+      const targetFov = rushFov(driveStep * transitionZone);
       fovRef.current = MathUtils.damp(
         fovRef.current,
         targetFov,
@@ -124,10 +124,7 @@ export default function CameraRig({
       );
     }
     if (aberrationRef.current) {
-      const strength = Math.max(
-        aberrationStrength(driveStep) * transitionZone,
-        approach * ARRIVAL_ABERRATION,
-      );
+      const strength = aberrationStrength(driveStep) * transitionZone;
       aberrationRef.current.offset.set(strength, strength * 0.55);
     }
     if (glowRef.current) {

@@ -100,7 +100,7 @@ test('long frames cap movement and arrival together; zero time has finite veloci
 test('the opening advances by elapsed live time and remains complete', () => {
   const handoff = createHeroHandoff(route);
   const timeline = createDiveTimeline(createDrive(), handoff);
-  for (let index = 0; index < 168; index++) {
+  for (let index = 0; index < Math.ceil(ARRIVAL_DURATION * 60); index++) {
     advanceDiveTimeline(timeline, {
       delta: 1 / 60,
       stage: 'live',

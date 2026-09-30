@@ -14,7 +14,6 @@ import { jumpDriveToSection } from './camera-motion';
 import { useDivePalette } from './use-dive-palette';
 import DiveOverlay from './dive-overlay';
 import type { DiveContent } from './dive-overlay';
-import DiveLoader from './dive-loader';
 import type { OverlayNodes } from './dive-overlay-motion';
 import { useHeroHandoff } from './use-hero-handoff';
 
@@ -66,10 +65,9 @@ export default function DiveScene({
           motionMode={motionMode}
         />
       </Suspense>
-      <DiveLoader
-        handoffRef={handoffRef}
-        palette={palette}
-        motionMode={motionMode}
+      <div
+        aria-hidden
+        className="dive-loader pointer-events-none absolute inset-0 z-20"
       />
       <div className="dive-chrome relative z-30">
         <PalettePicker />

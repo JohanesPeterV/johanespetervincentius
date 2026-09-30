@@ -21,8 +21,6 @@ const appendTriangle = (
   }
 };
 
-// REASON: the loader worker draws this star while the main thread boots WebGL,
-// so the shape stays plain arithmetic and keeps Three.js out of the worker.
 export const createStarPositions = (): number[] => {
   const positions: number[] = [];
   const rings = [
