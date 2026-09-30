@@ -375,6 +375,10 @@
 
   .dive-loader {
     --loader-exit: 0;
+    --loader-contract: clamp(0, var(--loader-exit) / 0.22, 1);
+    --loader-open: clamp(0, (var(--loader-exit) - 0.22) / 0.78, 1);
+    --loader-radius: calc(var(--loader-open) * 200vmax);
+    --loader-notch: calc(var(--loader-radius) * 0.28);
     --loader-inset: clamp(1.5rem, 3.6vw, 3.5rem);
     isolation: isolate;
     color: hsl(var(--foreground));
@@ -385,8 +389,45 @@
     position: absolute;
     inset: 0;
     background: hsl(var(--background));
-    opacity: calc(1 - var(--loader-exit));
+    clip-path: polygon(
+      evenodd,
+      0 0,
+      100% 0,
+      100% 100%,
+      0 100%,
+      0 0,
+      50% calc(46% - var(--loader-radius)),
+      calc(50% + var(--loader-notch)) calc(46% - var(--loader-notch)),
+      calc(50% + var(--loader-radius)) 46%,
+      calc(50% + var(--loader-notch)) calc(46% + var(--loader-notch)),
+      50% calc(46% + var(--loader-radius)),
+      calc(50% - var(--loader-notch)) calc(46% + var(--loader-notch)),
+      calc(50% - var(--loader-radius)) 46%,
+      calc(50% - var(--loader-notch)) calc(46% - var(--loader-notch)),
+      50% calc(46% - var(--loader-radius))
+    );
     z-index: -1;
+  }
+
+  .dive-loader-star {
+    transform-origin: 50% 46%;
+    transform: scale(
+        calc(1 - var(--loader-contract) * 0.88 + var(--loader-open) * 5)
+      )
+      rotate(calc(var(--loader-open) * -12deg));
+    opacity: clamp(0, 1 - var(--loader-open) * 2.5, 1);
+    will-change: transform, opacity;
+  }
+
+  .dive-loader-aperture {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: calc(var(--loader-radius) * 2);
+    height: calc(var(--loader-radius) * 2);
+    translate: -50% -50%;
+    stroke: hsl(var(--primary));
+    opacity: clamp(0, 1 - var(--loader-open) * 1.5, 1);
   }
 
   .dive-loader-caption {
@@ -404,7 +445,8 @@
   .dive-loader-coordinate,
   .dive-loader-readout {
     position: absolute;
-    opacity: clamp(0, 1 - var(--loader-exit) * 2.5, 1);
+    opacity: clamp(0, 1 - var(--loader-exit) * 5, 1);
+    translate: 0 calc(var(--loader-exit) * -1rem);
   }
 
   .dive-loader-identity {

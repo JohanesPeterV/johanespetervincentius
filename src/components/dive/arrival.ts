@@ -16,3 +16,6 @@ export const arrivalLids = (arrival: number): number =>
 
 export const arrivalCard = (arrival: number): number =>
   MathUtils.smoothstep(arrival, 0.55, 0.95);
+
+export const arrivalLoader = (arrival: number): number =>
+  MathUtils.smoothstep(arrival, 0.06, 0.82);

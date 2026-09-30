@@ -1,7 +1,7 @@
 type Point = readonly [x: number, y: number, z: number];
 type OutlinePoint = readonly [x: number, y: number];
 
-const OUTLINE: readonly OutlinePoint[] = [
+export const STAR_OUTLINE: readonly OutlinePoint[] = [
   [0, 0.5],
   [-0.14, 0.14],
   [-0.5, 0],
@@ -31,11 +31,11 @@ export const createStarPositions = (): number[] => {
     { scale: 1, depth: -0.05 },
     { scale: 0.72, depth: -0.14 },
   ].map(({ scale, depth }) =>
-    OUTLINE.map<Point>(([x, y]) => [x * scale, y * scale, depth]),
+    STAR_OUTLINE.map<Point>(([x, y]) => [x * scale, y * scale, depth]),
   );
 
-  for (let index = 0; index < OUTLINE.length; index++) {
-    const next = (index + 1) % OUTLINE.length;
+  for (let index = 0; index < STAR_OUTLINE.length; index++) {
+    const next = (index + 1) % STAR_OUTLINE.length;
     appendTriangle(positions, [[0, 0, 0.14], rings[0][index], rings[0][next]]);
     appendTriangle(positions, [[0, 0, -0.14], rings[3][next], rings[3][index]]);
 

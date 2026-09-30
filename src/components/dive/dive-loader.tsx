@@ -8,13 +8,16 @@ import type { DivePalette } from './dive-palette';
 import type { HeroHandoff } from './hero-handoff';
 import { drawLoadingStar } from './loading-star';
 import type { LoadingStarMessage } from './loading-star.worker';
-import { arrivalCard } from './arrival';
+import { arrivalLoader } from './arrival';
+import { STAR_OUTLINE } from './star-shape';
 
 type DiveLoaderProps = {
   handoffRef: RefObject<HeroHandoff>;
   palette: DivePalette;
   motionMode: MotionMode;
 };
+
+const APERTURE_POINTS = STAR_OUTLINE.map(([x, y]) => `${x},${y}`).join(' ');
 
 export default function DiveLoader({
   handoffRef,
@@ -97,7 +100,7 @@ export default function DiveLoader({
 
     const render = (now: number): void => {
       const arrival = handoffRef.current.arrival;
-      const exit = arrivalCard(arrival);
+      const exit = arrivalLoader(arrival);
       if (exit === 1) {
         root.hidden = true;
         resize.disconnect();
@@ -158,8 +161,16 @@ export default function DiveLoader({
       <div
         ref={canvasHostRef}
         aria-hidden
-        className="absolute inset-0 h-full w-full opacity-[calc(1-var(--loader-exit))]"
+        className="dive-loader-star absolute inset-0 h-full w-full"
       />
+      <svg aria-hidden className="dive-loader-aperture" viewBox="-0.5 -0.5 1 1">
+        <polygon
+          points={APERTURE_POINTS}
+          fill="none"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
       <div aria-hidden className="dive-loader-caption dive-loader-identity">
         Johanes Peter
         <br />
