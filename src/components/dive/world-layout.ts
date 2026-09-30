@@ -4,6 +4,7 @@ type StarfieldAppearance = {
   size: number;
   glow: number;
   tint: number;
+  cohesion: number;
 };
 
 type ShapeGenerator = (
@@ -191,7 +192,7 @@ export const STARFIELD_SHAPES: Readonly<
     {
       id: 'bitcoin',
       generate: formBitcoin,
-      appearance: { size: 1, glow: 0.12, tint: 0.72 },
+      appearance: { size: 2.4, glow: 0.08, tint: 0.72, cohesion: 1 },
     },
   ],
   orbital: [
@@ -223,7 +224,7 @@ export const buildStarfield = (
   const shapes = STARFIELD_SHAPES[reality];
   const frames = shapes.map(({ id, appearance }) => ({
     id,
-    appearance: { size: 1, glow: 1, tint: 0.5, ...appearance },
+    appearance: { size: 1, glow: 1, tint: 0.5, cohesion: 0, ...appearance },
     positions: new Float32Array(count * 3),
   }));
   const seeds = new Float32Array(count * 3);

@@ -2,8 +2,8 @@ import { STARFIELD_REFERENCE_DISTANCE } from './starfield-space';
 
 export const starfieldVertex = `
   uniform float uTime;
-  uniform vec3 uAppearanceFrom;
-  uniform vec3 uAppearanceTo;
+  uniform vec4 uAppearanceFrom;
+  uniform vec4 uAppearanceTo;
   uniform float uLuminous;
   uniform float uAspect;
   uniform float uWorldScale;
@@ -26,14 +26,14 @@ export const starfieldVertex = `
   varying vec3 vViewPosition;
   const float STAR_ACCENT_THRESHOLD = 0.933333;
 
-  vec2 distortPosition(vec2 point) {
+  vec2 distortPosition(vec2 point, float cohesion) {
     vec2 pointerDelta = point - vec2(uPointer.x * uAspect, uPointer.y);
     float pointerDistance = length(pointerDelta);
     vec2 pointerDirection = pointerDelta / max(pointerDistance, 0.025);
     float influence = exp(-pow(pointerDistance / 0.24, 2.0));
     vec2 curl = vec2(-pointerDirection.y, pointerDirection.x);
     point += (pointerDirection * 0.12 + curl * 0.085)
-      * influence * uPointerStrength * uInteraction;
+      * influence * uPointerStrength * uInteraction * mix(1.0, 0.15, cohesion);
     return point;
   }
 
@@ -60,27 +60,39 @@ export const starfieldVertex = `
     float delay = aSeed.x * 0.18;
     float phase = clamp((uMorph - delay) / (1.0 - delay), 0.0, 1.0);
     float morph = smoothstep(0.0, 1.0, phase);
+    vec4 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
+    float cohesion = appearance.w;
+    // REASON: extra stars appear only as a cohesive silhouette forms, leaving the open sky sparse.
+    float density = mix(0.20, 1.04, cohesion);
+    if (aSeed.x >= density) {
+      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+      return;
+    }
+    float visibility = 1.0 - smoothstep(density - 0.04, density, aSeed.x);
+    float drift = mix(1.0, 0.06, cohesion);
     vec3 point = mix(aFrom, aTo, morph);
     vec2 journey = aTo.xy - aFrom.xy;
     point.xy += vec2(-journey.y, journey.x) * sin(morph * 3.14159) * 0.16;
-    point = mix(aScatter, point, step(0.20, aSeed.z) * (1.0 - uTravel));
+    point = mix(aScatter, point, mix(step(0.20, aSeed.z), 1.0, cohesion) * (1.0 - uTravel));
     point.xy += vec2(
       sin(uTime * 0.18 + aSeed.x * 6.283),
       cos(uTime * 0.14 + aSeed.z * 6.283)
-    ) * 0.6;
-    point.z += sin(uTime * 0.12 + aSeed.y * 6.283) * 0.8;
+    ) * 0.6 * drift;
+    point.z += sin(uTime * 0.12 + aSeed.y * 6.283) * 0.8 * drift;
     point.x += sign(point.x) * uTravel * (4.0 + aSeed.z * 7.0);
     float flowDepth = max(12.0, abs(point.z));
     point.y -= uFlow * flowDepth * (0.85 + aSeed.x * 0.65);
     point.x += sin(aSeed.z * 6.283) * uFlow * flowDepth * 0.08;
 
-    vec3 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
     vGlow = pow(smoothstep(STAR_ACCENT_THRESHOLD, 1.0, aSeed.y), 2.0);
     float twinkle = 0.64 + 0.36 * (0.5 + 0.5 * sin(
       uTime * (0.8 + aSeed.x * 0.35) + aSeed.z * 6.283
     ));
-    float diameter = (0.04 + aSeed.y * aSeed.y * 0.065 + vGlow * 0.32)
-      * appearance.x * uWorldScale * mix(0.75, 1.0, uLuminous);
+    float diameter = mix(
+      0.04 + aSeed.y * aSeed.y * 0.065 + vGlow * 0.32,
+      0.085 + aSeed.y * aSeed.y * 0.065 + vGlow * 0.08,
+      cohesion
+    ) * appearance.x * uWorldScale * mix(0.75, 1.0, uLuminous);
     vec4 center = modelViewMatrix * vec4(point, 1.0);
     float depth = max(0.01, -center.z);
     float nearFade = smoothstep(1.0, 6.0, depth);
@@ -99,7 +111,7 @@ export const starfieldVertex = `
     if (center.z < -0.2) {
       vec4 projectedCenter = projectionMatrix * center;
       vec2 screen = projectedCenter.xy / projectedCenter.w * vec2(uAspect, 1.0);
-      gl_Position.xy += (distortPosition(screen) - screen)
+      gl_Position.xy += (distortPosition(screen, cohesion) - screen)
         / vec2(uAspect, 1.0) * gl_Position.w;
     }
     // REASON: stars retain spatial perspective and facets while sky depth keeps them behind foreground objects.
@@ -108,7 +120,7 @@ export const starfieldVertex = `
       * nearFade;
     // REASON: a printed star is a solid mark in one of the two inks; on paper size carries depth, not fade.
     float inkAlpha = (0.55 + 0.45 * aSeed.y) * (0.85 + 0.15 * twinkle) * nearFade;
-    vAlpha = mix(inkAlpha, glowAlpha, uLuminous);
+    vAlpha = mix(mix(inkAlpha, glowAlpha, uLuminous), nearFade, cohesion) * visibility;
     vTint = mix(step(0.5, aSeed.x), 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283), uLuminous);
     vColorStrength = mix(1.0, appearance.z, uLuminous);
     vHalo = appearance.y * twinkle;

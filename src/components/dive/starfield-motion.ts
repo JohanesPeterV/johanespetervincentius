@@ -6,6 +6,7 @@ import {
   PerspectiveCamera,
   Vector2,
   Vector3,
+  Vector4,
 } from 'three';
 
 import type { buildSpatialStarfield } from './starfield-space';
@@ -20,6 +21,8 @@ type StarfieldMotionParams = {
   uniforms: {
     uTime: { value: number };
     uMorph: { value: number };
+    uAppearanceFrom: { value: Vector4 };
+    uAppearanceTo: { value: Vector4 };
     uTravel: { value: number };
     uFlow: { value: number };
     uAspect: { value: number };
@@ -113,14 +116,23 @@ export const createStarfieldMotion = ({
       1,
     );
     const morph = MathUtils.smoothstep(phase, 0, 1);
+    const cohesion = MathUtils.lerp(
+      uniforms.uAppearanceFrom.value.w,
+      uniforms.uAppearanceTo.value.w,
+      morph,
+    );
+    const drift = MathUtils.lerp(1, 0.06, cohesion);
     position.lerpVectors(from, to, morph);
     const arc = Math.sin(morph * 3.14159) * 0.16;
     position.x -= (to.y - from.y) * arc;
     position.y += (to.x - from.x) * arc;
-    position.lerp(scatter, 1 - Number(seed.z >= 0.2) * (1 - travel));
-    position.x += Math.sin(time * 0.18 + seed.x * 6.283) * 0.6;
-    position.y += Math.cos(time * 0.14 + seed.z * 6.283) * 0.6;
-    position.z += Math.sin(time * 0.12 + seed.y * 6.283) * 0.8;
+    position.lerp(
+      scatter,
+      1 - MathUtils.lerp(Number(seed.z >= 0.2), 1, cohesion) * (1 - travel),
+    );
+    position.x += Math.sin(time * 0.18 + seed.x * 6.283) * 0.6 * drift;
+    position.y += Math.cos(time * 0.14 + seed.z * 6.283) * 0.6 * drift;
+    position.z += Math.sin(time * 0.12 + seed.y * 6.283) * 0.8 * drift;
     position.x += Math.sign(position.x) * travel * (4 + seed.z * 7);
     const flowDepth = Math.max(12, Math.abs(position.z));
     position.y -= flow * flowDepth * (0.85 + seed.x * 0.65);
@@ -143,7 +155,8 @@ export const createStarfieldMotion = ({
     const pointerInfluence =
       (Math.exp(-Math.pow(pointerDistance / 0.24, 2)) *
         uniforms.uPointerStrength.value *
-        uniforms.uInteraction.value) /
+        uniforms.uInteraction.value *
+        MathUtils.lerp(1, 0.15, cohesion)) /
       Math.max(pointerDistance, 0.025);
     x += (pointerX * 0.12 - pointerY * 0.085) * pointerInfluence;
     y += (pointerY * 0.12 + pointerX * 0.085) * pointerInfluence;
