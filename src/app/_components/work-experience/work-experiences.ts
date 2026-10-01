@@ -1,7 +1,8 @@
 export type WorkExperience = {
   company: string;
   status: 'current' | 'past';
-  summary?: string;
+  metrics: { value: string; label: string }[];
+  metricsPeriod?: string;
   deliverables?: {
     name: string;
     href: string;
@@ -23,8 +24,12 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'Smilie',
     status: 'current',
-    summary:
-      'Own engineering for custom merchandise, corporate gifting, and rewards systems — from quotes and checkout to inventory, delivery, and accounting.',
+    metrics: [
+      { value: 'S$700K+', label: 'platform revenue' },
+      { value: '9K+', label: 'delivery orders' },
+      { value: '230+', label: 'company accounts' },
+    ],
+    metricsPeriod: 'All-time GMS totals · September 2026',
     deliverables: [
       {
         name: 'Smilie',
@@ -62,17 +67,17 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         title: 'Gifting & fulfilment',
         description:
-          'Connect checkout and recipient campaigns to stock reservations, packing, dispatch, and courier tracking. An inventory ledger traces movements between warehouse stock and customer-owned inventory.',
+          'Connect checkout and 305 gifting campaigns to stock reservations, packing, dispatch, and courier tracking. GMS records 8,707 gift sets ordered and 9,032 delivery orders, with an inventory ledger tracing stock and customer-owned inventory.',
       },
       {
         title: 'Payments & accounting',
         description:
-          'Connect Stripe payments, company credits, and Xero invoices, with reconciliation and retries that recover failed accounting updates while preserving successful payments.',
+          'Support S$717.7K in recorded platform revenue through Stripe payments, company credits, and Xero invoices. Reconciliation and retries recover failed accounting updates while preserving successful payments.',
       },
       {
-        title: 'Rewards systems',
+        title: '2.5K+ vouchers activated · S$25K+ face value',
         description:
-          'Develop and maintain rewards systems with points wallets, physical gift redemption, and digital vouchers. Handle provider integrations, activation retries, expiry rules, and redemption reporting.',
+          'By August 2026, IG Club Rewards had activated at least 2,542 digital vouchers with S$25,460 in face value across 33M+ reward points, verified in June and August campaign exports. S$5 Lazada vouchers cost 6,500 points. Own points wallets, physical gift redemption, provider integrations, activation retries, expiry rules, and reporting.',
       },
       {
         title: 'Catalogue automation',
@@ -89,6 +94,11 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
   {
     company: 'TableLink',
     status: 'past',
+    metrics: [
+      { value: '~Rp72M', label: 'estimated annual savings' },
+      { value: '12', label: 'engineers supported' },
+      { value: '19', label: 'UI components documented' },
+    ],
     deliverables: [
       {
         name: 'Customer Requests',
@@ -139,7 +149,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         title: 'Shared frontend architecture',
         description:
-          'Standardized Next.js and Vite apps with reusable components and Storybook.',
+          'Standardized Next.js and Vite apps with reusable components, authoring Storybook documentation for 19 UI components.',
       },
       {
         title: 'Real-time infrastructure',
@@ -149,13 +159,17 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         title: 'Code review and releases',
         description:
-          'Reduced debt across services and strengthened code review and release practices.',
+          'Reduced debt across services and strengthened code review and release practices. Migrated developer tooling for 12 engineers, avoiding an estimated Rp72M in annual licensing costs.',
       },
     ],
   },
   {
     company: 'Farmio',
     status: 'past',
+    metrics: [
+      { value: '10+', label: 'pages consolidated' },
+      { value: '3', label: 'locales supported' },
+    ],
     deliverables: [
       {
         name: 'Farmio',
@@ -198,13 +212,18 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         title: 'Shared components and localization',
         description:
-          'Consolidated duplicated pages and standardized internationalization across three locales.',
+          'Consolidated 10+ duplicated pages into shared components and standardized internationalization across three locales.',
       },
     ],
   },
   {
     company: 'BINUS University',
     status: 'past',
+    metrics: [
+      { value: '~20K', label: 'students per semester' },
+      { value: '5,293', label: 'application users' },
+      { value: '179', label: 'projects supported' },
+    ],
     positions: [
       {
         name: 'Database Administrator · Developer Intern · Teaching Assistant',
@@ -217,12 +236,12 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         title: '5,293 users',
         description:
-          'Shipped evaluation and dashboard features for an internal Vue.js and ASP.NET application.',
+          'Shipped evaluation and dashboard features for an internal Vue.js and ASP.NET application used by 5,293 people, with monthly evaluations supporting 179 projects.',
       },
       {
         title: 'Operational reliability',
         description:
-          'Maintained the practicum database, operational procedures, and ASP.NET staff application.',
+          'Maintained the practicum database supporting approximately 20,000 students per semester, operational procedures, and an ASP.NET application used by 161 staff.',
       },
       {
         title: 'Full-stack tooling',

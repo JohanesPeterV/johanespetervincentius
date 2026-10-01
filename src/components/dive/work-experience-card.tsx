@@ -1,4 +1,5 @@
 import type { WorkExperience } from '@/app/_components/work-experience/work-experiences';
+import { WorkExperienceMetrics } from '@/app/_components/work-experience/work-experience-metrics';
 
 type WorkExperienceCardProps = {
   job: WorkExperience;
@@ -35,15 +36,7 @@ export const WorkExperienceCard = ({
           <span className="work-card-role type-label text-muted-foreground">
             {job.positions.map((position) => position.name).join(' · ')}
           </span>
-          {job.summary ? (
-            <span className="work-card-summary">{job.summary}</span>
-          ) : (
-            <span className="work-card-proof type-label">
-              {job.showcases.map((showcase) => (
-                <span key={showcase.title}>{showcase.title}</span>
-              ))}
-            </span>
-          )}
+          <WorkExperienceMetrics metrics={job.metrics} />
           <span className="work-card-period type-meta mt-auto text-muted-foreground">
             {job.positions[0].workPeriod}
           </span>

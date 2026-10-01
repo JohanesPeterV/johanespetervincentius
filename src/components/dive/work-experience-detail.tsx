@@ -2,6 +2,7 @@ import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 
 import type { WorkExperience } from '@/app/_components/work-experience/work-experiences';
+import { WorkExperienceMetrics } from '@/app/_components/work-experience/work-experience-metrics';
 
 type WorkExperienceDetailProps = {
   job: WorkExperience;
@@ -32,6 +33,14 @@ export const WorkExperienceDetail = ({
           </p>
         </div>
       ))}
+      <div className="mt-6">
+        <WorkExperienceMetrics metrics={job.metrics} />
+        {job.metricsPeriod ? (
+          <p className="type-meta mt-3 text-muted-foreground">
+            {job.metricsPeriod}
+          </p>
+        ) : null}
+      </div>
     </div>
     {job.deliverables ? (
       <ul className="work-deliverables grid content-start gap-6 sm:grid-cols-2">

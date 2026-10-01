@@ -409,11 +409,36 @@
     letter-spacing: -0.055em;
   }
 
-  .work-card-summary {
-    margin-top: 1rem;
-    max-width: 32ch;
-    font-size: 0.875rem;
-    line-height: 1.6;
+  .work-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+    gap: 1rem;
+  }
+
+  .work-metric {
+    display: grid;
+    align-content: start;
+    gap: 0.375rem;
+  }
+
+  .work-metric-value {
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
+  }
+
+  .work-card .work-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .work-card .work-metric {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.5rem;
   }
 
   /* The picked job's full story sits under the hanging cards. */
@@ -629,14 +654,6 @@
     text-wrap: balance;
   }
 
-  /* The face carries what was done there, not just the title held. */
-  .work-card-proof {
-    display: grid;
-    gap: 0.2rem;
-    margin-top: 1.25rem;
-    max-width: 26ch;
-  }
-
   .work-card-period {
     padding-top: 1rem;
   }
@@ -838,7 +855,7 @@
     }
   }
 
-  @media (max-width: 1023px) {
+  @media (max-width: 1439px) {
     .work-card-spread {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       height: auto;
@@ -886,7 +903,6 @@
       font-size: 0.625rem;
     }
 
-    .work-card-proof,
     .project-card-stack,
     .project-showcase-description {
       display: none;
@@ -928,7 +944,6 @@
   @media (max-height: 600px) {
     .work-card-role,
     .work-card-period,
-    .work-card-proof,
     .project-card-stack,
     .project-showcase-description {
       display: none;

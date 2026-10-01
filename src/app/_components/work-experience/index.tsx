@@ -2,6 +2,7 @@ import ScrollContainer from '@/components/scroll-container';
 import { Title } from '@/components/title';
 import { Card, CardContent } from '@/components/ui/card';
 import { WORK_EXPERIENCES } from './work-experiences';
+import { WorkExperienceMetrics } from './work-experience-metrics';
 
 export default function WorkExperience() {
   return (
@@ -43,6 +44,12 @@ export default function WorkExperience() {
                           )}
                         </div>
                       ))}
+                      <WorkExperienceMetrics metrics={workExperience.metrics} />
+                      {workExperience.metricsPeriod ? (
+                        <p className="type-meta text-muted-foreground">
+                          {workExperience.metricsPeriod}
+                        </p>
+                      ) : null}
                       <ul className="grid gap-4 sm:grid-cols-3">
                         {workExperience.showcases.map((showcase) => (
                           <li key={showcase.title} className="space-y-1.5">
