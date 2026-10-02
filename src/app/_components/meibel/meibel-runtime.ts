@@ -1,9 +1,19 @@
-import { MeibelEngine, MEIBEL_SHEET } from './meibel-engine';
+import {
+  MeibelEngine,
+  MEIBEL_SHEET,
+  type MeibelAnimation,
+} from './meibel-engine';
+
+type MeibelControls = {
+  play: (animation: MeibelAnimation) => void;
+  run: () => void;
+  dispose: () => void;
+};
 
 export const mountMeibel = (
   button: HTMLButtonElement,
   reportError: (message: string) => void,
-): (() => void) => {
+): MeibelControls => {
   const sprite = button.querySelector<HTMLElement>('.meibel-sprite');
   if (!sprite) {
     throw new Error('Meibel sprite element is missing.');
@@ -17,6 +27,15 @@ export const mountMeibel = (
   let previousTime: number | null = null;
   let lastFrame = '';
   let lastWaveAt = -Infinity;
+  let leftBoundary = 0;
+
+  const updateBoundary = (): void => {
+    const dock = button.parentElement;
+    if (dock) {
+      leftBoundary = Math.max(0, dock.getBoundingClientRect().left - 12);
+    }
+  };
+  updateBoundary();
 
   const render = (): void => {
     const frame = engine.frame();
@@ -27,7 +46,7 @@ export const mountMeibel = (
       button.dataset.frame = identity;
       lastFrame = identity;
     }
-    sprite.style.transform = `translateX(${frame.offsetX}px)`;
+    button.style.transform = `translateX(${Math.max(-leftBoundary, frame.offsetX)}px)`;
   };
 
   const tick = (now: number): void => {
@@ -112,11 +131,12 @@ export const mountMeibel = (
   document.documentElement.addEventListener('pointerleave', handlePointerLeave);
   document.addEventListener('visibilitychange', syncPlayback);
   reducedMotion.addEventListener('change', syncPlayback);
+  window.addEventListener('resize', updateBoundary);
   button.addEventListener('pointerenter', handleWave);
   button.addEventListener('focus', handleWave);
   button.addEventListener('click', handleJump);
 
-  return () => {
+  const dispose = (): void => {
     cancelAnimationFrame(request);
     observer.disconnect();
     image.onload = null;
@@ -128,8 +148,21 @@ export const mountMeibel = (
     );
     document.removeEventListener('visibilitychange', syncPlayback);
     reducedMotion.removeEventListener('change', syncPlayback);
+    window.removeEventListener('resize', updateBoundary);
     button.removeEventListener('pointerenter', handleWave);
     button.removeEventListener('focus', handleWave);
     button.removeEventListener('click', handleJump);
+  };
+
+  return {
+    play: (animation) => engine.play(animation),
+    run: () => {
+      if (!ready) {
+        return;
+      }
+      updateBoundary();
+      engine.run(Math.min(240, leftBoundary));
+    },
+    dispose,
   };
 };

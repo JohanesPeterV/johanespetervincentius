@@ -4,6 +4,7 @@ import { ReactNode, Suspense, useRef } from 'react';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
 import PalettePicker from '@/components/theme-buttons/palette-picker';
+import Meibel from '@/app/_components/meibel/meibel';
 
 import { DiveRoute } from './dive-route';
 import type { PointerState } from './dive-input';
@@ -29,6 +30,7 @@ export default function DiveScene({
   chapters,
 }: DiveSceneProps) {
   const route = new DiveRoute(heroTitle, chapters);
+  const workSection = route.sections.find(({ id }) => id === 'work');
   const driveRef = useRef(createDrive(route));
   driveRef.current.route = route;
   const pointerRef = useRef<PointerState>({ x: 0, y: 0 });
@@ -79,6 +81,13 @@ export default function DiveScene({
         overlayRef={overlayRef}
         onNavigate={(center) => jumpDriveToSection(driveRef.current, center)}
       />
+      {workSection ? (
+        <Meibel
+          onShowWork={() =>
+            jumpDriveToSection(driveRef.current, workSection.center)
+          }
+        />
+      ) : null}
       {handoffError ? (
         <p
           role="status"

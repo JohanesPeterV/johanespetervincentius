@@ -13,6 +13,7 @@ type SpriteClip = { row: number; durations: readonly number[] };
 type Behavior = { animation: MeibelAnimation; duration: number };
 type MeibelEvent =
   | { type: 'play'; animation: MeibelAnimation }
+  | { type: 'run'; distance: number }
   | { type: 'look'; x: number; y: number }
   | { type: 'leave' };
 export type MeibelFrame = {
@@ -110,6 +111,9 @@ class IdleState implements MeibelState {
   }
 
   handle(event: MeibelEvent, time: number): MeibelState {
+    if (event.type === 'run') {
+      return new RunningState(event.distance, time);
+    }
     if (event.type === 'play') {
       return actionState(event.animation, time);
     }
@@ -177,12 +181,47 @@ class PlayingState implements MeibelState {
   }
 
   handle(event: MeibelEvent, time: number): MeibelState {
+    if (event.type === 'run') {
+      return new RunningState(event.distance, time);
+    }
     if (event.type === 'play') {
       const requested = actionState(event.animation, time);
       if (requested.priority > this.priority) {
         return requested;
       }
     }
+    return this;
+  }
+}
+
+class RunningState implements MeibelState {
+  readonly priority = 3;
+  readonly endsAt: number;
+  private readonly legDuration: number;
+
+  constructor(
+    private readonly distance: number,
+    private readonly startedAt: number,
+  ) {
+    this.legDuration = distance / 0.12;
+    this.endsAt = startedAt + this.legDuration * 2;
+  }
+
+  frame(time: number): MeibelFrame {
+    const elapsed = Math.max(0, time - this.startedAt);
+    const returning = elapsed >= this.legDuration;
+    const frame = clipFrame(
+      returning ? 'running-right' : 'running-left',
+      elapsed,
+    );
+    const progress = Math.min(1, elapsed / this.legDuration);
+    frame.offsetX = returning
+      ? -this.distance * Math.max(0, 2 - elapsed / this.legDuration)
+      : -this.distance * progress;
+    return frame;
+  }
+
+  handle(): MeibelState {
     return this;
   }
 }
@@ -227,9 +266,16 @@ export class MeibelEngine {
     const step = Math.max(0, delta);
     this.elapsed += step;
     if (this.elapsed >= this.state.endsAt) {
+      if (this.state instanceof RunningState) {
+        this.offsetX = 0;
+      }
       this.state = ambientState(this.elapsed);
     }
     const target = this.state.frame(this.elapsed).offsetX;
+    if (this.state instanceof RunningState) {
+      this.offsetX = target;
+      return;
+    }
     const distance = target - this.offsetX;
     const maxTravel = step * 0.025;
     this.offsetX += Math.min(maxTravel, Math.max(-maxTravel, distance));
@@ -240,6 +286,17 @@ export class MeibelEngine {
       return;
     }
     this.state = this.state.handle({ type: 'play', animation }, this.elapsed);
+  }
+
+  run(distance: number): void {
+    if (
+      this.motion === 'reduced' ||
+      !Number.isFinite(distance) ||
+      distance <= 0
+    ) {
+      return;
+    }
+    this.state = this.state.handle({ type: 'run', distance }, this.elapsed);
   }
 
   lookAt(x: number, y: number): void {

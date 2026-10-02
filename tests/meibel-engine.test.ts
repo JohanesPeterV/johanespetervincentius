@@ -109,3 +109,48 @@ test('reduced motion holds a still pose, accepts gaze, and clears it on exit', (
   engine.clearGaze();
   assert.equal(engine.frame().animation, 'idle');
 });
+
+test('a run travels left, turns, and returns to its dock without interruption', () => {
+  const engine = new MeibelEngine();
+  engine.play('jumping');
+  engine.run(240);
+  assert.equal(engine.frame().animation, 'running-left');
+  engine.advance(1000);
+  assert.equal(engine.frame().offsetX, -120);
+  engine.play('jumping');
+  engine.run(500);
+  engine.lookAt(100, 0);
+  engine.advance(1000);
+  assert.equal(engine.frame().animation, 'running-right');
+  assert.equal(engine.frame().offsetX, -240);
+  engine.advance(1000);
+  assert.equal(engine.frame().offsetX, -120);
+  engine.advance(1000);
+  assert.equal(engine.frame().animation, 'idle');
+  assert.equal(engine.frame().offsetX, 0);
+});
+
+test('short runs fit their available space and reduced motion cancels travel', () => {
+  const engine = new MeibelEngine();
+  engine.run(30);
+  engine.advance(250);
+  assert.equal(engine.frame().offsetX, -30);
+  engine.advance(250);
+  assert.equal(engine.frame().offsetX, 0);
+  engine.run(240);
+  engine.advance(500);
+  engine.setMotion('reduced');
+  engine.run(240);
+  engine.advance(10000);
+  assert.equal(engine.frame().animation, 'idle');
+  assert.equal(engine.frame().offsetX, 0);
+});
+
+test('invalid run distances leave the current behavior intact', () => {
+  const engine = new MeibelEngine();
+  for (const distance of [0, -10, Infinity, NaN]) {
+    engine.run(distance);
+    assert.equal(engine.frame().animation, 'idle');
+    assert.equal(engine.frame().offsetX, 0);
+  }
+});
