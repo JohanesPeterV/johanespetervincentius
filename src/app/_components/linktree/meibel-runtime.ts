@@ -17,6 +17,7 @@ export const mountMeibel = (
   let request = 0;
   let previousTime: number | null = null;
   let lastFrame = '';
+  let lastWaveAt = -Infinity;
 
   const render = (): void => {
     const frame = engine.frame();
@@ -103,6 +104,11 @@ export const mountMeibel = (
     render();
   };
   const handleWave = (): void => {
+    const now = performance.now();
+    if (now - lastWaveAt < 15000) {
+      return;
+    }
+    lastWaveAt = now;
     engine.play('waving');
   };
   const handleJump = (): void => {

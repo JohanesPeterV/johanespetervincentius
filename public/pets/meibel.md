@@ -25,6 +25,6 @@ Look poses run clockwise in viewer coordinates: up is index 0, right 4, down 8, 
 
 `meibel-runtime.ts` connects the engine to the sprite element. It uses one animation clock, renders without React updates per frame, pauses outside the visible hero or browser tab, and removes listeners on unmount. Reduced motion holds a still pose and allows direct gaze changes. The React component owns the accessible play button and visible loading errors.
 
-Hover or focus to wave; click, tap, Enter, or Space to jump. Cursor movement controls all sixteen gaze poses during idle. The ambient cycle uses every standard animation; the short right/left walk returns to its starting position.
+Meibel normally sits and blinks about once every eight seconds. She gives a brief curious glance after a minute, then rests for two minutes. Hover or focus to wave, with a fifteen-second cooldown; click, tap, Enter, or Space to jump. Cursor movement controls all sixteen gaze poses during idle. All nine clips remain available through `MeibelEngine.play`; walking, jumping, busy paws, waiting, and disappointment do not run automatically.
 
 Run `npm run test:meibel` to verify frame coverage, gaze mapping, action priority, and reduced motion.

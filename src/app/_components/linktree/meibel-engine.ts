@@ -39,7 +39,7 @@ export const MEIBEL_SHEET = {
 };
 
 export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
-  idle: { row: 0, durations: [1800, 140, 90, 90, 140, 1800] },
+  idle: { row: 0, durations: [3200, 140, 90, 90, 140, 4500] },
   'running-right': { row: 1, durations: Array(8).fill(90) },
   'running-left': { row: 2, durations: Array(8).fill(90) },
   waving: { row: 3, durations: [200, 180, 200, 260] },
@@ -51,18 +51,9 @@ export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
 };
 
 const BEHAVIORS: readonly Behavior[] = [
-  { animation: 'waving', duration: 1680 },
-  { animation: 'idle', duration: 9000 },
-  { animation: 'review', duration: 3000 },
-  { animation: 'idle', duration: 5000 },
-  { animation: 'waiting', duration: 2640 },
-  { animation: 'running', duration: 2700 },
-  { animation: 'idle', duration: 7000 },
-  { animation: 'failed', duration: 1440 },
-  { animation: 'jumping', duration: 900 },
-  { animation: 'running-right', duration: 1440 },
-  { animation: 'running-left', duration: 1440 },
-  { animation: 'idle', duration: 6000 },
+  { animation: 'idle', duration: 60000 },
+  { animation: 'review', duration: 1500 },
+  { animation: 'idle', duration: 120000 },
 ];
 const CYCLE_DURATION = BEHAVIORS.reduce(
   (sum, behavior) => sum + behavior.duration,
