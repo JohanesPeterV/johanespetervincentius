@@ -28,11 +28,9 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     status: 'current',
     metrics: [
-      { value: 'S$569K+', label: 'commercial value' },
-      { value: '99M+', label: 'net gift points' },
+      { value: '9K+', label: 'delivery orders managed' },
       { value: '4.5K+', label: 'vouchers activated' },
     ],
-    metricsPeriod: 'Jan–Sep 2026 · Production records reviewed 1 October 2026',
     deliverables: [
       {
         name: 'Smilie',
@@ -66,7 +64,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         title: 'Custom merchandise',
         metrics: [{ value: '100', label: 'invoiced merchandise jobs' }],
         description:
-          'Build proposals, quantity-based pricing, customer approvals, revised quotes, production documents, and inventory reservations. January–September 2026 records include 100 invoiced merchandise jobs with S$281,597.83 in stored customer billing value.',
+          'Build proposals, quantity-based pricing, customer approvals, revised quotes, production documents, and inventory reservations.',
       },
       {
         title: 'Gifting & fulfilment',
@@ -80,31 +78,9 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       },
       {
         title: 'Payments & accounting',
-        metrics: [
-          { value: 'S$287K+', label: 'paid gift charges' },
-          { value: 'S$281K+', label: 'invoiced merchandise value' },
-          { value: '544', label: 'paid gift orders' },
-        ],
+        metrics: [{ value: '544', label: 'paid gift orders' }],
         description:
-          'Support S$569,373.46 in January–September 2026 commercial value: S$287,775.63 in paid gift charges plus S$281,597.83 in invoiced merchandise. Connect Stripe, company credits, Xero, and reconciliation. The measure uses order creation cohorts and stored billing status; merchandise invoicing does not establish cash collection.',
-      },
-      {
-        title: 'Commercial value by quarter',
-        metrics: [
-          { value: '111.7K', label: 'Q1 2026, SGD' },
-          { value: '76.0K', label: 'Q2 2026, SGD' },
-          { value: '381.6K', label: 'Q3 2026, SGD' },
-        ],
-        description:
-          'Calendar-quarter totals reconcile to S$569,373.46. Q3 includes S$140,431.70 of imported Mooncake paid charges. These figures show the commercial scale supported by the systems and include contributions from sales, procurement, and operations.',
-      },
-      {
-        title: 'Recorded value since late 2025',
-        metrics: [
-          { value: 'S$645K+', label: 'Q4 2025–Q3 2026 commercial value' },
-        ],
-        description:
-          'Retained paid gift charges and invoiced merchandise total S$645,456.96 across Q4 2025–Q3 2026. This includes the January–September total above; retained Neon orders begin in November 2025.',
+          'Connect Stripe, company credits, Xero, and reconciliation across gifting and merchandise workflows.',
       },
       {
         title: 'Courier automation',
@@ -117,45 +93,30 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       },
       {
         title: 'IG digital voucher delivery',
-        metrics: [
-          { value: '4,527', label: 'successful digital activations' },
-          { value: 'S$43K+', label: 'activated voucher face value' },
-        ],
+        metrics: [{ value: '4,527', label: 'successful digital activations' }],
         description:
-          'Own provider integrations, redemption reporting, expiry rules, and activation recovery. January–September 2026 provider activation records contain 4,527 successful vouchers with S$43,145 in face value and unique provider order IDs. Activation establishes issuance; retailer spending is a separate event.',
+          'Own provider integrations, redemption reporting, expiry rules, and activation recovery. January–September 2026 provider activation records contain 4,527 successful vouchers with unique provider order IDs. Activation establishes issuance; retailer spending is a separate event.',
       },
       {
         title: 'IG points wallets & rewards',
-        metrics: [
-          { value: '99.24M', label: 'gift points after refunds' },
-          { value: 'S$76.3K', label: 'voucher-equivalent gift budget' },
-        ],
         description:
-          'Manage points wallets, refunds, physical gifts, and digital redemptions. January–September gift purchases total 100,003,900 points, less 760,500 refunded points. At 6,500 points per S$5 voucher, the net budget is S$76,341.08 equivalent. Physical-gift pricing differs, and this conversion measures a reference budget. It overlaps activated vouchers.',
+          'Manage points wallets, refunds, physical gifts, and digital redemptions.',
       },
       {
         title: 'Provider failure recovery',
         metrics: [{ value: '15', label: 'retried vouchers later activated' }],
         description:
-          'Build automatic activation retries and follow through on stuck provider orders. Fifteen vouchers with recorded retry attempts ultimately activated, representing S$75 in face value. Require an authoritative provider outcome before another redemption attempt.',
+          'Build automatic activation retries and follow through on stuck provider orders. Fifteen vouchers with recorded retry attempts ultimately activated. Require an authoritative provider outcome before another redemption attempt.',
       },
       {
-        title: 'Modeled operational capacity',
-        metrics: [
-          { value: '~208h', label: 'modeled staff capacity' },
-          { value: '~S$4.2K', label: 'modeled capacity value' },
-        ],
+        title: 'Operational automation',
         description:
-          'A January–September scenario estimates 208.47 hours and S$4,169.33 of staff capacity. Assumptions: two net minutes per SPX booking, 15 minutes per invoiced-job document task, 50% document adoption, and S$20 per hour. Handling times and adoption remain unmeasured; payroll cash savings are unquantified.',
+          'Automate courier bookings and merchandise production documents to streamline operational handoffs.',
       },
       {
         title: 'Technology spending decisions',
-        metrics: [
-          { value: 'US$240', label: 'annual Vercel savings' },
-          { value: 'US$420', label: 'annual Clerk savings' },
-        ],
         description:
-          'Minimise technology costs by deliberately keeping the stack and operations simple. Reduce Vercel deploying seats from three to two and downgrade Clerk, saving US$240 and US$420 annually.',
+          'Minimise technology costs by deliberately keeping the stack and operations simple and matching subscriptions to team needs.',
       },
       {
         title: 'Catalogue automation',
@@ -192,7 +153,6 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'TableLink',
     status: 'past',
     metrics: [
-      { value: '~Rp72M', label: 'estimated annual savings' },
       { value: '12', label: 'engineers supported' },
       { value: '19', label: 'UI components documented' },
     ],
@@ -256,7 +216,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         title: 'Code review and releases',
         description:
-          'Reduced debt across services and strengthened code review and release practices. Migrated developer tooling for 12 engineers, avoiding an estimated Rp72M in annual licensing costs.',
+          'Reduced debt across services and strengthened code review and release practices. Migrated developer tooling for 12 engineers.',
       },
     ],
   },
