@@ -56,6 +56,11 @@ export default function WorkExperience() {
                             <p className="text-xs sm:text-sm font-medium">
                               {showcase.title}
                             </p>
+                            {showcase.metrics ? (
+                              <WorkExperienceMetrics
+                                metrics={showcase.metrics}
+                              />
+                            ) : null}
                             <p className="text-xs text-muted-foreground">
                               {showcase.description}
                             </p>

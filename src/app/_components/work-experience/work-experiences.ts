@@ -1,7 +1,9 @@
+type WorkMetric = { value: string; label: string };
+
 export type WorkExperience = {
   company: string;
   status: 'current' | 'past';
-  metrics: { value: string; label: string }[];
+  metrics: WorkMetric[];
   metricsPeriod?: string;
   deliverables?: {
     name: string;
@@ -17,6 +19,7 @@ export type WorkExperience = {
   showcases: {
     title: string;
     description: string;
+    metrics?: WorkMetric[];
   }[];
 };
 
@@ -25,11 +28,11 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     company: 'Smilie',
     status: 'current',
     metrics: [
-      { value: 'S$700K+', label: 'platform revenue' },
-      { value: '9K+', label: 'delivery orders' },
-      { value: '230+', label: 'company accounts' },
+      { value: 'S$569K+', label: 'commercial value' },
+      { value: '99M+', label: 'net gift points' },
+      { value: '4.5K+', label: 'vouchers activated' },
     ],
-    metricsPeriod: 'All-time GMS totals · September 2026',
+    metricsPeriod: 'Jan–Sep 2026 · Production records reviewed 1 October 2026',
     deliverables: [
       {
         name: 'Smilie',
@@ -55,29 +58,104 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Lead Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
-          'Work directly with the Founder on commerce, gifting, and rewards systems. Own architecture, business workflows, and production delivery, replacing legacy WordPress and Airtable processes.',
+          'Lead engineering delivery across commerce, gifting, and rewards, working directly with the Founder. Own product scope, architecture, workflow design, hands-on implementation, briefs, reviews, and production follow-through. Direct other engineers and remain accountable for the team’s delivery.',
       },
     ],
     showcases: [
       {
         title: 'Custom merchandise',
+        metrics: [{ value: '100', label: 'invoiced merchandise jobs' }],
         description:
-          'Build the workflow from product proposals and quantity-based pricing to customer approvals, revised quotes, and confirmed orders, with inventory reservations tied to order decisions.',
+          'Build proposals, quantity-based pricing, customer approvals, revised quotes, production documents, and inventory reservations. January–September 2026 records include 100 invoiced merchandise jobs with S$281,597.83 in stored customer billing value.',
       },
       {
         title: 'Gifting & fulfilment',
+        metrics: [
+          { value: '9K+', label: 'delivery orders managed' },
+          { value: '8.7K+', label: 'gift sets ordered' },
+          { value: '230+', label: 'company accounts' },
+        ],
         description:
-          'Connect checkout and 305 gifting campaigns to stock reservations, packing, dispatch, and courier tracking. GMS records 8,707 gift sets ordered and 9,032 delivery orders, with an inventory ledger tracing stock and customer-owned inventory.',
+          'Connect checkout, recipient campaigns, stock reservations, packing, dispatch, and tracking. The September 2026 all-time GMS snapshot records 9,032 delivery orders, 8,707 gift sets ordered, 232 company accounts, and 305 campaigns. Delivery orders cover multiple lifecycle stages.',
       },
       {
         title: 'Payments & accounting',
+        metrics: [
+          { value: 'S$287K+', label: 'paid gift charges' },
+          { value: 'S$281K+', label: 'invoiced merchandise value' },
+          { value: '544', label: 'paid gift orders' },
+        ],
         description:
-          'Support S$717.7K in recorded platform revenue through Stripe payments, company credits, and Xero invoices. Reconciliation and retries recover failed accounting updates while preserving successful payments.',
+          'Support S$569,373.46 in January–September 2026 commercial value: S$287,775.63 in paid gift charges plus S$281,597.83 in invoiced merchandise. Connect Stripe, company credits, Xero, and reconciliation. The measure uses order creation cohorts and stored billing status; merchandise invoicing does not establish cash collection.',
       },
       {
-        title: '2.5K+ vouchers activated · S$25K+ face value',
+        title: 'Commercial value by quarter',
+        metrics: [
+          { value: '111.7K', label: 'Q1 2026, SGD' },
+          { value: '76.0K', label: 'Q2 2026, SGD' },
+          { value: '381.6K', label: 'Q3 2026, SGD' },
+        ],
         description:
-          'By August 2026, IG Club Rewards had activated at least 2,542 digital vouchers with S$25,460 in face value across 33M+ reward points, verified in June and August campaign exports. S$5 Lazada vouchers cost 6,500 points. Own points wallets, physical gift redemption, provider integrations, activation retries, expiry rules, and reporting.',
+          'Calendar-quarter totals reconcile to S$569,373.46. Q3 includes S$140,431.70 of imported Mooncake paid charges. These figures show the commercial scale supported by the systems and include contributions from sales, procurement, and operations.',
+      },
+      {
+        title: 'Recorded value since late 2025',
+        metrics: [
+          { value: 'S$645K+', label: 'Q4 2025–Q3 2026 commercial value' },
+        ],
+        description:
+          'Retained paid gift charges and invoiced merchandise total S$645,456.96 across Q4 2025–Q3 2026. This includes the January–September total above; retained Neon orders begin in November 2025.',
+      },
+      {
+        title: 'Courier automation',
+        metrics: [
+          { value: '5,879', label: 'noncancelled SPX bookings' },
+          { value: '5,752', label: 'booked parcels marked delivered' },
+        ],
+        description:
+          'Build batch courier booking, labels, dispatch, and tracking callbacks. January–September 2026 booking cohorts contain 5,879 noncancelled SPX bookings, with 5,752 marked delivered at the October snapshot.',
+      },
+      {
+        title: 'IG digital voucher delivery',
+        metrics: [
+          { value: '4,527', label: 'successful digital activations' },
+          { value: 'S$43K+', label: 'activated voucher face value' },
+        ],
+        description:
+          'Own provider integrations, redemption reporting, expiry rules, and activation recovery. January–September 2026 provider activation records contain 4,527 successful vouchers with S$43,145 in face value and unique provider order IDs. Activation establishes issuance; retailer spending is a separate event.',
+      },
+      {
+        title: 'IG points wallets & rewards',
+        metrics: [
+          { value: '99.24M', label: 'gift points after refunds' },
+          { value: 'S$76.3K', label: 'voucher-equivalent gift budget' },
+        ],
+        description:
+          'Manage points wallets, refunds, physical gifts, and digital redemptions. January–September gift purchases total 100,003,900 points, less 760,500 refunded points. At 6,500 points per S$5 voucher, the net budget is S$76,341.08 equivalent. Physical-gift pricing differs, and this conversion measures a reference budget. It overlaps activated vouchers.',
+      },
+      {
+        title: 'Provider failure recovery',
+        metrics: [{ value: '15', label: 'retried vouchers later activated' }],
+        description:
+          'Build automatic activation retries and follow through on stuck provider orders. Fifteen vouchers with recorded retry attempts ultimately activated, representing S$75 in face value. Require an authoritative provider outcome before another redemption attempt.',
+      },
+      {
+        title: 'Modeled operational capacity',
+        metrics: [
+          { value: '~208h', label: 'modeled staff capacity' },
+          { value: '~S$4.2K', label: 'modeled capacity value' },
+        ],
+        description:
+          'A January–September scenario estimates 208.47 hours and S$4,169.33 of staff capacity. Assumptions: two net minutes per SPX booking, 15 minutes per invoiced-job document task, 50% document adoption, and S$20 per hour. Handling times and adoption remain unmeasured; payroll cash savings are unquantified.',
+      },
+      {
+        title: 'Technology spending decisions',
+        metrics: [
+          { value: 'US$240', label: 'annualized Vercel seat reduction' },
+          { value: 'US$25', label: 'monthly Clerk reduction candidate' },
+        ],
+        description:
+          'Reduce Vercel deploying seats from three to two, avoiding US$20 per month in recurring seat cost. Retained Clerk billing configuration and downgrade evidence support a US$25 monthly base-plan reduction candidate from September. Historical paid-quarter cash savings are unreconciled.',
       },
       {
         title: 'Catalogue automation',
@@ -86,8 +164,27 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       },
       {
         title: 'Engineering foundations',
+        metrics: [
+          { value: '2 → 1', label: 'shared form-submission owner' },
+          { value: '3 → 1', label: 'payment settlement owner' },
+        ],
         description:
-          'Unify apps around shared business logic, database models, and UI. Establish database and browser tests, automated checks, code review standards, and engineer onboarding.',
+          'Consolidate duplicated storefront/GMS form submission and unify webhook, customer-return, and reconciliation settlement. Repay payment, inventory, and form debt while shipping Xero, fulfilment, and finance features. Establish database/browser tests, review standards, implementation briefs, and engineer onboarding.',
+      },
+      {
+        title: 'AI-assisted engineering at scale',
+        metrics: [
+          { value: '30.8B', label: 'recorded Smilie input + output tokens' },
+          { value: '118.6M', label: 'recorded Smilie output tokens' },
+          { value: '56.4B', label: 'lifetime Codex profile tokens' },
+        ],
+        description:
+          'Design rules and workflows for AI-assisted implementation, delegation, and verification. Retained January–September 2026 Smilie Codex/Claude logs record 30.8B input-plus-output tokens, including cached context, and 118.6M output tokens, including reasoning. Separately, the October Codex profile shows 56.4B lifetime tokens across projects. These activity measures have different, overlapping scopes.',
+      },
+      {
+        title: 'Product & architecture judgment',
+        description:
+          'Challenge infrastructure tenancy per customer company and retain company membership/access controls within a shared GMS dataset. Deliberately separate the future Giftstack product from Smilie-specific workflows. Own product sequencing, interface design, hiring input, and founder/provider follow-through alongside implementation.',
       },
     ],
   },

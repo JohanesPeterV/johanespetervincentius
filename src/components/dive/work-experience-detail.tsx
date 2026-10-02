@@ -78,6 +78,11 @@ export const WorkExperienceDetail = ({
       {job.showcases.map((showcase) => (
         <li key={showcase.title}>
           <h4 className="type-label mb-2">{showcase.title}</h4>
+          {showcase.metrics ? (
+            <div className="my-3">
+              <WorkExperienceMetrics metrics={showcase.metrics} />
+            </div>
+          ) : null}
           <p className="work-description text-muted-foreground">
             {showcase.description}
           </p>
