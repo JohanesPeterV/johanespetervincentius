@@ -6,6 +6,8 @@ import type { ReactNode } from 'react';
 
 import { STACK_GROUPS } from '@/app/_components/stack';
 
+import { AiConsumption } from './ai-consumption';
+
 const IceModel = dynamic(() => import('./ice-model'), {
   ssr: false,
   loading: () => <p role="status">Loading frozen MacBook…</p>,
@@ -115,6 +117,7 @@ export const StackIceExhibit = () => {
               <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
                 {group.description}
               </p>
+              {group.id === 'main' ? <AiConsumption /> : null}
               <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
                 {group.technologies.map(({ name, icon: Icon }) => (
                   <li

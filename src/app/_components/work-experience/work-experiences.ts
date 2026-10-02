@@ -134,13 +134,8 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       },
       {
         title: 'AI-assisted engineering at scale',
-        metrics: [
-          { value: '30.8B', label: 'recorded Smilie input + output tokens' },
-          { value: '118.6M', label: 'recorded Smilie output tokens' },
-          { value: '56.4B', label: 'lifetime Codex profile tokens' },
-        ],
         description:
-          'Design rules and workflows for AI-assisted implementation, delegation, and verification. Retained January–September 2026 Smilie Codex/Claude logs record 30.8B input-plus-output tokens, including cached context, and 118.6M output tokens, including reasoning. Separately, the October Codex profile shows 56.4B lifetime tokens across projects. These activity measures have different, overlapping scopes.',
+          'Design rules and workflows for AI-assisted implementation, delegation, and verification.',
       },
       {
         title: 'Product & architecture judgment',

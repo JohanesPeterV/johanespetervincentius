@@ -8,6 +8,7 @@ import {
   SiBlazor,
   SiBootstrap,
   SiClerk,
+  SiClaude,
   SiCplusplus,
   SiDart,
   SiDiscord,
@@ -65,6 +66,7 @@ import {
   TbDatabase,
   TbRipple,
   TbSql,
+  TbTerminal2,
 } from 'react-icons/tb';
 
 export type StackGroup = {
@@ -78,8 +80,12 @@ export const STACK_GROUPS: StackGroup[] = [
   {
     id: 'main',
     title: 'Main stack',
-    description: 'The foundation of my current web products.',
+    description:
+      'T3 Code, Claude Code, and Codex are my main tools for AI development: planning, implementation, review, and verification.',
     technologies: [
+      { name: 'T3 Code', icon: TbTerminal2 },
+      { name: 'Claude Code', icon: SiClaude },
+      { name: 'Codex', icon: SiOpenai },
       { name: 'TypeScript', icon: SiTypescript },
       { name: 'React', icon: SiReact },
       { name: 'Next.js', icon: SiNextdotjs },

@@ -2,6 +2,8 @@
 
 import { STACK_GROUPS } from '@/app/_components/stack';
 
+import { AiConsumption } from './ai-consumption';
+
 export const DiveStack = () => (
   <>
     <header className="px-4 pb-6">
@@ -22,17 +24,20 @@ export const DiveStack = () => (
           >
             {group.title}
           </h3>
-          <ul className="flex flex-wrap gap-x-7 gap-y-2">
-            {group.technologies.map(({ name, icon: Icon }) => (
-              <li
-                key={name}
-                className="stack-technology flex items-center gap-3"
-              >
-                <Icon aria-hidden="true" className="stack-icon shrink-0" />
-                <span>{name}</span>
-              </li>
-            ))}
-          </ul>
+          <div>
+            <ul className="flex flex-wrap gap-x-7 gap-y-2">
+              {group.technologies.map(({ name, icon: Icon }) => (
+                <li
+                  key={name}
+                  className="stack-technology flex items-center gap-3"
+                >
+                  <Icon aria-hidden="true" className="stack-icon shrink-0" />
+                  <span>{name}</span>
+                </li>
+              ))}
+            </ul>
+            {group.id === 'main' ? <AiConsumption /> : null}
+          </div>
         </section>
       ))}
     </div>

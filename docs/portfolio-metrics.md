@@ -4,9 +4,10 @@ This broad first pass uses the research in T3 thread
 `be12264d-c712-49b9-996a-cb664bdcbc86` and its retained evidence under
 `/Users/peter/Projects/smilie/raise-review-2026/`.
 
-The displayed content lives in
-`src/app/_components/work-experience/work-experiences.ts`. These notes preserve
-the meaning and source of the figures for later editing.
+Work content lives in `src/app/_components/work-experience/work-experiences.ts`.
+Personal AI consumption lives in `src/components/dive/ai-consumption.tsx`, shared
+by the Skills exhibit and Stack chapter. These notes preserve the meaning and
+source of the figures for later editing.
 
 ## Publication scope
 
@@ -57,8 +58,16 @@ owners consolidated into one shared owner while retaining application difference
 and webhook, customer-return, and reconciliation paths using one settlement owner.
 These mechanisms do not establish a measured developer-time improvement.
 
-`evidence/total-token-scope.md` establishes 30,787,011,023 retained Smilie input-plus-
-output tokens and 118,646,249 output tokens for January–September 2026. Cached
-context is included in input; reasoning is included in output; retention is partial.
-The separately verified Codex profile counter is 56.4B lifetime tokens across
-projects. These overlapping activity scopes do not establish productivity or savings.
+Personal consumption is presented with T3 Code, Claude Code, and Codex in Main
+stack, rather than as company impact. Two screenshots supplied by Peter on
+3 October 2026 establish:
+
+- T3 Usage, All environments, 30 days: 4 September–3 October 2026.
+- Codex: 9.90B processed tokens across 1,056 sessions.
+- Claude Code: 12.1B processed tokens across 1,333 sessions.
+- Codex profile: 59B lifetime tokens across projects, superseding 56.4B.
+
+Processed tokens include input, output, and cached context. The profile lifetime
+counter has a different scope from the monthly retained usage. These are dated
+snapshots, not automatically refreshed counters, productivity, or savings.
+The screenshots also show monetary API estimates; these are not published.
