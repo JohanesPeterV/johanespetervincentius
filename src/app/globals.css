@@ -112,6 +112,25 @@
     border-radius: 1.25rem;
   }
 
+  .profile-meibel {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    border-radius: 1rem;
+  }
+
+  .profile-meibel:focus-visible {
+    outline: 2px solid hsl(var(--primary-text));
+    outline-offset: 2px;
+  }
+
+  .profile-meibel-sprite {
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+
   .dark .profile-avatar {
     border-color: hsl(var(--foreground) / 0.22);
   }

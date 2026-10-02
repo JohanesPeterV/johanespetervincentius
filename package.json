@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:dive": "tsc -p tests/tsconfig.json && node --test .next-build/dive-tests/tests/dive*.test.js",
+    "test:meibel": "tsc -p tests/tsconfig.json && node --test .next-build/dive-tests/tests/meibel*.test.js",
     "check:sizes": "bash scripts/check-file-sizes.sh",
     "prepare": "lefthook install"
   },

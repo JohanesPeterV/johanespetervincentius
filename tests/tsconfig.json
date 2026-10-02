@@ -9,5 +9,5 @@
     "incremental": false,
     "outDir": "../.next-build/dive-tests"
   },
-  "include": ["dive*.test.ts"]
+  "include": ["dive*.test.ts", "meibel*.test.ts"]
 }
