@@ -476,10 +476,11 @@
     grid-template-columns: 1fr;
     gap: 0.75rem;
     margin-top: 1.25rem;
+    width: 100%;
   }
 
   .work-card .work-metric {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(max-content, 1fr) minmax(0, 1fr);
     align-items: baseline;
     gap: 0.5rem;
   }
@@ -540,9 +541,9 @@
   .work-card-spread {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.25rem;
+    align-items: start;
+    gap: 4rem;
     margin: 3rem 1.5rem 1rem;
-    height: 24rem;
     isolation: isolate;
   }
 
@@ -558,30 +559,28 @@
     --card-angle: -1.5deg;
     --motion-delay: 0s;
     position: relative;
-    top: 10%;
-    height: 84%;
-    max-height: 22rem;
+    margin-top: 2.4rem;
+    min-width: 0;
     z-index: 1;
   }
 
   .work-card-slot:nth-child(2) {
     --card-angle: 1.5deg;
     --motion-delay: -1.375s;
-    top: 0;
+    margin-top: 0;
     z-index: 2;
   }
 
   .work-card-slot:nth-child(3) {
     --card-angle: -1.5deg;
     --motion-delay: -2.75s;
-    top: 10%;
     z-index: 3;
   }
 
   .work-card-slot:nth-child(4) {
     --card-angle: 1.5deg;
     --motion-delay: -4.125s;
-    top: 0;
+    margin-top: 0;
     z-index: 4;
   }
 
@@ -606,7 +605,6 @@
   .work-card-hanger {
     --cord-length: 0px;
     position: relative;
-    height: 100%;
     transform: rotate(var(--card-angle));
     transform-origin: 50% calc(-1 * var(--cord-length));
     animation: work-card-sway 6s ease-in-out infinite;
@@ -615,6 +613,7 @@
 
   .work-card {
     position: relative;
+    min-height: 20rem;
     padding: clamp(0.75rem, 1.5vw, 1.5rem);
     cursor: pointer;
     transition: border-color 200ms;
@@ -901,12 +900,11 @@
   @media (max-width: 1439px) {
     .work-card-spread {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      height: auto;
+      gap: 1.25rem;
     }
 
     .work-card-slot:nth-child(n) {
-      top: 0;
-      height: 20rem;
+      margin-top: 0;
     }
 
     .work-card-hanger {
@@ -925,17 +923,14 @@
     .work-card-spread {
       grid-template-columns: 1fr;
       gap: 1rem;
-      height: auto;
     }
 
     .work-card-slot:nth-child(n) {
       --card-angle: -1deg;
-      top: 0;
-      height: auto;
     }
 
-    .work-card-hanger {
-      height: auto;
+    .work-card {
+      min-height: 0;
     }
 
     .work-card-slot:nth-child(even) {

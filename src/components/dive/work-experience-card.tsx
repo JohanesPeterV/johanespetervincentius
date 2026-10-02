@@ -20,7 +20,7 @@ export const WorkExperienceCard = ({
       <div className="work-card-hanger">
         <button
           type="button"
-          className="work-card surface-panel flex h-full w-full flex-col text-left"
+          className="work-card surface-panel flex w-full flex-col text-left"
           aria-label={`${job.company}${current ? ', current role' : ''}`}
           aria-pressed={job.company === selectedCompany}
           aria-controls={`work-detail-${index}`}
