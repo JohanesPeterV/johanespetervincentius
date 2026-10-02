@@ -79,9 +79,8 @@ export type StackGroup = {
 export const STACK_GROUPS: StackGroup[] = [
   {
     id: 'main',
-    title: 'Main stack',
-    description:
-      'T3 Code, Claude Code, and Codex are my main tools for AI development: planning, implementation, review, and verification.',
+    title: 'AI-native',
+    description: 'T3 Code · Codex · Claude Code',
     technologies: [
       { name: 'T3 Code', icon: TbTerminal2 },
       { name: 'Claude Code', icon: SiClaude },

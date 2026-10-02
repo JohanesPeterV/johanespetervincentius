@@ -106,7 +106,7 @@ export const StackIceExhibit = () => {
               className={`col-start-1 row-start-1 ${index !== groupIndex ? 'invisible pointer-events-none' : ''}`}
             >
               <p className="identity-tag type-meta">
-                {group.id === 'main' ? 'My core stack' : 'Also work with'}
+                {group.id === 'main' ? 'My main stack' : 'Also work with'}
               </p>
               <h3
                 id={`skill-${group.id}`}

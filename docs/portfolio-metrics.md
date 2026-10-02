@@ -67,7 +67,16 @@ stack, rather than as company impact. Two screenshots supplied by Peter on
 - Claude Code: 12.1B processed tokens across 1,333 sessions.
 - Codex profile: 59B lifetime tokens across projects, superseding 56.4B.
 
+The monthly counters now refresh from a public aggregate feed backed by a
+scheduled local usage collector. See [automatic updates](ai-usage-sync.md).
+The screenshots above preserve the initial reference; the visible totals roll
+forward with the latest 30 days of retained usage, following T3's counting rules.
+
+The presentation is deliberately quiet: "AI-native", the three primary tools,
+"Monthly consumption", and Codex/Claude token totals with a small update date.
+Session counts and the lifetime profile counter are not displayed.
+
 Processed tokens include input, output, and cached context. The profile lifetime
-counter has a different scope from the monthly retained usage. These are dated
-snapshots, not automatically refreshed counters, productivity, or savings.
-The screenshots also show monetary API estimates; these are not published.
+counter has a different scope from the monthly retained usage. These activity
+measures do not establish productivity or savings. The screenshots also show
+monetary API estimates; these are not published.
