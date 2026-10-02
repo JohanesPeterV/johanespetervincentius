@@ -57,6 +57,9 @@ export const WorkExperienceDetail = ({
                 alt={deliverable.screenshot.alt}
                 width={1200}
                 height={750}
+                // REASON: details sit in a clipped scroller and swap in hidden,
+                // so lazy loading would pop the shot in only once revealed.
+                loading="eager"
                 sizes="(min-width: 1024px) 26rem, (min-width: 640px) 45vw, 90vw"
                 className="work-deliverable-shot h-auto w-full"
               />
