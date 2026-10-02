@@ -192,7 +192,7 @@ export const STARFIELD_SHAPES: Readonly<
     {
       id: 'bitcoin',
       generate: formBitcoin,
-      appearance: { size: 2.4, glow: 0.08, tint: 0.72, cohesion: 1 },
+      appearance: { size: 1.65, glow: 0.18, tint: 0.72, cohesion: 1 },
     },
   ],
   orbital: [

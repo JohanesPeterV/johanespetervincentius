@@ -62,13 +62,6 @@ export const starfieldVertex = `
     float morph = smoothstep(0.0, 1.0, phase);
     vec4 appearance = mix(uAppearanceFrom, uAppearanceTo, morph);
     float cohesion = appearance.w;
-    // REASON: extra stars appear only as a cohesive silhouette forms, leaving the open sky sparse.
-    float density = mix(0.20, 1.04, cohesion);
-    if (aSeed.x >= density) {
-      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
-      return;
-    }
-    float visibility = 1.0 - smoothstep(density - 0.04, density, aSeed.x);
     float drift = mix(1.0, 0.06, cohesion);
     vec3 point = mix(aFrom, aTo, morph);
     vec2 journey = aTo.xy - aFrom.xy;
@@ -88,11 +81,8 @@ export const starfieldVertex = `
     float twinkle = 0.64 + 0.36 * (0.5 + 0.5 * sin(
       uTime * (0.8 + aSeed.x * 0.35) + aSeed.z * 6.283
     ));
-    float diameter = mix(
-      0.04 + aSeed.y * aSeed.y * 0.065 + vGlow * 0.32,
-      0.085 + aSeed.y * aSeed.y * 0.065 + vGlow * 0.08,
-      cohesion
-    ) * appearance.x * uWorldScale * mix(0.75, 1.0, uLuminous);
+    float diameter = (0.04 + aSeed.y * aSeed.y * 0.065 + vGlow * mix(0.32, 0.12, cohesion))
+      * appearance.x * uWorldScale * mix(0.75, 1.0, uLuminous);
     vec4 center = modelViewMatrix * vec4(point, 1.0);
     float depth = max(0.01, -center.z);
     float nearFade = smoothstep(1.0, 6.0, depth);
@@ -120,7 +110,7 @@ export const starfieldVertex = `
       * nearFade;
     // REASON: a printed star is a solid mark in one of the two inks; on paper size carries depth, not fade.
     float inkAlpha = (0.55 + 0.45 * aSeed.y) * (0.85 + 0.15 * twinkle) * nearFade;
-    vAlpha = mix(mix(inkAlpha, glowAlpha, uLuminous), nearFade, cohesion) * visibility;
+    vAlpha = mix(mix(inkAlpha, glowAlpha, uLuminous), nearFade * (0.7 + 0.2 * twinkle), cohesion);
     vTint = mix(step(0.5, aSeed.x), 0.5 + 0.5 * sin(uTime * 0.48 + aSeed.x * 6.283), uLuminous);
     vColorStrength = mix(1.0, appearance.z, uLuminous);
     vHalo = appearance.y * twinkle;
