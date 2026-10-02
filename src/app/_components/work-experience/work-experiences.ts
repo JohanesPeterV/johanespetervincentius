@@ -52,7 +52,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     ],
     positions: [
       {
-        name: 'Senior Software Engineer',
+        name: 'Lead Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
           'Work directly with the Founder on commerce, gifting, and rewards systems. Own architecture, business workflows, and production delivery, replacing legacy WordPress and Airtable processes.',
