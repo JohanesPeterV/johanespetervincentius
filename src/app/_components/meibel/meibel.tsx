@@ -1,20 +1,15 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { BriefcaseBusiness, Footprints, PawPrint, X } from 'lucide-react';
+import { Footprints, PawPrint, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { CONTACT_ICONS } from '../linktree/links';
 
 import { mountMeibel } from './meibel-runtime';
 import { MEIBEL_SHEET } from './meibel-engine';
 
-type MeibelProps = {
-  onShowWork: () => void;
-};
-
-export default function Meibel({ onShowWork }: MeibelProps) {
+export default function Meibel() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<ReturnType<typeof mountMeibel> | null>(null);
@@ -47,7 +42,7 @@ export default function Meibel({ onShowWork }: MeibelProps) {
         type="button"
         className="meibel-companion block h-full w-full"
         aria-label="Play with Meibel, my cat"
-        title="Meibel — play or let me show you around"
+        title="Meibel — tap to play"
         popoverTarget={panelId}
       >
         <span
@@ -85,7 +80,7 @@ export default function Meibel({ onShowWork }: MeibelProps) {
             <X aria-hidden />
           </Button>
         </div>
-        <p className="type-meta mb-3">Peter’s cat. Your little guide.</p>
+        <p className="type-meta mb-3">Peter’s cat.</p>
         <Button
           variant="ghost"
           className="min-h-11 justify-start"
@@ -110,37 +105,6 @@ export default function Meibel({ onShowWork }: MeibelProps) {
         >
           <Footprints aria-hidden /> Run around
         </Button>
-        <Button
-          variant="ghost"
-          className="min-h-11 justify-start"
-          onClick={() => {
-            panelRef.current?.hidePopover();
-            onShowWork();
-          }}
-        >
-          <BriefcaseBusiness aria-hidden /> Show me your work
-        </Button>
-        <p className="type-meta mb-2 mt-4">Contact Peter</p>
-        <nav aria-label="Meibel’s contact links" className="flex gap-2">
-          {CONTACT_ICONS.map(({ icon: Icon, label, url }) => (
-            <Button
-              key={label}
-              asChild
-              variant="destination"
-              size="icon"
-              className="h-11 w-11"
-            >
-              <a
-                href={url}
-                aria-label={label}
-                target={url.startsWith('http') ? '_blank' : undefined}
-                rel={url.startsWith('http') ? 'noopener noreferrer' : undefined}
-              >
-                <Icon aria-hidden />
-              </a>
-            </Button>
-          ))}
-        </nav>
       </div>
       {error ? (
         <span
