@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, stat, rm } from 'node:fs/promises';
+import {
+  mkdtemp,
+  writeFile,
+  stat,
+  rm,
+  mkdir,
+  readFile,
+} from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aggregateUsage, readTranscript } from './transcripts.mjs';
@@ -131,4 +140,60 @@ test('Invalid provider counters fail instead of silently becoming zero', async (
     readEntries('claude', [entry]),
     /Invalid provider token count/,
   );
+});
+
+test('Configured --local sync scans without invoking GitHub publication', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'portfolio-ai-local-'));
+  try {
+    const codexDirectory = join(directory, 'codex');
+    const claudeDirectory = join(directory, 'claude');
+    const stateDirectory = join(directory, 'state');
+    const binDirectory = join(directory, 'bin');
+    await Promise.all(
+      [codexDirectory, claudeDirectory, stateDirectory, binDirectory].map(
+        (path) => mkdir(path),
+      ),
+    );
+    const cachePath = join(directory, 't3.json');
+    await writeFile(
+      cachePath,
+      JSON.stringify({
+        version: 4,
+        files: {},
+        sessions: [],
+        sources: {
+          'codex\0root': { dir: codexDirectory },
+          'claude\0root': { dir: claudeDirectory },
+        },
+      }),
+    );
+    await writeFile(
+      join(stateDirectory, 'config.json'),
+      JSON.stringify({ gistId: 'must-not-publish' }),
+    );
+    await writeFile(join(binDirectory, 'gh'), '#!/bin/sh\nexit 99\n', {
+      mode: 0o700,
+    });
+    const output = execFileSync(
+      process.execPath,
+      [fileURLToPath(new URL('./sync.mjs', import.meta.url)), '--local'],
+      {
+        env: {
+          ...process.env,
+          PATH: binDirectory,
+          AI_USAGE_STATE_DIR: stateDirectory,
+          AI_USAGE_T3_CACHE: cachePath,
+        },
+        encoding: 'utf8',
+      },
+    );
+    assert.match(output, /local only/);
+    const latest = JSON.parse(
+      await readFile(join(stateDirectory, 'latest.json'), 'utf8'),
+    );
+    assert.equal(latest.providers.codex.tokens, 0);
+    assert.equal(latest.providers.claude.tokens, 0);
+  } finally {
+    await rm(directory, { recursive: true });
+  }
 });
