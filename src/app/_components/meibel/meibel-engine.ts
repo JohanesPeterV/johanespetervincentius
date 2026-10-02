@@ -7,13 +7,19 @@ export type MeibelAnimation =
   | 'failed'
   | 'waiting'
   | 'running'
-  | 'review';
+  | 'review'
+  | 'petting';
 
-type SpriteClip = { row: number; durations: readonly number[] };
+type SpriteClip = {
+  row: number;
+  durations: readonly number[];
+  columns?: readonly number[];
+};
+
+export type MeibelFollowMode = 'resting' | 'following';
 type Behavior = { animation: MeibelAnimation; duration: number };
 type MeibelEvent =
   | { type: 'play'; animation: MeibelAnimation }
-  | { type: 'run'; distance: number }
   | { type: 'look'; x: number; y: number }
   | { type: 'leave' };
 export type MeibelFrame = {
@@ -21,6 +27,7 @@ export type MeibelFrame = {
   row: number;
   column: number;
   offsetX: number;
+  offsetY: number;
 };
 
 interface MeibelState {
@@ -49,6 +56,11 @@ export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
   waiting: { row: 6, durations: Array(6).fill(220) },
   running: { row: 7, durations: Array(6).fill(150) },
   review: { row: 8, durations: Array(6).fill(250) },
+  petting: {
+    row: 0,
+    columns: [2, 3, 3, 3, 4],
+    durations: [100, 180, 240, 240, 160],
+  },
 };
 
 const BEHAVIORS: readonly Behavior[] = [
@@ -76,12 +88,12 @@ const clipFrame = (
   let column = 0;
   for (let index = 0; index < clip.durations.length; index += 1) {
     if (time < clip.durations[index]) {
-      column = index;
+      column = clip.columns?.[index] ?? index;
       break;
     }
     time -= clip.durations[index];
   }
-  return { animation, row: clip.row, column, offsetX: 0 };
+  return { animation, row: clip.row, column, offsetX: 0, offsetY: 0 };
 };
 
 export const lookDirection = (x: number, y: number): number | null => {
@@ -95,7 +107,7 @@ const actionState = (animation: MeibelAnimation, time: number): PlayingState =>
   new PlayingState(
     { animation, duration: clipDuration(animation) },
     time,
-    animation === 'jumping' ? 2 : 1,
+    animation === 'jumping' || animation === 'petting' ? 2 : 1,
   );
 
 class IdleState implements MeibelState {
@@ -111,9 +123,6 @@ class IdleState implements MeibelState {
   }
 
   handle(event: MeibelEvent, time: number): MeibelState {
-    if (event.type === 'run') {
-      return new RunningState(event.distance, time);
-    }
     if (event.type === 'play') {
       return actionState(event.animation, time);
     }
@@ -146,6 +155,7 @@ class LookingState implements MeibelState {
       row: 9 + Math.floor(this.direction / MEIBEL_SHEET.columns),
       column: this.direction % MEIBEL_SHEET.columns,
       offsetX: 0,
+      offsetY: 0,
     };
   }
 
@@ -166,62 +176,16 @@ class PlayingState implements MeibelState {
   }
 
   frame(time: number): MeibelFrame {
-    const frame = clipFrame(this.behavior.animation, time - this.startedAt);
-    const progress = Math.min(
-      1,
-      Math.max(0, (time - this.startedAt) / (this.endsAt - this.startedAt)),
-    );
-    if (this.behavior.animation === 'running-right') {
-      frame.offsetX = progress * 18;
-    }
-    if (this.behavior.animation === 'running-left') {
-      frame.offsetX = (1 - progress) * 18;
-    }
-    return frame;
+    return clipFrame(this.behavior.animation, time - this.startedAt);
   }
 
   handle(event: MeibelEvent, time: number): MeibelState {
-    if (event.type === 'run') {
-      return new RunningState(event.distance, time);
-    }
     if (event.type === 'play') {
       const requested = actionState(event.animation, time);
       if (requested.priority > this.priority) {
         return requested;
       }
     }
-    return this;
-  }
-}
-
-class RunningState implements MeibelState {
-  readonly priority = 3;
-  readonly endsAt: number;
-  private readonly legDuration: number;
-
-  constructor(
-    private readonly distance: number,
-    private readonly startedAt: number,
-  ) {
-    this.legDuration = distance / 0.12;
-    this.endsAt = startedAt + this.legDuration * 2;
-  }
-
-  frame(time: number): MeibelFrame {
-    const elapsed = Math.max(0, time - this.startedAt);
-    const returning = elapsed >= this.legDuration;
-    const frame = clipFrame(
-      returning ? 'running-right' : 'running-left',
-      elapsed,
-    );
-    const progress = Math.min(1, elapsed / this.legDuration);
-    frame.offsetX = returning
-      ? -this.distance * Math.max(0, 2 - elapsed / this.legDuration)
-      : -this.distance * progress;
-    return frame;
-  }
-
-  handle(): MeibelState {
     return this;
   }
 }
@@ -245,6 +209,11 @@ export class MeibelEngine {
   private elapsed = 0;
   private state: MeibelState = ambientState(0);
   private offsetX = 0;
+  private offsetY = 0;
+  private targetX = 0;
+  private targetY = 0;
+  private mode: MeibelFollowMode = 'resting';
+  private walking: MeibelAnimation | null = null;
   private motion: 'full' | 'reduced' = 'full';
 
   setMotion(motion: 'full' | 'reduced'): void {
@@ -253,6 +222,11 @@ export class MeibelEngine {
     }
     this.motion = motion;
     this.offsetX = 0;
+    this.offsetY = 0;
+    this.targetX = 0;
+    this.targetY = 0;
+    this.mode = 'resting';
+    this.walking = null;
     this.state =
       motion === 'reduced'
         ? new IdleState(this.elapsed, Infinity)
@@ -264,21 +238,34 @@ export class MeibelEngine {
       return;
     }
     const step = Math.max(0, delta);
+    const petEndsAt =
+      this.state.frame(this.elapsed).animation === 'petting'
+        ? this.state.endsAt
+        : this.elapsed;
     this.elapsed += step;
     if (this.elapsed >= this.state.endsAt) {
-      if (this.state instanceof RunningState) {
-        this.offsetX = 0;
-      }
       this.state = ambientState(this.elapsed);
     }
-    const target = this.state.frame(this.elapsed).offsetX;
-    if (this.state instanceof RunningState) {
-      this.offsetX = target;
+    if (this.state.frame(this.elapsed).animation === 'petting') {
+      this.walking = null;
       return;
     }
-    const distance = target - this.offsetX;
-    const maxTravel = step * 0.025;
-    this.offsetX += Math.min(maxTravel, Math.max(-maxTravel, distance));
+    const x = this.targetX - this.offsetX;
+    const y = this.targetY - this.offsetY;
+    const distance = Math.hypot(x, y);
+    if (distance <= 1) {
+      this.offsetX = this.targetX;
+      this.offsetY = this.targetY;
+      this.walking = null;
+      return;
+    }
+    const travel = Math.min(
+      distance,
+      Math.max(0, this.elapsed - petEndsAt) * 0.16,
+    );
+    this.offsetX += (x / distance) * travel;
+    this.offsetY += (y / distance) * travel;
+    this.walking = x < 0 ? 'running-left' : 'running-right';
   }
 
   play(animation: MeibelAnimation): void {
@@ -286,17 +273,36 @@ export class MeibelEngine {
       return;
     }
     this.state = this.state.handle({ type: 'play', animation }, this.elapsed);
+    if (this.state.frame(this.elapsed).animation === 'petting') {
+      this.walking = null;
+    }
   }
 
-  run(distance: number): void {
+  get followMode(): MeibelFollowMode {
+    return this.mode;
+  }
+
+  setFollowMode(mode: MeibelFollowMode): void {
+    if (this.motion === 'reduced') {
+      return;
+    }
+    this.mode = mode;
+    if (mode === 'resting') {
+      this.targetX = 0;
+      this.targetY = 0;
+    }
+  }
+
+  followTo(x: number, y: number): void {
     if (
-      this.motion === 'reduced' ||
-      !Number.isFinite(distance) ||
-      distance <= 0
+      this.mode !== 'following' ||
+      !Number.isFinite(x) ||
+      !Number.isFinite(y)
     ) {
       return;
     }
-    this.state = this.state.handle({ type: 'run', distance }, this.elapsed);
+    this.targetX = x;
+    this.targetY = y;
   }
 
   lookAt(x: number, y: number): void {
@@ -308,6 +314,9 @@ export class MeibelEngine {
   }
 
   frame(): MeibelFrame {
-    return { ...this.state.frame(this.elapsed), offsetX: this.offsetX };
+    const frame = this.walking
+      ? clipFrame(this.walking, this.elapsed)
+      : this.state.frame(this.elapsed);
+    return { ...frame, offsetX: this.offsetX, offsetY: this.offsetY };
   }
 }

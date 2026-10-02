@@ -1,21 +1,22 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { Footprints, PawPrint, X } from 'lucide-react';
+import { Heart, MousePointer2, PawPrint } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
 import { mountMeibel } from './meibel-runtime';
-import { MEIBEL_SHEET } from './meibel-engine';
+import { MEIBEL_SHEET, type MeibelFollowMode } from './meibel-engine';
 
 export default function Meibel() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<ReturnType<typeof mountMeibel> | null>(null);
   const panelId = useId();
-  const titleId = useId();
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const mouseAvailable = useMediaQuery('(any-pointer: fine)');
+  const [followMode, setFollowMode] = useState<MeibelFollowMode>('resting');
   const [error, setError] = useState('');
 
   // REASON: sprite playback and document pointer tracking need a browser clock and cleanup on unmount.
@@ -24,7 +25,7 @@ export default function Meibel() {
     if (!button) {
       return;
     }
-    const controls = mountMeibel(button, setError);
+    const controls = mountMeibel(button, setError, setFollowMode);
     controlsRef.current = controls;
     return () => {
       controls.dispose();
@@ -40,9 +41,9 @@ export default function Meibel() {
       <button
         ref={buttonRef}
         type="button"
-        className="meibel-companion block h-full w-full"
+        className="meibel-companion relative block h-full w-full"
         aria-label="Play with Meibel, my cat"
-        title="Meibel — tap to play"
+        title="Meibel — tap to pet"
         popoverTarget={panelId}
       >
         <span
@@ -53,57 +54,43 @@ export default function Meibel() {
           }}
           aria-hidden
         />
+        <Heart
+          aria-hidden
+          className="meibel-heart pointer-events-none absolute left-1/2 top-0 h-3 w-3"
+        />
       </button>
       <div
         ref={panelRef}
         id={panelId}
         popover="auto"
-        role="dialog"
-        aria-labelledby={titleId}
-        onPointerDown={(event) => event.stopPropagation()}
-        onPointerMove={(event) => event.stopPropagation()}
-        onPointerUp={(event) => event.stopPropagation()}
-        onWheel={(event) => event.stopPropagation()}
-        className="appearance-panel fixed bottom-[calc(env(safe-area-inset-bottom)+12.5rem)] left-auto right-3 top-auto m-0 max-h-[calc(100svh-14rem)] w-64 max-w-[calc(100vw-1.5rem)] flex-col overflow-y-auto p-4 sm:right-8 [&:popover-open]:flex"
+        role="group"
+        aria-label="Play with Meibel"
+        className="meibel-actions fixed m-0 flex-col items-end [&:popover-open]:flex"
       >
-        <div className="flex items-center justify-between">
-          <h2 id={titleId} className="type-label">
-            Hi, I’m Meibel.
-          </h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Close Meibel’s menu"
-            popoverTarget={panelId}
-            popoverTargetAction="hide"
-          >
-            <X aria-hidden />
-          </Button>
-        </div>
-        <p className="type-meta mb-3">Peter’s cat.</p>
         <Button
-          variant="ghost"
-          className="min-h-11 justify-start"
+          variant="link"
+          size="sm"
           onClick={() => {
-            controlsRef.current?.play('jumping');
+            controlsRef.current?.pet();
             panelRef.current?.hidePopover();
           }}
         >
           <PawPrint aria-hidden /> Pet Meibel
         </Button>
         <Button
-          variant="ghost"
-          className="min-h-11 justify-start"
-          disabled={reducedMotion}
-          title={
-            reducedMotion ? 'Running is paused with reduced motion' : undefined
-          }
+          variant="link"
+          size="sm"
+          aria-pressed={followMode === 'following'}
+          disabled={reducedMotion || !mouseAvailable}
           onClick={() => {
-            controlsRef.current?.run();
+            controlsRef.current?.setFollowMode(
+              followMode === 'following' ? 'resting' : 'following',
+            );
             panelRef.current?.hidePopover();
           }}
         >
-          <Footprints aria-hidden /> Run around
+          <MousePointer2 aria-hidden />{' '}
+          {followMode === 'following' ? 'Stop following' : 'Follow mouse'}
         </Button>
       </div>
       {error ? (

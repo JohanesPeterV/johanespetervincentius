@@ -102,6 +102,7 @@ test('reduced motion holds a still pose, accepts gaze, and clears it on exit', (
     row: 0,
     column: 0,
     offsetX: 0,
+    offsetY: 0,
   });
   engine.lookAt(-100, 0);
   assert.equal(engine.frame().row, 10);
@@ -110,47 +111,99 @@ test('reduced motion holds a still pose, accepts gaze, and clears it on exit', (
   assert.equal(engine.frame().animation, 'idle');
 });
 
-test('a run travels left, turns, and returns to its dock without interruption', () => {
+test('petting closes her eyes without jumping or moving', () => {
   const engine = new MeibelEngine();
-  engine.play('jumping');
-  engine.run(240);
-  assert.equal(engine.frame().animation, 'running-left');
-  engine.advance(1000);
-  assert.equal(engine.frame().offsetX, -120);
-  engine.play('jumping');
-  engine.run(500);
-  engine.lookAt(100, 0);
-  engine.advance(1000);
-  assert.equal(engine.frame().animation, 'running-right');
-  assert.equal(engine.frame().offsetX, -240);
-  engine.advance(1000);
-  assert.equal(engine.frame().offsetX, -120);
-  engine.advance(1000);
-  assert.equal(engine.frame().animation, 'idle');
+  engine.play('petting');
+  engine.advance(150);
+  assert.equal(engine.frame().animation, 'petting');
+  assert.equal(engine.frame().row, 0);
+  assert.equal(engine.frame().column, 3);
+  engine.play('waving');
+  engine.play('petting');
+  engine.advance(600);
+  assert.equal(engine.frame().column, 3);
   assert.equal(engine.frame().offsetX, 0);
+  assert.equal(engine.frame().offsetY, 0);
+  engine.advance(170);
+  assert.equal(engine.frame().animation, 'idle');
 });
 
-test('short runs fit their available space and reduced motion cancels travel', () => {
+test('following approaches the pointer at a bounded speed and changes direction', () => {
   const engine = new MeibelEngine();
-  engine.run(30);
-  engine.advance(250);
+  engine.setFollowMode('following');
+  engine.followTo(-300, -400);
+  engine.advance(1000);
+  const frame = engine.frame();
+  assert.equal(frame.animation, 'running-left');
+  assert.equal(frame.offsetX, -96);
+  assert.equal(frame.offsetY, -128);
+  assert.equal(Math.hypot(frame.offsetX, frame.offsetY), 160);
+  engine.followTo(100, -128);
+  engine.advance(500);
+  assert.equal(engine.frame().animation, 'running-right');
+  assert.equal(engine.frame().offsetX, -16);
+  assert.equal(engine.frame().offsetY, -128);
+});
+
+test('following settles without overshooting and stopping returns her home', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('following');
+  engine.followTo(-30, -40);
+  engine.advance(1000);
+  engine.advance(16);
   assert.equal(engine.frame().offsetX, -30);
-  engine.advance(250);
+  assert.equal(engine.frame().offsetY, -40);
+  assert.equal(engine.frame().animation, 'idle');
+  engine.setFollowMode('resting');
+  engine.followTo(-300, -400);
+  engine.advance(1000);
+  engine.advance(16);
   assert.equal(engine.frame().offsetX, 0);
-  engine.run(240);
+  assert.equal(engine.frame().offsetY, 0);
+  assert.equal(engine.frame().animation, 'idle');
+});
+
+test('petting pauses following, then resumes the latest target', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('following');
+  engine.followTo(-300, -400);
+  engine.advance(100);
+  const before = engine.frame();
+  engine.play('petting');
+  engine.advance(500);
+  assert.equal(engine.frame().animation, 'petting');
+  assert.equal(engine.frame().offsetX, before.offsetX);
+  assert.equal(engine.frame().offsetY, before.offsetY);
+  engine.advance(420);
+  assert.equal(engine.frame().offsetX, before.offsetX);
+  engine.advance(16);
+  assert.equal(engine.frame().animation, 'running-left');
+  assert.ok(engine.frame().offsetX < before.offsetX);
+});
+
+test('reduced motion cancels following and ignores new movement requests', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('following');
+  engine.followTo(-300, -400);
   engine.advance(500);
   engine.setMotion('reduced');
-  engine.run(240);
+  engine.setFollowMode('following');
+  engine.followTo(-300, -400);
   engine.advance(10000);
   assert.equal(engine.frame().animation, 'idle');
   assert.equal(engine.frame().offsetX, 0);
+  assert.equal(engine.frame().offsetY, 0);
 });
 
-test('invalid run distances leave the current behavior intact', () => {
+test('resting or invalid pointer coordinates cannot move her', () => {
   const engine = new MeibelEngine();
-  for (const distance of [0, -10, Infinity, NaN]) {
-    engine.run(distance);
-    assert.equal(engine.frame().animation, 'idle');
-    assert.equal(engine.frame().offsetX, 0);
-  }
+  engine.followTo(-300, -400);
+  engine.advance(1000);
+  assert.equal(engine.frame().offsetX, 0);
+  engine.setFollowMode('following');
+  engine.followTo(Infinity, 0);
+  engine.followTo(0, NaN);
+  engine.advance(1000);
+  assert.equal(engine.frame().offsetX, 0);
+  assert.equal(engine.frame().offsetY, 0);
 });
