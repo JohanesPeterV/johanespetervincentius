@@ -125,7 +125,12 @@ export const aggregateUsage = (files, now = new Date()) => {
   const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' });
   const windowEnd = day.format(now);
   const end = new Date(`${windowEnd}T00:00:00+07:00`);
-  const windowStart = day.format(new Date(end.getTime() - 29 * 86400000));
+  const dates = Array.from({ length: 30 }, (_, index) =>
+    day.format(new Date(end.getTime() - (29 - index) * 86400000)),
+  );
+  const daily = new Map(
+    dates.map((date) => [date, { date, codex: 0, claude: 0 }]),
+  );
   const providers = {
     codex: { tokens: 0, sessions: 0 },
     claude: { tokens: 0, sessions: 0 },
@@ -140,10 +145,11 @@ export const aggregateUsage = (files, now = new Date()) => {
         }
         seen.add(key);
       }
-      const recordDay = day.format(timestamp);
-      if (recordDay < windowStart || recordDay > windowEnd) {
+      const dayUsage = daily.get(day.format(timestamp));
+      if (!dayUsage) {
         continue;
       }
+      dayUsage[file.provider] += tokens;
       providers[file.provider].tokens += tokens;
       if (session) {
         sessions[file.provider].add(session);
@@ -155,10 +161,11 @@ export const aggregateUsage = (files, now = new Date()) => {
   }
   return {
     version: 1,
-    windowStart,
+    windowStart: dates[0],
     windowEnd,
     updatedAt: now.toISOString(),
     sourceUpdatedAt: now.toISOString(),
     providers,
+    daily: [...daily.values()],
   };
 };

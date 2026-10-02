@@ -52,6 +52,11 @@ export const useHeroHandoff = (
     last.addEventListener('scroll', invalidateLast);
     // REASON: observe content and theme changes, not animation style writes.
     const observer = new MutationObserver(snapshots.invalidate);
+    observer.observe(hero, {
+      attributes: true,
+      attributeFilter: ['d'],
+      subtree: true,
+    });
     observer.observe(entry, {
       attributes: true,
       attributeFilter: ['data-active'],

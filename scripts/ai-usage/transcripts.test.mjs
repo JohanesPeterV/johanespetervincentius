@@ -102,6 +102,17 @@ test('Calendar rolling window expires old days and uses Jakarta boundaries', () 
   assert.equal(usage.windowStart, '2026-09-04');
   assert.equal(usage.windowEnd, '2026-10-03');
   assert.equal(usage.providers.codex.tokens, 200);
+  assert.equal(usage.daily.length, 30);
+  assert.deepEqual(usage.daily[0], {
+    date: '2026-09-04',
+    codex: 100,
+    claude: 0,
+  });
+  assert.deepEqual(usage.daily[29], {
+    date: '2026-10-03',
+    codex: 100,
+    claude: 0,
+  });
   assert.deepEqual(Object.keys(usage), [
     'version',
     'windowStart',
@@ -109,6 +120,7 @@ test('Calendar rolling window expires old days and uses Jakarta boundaries', () 
     'updatedAt',
     'sourceUpdatedAt',
     'providers',
+    'daily',
   ]);
   assert.equal(JSON.stringify(usage).includes('session"'), false);
 });

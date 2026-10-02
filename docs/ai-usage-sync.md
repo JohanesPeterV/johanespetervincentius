@@ -1,8 +1,8 @@
 # Automatic AI consumption
 
-The stack page shows aggregate Codex and Claude token consumption for the last 30 calendar days, including today, in Asia/Jakarta. T3 Code is the workspace, not a third token provider.
+The stack page shows aggregate Codex and Claude token consumption for the last 30 calendar days, including today, in Asia/Jakarta. The hero background plots the same window as daily curves. T3 Code is the workspace, not a third token provider.
 
-The Mac scans local Codex and Claude usage telemetry every 15 minutes, then updates one public GitHub Gist. The website reads that JSON on mount and every 15 minutes. This needs no website secret, deployment per update, or automated Git commit/push. Only dates, provider token totals and session counts are published. Prompts, models, costs, project names, session IDs and local paths stay private.
+The Mac scans local Codex and Claude usage telemetry every 15 minutes, then updates one public GitHub Gist. The website reads that JSON on mount and every 15 minutes. This needs no website secret, deployment per update, or automated Git commit/push. Only dates, provider token totals per window and per day, and session counts are published. Prompts, models, costs, project names, session IDs and local paths stay private.
 
 The collector seeds unchanged files from T3 Code's version 4 scan cache, then directly scans new and changed provider transcripts. Opening T3's usage screen is unnecessary. A private collector cache reuses unchanged results. Scans stream a fixed byte snapshot and ignore an unfinished final line, so active provider writes do not corrupt a run.
 
