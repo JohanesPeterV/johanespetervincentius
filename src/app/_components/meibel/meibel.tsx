@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { Heart, MousePointer2, PawPrint } from 'lucide-react';
+import { MousePointer2, PawPrint } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -53,10 +53,6 @@ export default function Meibel() {
             backgroundSize: `${MEIBEL_SHEET.width / 2}px ${MEIBEL_SHEET.height / 2}px`,
           }}
           aria-hidden
-        />
-        <Heart
-          aria-hidden
-          className="meibel-heart pointer-events-none absolute left-1/2 top-0 h-3 w-3"
         />
       </button>
       <div

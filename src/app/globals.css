@@ -144,34 +144,14 @@
     color: hsl(var(--foreground));
   }
 
-  .meibel-heart {
-    color: hsl(var(--primary-text));
-    fill: currentColor;
-    opacity: 0;
-  }
-
   .meibel-companion[data-animation='petting'] .meibel-sprite {
     animation: meibelPet 920ms ease-in-out;
-  }
-
-  .meibel-companion[data-animation='petting'] .meibel-heart {
-    animation: meibelHeart 920ms ease-out;
   }
 
   @keyframes meibelPet {
     40%,
     70% {
       transform: rotate(-4deg) scale(1.02);
-    }
-  }
-
-  @keyframes meibelHeart {
-    20% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-16px);
     }
   }
 
@@ -1108,7 +1088,6 @@
 
     .appearance-orb,
     .meibel-sprite,
-    .meibel-heart,
     .profile-avatar-rim-primary,
     .profile-avatar-rim-secondary,
     .profile-coffee-steam path {
