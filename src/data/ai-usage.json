@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "windowStart": "2026-09-04",
+  "windowEnd": "2026-10-03",
+  "updatedAt": "2026-10-02T18:38:55.309Z",
+  "sourceUpdatedAt": "2026-10-02T18:38:55.309Z",
+  "providers": {
+    "codex": {
+      "tokens": 9936735151,
+      "sessions": 1060
+    },
+    "claude": {
+      "tokens": 12110113133,
+      "sessions": 1339
+    }
+  }
+}
