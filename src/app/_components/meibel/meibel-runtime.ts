@@ -1,11 +1,14 @@
 import {
   MeibelEngine,
   MEIBEL_SHEET,
+  MEIBEL_PLAY_SHEET,
+  MEIBEL_LOUNGE_SHEET,
   type MeibelFollowMode,
 } from './meibel-engine';
 
 type MeibelControls = {
   pet: () => void;
+  lounge: () => void;
   setFollowMode: (mode: MeibelFollowMode) => void;
   dispose: () => void;
 };
@@ -22,13 +25,16 @@ export const mountMeibel = (
     throw new Error('Meibel’s sprite or controls are missing.');
   }
   const engine = new MeibelEngine();
-  const image = new Image();
+  const sheets = [MEIBEL_SHEET, MEIBEL_PLAY_SHEET, MEIBEL_LOUNGE_SHEET];
+  const images = sheets.map(() => new Image());
+  let loadedImages = 0;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let ready = false;
   let visible = false;
   let request = 0;
   let previousTime: number | null = null;
   let lastFrame = '';
+  let previousAnimation = '';
   let lastWaveAt = -Infinity;
   let pointer: { x: number; y: number } | null = null;
   let renderedX = 0;
@@ -56,28 +62,68 @@ export const mountMeibel = (
 
   const followPointer = (): void => {
     if (panel.matches(':popover-open')) {
-      const frame = engine.frame();
-      engine.followTo(frame.offsetX, frame.offsetY);
+      engine.pausePursuit();
       return;
     }
     if (pointer) {
-      const target = boundPosition(
-        pointer.x - origin.x - origin.width / 2,
-        pointer.y + 28 - origin.y,
-      );
+      let x = pointer.x - origin.x - origin.width / 2;
+      let y = pointer.y + 28 - origin.y;
+      if (engine.followMode === 'playing') {
+        const facingRight = pointer.x > origin.x + renderedX + origin.width / 2;
+        x = pointer.x - origin.x - (facingRight ? 72 : 24);
+        y = pointer.y - origin.y - 52;
+      }
+      const target = boundPosition(x, y);
+      if (
+        engine.followMode === 'playing' &&
+        Math.hypot(target.x - x, target.y - y) > 24
+      ) {
+        engine.pausePursuit();
+        return;
+      }
       engine.followTo(target.x, target.y);
     }
   };
 
   const render = (): void => {
     const frame = engine.frame();
-    const identity = `${frame.row}:${frame.column}`;
+    let sheet = MEIBEL_SHEET;
+    let row = frame.row;
+    let column = frame.column;
+    if (frame.animation === 'lounging') {
+      sheet = MEIBEL_LOUNGE_SHEET;
+    } else if (
+      frame.animation === 'swatting' ||
+      engine.followMode === 'playing'
+    ) {
+      sheet = MEIBEL_PLAY_SHEET;
+      if (frame.animation !== 'swatting') {
+        row = 0;
+        column = 0;
+      }
+    }
+    const identity = `${sheet.source}:${row}:${column}`;
     if (identity !== lastFrame) {
-      sprite.style.backgroundPosition = `${(-frame.column * MEIBEL_SHEET.cellWidth) / 2}px ${(-frame.row * MEIBEL_SHEET.cellHeight) / 2}px`;
-      button.dataset.frame = identity;
+      sprite.style.backgroundImage = `url('${sheet.source}')`;
+      sprite.style.backgroundSize = `${sheet.width / 2}px ${sheet.height / 2}px`;
+      sprite.style.backgroundPosition = `${(-column * sheet.cellWidth) / 2}px ${(-row * sheet.cellHeight) / 2}px`;
+      button.dataset.frame = `${row}:${column}`;
       lastFrame = identity;
     }
+    if (
+      engine.followMode === 'playing' &&
+      (frame.animation !== 'swatting' || previousAnimation !== 'swatting')
+    ) {
+      const facingRight =
+        pointer && pointer.x > origin.x + renderedX + origin.width / 2;
+      sprite.style.transform = facingRight ? 'scaleX(-1)' : '';
+    } else if (engine.followMode !== 'playing') {
+      sprite.style.transform = '';
+    }
+    previousAnimation = frame.animation;
     button.dataset.animation = frame.animation;
+    dock.style.pointerEvents = engine.followMode === 'playing' ? 'none' : '';
+    panel.style.pointerEvents = 'auto';
     const position = boundPosition(frame.offsetX, frame.offsetY);
     renderedX = position.x;
     renderedY = position.y;
@@ -90,7 +136,7 @@ export const mountMeibel = (
     );
     dock.style.setProperty(
       '--meibel-actions-y',
-      `${Math.max(12, origin.y + renderedY + 16)}px`,
+      `${Math.max(12, Math.min(window.innerHeight - panel.offsetHeight - 80, origin.y + renderedY + 16))}px`,
     );
   };
 
@@ -130,27 +176,31 @@ export const mountMeibel = (
   });
   observer.observe(button);
 
-  image.onload = () => {
-    if (
-      image.naturalWidth !== MEIBEL_SHEET.width ||
-      image.naturalHeight !== MEIBEL_SHEET.height
-    ) {
-      reportError('Meibel’s sprite sheet has an unsupported size.');
-      return;
-    }
-    ready = true;
-    syncPlayback();
-  };
-  image.onerror = () =>
-    reportError('Meibel could not load. Please refresh to try again.');
-  image.src = MEIBEL_SHEET.source;
+  images.forEach((image, index) => {
+    const sheet = sheets[index];
+    image.onload = () => {
+      if (
+        image.naturalWidth !== sheet.width ||
+        image.naturalHeight !== sheet.height
+      ) {
+        reportError('Meibel’s sprite sheet has an unsupported size.');
+        return;
+      }
+      loadedImages += 1;
+      ready = loadedImages === images.length;
+      syncPlayback();
+    };
+    image.onerror = () =>
+      reportError('Meibel could not load. Please refresh to try again.');
+    image.src = sheet.source;
+  });
 
   const handlePointerMove = (event: PointerEvent): void => {
     if (!ready || !visible || event.pointerType !== 'mouse') {
       return;
     }
     pointer = { x: event.clientX, y: event.clientY };
-    if (engine.followMode === 'following') {
+    if (engine.followMode !== 'resting') {
       followPointer();
     }
     const rect = button.getBoundingClientRect();
@@ -164,14 +214,13 @@ export const mountMeibel = (
   };
   const handlePointerLeave = (): void => {
     pointer = null;
-    const frame = engine.frame();
-    engine.followTo(frame.offsetX, frame.offsetY);
+    engine.pausePursuit();
     engine.clearGaze();
     render();
   };
   const handleWave = (): void => {
     const now = performance.now();
-    if (engine.followMode === 'following' || now - lastWaveAt < 15000) {
+    if (engine.followMode !== 'resting' || now - lastWaveAt < 15000) {
       return;
     }
     lastWaveAt = now;
@@ -181,10 +230,32 @@ export const mountMeibel = (
     engine.play('petting');
     render();
   };
+  const lounge = (): void => {
+    if (!ready || reducedMotion.matches) {
+      return;
+    }
+    engine.play('lounging');
+    reportFollowMode(engine.followMode);
+    render();
+  };
   const handleResize = (): void => {
     updateBounds();
     followPointer();
     render();
+  };
+  const setFollowMode = (mode: MeibelFollowMode): void => {
+    if (!ready || reducedMotion.matches) {
+      return;
+    }
+    engine.setFollowMode(mode);
+    reportFollowMode(engine.followMode);
+    followPointer();
+    render();
+  };
+  const handleKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape' && engine.followMode === 'playing') {
+      setFollowMode('resting');
+    }
   };
 
   document.addEventListener('pointermove', handlePointerMove, {
@@ -192,6 +263,7 @@ export const mountMeibel = (
   });
   document.documentElement.addEventListener('pointerleave', handlePointerLeave);
   document.addEventListener('visibilitychange', syncPlayback);
+  document.addEventListener('keydown', handleKeyDown);
   reducedMotion.addEventListener('change', syncPlayback);
   window.addEventListener('resize', handleResize);
   panel.addEventListener('toggle', followPointer);
@@ -201,25 +273,22 @@ export const mountMeibel = (
 
   return {
     pet,
-    setFollowMode: (mode) => {
-      if (!ready || reducedMotion.matches) {
-        return;
-      }
-      engine.setFollowMode(mode);
-      reportFollowMode(engine.followMode);
-      followPointer();
-    },
+    lounge,
+    setFollowMode,
     dispose: () => {
       cancelAnimationFrame(request);
       observer.disconnect();
-      image.onload = null;
-      image.onerror = null;
+      images.forEach((image) => {
+        image.onload = null;
+        image.onerror = null;
+      });
       document.removeEventListener('pointermove', handlePointerMove);
       document.documentElement.removeEventListener(
         'pointerleave',
         handlePointerLeave,
       );
       document.removeEventListener('visibilitychange', syncPlayback);
+      document.removeEventListener('keydown', handleKeyDown);
       reducedMotion.removeEventListener('change', syncPlayback);
       window.removeEventListener('resize', handleResize);
       panel.removeEventListener('toggle', followPointer);

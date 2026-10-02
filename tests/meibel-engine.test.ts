@@ -43,17 +43,17 @@ test('every standard animation can play every populated cell', () => {
   }
 });
 
-test('ambient behavior stays still apart from an occasional curious glance', () => {
+test('ambient behavior stays still with an occasional glance and long lounge', () => {
   const engine = new MeibelEngine();
   let idleSamples = 0;
   for (let time = 0; time < 200000; time += 100) {
     const frame = engine.frame();
-    assert.ok(frame.animation === 'idle' || frame.animation === 'review');
+    assert.ok(['idle', 'review', 'lounging'].includes(frame.animation));
     assert.equal(frame.offsetX, 0);
     if (time < 60000) {
       assert.equal(frame.animation, 'idle');
     }
-    if (frame.animation === 'idle') {
+    if (frame.animation !== 'review') {
       idleSamples += 1;
     }
     engine.advance(100);
@@ -206,4 +206,192 @@ test('resting or invalid pointer coordinates cannot move her', () => {
   engine.advance(1000);
   assert.equal(engine.frame().offsetX, 0);
   assert.equal(engine.frame().offsetY, 0);
+});
+
+test('mouse play approaches gently and waits for the cursor to settle before swiping', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(-120, 0);
+  engine.advance(500);
+  assert.equal(engine.frame().offsetX, -60);
+  assert.equal(engine.frame().animation, 'running-left');
+  engine.advance(500);
+  engine.followTo(-120, 0);
+  engine.advance(16);
+  assert.equal(engine.frame().animation, 'swatting');
+  assert.equal(engine.frame().offsetX, -120);
+  const cells = new Set<string>();
+  let highestReach = 0;
+  let lastOffsetY = 0;
+  for (let time = 0; time < 1480; time += 20) {
+    const frame = engine.frame();
+    assert.equal(frame.animation, 'swatting');
+    assert.equal(frame.offsetX, -120);
+    assert.ok(frame.offsetY >= -8 && frame.offsetY <= 0);
+    highestReach = Math.min(highestReach, frame.offsetY);
+    lastOffsetY = frame.offsetY;
+    cells.add(`${frame.row}:${frame.column}`);
+    engine.advance(20);
+  }
+  assert.equal(cells.size, 8);
+  assert.ok(highestReach < -7);
+  assert.equal(lastOffsetY, 0);
+  assert.equal(engine.frame().animation, 'idle');
+  assert.equal(engine.frame().offsetY, 0);
+});
+
+test('a stationary cursor is swiped once and moving it rearms play after a rest', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(0, 0);
+  engine.advance(300);
+  assert.equal(engine.frame().animation, 'swatting');
+  engine.advance(1480);
+  engine.followTo(30, 0);
+  engine.advance(300);
+  engine.advance(16);
+  assert.notEqual(engine.frame().animation, 'swatting');
+  engine.advance(1500);
+  assert.equal(engine.frame().animation, 'swatting');
+  engine.advance(1480);
+  engine.advance(20000);
+  assert.equal(engine.frame().animation, 'idle');
+  engine.followTo(32, 0);
+  engine.advance(1000);
+  engine.advance(16);
+  assert.notEqual(engine.frame().animation, 'swatting');
+});
+
+test('the short reach is local to her chase position and petting settles it', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(-30, -40);
+  engine.advance(500);
+  engine.advance(360);
+  assert.equal(engine.frame().animation, 'swatting');
+  assert.equal(engine.frame().offsetX, -30);
+  assert.ok(engine.frame().offsetY < -40 && engine.frame().offsetY >= -48);
+  engine.play('petting');
+  assert.equal(engine.frame().offsetY, -40);
+});
+
+test('leaving or opening controls cancels a swipe and pauses pursuit', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(0, 0);
+  engine.advance(300);
+  assert.equal(engine.frame().animation, 'swatting');
+  engine.pausePursuit();
+  engine.advance(10000);
+  assert.equal(engine.frame().animation, 'idle');
+  assert.equal(engine.frame().offsetX, 0);
+});
+
+test('stopping play cancels the swipe and reduced motion prevents cursor play', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(-60, 0);
+  engine.advance(500);
+  engine.advance(16);
+  assert.equal(engine.frame().animation, 'swatting');
+  engine.setFollowMode('resting');
+  engine.advance(500);
+  engine.advance(16);
+  assert.equal(engine.frame().animation, 'idle');
+  assert.equal(engine.frame().offsetX, 0);
+  engine.setMotion('reduced');
+  engine.setFollowMode('playing');
+  engine.followTo(-60, 0);
+  engine.advance(10000);
+  assert.equal(engine.followMode, 'resting');
+  assert.equal(engine.frame().animation, 'idle');
+  assert.equal(engine.frame().offsetX, 0);
+});
+
+test('leaving after Stop preserves the return home', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(-120, -160);
+  engine.advance(500);
+  engine.setFollowMode('resting');
+  engine.advance(100);
+  engine.pausePursuit();
+  engine.advance(1000);
+  assert.equal(engine.frame().offsetX, 0);
+  assert.equal(engine.frame().offsetY, 0);
+  assert.equal(engine.frame().animation, 'idle');
+});
+
+test('play waits for movement to settle and stays within the diagonal speed limit', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(-300, -400);
+  engine.advance(1000);
+  assert.equal(Math.hypot(engine.frame().offsetX, engine.frame().offsetY), 120);
+  engine.followTo(-72, -96);
+  engine.advance(100);
+  assert.notEqual(engine.frame().animation, 'swatting');
+  engine.followTo(-66, -96);
+  engine.advance(100);
+  assert.notEqual(engine.frame().animation, 'swatting');
+  engine.advance(200);
+  assert.equal(engine.frame().animation, 'swatting');
+});
+
+test('petting interrupts a swipe and preserves the play position and rearm rules', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(0, 0);
+  engine.advance(300);
+  engine.play('petting');
+  engine.advance(500);
+  assert.equal(engine.frame().animation, 'petting');
+  engine.followTo(-120, 0);
+  assert.equal(engine.frame().offsetX, 0);
+  engine.advance(420);
+  assert.equal(engine.frame().offsetX, 0);
+  engine.advance(100);
+  assert.equal(engine.frame().animation, 'running-left');
+  assert.equal(engine.frame().offsetX, -12);
+});
+
+test('lounging stops pursuit and holds through gaze and hover for thirty seconds', () => {
+  const engine = new MeibelEngine();
+  engine.setFollowMode('playing');
+  engine.followTo(-120, 0);
+  engine.advance(500);
+  engine.play('lounging');
+  assert.equal(engine.followMode, 'resting');
+  engine.lookAt(-100, 0);
+  engine.play('waving');
+  engine.followTo(-400, 0);
+  engine.advance(12000);
+  assert.equal(engine.frame().animation, 'lounging');
+  assert.equal(engine.frame().column, 1);
+  assert.equal(engine.frame().offsetX, -60);
+  engine.advance(1800);
+  assert.equal(engine.frame().column, 2);
+  engine.advance(300);
+  assert.equal(engine.frame().column, 3);
+  engine.advance(15899);
+  assert.equal(engine.frame().animation, 'lounging');
+  engine.advance(1);
+  assert.equal(engine.frame().animation, 'idle');
+});
+
+test('petting and selecting a movement mode can interrupt lounging', () => {
+  const engine = new MeibelEngine();
+  engine.play('lounging');
+  engine.play('petting');
+  assert.equal(engine.frame().animation, 'petting');
+  engine.play('lounging');
+  engine.setFollowMode('following');
+  engine.followTo(-100, 0);
+  engine.advance(100);
+  assert.equal(engine.frame().animation, 'running-left');
+  engine.play('lounging');
+  engine.setFollowMode('playing');
+  engine.followTo(-100, 0);
+  engine.advance(100);
+  assert.equal(engine.frame().animation, 'running-left');
 });
