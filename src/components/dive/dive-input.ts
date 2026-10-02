@@ -1,6 +1,6 @@
 import { scrollDriveBy } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
-import { CHAPTER_GAP, READING_RANGE } from './dive-route';
+import { CHAPTER_GAP } from './dive-route';
 
 const READING_CENTER_EPSILON = 0.001;
 
@@ -73,17 +73,7 @@ const getReadingSection = (
   const section = drive.route.sections.find(
     (candidate) => candidate.id === chapter?.dataset.diveSection,
   );
-  // REASON: departing and incoming panels must not reclaim scroll and reset
-  // the journey while the camera is still travelling between reading poses.
-  if (
-    !element ||
-    !chapter ||
-    !section ||
-    Math.abs(drive.route.jumpDelta(drive.current, section.center)) >
-      READING_RANGE ||
-    Math.abs(drive.route.jumpDelta(drive.target, section.center)) >
-      READING_RANGE
-  ) {
+  if (!element || !chapter || !section) {
     return null;
   }
   return { element, chapter, center: section.center };
@@ -195,10 +185,9 @@ export const createReadingInput = (drive: DriveMotion) => {
     if (!reading) {
       return pixels;
     }
-    const toCenter = drive.route.jumpDelta(
-      drive.settling ? drive.current : drive.target,
-      reading.center,
-    );
+    // REASON: without snapping, a coarse wheel step must not jump past a
+    // chapter's centre; travel stops there so its reading scroll takes over.
+    const toCenter = drive.route.jumpDelta(drive.target, reading.center);
     const { travelPixels, readingPixels } = splitReadingInput(
       pixels,
       Math.abs(toCenter) < READING_CENTER_EPSILON ? 0 : toCenter,

@@ -35,7 +35,6 @@ const createDrive = (): DriveMotion => ({
   route,
   current: DIVE_START,
   target: DIVE_START,
-  settling: false,
   inputDriven: false,
 });
 

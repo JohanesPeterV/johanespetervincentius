@@ -5,7 +5,6 @@ import {
   advanceDrive,
   createDrive,
   scrollDriveBy,
-  settleDriveToSection,
   stepDriveToSection,
 } from '../src/components/dive/camera-motion';
 import {
@@ -59,7 +58,7 @@ test('large scroll bursts stay bounded and do not reverse a chapter command', ()
   assert.equal(drive.target, destination);
 });
 
-test('a held gesture stays proportional and snaps only when it ends', () => {
+test('a held gesture stays proportional and rests where it stops', () => {
   const drive = createDrive(route);
   for (let frame = 0; frame < 60; frame++) {
     scrollDriveBy(drive, 0.012);
@@ -72,74 +71,6 @@ test('a held gesture stays proportional and snaps only when it ends', () => {
   }
   assert.equal(drive.target, stoppedTarget);
   assert.equal(drive.current, stoppedTarget);
-  settleDriveToSection(drive);
-  for (let frame = 0; frame < 180; frame++) {
-    advanceDrive(drive, 1 / 60);
-  }
-  assert.ok(Math.abs(drive.current - route.entry.center) < 1e-9);
-});
-
-test('idle snap reaches the nearest screen in both directions across repeated loops', () => {
-  for (const lap of [-3, 0, 3]) {
-    for (const section of route.sections) {
-      for (const offset of [-0.2, 0.2]) {
-        const drive = createDrive(route);
-        const center = section.center + lap * route.length;
-        drive.current = center + offset;
-        drive.target = drive.current;
-        settleDriveToSection(drive);
-        for (let frame = 0; frame < 180; frame++) {
-          advanceDrive(drive, 1 / 60);
-        }
-        assert.ok(Math.abs(drive.current - center) < 1e-9);
-        assert.equal(drive.settling, false);
-      }
-    }
-  }
-});
-
-test('new scrolling interrupts a snap from its visible position', () => {
-  const drive = createDrive(route);
-  drive.current = route.entry.center - 0.2;
-  drive.target = drive.current;
-  settleDriveToSection(drive);
-  advanceDrive(drive, 1 / 60);
-  const visible = drive.current;
-  scrollDriveBy(drive, -0.03);
-  advanceDrive(drive, 1 / 60);
-  assert.ok(drive.current < visible);
-  assert.equal(drive.target, visible - 0.03);
-});
-
-test('reading a tall section keeps its screen and scroll position after snapping', () => {
-  const drive = createDrive(route);
-  drive.current = route.entry.center - 0.2;
-  drive.target = drive.current;
-  settleDriveToSection(drive);
-  for (let frame = 0; frame < 180; frame++) {
-    advanceDrive(drive, 1 / 60);
-  }
-  const panel = { scrollTop: 0, scrollHeight: 2400, clientHeight: 800 };
-  for (const delta of [400, 500, -200, 700]) {
-    const remaining = scrollSectionBy(panel, delta);
-    assert.equal(remaining, 0);
-    scrollDriveBy(drive, remaining);
-    settleDriveToSection(drive);
-    for (let frame = 0; frame < 180; frame++) {
-      advanceDrive(drive, 1 / 60);
-    }
-    assert.ok(Math.abs(drive.current - route.entry.center) < 1e-9);
-  }
-  assert.equal(panel.scrollTop, 1400);
-  const overflow = scrollSectionBy(panel, 650);
-  assert.equal(overflow, 450);
-  assert.equal(panel.scrollTop, 1600);
-  scrollDriveBy(drive, journeyDeltaForScroll(overflow, 800));
-  settleDriveToSection(drive);
-  for (let frame = 0; frame < 180; frame++) {
-    advanceDrive(drive, 1 / 60);
-  }
-  assert.ok(Math.abs(drive.current - route.sections[2].center) < 1e-9);
 });
 
 test('wheel pixel, line and page units retain proportional distance', () => {

@@ -83,21 +83,6 @@ export class DiveRoute {
     return direction * nearest;
   }
 
-  nearestDelta(progress: number): number {
-    const wrapped = this.wrapDistance(progress);
-    let best = 0;
-    let bestDistance = this.length;
-    for (const section of this.sections) {
-      const forward = this.wrapDistance(section.center - wrapped);
-      const delta = forward > this.length / 2 ? forward - this.length : forward;
-      if (Math.abs(delta) < bestDistance) {
-        bestDistance = Math.abs(delta);
-        best = delta;
-      }
-    }
-    return best;
-  }
-
   travel(progress: number): number {
     let travel = 1;
     for (const section of this.sections) {

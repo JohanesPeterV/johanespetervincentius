@@ -1,11 +1,7 @@
 'use client';
 
 import { ReactNode, RefObject, useEffect, useRef } from 'react';
-import {
-  scrollDriveBy,
-  settleDriveToSection,
-  stepDriveToSection,
-} from './camera-motion';
+import { scrollDriveBy, stepDriveToSection } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import {
   canScrollSection,
@@ -110,9 +106,6 @@ export default function DiveNavigation({
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     if (dragRef.current.id === event.pointerId) {
-      if (dragRef.current.axis === 'vertical') {
-        settleDriveToSection(driveRef.current);
-      }
       dragRef.current.id = null;
       dragRef.current.scrollTarget = null;
     }
@@ -121,8 +114,6 @@ export default function DiveNavigation({
   // REASON: one wheel delta can finish reading a panel and continue the
   // journey; a non-passive listener prevents the browser applying it twice.
   useEffect(() => {
-    let snapTimer: ReturnType<typeof setTimeout> | undefined;
-    const cancelSnap = (): void => clearTimeout(snapTimer);
     const handleWheel = (event: WheelEvent): void => {
       if (
         event.ctrlKey ||
@@ -131,7 +122,6 @@ export default function DiveNavigation({
       ) {
         return;
       }
-      cancelSnap();
       event.preventDefault();
       const remaining = readingInput.scroll(
         event.target,
@@ -143,23 +133,13 @@ export default function DiveNavigation({
           journeyDeltaForScroll(remaining, window.innerHeight),
         );
       }
-      // REASON: align the screen even if reading consumed the final delta;
-      // settling the drive leaves the panel's own scroll position intact.
-      snapTimer = setTimeout(() => {
-        if (dragRef.current.id === null) {
-          settleDriveToSection(driveRef.current);
-        }
-      }, 220);
     };
 
     const root = rootRef.current;
     root?.addEventListener('wheel', handleWheel, { passive: false });
-    root?.addEventListener('pointerdown', cancelSnap);
     return () => {
-      cancelSnap();
       readingInput.dispose();
       root?.removeEventListener('wheel', handleWheel);
-      root?.removeEventListener('pointerdown', cancelSnap);
     };
   }, [driveRef, readingInput]);
 
