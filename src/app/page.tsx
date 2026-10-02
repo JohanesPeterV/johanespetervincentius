@@ -1,4 +1,5 @@
 import LinktreeSection, { type CardType } from '@/app/_components/linktree';
+import Meibel from '@/app/_components/meibel/meibel';
 import DiveScene from '@/components/dive/dive-scene';
 import { DiveWork } from '@/components/dive/dive-work';
 import { DiveProjects } from '@/components/dive/dive-projects';
@@ -38,6 +39,7 @@ export default async function Home({ searchParams }: HomeParams) {
           { id: 'stack', title: 'Stack', content: <DiveStack /> },
         ]}
       />
+      <Meibel />
     </main>
   );
 }

@@ -112,7 +112,7 @@
     border-radius: 1.25rem;
   }
 
-  .profile-meibel {
+  .meibel-companion {
     border: 0;
     padding: 0;
     background: transparent;
@@ -121,12 +121,12 @@
     border-radius: 1rem;
   }
 
-  .profile-meibel:focus-visible {
+  .meibel-companion:focus-visible {
     outline: 2px solid hsl(var(--primary-text));
     outline-offset: 2px;
   }
 
-  .profile-meibel-sprite {
+  .meibel-sprite {
     background-repeat: no-repeat;
     pointer-events: none;
   }

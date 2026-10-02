@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import type { MeibelAnimation } from '../src/app/_components/linktree/meibel-engine';
+import type { MeibelAnimation } from '../src/app/_components/meibel/meibel-engine';
 
 import {
   lookDirection,
   MeibelEngine,
   MEIBEL_CLIPS,
-} from '../src/app/_components/linktree/meibel-engine';
+} from '../src/app/_components/meibel/meibel-engine';
 
 test('every standard animation can play every populated cell', () => {
   const cases: { animation: MeibelAnimation; row: number; frames: number }[] = [

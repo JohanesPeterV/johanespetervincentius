@@ -1,7 +1,5 @@
 import Image from 'next/image';
 
-import Meibel from './meibel';
-
 export default function ProfileAvatar() {
   return (
     <div className="relative flex h-28 w-28 items-center justify-center">
@@ -94,7 +92,6 @@ export default function ProfileAvatar() {
           />
         </g>
       </svg>
-      <Meibel />
     </div>
   );
 }

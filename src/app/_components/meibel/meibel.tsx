@@ -19,16 +19,16 @@ export default function Meibel() {
   }, []);
 
   return (
-    <>
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-3 z-40 h-[104px] w-24 sm:right-8">
       <button
         ref={buttonRef}
         type="button"
-        className="profile-meibel absolute -bottom-2 left-[calc(100%-1.25rem)] z-10 h-[104px] w-24"
+        className="meibel-companion block h-full w-full"
         aria-label="Play with Meibel, my cat"
         title="Meibel — tap to play"
       >
         <span
-          className="profile-meibel-sprite block h-full w-full"
+          className="meibel-sprite block h-full w-full"
           style={{
             backgroundImage: `url('${MEIBEL_SHEET.source}')`,
             backgroundSize: `${MEIBEL_SHEET.width / 2}px ${MEIBEL_SHEET.height / 2}px`,
@@ -39,11 +39,11 @@ export default function Meibel() {
       {error ? (
         <span
           role="status"
-          className="absolute top-full text-xs text-muted-foreground"
+          className="absolute bottom-full right-0 w-40 text-xs text-muted-foreground"
         >
           {error}
         </span>
       ) : null}
-    </>
+    </div>
   );
 }

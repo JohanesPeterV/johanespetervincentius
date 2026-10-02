@@ -4,12 +4,11 @@ export const mountMeibel = (
   button: HTMLButtonElement,
   reportError: (message: string) => void,
 ): (() => void) => {
-  const sprite = button.querySelector<HTMLElement>('.profile-meibel-sprite');
+  const sprite = button.querySelector<HTMLElement>('.meibel-sprite');
   if (!sprite) {
     throw new Error('Meibel sprite element is missing.');
   }
   const engine = new MeibelEngine();
-  const chapter = button.closest<HTMLElement>('[data-dive-section]');
   const image = new Image();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let ready = false;
@@ -50,7 +49,6 @@ export const mountMeibel = (
     render();
     if (
       visible &&
-      (!chapter || chapter.dataset.visible === 'true') &&
       document.visibilityState === 'visible' &&
       !reducedMotion.matches
     ) {
@@ -63,13 +61,6 @@ export const mountMeibel = (
     syncPlayback();
   });
   observer.observe(button);
-  const chapterObserver = new MutationObserver(syncPlayback);
-  if (chapter) {
-    chapterObserver.observe(chapter, {
-      attributes: true,
-      attributeFilter: ['data-visible'],
-    });
-  }
 
   image.onload = () => {
     if (
@@ -128,7 +119,6 @@ export const mountMeibel = (
   return () => {
     cancelAnimationFrame(request);
     observer.disconnect();
-    chapterObserver.disconnect();
     image.onload = null;
     image.onerror = null;
     document.removeEventListener('pointermove', handlePointerMove);

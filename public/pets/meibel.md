@@ -21,9 +21,9 @@ Look poses run clockwise in viewer coordinates: up is index 0, right 4, down 8, 
 
 ## Playback
 
-`src/app/_components/linktree/meibel-engine.ts` implements the State pattern. `IdleState` accepts gaze and action events. `LookingState` returns to idle when gaze expires or the pointer leaves. `PlayingState` owns clip timing and action priority; a jump finishes even if hover or repeated taps arrive. All states implement the same frame/event interface. The engine advances the clock and resumes the ambient behavior schedule when a state expires.
+`src/app/_components/meibel/meibel-engine.ts` implements the State pattern. `IdleState` accepts gaze and action events. `LookingState` returns to idle when gaze expires or the pointer leaves. `PlayingState` owns clip timing and action priority; a jump finishes even if hover or repeated taps arrive. All states implement the same frame/event interface. The engine advances the clock and resumes the ambient behavior schedule when a state expires.
 
-`meibel-runtime.ts` connects the engine to the sprite element. It uses one animation clock, renders without React updates per frame, pauses outside the visible hero or browser tab, and removes listeners on unmount. Reduced motion holds a still pose and allows direct gaze changes. The React component owns the accessible play button and visible loading errors.
+`meibel-runtime.ts` connects the engine to the sprite element. It uses one animation clock, renders without React updates per frame, pauses outside the viewport or a visible browser tab, and removes listeners on unmount. Reduced motion holds a still pose and allows direct gaze changes. The React component owns the accessible play button and visible loading errors. The home page mounts her at the bottom-right of the screen, above navigation and the device safe area, so she stays with the visitor across chapters.
 
 Meibel normally sits and blinks about once every eight seconds. She gives a brief curious glance after a minute, then rests for two minutes. Hover or focus to wave, with a fifteen-second cooldown; click, tap, Enter, or Space to jump. Cursor movement controls all sixteen gaze poses during idle. All nine clips remain available through `MeibelEngine.play`; walking, jumping, busy paws, waiting, and disappointment do not run automatically.
 
