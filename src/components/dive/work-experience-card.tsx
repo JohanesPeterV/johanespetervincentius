@@ -20,24 +20,30 @@ export const WorkExperienceCard = ({
       <div className="work-card-hanger">
         <button
           type="button"
-          className="work-card surface-panel flex w-full flex-col text-left"
+          className="work-card surface-panel w-full text-left"
           aria-label={`${job.company}${current ? ', current role' : ''}`}
           aria-pressed={job.company === selectedCompany}
           aria-controls={`work-detail-${index}`}
           onClick={() => onSelect(job.company)}
         >
-          <span className="type-meta flex w-full items-center justify-between gap-2">
-            <span className="text-muted-foreground">0{index + 1}</span>
-            {current ? (
-              <span className="work-current-label">Current role</span>
-            ) : null}
-          </span>
-          <span className="card-face-title font-display">{job.company}</span>
-          <span className="work-card-role type-label text-muted-foreground">
-            {job.positions.map((position) => position.name).join(' · ')}
+          <span className="grid gap-3">
+            <span className="type-meta flex items-center justify-between gap-2">
+              <span className="text-muted-foreground">0{index + 1}</span>
+              {current ? (
+                <span className="work-current-label">Current role</span>
+              ) : null}
+            </span>
+            <span className="grid gap-2">
+              <span className="card-face-title font-display">
+                {job.company}
+              </span>
+              <span className="work-card-role type-label text-muted-foreground">
+                {job.positions.map((position) => position.name).join(' · ')}
+              </span>
+            </span>
           </span>
           <WorkExperienceMetrics metrics={job.metrics} />
-          <span className="work-card-period type-meta mt-auto text-muted-foreground">
+          <span className="work-card-period type-meta text-muted-foreground">
             {job.positions[0].workPeriod}
           </span>
         </button>

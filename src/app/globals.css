@@ -473,16 +473,19 @@
   }
 
   .work-card .work-metrics {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
-    width: 100%;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-content: center;
+    gap: 0.75rem 1rem;
   }
 
   .work-card .work-metric {
-    grid-template-columns: minmax(max-content, 1fr) minmax(0, 1fr);
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     align-items: baseline;
-    gap: 0.5rem;
+  }
+
+  .work-card .work-metric-value {
+    font-size: clamp(1.25rem, 8cqw, 1.75rem);
   }
 
   /* The picked job's full story sits under the hanging cards. */
@@ -542,8 +545,9 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: start;
-    gap: 4rem;
-    margin: 3rem 1.5rem 1rem;
+    gap: 1.25rem;
+    width: calc(100% - 3rem);
+    margin: 3rem auto 1rem;
     isolation: isolate;
   }
 
@@ -604,6 +608,7 @@
 
   .work-card-hanger {
     --cord-length: 0px;
+    container-type: inline-size;
     position: relative;
     transform: rotate(var(--card-angle));
     transform-origin: 50% calc(-1 * var(--cord-length));
@@ -613,8 +618,12 @@
 
   .work-card {
     position: relative;
-    min-height: 20rem;
-    padding: clamp(0.75rem, 1.5vw, 1.5rem);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 1.25rem;
+    aspect-ratio: 3 / 4;
+    min-height: min-content;
+    padding: clamp(1rem, 6cqw, 1.5rem);
     cursor: pointer;
     transition: border-color 200ms;
   }
@@ -696,8 +705,9 @@
     text-wrap: balance;
   }
 
-  .work-card-period {
-    padding-top: 1rem;
+  .work-card .card-face-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 10cqw, 2.5rem);
   }
 
   @media (hover: hover) {
@@ -900,7 +910,7 @@
   @media (max-width: 1439px) {
     .work-card-spread {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.25rem;
+      max-width: 48rem;
     }
 
     .work-card-slot:nth-child(n) {
@@ -923,14 +933,11 @@
     .work-card-spread {
       grid-template-columns: 1fr;
       gap: 1rem;
+      max-width: 22rem;
     }
 
     .work-card-slot:nth-child(n) {
       --card-angle: -1deg;
-    }
-
-    .work-card {
-      min-height: 0;
     }
 
     .work-card-slot:nth-child(even) {
