@@ -18,7 +18,7 @@ type SpriteClip = {
   columns?: readonly number[];
 };
 
-export type MeibelFollowMode = 'resting' | 'following' | 'playing';
+export type MeibelFollowMode = 'resting' | 'following';
 type Behavior = { animation: MeibelAnimation; duration: number };
 type MeibelEvent =
   | { type: 'play'; animation: MeibelAnimation }
@@ -30,6 +30,8 @@ export type MeibelFrame = {
   column: number;
   offsetX: number;
   offsetY: number;
+  rotation?: number;
+  facing?: 'left' | 'right';
 };
 
 interface MeibelState {
@@ -66,8 +68,8 @@ export const MEIBEL_LOUNGE_SHEET = {
 
 export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
   idle: { row: 0, durations: [3200, 140, 90, 90, 140, 4500] },
-  'running-right': { row: 1, durations: Array(8).fill(90) },
-  'running-left': { row: 2, durations: Array(8).fill(90) },
+  'running-right': { row: 1, durations: Array(8).fill(150) },
+  'running-left': { row: 2, durations: Array(8).fill(150) },
   waving: { row: 3, durations: [200, 180, 200, 260] },
   jumping: { row: 4, durations: [180, 120, 240, 140, 220] },
   failed: { row: 5, durations: Array(8).fill(180) },
@@ -91,11 +93,10 @@ const BEHAVIORS: readonly Behavior[] = [
 ];
 const CYCLE_DURATION = BEHAVIORS.reduce((sum, pose) => sum + pose.duration, 0);
 
-const clipDuration = (animation: MeibelAnimation): number =>
-  MEIBEL_CLIPS[animation].durations.reduce(
-    (sum, duration) => sum + duration,
-    0,
-  );
+const clipDuration = (animation: MeibelAnimation): number => {
+  const { durations } = MEIBEL_CLIPS[animation];
+  return durations.reduce((sum, duration) => sum + duration, 0);
+};
 
 const clipFrame = (
   animation: MeibelAnimation,
@@ -111,7 +112,15 @@ const clipFrame = (
     }
     time -= clip.durations[index];
   }
-  return { animation, row: clip.row, column, offsetX: 0, offsetY: 0 };
+  const columns =
+    animation === 'swatting' ? MEIBEL_PLAY_SHEET.columns : MEIBEL_SHEET.columns;
+  return {
+    animation,
+    row: clip.row + Math.floor(column / columns),
+    column: column % columns,
+    offsetX: 0,
+    offsetY: 0,
+  };
 };
 
 export const lookDirection = (x: number, y: number): number | null => {
@@ -122,16 +131,11 @@ export const lookDirection = (x: number, y: number): number | null => {
 };
 
 const actionState = (animation: MeibelAnimation, time: number): MeibelState => {
-  if (animation === 'swatting') {
-    return new PawSwipeState(time);
-  }
-  if (animation === 'lounging') {
-    return new LoungingState(time, time + clipDuration(animation));
-  }
+  const priority = animation === 'lounging' ? 0 : 1;
   return new ActionState(
     { animation, duration: clipDuration(animation) },
     time,
-    animation === 'jumping' || animation === 'petting' ? 2 : 1,
+    animation === 'jumping' || animation === 'petting' ? 2 : priority,
   );
 };
 
@@ -206,6 +210,10 @@ class ActionState implements MeibelState {
 
   handle(event: MeibelEvent, time: number): MeibelState {
     if (event.type === 'play') {
+      const lounging = this.behavior.animation === 'lounging';
+      if (lounging && event.animation === 'waving') {
+        return this;
+      }
       const requested = actionState(event.animation, time);
       if (requested.priority > this.priority) {
         return requested;
@@ -215,38 +223,7 @@ class ActionState implements MeibelState {
   }
 }
 
-class PawSwipeState extends ActionState {
-  constructor(time: number) {
-    const duration = clipDuration('swatting');
-    super({ animation: 'swatting', duration }, time, 1);
-  }
-
-  frame(time: number): MeibelFrame {
-    const frame = super.frame(time);
-    return {
-      ...frame,
-      row: Math.floor(frame.column / MEIBEL_PLAY_SHEET.columns),
-      column: frame.column % MEIBEL_PLAY_SHEET.columns,
-      offsetY:
-        frame.column === 7 ? 0 : -8 * Math.sin((Math.PI * frame.column) / 7),
-    };
-  }
-}
-
-class LoungingState extends ActionState {
-  constructor(time: number, endsAt: number) {
-    super({ animation: 'lounging', duration: endsAt - time }, time, 0);
-  }
-
-  handle(event: MeibelEvent, time: number): MeibelState {
-    if (event.type === 'play' && event.animation === 'waving') {
-      return this;
-    }
-    return super.handle(event, time);
-  }
-}
-
-class FollowingState implements MeibelState {
+class MovingState implements MeibelState {
   readonly endsAt = Infinity;
   readonly priority = 0;
   protected speed = 0.16;
@@ -288,7 +265,6 @@ class FollowingState implements MeibelState {
       this.action = new IdleState(time, Infinity);
     }
     if (this.action.priority > 0) {
-      this.walking = null;
       return;
     }
     const x = this.target.x - this.x;
@@ -307,68 +283,96 @@ class FollowingState implements MeibelState {
   }
 
   frame(time: number): MeibelFrame {
-    const frame = this.walking
-      ? clipFrame(this.walking, time)
-      : this.action.frame(time);
+    const frame =
+      this.walking && this.action.priority === 0
+        ? clipFrame(this.walking, time)
+        : this.action.frame(time);
     frame.offsetX += this.x;
     frame.offsetY += this.y;
+    frame.facing = this.walking === 'running-right' ? 'right' : 'left';
     return frame;
   }
 
   handle(event: MeibelEvent, time: number): MeibelState {
     this.action = this.action.handle(event, time);
-    if (this.action.priority > 0) {
-      this.walking = null;
-    }
     return this;
   }
 }
 
-class MousePlayState extends FollowingState {
-  protected speed = 0.12;
-  private pointerActive = false;
-  private movedAt = 0;
-  private nextSwipeAt = 0;
-  private swipedTarget: { x: number; y: number } | null = null;
+class MousePlayState extends MovingState {
+  protected speed = 0.18;
+  private cursor: { x: number; y: number } | null = null;
+  private phase: 'chasing' | 'resting' | 'circling' = 'chasing';
+  private phaseStarted = 0;
+  private side = 1;
 
   followTo(x: number, y: number): void {
-    if (
-      !this.pointerActive ||
-      Math.hypot(x - this.target.x, y - this.target.y) > 4
-    ) {
-      this.movedAt = this.clock;
+    if (!this.cursor || Math.hypot(x - this.cursor.x, y - this.cursor.y) > 8) {
+      this.phase = 'chasing';
+      this.side = Math.sign(this.x - x) || this.side;
+      if (this.action.priority < 2) {
+        this.action = new IdleState(this.clock, Infinity);
+      }
     }
-    this.pointerActive = true;
-    super.followTo(x, y);
+    this.cursor = { x, y };
+    if (this.phase === 'chasing') {
+      super.followTo(x + this.side * 40, y);
+    }
   }
 
   pause(): void {
-    this.pointerActive = false;
+    this.cursor = null;
     super.pause();
   }
 
   advance(time: number): void {
+    const reaching = this.action.frame(this.clock).animation === 'swatting';
+    if (this.phase === 'circling' && this.cursor) {
+      const angle = Math.PI * Math.min(1, (time - this.phaseStarted) / 1400);
+      super.followTo(
+        this.cursor.x + this.side * 40 * Math.cos(angle),
+        this.cursor.y - 40 * Math.sin(angle),
+      );
+    }
     super.advance(time);
-    if (
-      !this.settled ||
-      this.action.priority > 0 ||
-      !this.pointerActive ||
-      time < this.nextSwipeAt ||
-      time - this.movedAt < 300
-    ) {
+    if (!this.cursor || this.action.priority > 0) {
       return;
     }
-    if (
-      this.swipedTarget &&
-      Math.hypot(this.x - this.swipedTarget.x, this.y - this.swipedTarget.y) <
-        24
-    ) {
-      return;
+    if (reaching) {
+      this.phase = 'resting';
+      this.phaseStarted = time;
     }
-    this.walking = null;
-    this.action = new PawSwipeState(time);
-    this.nextSwipeAt = this.action.endsAt + 1800;
-    this.swipedTarget = { x: this.x, y: this.y };
+    const phaseTime = time - this.phaseStarted;
+    if (this.phase === 'chasing' && this.settled) {
+      this.action = actionState('swatting', time);
+      this.phaseStarted = time;
+    } else if (this.phase === 'resting' && phaseTime >= 900) {
+      this.phase = 'circling';
+      this.phaseStarted = time;
+    } else if (this.phase === 'circling' && phaseTime >= 1400) {
+      this.phase = 'chasing';
+      this.side *= -1;
+      super.followTo(this.cursor.x + this.side * 40, this.cursor.y);
+    }
+  }
+
+  frame(time: number): MeibelFrame {
+    const frame = super.frame(time);
+    const sign = Math.sign((this.cursor?.x ?? this.x) - this.x) || -this.side;
+    frame.facing = sign > 0 ? 'right' : 'left';
+    if (frame.animation === 'swatting') {
+      const reach = Math.sin(
+        (Math.PI * (time - this.phaseStarted)) / clipDuration('swatting'),
+      );
+      frame.offsetX += sign * 6 * reach;
+      frame.offsetY -= 8 * reach;
+      frame.rotation = sign * 6 * reach;
+    } else if (frame.animation.startsWith('running-')) {
+      const stride = Math.sin((time - this.phaseStarted) / 90);
+      frame.offsetY -= 3 * Math.abs(stride);
+      frame.rotation = sign * 4 * stride;
+    }
+    return frame;
   }
 }
 
@@ -380,9 +384,6 @@ const ambientState = (elapsed: number): MeibelState => {
       if (behavior.animation === 'idle') {
         return new IdleState(startsAt, endsAt);
       }
-      if (behavior.animation === 'lounging') {
-        return new LoungingState(startsAt, endsAt);
-      }
       return new ActionState(behavior, startsAt, 0);
     }
     startsAt = endsAt;
@@ -393,8 +394,7 @@ const ambientState = (elapsed: number): MeibelState => {
 export class MeibelEngine {
   private elapsed = 0;
   private state: MeibelState = ambientState(0);
-  private offsetX = 0;
-  private offsetY = 0;
+  private position = { x: 0, y: 0 };
   private mode: MeibelFollowMode = 'resting';
   private motion: 'full' | 'reduced' = 'full';
 
@@ -403,8 +403,7 @@ export class MeibelEngine {
       return;
     }
     this.motion = motion;
-    this.offsetX = 0;
-    this.offsetY = 0;
+    this.position = { x: 0, y: 0 };
     this.mode = 'resting';
     this.state =
       motion === 'reduced'
@@ -417,11 +416,10 @@ export class MeibelEngine {
       return;
     }
     this.elapsed += Math.max(0, delta);
-    if (this.state instanceof FollowingState) {
+    if (this.state instanceof MovingState) {
       this.state.advance(this.elapsed);
       if (this.mode === 'resting' && this.state.settled) {
-        this.offsetX = 0;
-        this.offsetY = 0;
+        this.position = { x: 0, y: 0 };
         this.state = ambientState(this.elapsed);
       }
       return;
@@ -437,8 +435,7 @@ export class MeibelEngine {
     }
     if (animation === 'lounging') {
       const frame = this.frame();
-      this.offsetX = frame.offsetX;
-      this.offsetY = frame.offsetY;
+      this.position = { x: frame.offsetX, y: frame.offsetY };
       this.mode = 'resting';
       this.state = actionState(animation, this.elapsed);
       return;
@@ -457,9 +454,9 @@ export class MeibelEngine {
     const frame = this.frame();
     this.mode = mode;
     const pursuit =
-      mode === 'playing'
+      mode === 'following'
         ? new MousePlayState(this.elapsed, frame.offsetX, frame.offsetY)
-        : new FollowingState(this.elapsed, frame.offsetX, frame.offsetY);
+        : new MovingState(this.elapsed, frame.offsetX, frame.offsetY);
     if (mode === 'resting') {
       pursuit.followTo(0, 0);
     }
@@ -470,13 +467,13 @@ export class MeibelEngine {
     if (this.mode === 'resting' || !Number.isFinite(x) || !Number.isFinite(y)) {
       return;
     }
-    if (this.state instanceof FollowingState) {
+    if (this.state instanceof MovingState) {
       this.state.followTo(x, y);
     }
   }
 
   pausePursuit(): void {
-    if (this.mode !== 'resting' && this.state instanceof FollowingState) {
+    if (this.mode !== 'resting' && this.state instanceof MovingState) {
       this.state.pause();
     }
   }
@@ -491,9 +488,11 @@ export class MeibelEngine {
 
   frame(): MeibelFrame {
     const frame = this.state.frame(this.elapsed);
-    if (this.state instanceof FollowingState) {
+    if (this.state instanceof MovingState) {
       return frame;
     }
-    return { ...frame, offsetX: this.offsetX, offsetY: this.offsetY };
+    frame.offsetX += this.position.x;
+    frame.offsetY += this.position.y;
+    return frame;
   }
 }

@@ -34,7 +34,6 @@ export const mountMeibel = (
   let request = 0;
   let previousTime: number | null = null;
   let lastFrame = '';
-  let previousAnimation = '';
   let lastWaveAt = -Infinity;
   let pointer: { x: number; y: number } | null = null;
   let renderedX = 0;
@@ -66,16 +65,11 @@ export const mountMeibel = (
       return;
     }
     if (pointer) {
-      let x = pointer.x - origin.x - origin.width / 2;
-      let y = pointer.y + 28 - origin.y;
-      if (engine.followMode === 'playing') {
-        const facingRight = pointer.x > origin.x + renderedX + origin.width / 2;
-        x = pointer.x - origin.x - (facingRight ? 72 : 24);
-        y = pointer.y - origin.y - 52;
-      }
+      const x = pointer.x - origin.x - origin.width / 2;
+      const y = pointer.y - origin.y - 52;
       const target = boundPosition(x, y);
       if (
-        engine.followMode === 'playing' &&
+        engine.followMode === 'following' &&
         Math.hypot(target.x - x, target.y - y) > 24
       ) {
         engine.pausePursuit();
@@ -94,12 +88,14 @@ export const mountMeibel = (
       sheet = MEIBEL_LOUNGE_SHEET;
     } else if (
       frame.animation === 'swatting' ||
-      engine.followMode === 'playing'
+      frame.animation.startsWith('running-') ||
+      engine.followMode === 'following'
     ) {
       sheet = MEIBEL_PLAY_SHEET;
       if (frame.animation !== 'swatting') {
-        row = 0;
-        column = 0;
+        const moving = frame.animation.startsWith('running-');
+        row = moving ? Math.floor(column / 4) : 0;
+        column = moving ? column % 4 : 0;
       }
     }
     const identity = `${sheet.source}:${row}:${column}`;
@@ -110,19 +106,9 @@ export const mountMeibel = (
       button.dataset.frame = `${row}:${column}`;
       lastFrame = identity;
     }
-    if (
-      engine.followMode === 'playing' &&
-      (frame.animation !== 'swatting' || previousAnimation !== 'swatting')
-    ) {
-      const facingRight =
-        pointer && pointer.x > origin.x + renderedX + origin.width / 2;
-      sprite.style.transform = facingRight ? 'scaleX(-1)' : '';
-    } else if (engine.followMode !== 'playing') {
-      sprite.style.transform = '';
-    }
-    previousAnimation = frame.animation;
+    sprite.style.transform = `rotate(${frame.rotation ?? 0}deg) scaleX(${frame.facing === 'right' ? -1 : 1})`;
     button.dataset.animation = frame.animation;
-    dock.style.pointerEvents = engine.followMode === 'playing' ? 'none' : '';
+    dock.style.pointerEvents = engine.followMode === 'following' ? 'none' : '';
     panel.style.pointerEvents = 'auto';
     const position = boundPosition(frame.offsetX, frame.offsetY);
     renderedX = position.x;
@@ -253,7 +239,7 @@ export const mountMeibel = (
     render();
   };
   const handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Escape' && engine.followMode === 'playing') {
+    if (event.key === 'Escape' && engine.followMode === 'following') {
       setFollowMode('resting');
     }
   };

@@ -56,6 +56,7 @@ export default function Meibel() {
             style={{
               backgroundImage: `url('${MEIBEL_SHEET.source}')`,
               backgroundSize: `${MEIBEL_SHEET.width / 2}px ${MEIBEL_SHEET.height / 2}px`,
+              transformOrigin: '50% 85%',
             }}
             aria-hidden
           />
@@ -68,18 +69,6 @@ export default function Meibel() {
           aria-label="Play with Meibel"
           className="meibel-actions fixed m-0 flex-col items-end [&:popover-open]:flex"
         >
-          <Button
-            variant="link"
-            size="sm"
-            aria-pressed={followMode === 'playing'}
-            disabled={reducedMotion || !mouseAvailable}
-            onClick={() => {
-              controlsRef.current?.setFollowMode('playing');
-              panelRef.current?.hidePopover();
-            }}
-          >
-            <PawPrint aria-hidden /> Play with mouse
-          </Button>
           <Button
             variant="link"
             size="sm"
@@ -126,14 +115,14 @@ export default function Meibel() {
           </span>
         ) : null}
       </div>
-      {followMode === 'playing' ? (
+      {followMode === 'following' ? (
         <Button
           variant="link"
           size="sm"
           className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-3 z-40 sm:right-8"
           onClick={() => controlsRef.current?.setFollowMode('resting')}
         >
-          Stop playing
+          Stop following
         </Button>
       ) : null}
     </>
