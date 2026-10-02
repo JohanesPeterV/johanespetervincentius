@@ -151,11 +151,11 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
       {
         title: 'Technology spending decisions',
         metrics: [
-          { value: 'US$240', label: 'annualized Vercel seat reduction' },
-          { value: 'US$25', label: 'monthly Clerk reduction candidate' },
+          { value: 'US$240', label: 'annual Vercel savings' },
+          { value: 'US$420', label: 'annual Clerk savings' },
         ],
         description:
-          'Reduce Vercel deploying seats from three to two, avoiding US$20 per month in recurring seat cost. Retained Clerk billing configuration and downgrade evidence support a US$25 monthly base-plan reduction candidate from September. Historical paid-quarter cash savings are unreconciled.',
+          'Minimise technology costs by deliberately keeping the stack and operations simple. Reduce Vercel deploying seats from three to two and downgrade Clerk, saving US$240 and US$420 annually.',
       },
       {
         title: 'Catalogue automation',

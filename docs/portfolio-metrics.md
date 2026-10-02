@@ -65,10 +65,12 @@ The capacity scenario is 208.47 hours / S$4,169.33: two net minutes per booking,
 Timings and adoption are assumed. This is modeled capacity, with payroll cash
 savings and incremental running costs unquantified.
 
-Vercel seats changed from three to two, supporting US$20/month in avoided seat
-cost, or US$240 annualized. Clerk evidence supports a US$25/month base-plan
-reduction candidate from September. Historical company-quarter cash savings
-remain unreconciled; the two figures are not a summed paid-quarter saving.
+Vercel seats changed from three to two, supporting US$240 in annual savings.
+Peter confirmed on 3 October 2026 that the Clerk reduction is US$35/month,
+or US$420 annually, superseding the earlier US$25/month candidate. The portfolio
+shows both figures annually and emphasises deliberately keeping the stack and
+operations simple to minimise recurring costs. Historical company-quarter cash
+savings remain unreconciled; these annual figures are not paid-quarter totals.
 
 ## Architecture and AI activity
 
