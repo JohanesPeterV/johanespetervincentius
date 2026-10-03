@@ -10,12 +10,14 @@ export type MeibelAnimation =
   | 'review'
   | 'petting'
   | 'swatting'
+  | 'lying'
   | 'lounging';
 
 type SpriteClip = {
   row: number;
   durations: readonly number[];
   columns?: readonly number[];
+  sheet?: typeof MEIBEL_SHEET;
 };
 
 export type MeibelFollowMode = 'resting' | 'following';
@@ -26,11 +28,11 @@ type MeibelEvent =
   | { type: 'leave' };
 export type MeibelFrame = {
   animation: MeibelAnimation | 'look';
+  sheet: typeof MEIBEL_SHEET;
   row: number;
   column: number;
   offsetX: number;
   offsetY: number;
-  rotation?: number;
   facing?: 'left' | 'right';
 };
 
@@ -68,8 +70,8 @@ export const MEIBEL_LOUNGE_SHEET = {
 
 export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
   idle: { row: 0, durations: [3200, 140, 90, 90, 140, 4500] },
-  'running-right': { row: 1, durations: Array(8).fill(150) },
-  'running-left': { row: 2, durations: Array(8).fill(150) },
+  'running-right': { row: 1, durations: Array(8).fill(90) },
+  'running-left': { row: 2, durations: Array(8).fill(90) },
   waving: { row: 3, durations: [200, 180, 200, 260] },
   jumping: { row: 4, durations: [180, 120, 240, 140, 220] },
   failed: { row: 5, durations: Array(8).fill(180) },
@@ -81,8 +83,17 @@ export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
     columns: [2, 3, 3, 3, 4],
     durations: [100, 180, 240, 240, 160],
   },
-  swatting: { row: 0, durations: [180, 180, 160, 180, 120, 180, 180, 300] },
-  lounging: { row: 0, durations: [12000, 1800, 300, 15900] },
+  swatting: {
+    row: 0,
+    durations: [180, 120, 80, 100, 80, 90, 120, 250],
+    sheet: MEIBEL_PLAY_SHEET,
+  },
+  lying: { row: 0, durations: [900], sheet: MEIBEL_PLAY_SHEET },
+  lounging: {
+    row: 0,
+    durations: [12000, 1800, 300, 15900],
+    sheet: MEIBEL_LOUNGE_SHEET,
+  },
 };
 
 const BEHAVIORS: readonly Behavior[] = [
@@ -93,10 +104,11 @@ const BEHAVIORS: readonly Behavior[] = [
 ];
 const CYCLE_DURATION = BEHAVIORS.reduce((sum, pose) => sum + pose.duration, 0);
 
-const clipDuration = (animation: MeibelAnimation): number => {
-  const { durations } = MEIBEL_CLIPS[animation];
-  return durations.reduce((sum, duration) => sum + duration, 0);
-};
+const clipDuration = (animation: MeibelAnimation): number =>
+  MEIBEL_CLIPS[animation].durations.reduce(
+    (sum, duration) => sum + duration,
+    0,
+  );
 
 const clipFrame = (
   animation: MeibelAnimation,
@@ -112,12 +124,12 @@ const clipFrame = (
     }
     time -= clip.durations[index];
   }
-  const columns =
-    animation === 'swatting' ? MEIBEL_PLAY_SHEET.columns : MEIBEL_SHEET.columns;
+  const sheet = clip.sheet ?? MEIBEL_SHEET;
   return {
     animation,
-    row: clip.row + Math.floor(column / columns),
-    column: column % columns,
+    sheet,
+    row: clip.row + Math.floor(column / sheet.columns),
+    column: column % sheet.columns,
     offsetX: 0,
     offsetY: 0,
   };
@@ -181,6 +193,7 @@ class LookingState implements MeibelState {
   frame(): MeibelFrame {
     return {
       animation: 'look',
+      sheet: MEIBEL_SHEET,
       row: 9 + Math.floor(this.direction / MEIBEL_SHEET.columns),
       column: this.direction % MEIBEL_SHEET.columns,
       offsetX: 0,
@@ -251,7 +264,7 @@ class MovingState implements MeibelState {
   pause(): void {
     this.target = { x: this.x, y: this.y };
     this.walking = null;
-    if (this.action.frame(this.clock).animation === 'swatting') {
+    if (this.action.priority < 2) {
       this.action = new IdleState(this.clock, Infinity);
     }
   }
@@ -289,7 +302,6 @@ class MovingState implements MeibelState {
         : this.action.frame(time);
     frame.offsetX += this.x;
     frame.offsetY += this.y;
-    frame.facing = this.walking === 'running-right' ? 'right' : 'left';
     return frame;
   }
 
@@ -341,6 +353,7 @@ class MousePlayState extends MovingState {
     if (reaching) {
       this.phase = 'resting';
       this.phaseStarted = time;
+      this.action = actionState('lying', time);
     }
     const phaseTime = time - this.phaseStarted;
     if (this.phase === 'chasing' && this.settled) {
@@ -360,18 +373,6 @@ class MousePlayState extends MovingState {
     const frame = super.frame(time);
     const sign = Math.sign((this.cursor?.x ?? this.x) - this.x) || -this.side;
     frame.facing = sign > 0 ? 'right' : 'left';
-    if (frame.animation === 'swatting') {
-      const reach = Math.sin(
-        (Math.PI * (time - this.phaseStarted)) / clipDuration('swatting'),
-      );
-      frame.offsetX += sign * 6 * reach;
-      frame.offsetY -= 8 * reach;
-      frame.rotation = sign * 6 * reach;
-    } else if (frame.animation.startsWith('running-')) {
-      const stride = Math.sin((time - this.phaseStarted) / 90);
-      frame.offsetY -= 3 * Math.abs(stride);
-      frame.rotation = sign * 4 * stride;
-    }
     return frame;
   }
 }

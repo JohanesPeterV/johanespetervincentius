@@ -66,7 +66,7 @@ export const mountMeibel = (
     }
     if (pointer) {
       const x = pointer.x - origin.x - origin.width / 2;
-      const y = pointer.y - origin.y - 52;
+      const y = pointer.y - origin.y - 78;
       const target = boundPosition(x, y);
       if (
         engine.followMode === 'following' &&
@@ -81,23 +81,7 @@ export const mountMeibel = (
 
   const render = (): void => {
     const frame = engine.frame();
-    let sheet = MEIBEL_SHEET;
-    let row = frame.row;
-    let column = frame.column;
-    if (frame.animation === 'lounging') {
-      sheet = MEIBEL_LOUNGE_SHEET;
-    } else if (
-      frame.animation === 'swatting' ||
-      frame.animation.startsWith('running-') ||
-      engine.followMode === 'following'
-    ) {
-      sheet = MEIBEL_PLAY_SHEET;
-      if (frame.animation !== 'swatting') {
-        const moving = frame.animation.startsWith('running-');
-        row = moving ? Math.floor(column / 4) : 0;
-        column = moving ? column % 4 : 0;
-      }
-    }
+    const { sheet, row, column } = frame;
     const identity = `${sheet.source}:${row}:${column}`;
     if (identity !== lastFrame) {
       sprite.style.backgroundImage = `url('${sheet.source}')`;
@@ -106,7 +90,10 @@ export const mountMeibel = (
       button.dataset.frame = `${row}:${column}`;
       lastFrame = identity;
     }
-    sprite.style.transform = `rotate(${frame.rotation ?? 0}deg) scaleX(${frame.facing === 'right' ? -1 : 1})`;
+    sprite.style.transform =
+      sheet === MEIBEL_PLAY_SHEET && frame.facing === 'right'
+        ? 'scaleX(-1)'
+        : '';
     button.dataset.animation = frame.animation;
     dock.style.pointerEvents = engine.followMode === 'following' ? 'none' : '';
     panel.style.pointerEvents = 'auto';
