@@ -1,5 +1,7 @@
 'use client';
 
+import { SiClaude, SiOpenai } from 'react-icons/si';
+
 import { useAiUsage } from '@/hooks/use-ai-usage';
 
 const WIDTH = 1000;
@@ -30,44 +32,58 @@ export const AiUsageBackground = () => {
   const series = [
     {
       tool: 'Claude Code',
+      icon: SiClaude,
       color: 'text-primary',
       values: usage.daily.map(({ claude }) => claude),
     },
     {
       tool: 'Codex',
+      icon: SiOpenai,
       color: 'text-secondary',
       values: usage.daily.map(({ codex }) => codex),
     },
   ];
 
   return (
-    <svg
-      role="img"
-      aria-label={`My daily AI usage, Claude Code and Codex, ${usage.windowStart} to ${usage.windowEnd}`}
-      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-      preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-x-0 bottom-0 h-[45svh] w-full"
-    >
-      {series.map(({ tool, color, values }) => {
-        const curve = buildCurve(values, peak);
-        return (
-          <g key={tool} className={color}>
-            <path
-              d={`${curve} L ${WIDTH} ${HEIGHT} L 0 ${HEIGHT} Z`}
-              fill="currentColor"
-              fillOpacity={0.08}
-            />
-            <path
-              d={curve}
-              fill="none"
-              stroke="currentColor"
-              strokeOpacity={0.6}
-              strokeWidth={1.5}
-              vectorEffect="non-scaling-stroke"
-            />
-          </g>
-        );
-      })}
-    </svg>
+    <figure className="pointer-events-none absolute inset-0">
+      <svg
+        aria-hidden
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        preserveAspectRatio="none"
+        className="absolute inset-x-0 bottom-0 h-[45svh] w-full"
+      >
+        {series.map(({ tool, color, values }) => {
+          const curve = buildCurve(values, peak);
+          return (
+            <g key={tool} className={color}>
+              <path
+                d={`${curve} L ${WIDTH} ${HEIGHT} L 0 ${HEIGHT} Z`}
+                fill="currentColor"
+                fillOpacity={0.08}
+              />
+              <path
+                d={curve}
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity={0.6}
+                strokeWidth={1.5}
+                vectorEffect="non-scaling-stroke"
+              />
+            </g>
+          );
+        })}
+      </svg>
+      <figcaption className="type-meta absolute bottom-6 left-5 flex h-11 items-center gap-4 text-muted-foreground sm:bottom-8 sm:left-8">
+        <span className="sr-only md:not-sr-only">
+          My daily AI usage · last 30 days
+        </span>
+        {series.map(({ tool, icon: Icon, color }) => (
+          <span key={tool} className="flex items-center gap-1.5">
+            <Icon aria-hidden className={`size-3.5 ${color}`} />
+            <span className="sr-only md:not-sr-only">{tool}</span>
+          </span>
+        ))}
+      </figcaption>
+    </figure>
   );
 };
