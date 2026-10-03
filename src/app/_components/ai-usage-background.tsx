@@ -3,6 +3,7 @@
 import { SiClaude, SiOpenai } from 'react-icons/si';
 
 import { useAiUsage } from '@/hooks/use-ai-usage';
+import { formatTokens } from '@/lib/ai-usage';
 
 const WIDTH = 1000;
 const HEIGHT = 100;
@@ -34,12 +35,14 @@ export const AiUsageBackground = () => {
       tool: 'Claude Code',
       icon: SiClaude,
       color: 'text-primary',
+      total: usage.providers.claude.tokens,
       values: usage.daily.map(({ claude }) => claude),
     },
     {
       tool: 'Codex',
       icon: SiOpenai,
       color: 'text-secondary',
+      total: usage.providers.codex.tokens,
       values: usage.daily.map(({ codex }) => codex),
     },
   ];
@@ -73,14 +76,15 @@ export const AiUsageBackground = () => {
           );
         })}
       </svg>
-      <figcaption className="type-meta absolute bottom-6 left-5 flex h-11 items-center gap-4 text-muted-foreground sm:bottom-8 sm:left-8">
+      <figcaption className="type-meta absolute bottom-6 left-5 flex h-11 flex-col justify-center text-muted-foreground sm:bottom-8 sm:left-8 md:flex-row md:items-center md:gap-4">
         <span className="sr-only md:not-sr-only">
-          My daily AI usage · last 30 days
+          My AI token usage · last 30 days
         </span>
-        {series.map(({ tool, icon: Icon, color }) => (
+        {series.map(({ tool, icon: Icon, color, total }) => (
           <span key={tool} className="flex items-center gap-1.5">
             <Icon aria-hidden className={`size-3.5 ${color}`} />
             <span className="sr-only md:not-sr-only">{tool}</span>
+            <span className="text-foreground">{formatTokens(total)}</span>
           </span>
         ))}
       </figcaption>

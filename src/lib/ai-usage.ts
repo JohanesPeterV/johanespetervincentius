@@ -6,6 +6,14 @@ export const INITIAL_AI_USAGE: AiUsage = snapshot;
 export const AI_USAGE_URL =
   'https://gist.githubusercontent.com/JohanesPeterV/39230a0a9b68ec5f7d218c1a704d93b0/raw/ai-usage.json';
 
+const tokenFormat = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+export const formatTokens = (tokens: number): string =>
+  tokenFormat.format(tokens);
+
 const isCount = (value: number): boolean =>
   Number.isSafeInteger(value) && value >= 0;
 

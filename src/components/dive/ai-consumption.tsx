@@ -1,11 +1,8 @@
 'use client';
 
 import { useAiUsage } from '@/hooks/use-ai-usage';
+import { formatTokens } from '@/lib/ai-usage';
 
-const tokenFormat = new Intl.NumberFormat('en', {
-  notation: 'compact',
-  maximumFractionDigits: 1,
-});
 const dateFormat = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'short',
@@ -31,7 +28,7 @@ export const AiConsumption = () => {
           <div key={tool} className="work-metric">
             <dt className="type-label">{tool}</dt>
             <dd className="work-section-title font-display">
-              {tokenFormat.format(tokens)}
+              {formatTokens(tokens)}
             </dd>
           </div>
         ))}
