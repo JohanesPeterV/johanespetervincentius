@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { mountMeibel } from '../src/app/_components/meibel/meibel-runtime';
 
-test('rendered walking, petting, swatting, and return-home keep their own atlases', () => {
+test('rendered following walks, sits on arrival, blinks when petted, and returns home', () => {
   let now = 0;
   let nextFrame: FrameRequestCallback | null = null;
   const sprite = {
@@ -52,12 +52,7 @@ test('rendered walking, petting, swatting, and return-home keep their own atlase
 
     set src(source: string) {
       this.naturalWidth = source === '/pets/meibel.png' ? 1536 : 768;
-      this.naturalHeight =
-        source === '/pets/meibel.png'
-          ? 2288
-          : source === '/pets/meibel-play.png'
-            ? 416
-            : 208;
+      this.naturalHeight = source === '/pets/meibel.png' ? 2288 : 208;
       this.onload?.();
     }
   }
@@ -111,6 +106,11 @@ test('rendered walking, petting, swatting, and return-home keep their own atlase
     );
   };
   try {
+    button.dispatchEvent(new Event('pointerenter'));
+    button.dispatchEvent(new Event('focus'));
+    advance(32);
+    assert.equal(button.dataset.animation, 'idle');
+
     controls.setFollowMode('following');
     moveMouse(100, 200);
     advance(500);
@@ -132,25 +132,23 @@ test('rendered walking, petting, swatting, and return-home keep their own atlase
     assert.equal(button.dataset.animation, 'petting');
     assert.equal(sprite.style.backgroundImage, "url('/pets/meibel.png')");
     assert.equal(button.dataset.frame.split(':')[0], '0');
+    assert.equal(button.dataset.frame, '0:3');
+    assert.equal(sprite.style.transform, '');
+    assert.equal(sprite.style.filter, '');
 
-    advance(750);
-    for (
-      let elapsed = 0;
-      button.dataset.animation !== 'swatting' && elapsed < 6000;
-      elapsed += 16
-    ) {
-      advance(16);
-    }
-    assert.equal(button.dataset.animation, 'swatting');
-    assert.equal(sprite.style.backgroundImage, "url('/pets/meibel-play.png')");
-    assert.equal(sprite.style.transform, 'scaleX(-1)');
-    assert.equal(sprite.style.filter, 'brightness(1.8)');
-    const cells = new Set<string>();
-    while (button.dataset.animation === 'swatting') {
-      cells.add(button.dataset.frame);
-      advance(16);
-    }
-    assert.equal(cells.size, 8);
+    advance(6000);
+    assert.equal(button.dataset.animation, 'idle');
+    assert.equal(sprite.style.backgroundImage, "url('/pets/meibel.png')");
+    assert.equal(dock.style.transform, 'translate(552px, -272px)');
+    const seated = dock.style.transform;
+    advance(65000);
+    assert.equal(button.dataset.animation, 'idle');
+    assert.equal(dock.style.transform, seated);
+
+    moveMouse(0, 0);
+    advance(10000);
+    assert.equal(button.dataset.animation, 'idle');
+    assert.equal(dock.style.transform, 'translate(-588px, -472px)');
 
     controls.setFollowMode('resting');
     advance(32);

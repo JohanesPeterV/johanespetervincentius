@@ -47,7 +47,7 @@ export default function Meibel() {
           ref={buttonRef}
           type="button"
           className="meibel-companion relative block h-full w-full"
-          aria-label="Play with Meibel, my cat"
+          aria-label="Pet Meibel, my cat"
           title="Meibel — tap to pet"
           popoverTarget={panelId}
         >
@@ -56,7 +56,6 @@ export default function Meibel() {
             style={{
               backgroundImage: `url('${MEIBEL_SHEET.source}')`,
               backgroundSize: `${MEIBEL_SHEET.width / 2}px ${MEIBEL_SHEET.height / 2}px`,
-              transformOrigin: '50% 85%',
             }}
             aria-hidden
           />
@@ -66,7 +65,7 @@ export default function Meibel() {
           id={panelId}
           popover="auto"
           role="group"
-          aria-label="Play with Meibel"
+          aria-label="Meibel actions"
           className="meibel-actions fixed m-0 flex-col items-end [&:popover-open]:flex"
         >
           <Button

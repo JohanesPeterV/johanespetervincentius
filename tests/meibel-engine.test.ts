@@ -8,7 +8,6 @@ import {
   MeibelEngine,
   MEIBEL_CLIPS,
   MEIBEL_SHEET,
-  MEIBEL_PLAY_SHEET,
 } from '../src/app/_components/meibel/meibel-engine';
 
 test('every standard animation can play every populated cell', () => {
@@ -16,7 +15,6 @@ test('every standard animation can play every populated cell', () => {
     { animation: 'idle', row: 0, frames: 6 },
     { animation: 'running-right', row: 1, frames: 8 },
     { animation: 'running-left', row: 2, frames: 8 },
-    { animation: 'waving', row: 3, frames: 4 },
     { animation: 'jumping', row: 4, frames: 5 },
     { animation: 'failed', row: 5, frames: 8 },
     { animation: 'waiting', row: 6, frames: 6 },
@@ -83,11 +81,11 @@ test('all sixteen clockwise gaze directions map to the final two atlas rows', ()
   assert.equal(lookDirection(0, 0), null);
 });
 
-test('a jump completes despite hover, focus, and repeated taps', () => {
+test('a jump completes despite lower-priority actions and repeated taps', () => {
   const engine = new MeibelEngine();
   engine.play('jumping');
   engine.advance(350);
-  engine.play('waving');
+  engine.play('review');
   engine.play('jumping');
   assert.equal(engine.frame().animation, 'jumping');
   assert.equal(engine.frame().column, 2);
@@ -122,7 +120,7 @@ test('petting closes her eyes without jumping or moving', () => {
   assert.equal(engine.frame().animation, 'petting');
   assert.equal(engine.frame().row, 0);
   assert.equal(engine.frame().column, 3);
-  engine.play('waving');
+  engine.play('review');
   engine.play('petting');
   engine.advance(600);
   assert.equal(engine.frame().column, 3);
@@ -150,7 +148,6 @@ test('following uses the original directional walk at its original cadence', () 
     assert.equal(frame.animation, 'running-left');
     assert.equal(frame.sheet, MEIBEL_SHEET);
     assert.equal(frame.row, 2);
-    assert.equal(frame.facing, 'left');
     assert.ok(
       Math.hypot(
         frame.offsetX - previous.offsetX,
@@ -162,112 +159,62 @@ test('following uses the original directional walk at its original cadence', () 
   }
   assert.equal(cells.size, 8);
   assert.equal(MEIBEL_CLIPS['running-left'].durations[0], 90);
-  assert.ok(Math.hypot(previous.offsetX, previous.offsetY) <= 289);
+  assert.ok(Math.hypot(previous.offsetX, previous.offsetY) <= 257);
 });
 
-test('a held cursor produces repeated reaches, opposite sides, arcs, and quiet pauses', () => {
+test('arrival sits and blinks at the cursor through the ambient lounge boundary', () => {
   const engine = new MeibelEngine();
   engine.setFollowMode('following');
   engine.followTo(-160, -100);
-  let reachStarts = 0;
-  let previousAnimation = '';
-  let quietDuration = 0;
-  let longestQuiet = 0;
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  const reachFacings = new Set<string>();
-  let previous = engine.frame();
-  for (let time = 0; time < 12000; time += 16) {
-    engine.advance(16);
+  advanceFor(engine, 1500);
+  const columns = new Set<number>();
+  for (let time = 0; time < 200000; time += 100) {
     const frame = engine.frame();
-    assert.ok(
-      Math.hypot(
-        frame.offsetX - previous.offsetX,
-        frame.offsetY - previous.offsetY,
-      ) < 4.1,
-    );
-    if (frame.animation === 'swatting') {
-      reachFacings.add(frame.facing ?? '');
-      if (previousAnimation !== 'swatting') {
-        reachStarts += 1;
-      }
-    }
-    if (
-      frame.animation === 'lying' &&
-      Math.abs(frame.offsetX - previous.offsetX) < 0.01 &&
-      Math.abs(frame.offsetY - previous.offsetY) < 0.01
-    ) {
-      quietDuration += 16;
-      longestQuiet = Math.max(longestQuiet, quietDuration);
-    } else {
-      quietDuration = 0;
-    }
-    if (time > 2000) {
-      minX = Math.min(minX, frame.offsetX);
-      maxX = Math.max(maxX, frame.offsetX);
-      minY = Math.min(minY, frame.offsetY);
-      maxY = Math.max(maxY, frame.offsetY);
-    }
-    previous = frame;
-    previousAnimation = frame.animation;
+    assert.equal(frame.animation, 'idle');
+    assert.equal(frame.sheet, MEIBEL_SHEET);
+    assert.equal(frame.row, 0);
+    assert.equal(frame.offsetX, -160);
+    assert.equal(frame.offsetY, -100);
+    columns.add(frame.column);
+    engine.followTo(-160, -100);
+    engine.advance(100);
   }
-  assert.ok(reachStarts >= 3);
-  assert.deepEqual([...reachFacings].sort(), ['left', 'right']);
-  assert.ok(maxX - minX >= 75);
-  assert.ok(maxY - minY >= 35);
-  assert.ok(longestQuiet >= 864);
+  assert.equal(engine.followMode, 'following');
+  assert.equal(columns.size, 6);
 });
 
-test('reach uses the photo sheet while her body stays planted', () => {
+test('the last walking step switches directly to sitting', () => {
   const engine = new MeibelEngine();
   engine.setFollowMode('following');
-  engine.followTo(-40, 0);
-  engine.advance(16);
-  assert.equal(engine.frame().animation, 'swatting');
-  assert.equal(engine.frame().facing, 'left');
-  const cells = new Set<string>();
-  for (let time = 0; time < 1020; time += 20) {
-    const frame = engine.frame();
-    assert.equal(frame.animation, 'swatting');
-    assert.equal(frame.facing, 'left');
-    assert.equal(frame.sheet, MEIBEL_PLAY_SHEET);
-    assert.equal(frame.offsetY, 0);
-    assert.equal(frame.offsetX, 0);
-    cells.add(`${frame.row}:${frame.column}`);
-    engine.advance(20);
-  }
-  assert.equal(cells.size, 8);
-  assert.equal(engine.frame().animation, 'lying');
-  assert.equal(engine.frame().offsetX, 0);
+  engine.followTo(-16, 0);
+  engine.lookAt(-100, -100);
+  engine.advance(90);
+  assert.equal(engine.frame().animation, 'running-left');
+  engine.advance(10);
+  assert.equal(engine.frame().animation, 'idle');
+  assert.equal(engine.frame().offsetX, -16);
   assert.equal(engine.frame().offsetY, 0);
 });
 
-test('moving the cursor retargets a reach into a chase without teleporting', () => {
+test('moving the cursor resumes walking from a seated position without teleporting', () => {
   const engine = new MeibelEngine();
   engine.setFollowMode('following');
   engine.followTo(-40, 0);
   advanceFor(engine, 400);
   const before = engine.frame();
+  assert.equal(before.animation, 'idle');
   engine.followTo(200, -50);
   const retargeted = engine.frame();
-  assert.notEqual(retargeted.animation, 'swatting');
-  assert.ok(
-    Math.hypot(
-      retargeted.offsetX - before.offsetX,
-      retargeted.offsetY - before.offsetY,
-    ) <= 10,
-  );
+  assert.deepEqual(retargeted, before);
   advanceFor(engine, 100);
   assert.equal(engine.frame().animation, 'running-right');
   assert.ok(engine.frame().offsetX > retargeted.offsetX);
 });
 
-test('leaving pauses recurring play and returning resumes it', () => {
+test('leaving pauses walking and returning resumes it', () => {
   const engine = new MeibelEngine();
   engine.setFollowMode('following');
-  engine.followTo(-40, 0);
+  engine.followTo(-400, 0);
   advanceFor(engine, 400);
   engine.pausePursuit();
   const paused = engine.frame();
@@ -275,9 +222,9 @@ test('leaving pauses recurring play and returning resumes it', () => {
   assert.equal(engine.frame().offsetX, paused.offsetX);
   assert.equal(engine.frame().offsetY, paused.offsetY);
   assert.equal(engine.frame().animation, 'idle');
-  engine.followTo(-40, 0);
+  engine.followTo(-400, 0);
   engine.advance(16);
-  assert.equal(engine.frame().animation, 'swatting');
+  assert.equal(engine.frame().animation, 'running-left');
 });
 
 test('petting pauses a chase before it continues to the latest cursor target', () => {
@@ -298,7 +245,7 @@ test('petting pauses a chase before it continues to the latest cursor target', (
   assert.ok(engine.frame().offsetX < before.offsetX);
 });
 
-test('Stop cancels play and returns home even after the pointer leaves', () => {
+test('Stop ends following and walks home even after the pointer leaves', () => {
   const engine = new MeibelEngine();
   engine.setFollowMode('following');
   engine.followTo(-160, -100);
@@ -330,7 +277,7 @@ test('Stop cancels play and returns home even after the pointer leaves', () => {
   assert.equal(engine.frame().animation, 'idle');
 });
 
-test('reduced motion cancels following and prevents new play requests', () => {
+test('reduced motion cancels following and prevents new movement requests', () => {
   const engine = new MeibelEngine();
   engine.setFollowMode('following');
   engine.followTo(-300, -400);
@@ -358,7 +305,7 @@ test('resting and invalid coordinates never start cursor pursuit', () => {
   assert.equal(engine.frame().offsetY, 0);
 });
 
-test('manual and ambient lounging ignore gaze and hover', () => {
+test('manual and ambient lounging ignore gaze', () => {
   for (const trigger of ['manual', 'ambient']) {
     const engine = new MeibelEngine();
     if (trigger === 'manual') {
@@ -367,7 +314,6 @@ test('manual and ambient lounging ignore gaze and hover', () => {
       engine.advance(181500);
     }
     engine.lookAt(-100, 0);
-    engine.play('waving');
     engine.advance(12000);
     assert.equal(engine.frame().animation, 'lounging');
     assert.equal(engine.frame().column, 1);
@@ -380,7 +326,7 @@ test('manual and ambient lounging ignore gaze and hover', () => {
   }
 });
 
-test('lounging stops play and petting or Follow can interrupt it', () => {
+test('lounging stops following and petting or Follow can interrupt it', () => {
   const engine = new MeibelEngine();
   engine.setFollowMode('following');
   engine.followTo(-120, 0);

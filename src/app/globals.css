@@ -129,7 +129,6 @@
   .meibel-sprite {
     background-repeat: no-repeat;
     pointer-events: none;
-    transform-origin: 50% 85%;
   }
 
   .meibel-actions {
@@ -142,17 +141,6 @@
     border: 0;
     background: transparent;
     color: hsl(var(--foreground));
-  }
-
-  .meibel-companion[data-animation='petting'] .meibel-sprite {
-    animation: meibelPet 920ms ease-in-out;
-  }
-
-  @keyframes meibelPet {
-    40%,
-    70% {
-      transform: rotate(-4deg) scale(1.02);
-    }
   }
 
   .dark .profile-avatar {

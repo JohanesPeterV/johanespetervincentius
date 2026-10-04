@@ -1,7 +1,6 @@
 import {
   MeibelEngine,
   MEIBEL_SHEET,
-  MEIBEL_PLAY_SHEET,
   MEIBEL_LOUNGE_SHEET,
   type MeibelFollowMode,
 } from './meibel-engine';
@@ -25,7 +24,7 @@ export const mountMeibel = (
     throw new Error('Meibel’s sprite or controls are missing.');
   }
   const engine = new MeibelEngine();
-  const sheets = [MEIBEL_SHEET, MEIBEL_PLAY_SHEET, MEIBEL_LOUNGE_SHEET];
+  const sheets = [MEIBEL_SHEET, MEIBEL_LOUNGE_SHEET];
   const images = sheets.map(() => new Image());
   let loadedImages = 0;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -34,7 +33,6 @@ export const mountMeibel = (
   let request = 0;
   let previousTime: number | null = null;
   let lastFrame = '';
-  let lastWaveAt = -Infinity;
   let pointer: { x: number; y: number } | null = null;
   let renderedX = 0;
   let renderedY = 0;
@@ -66,15 +64,8 @@ export const mountMeibel = (
     }
     if (pointer) {
       const x = pointer.x - origin.x - origin.width / 2;
-      const y = pointer.y - origin.y - 78;
+      const y = pointer.y + 28 - origin.y;
       const target = boundPosition(x, y);
-      if (
-        engine.followMode === 'following' &&
-        Math.hypot(target.x - x, target.y - y) > 24
-      ) {
-        engine.pausePursuit();
-        return;
-      }
       engine.followTo(target.x, target.y);
     }
   };
@@ -90,11 +81,6 @@ export const mountMeibel = (
       button.dataset.frame = `${row}:${column}`;
       lastFrame = identity;
     }
-    sprite.style.transform =
-      sheet === MEIBEL_PLAY_SHEET && frame.facing === 'right'
-        ? 'scaleX(-1)'
-        : '';
-    sprite.style.filter = sheet === MEIBEL_PLAY_SHEET ? 'brightness(1.8)' : '';
     button.dataset.animation = frame.animation;
     dock.style.pointerEvents = engine.followMode === 'following' ? 'none' : '';
     panel.style.pointerEvents = 'auto';
@@ -192,14 +178,6 @@ export const mountMeibel = (
     engine.clearGaze();
     render();
   };
-  const handleWave = (): void => {
-    const now = performance.now();
-    if (engine.followMode !== 'resting' || now - lastWaveAt < 15000) {
-      return;
-    }
-    lastWaveAt = now;
-    engine.play('waving');
-  };
   const pet = (): void => {
     engine.play('petting');
     render();
@@ -241,8 +219,6 @@ export const mountMeibel = (
   reducedMotion.addEventListener('change', syncPlayback);
   window.addEventListener('resize', handleResize);
   panel.addEventListener('toggle', followPointer);
-  button.addEventListener('pointerenter', handleWave);
-  button.addEventListener('focus', handleWave);
   button.addEventListener('click', pet);
 
   return {
@@ -266,8 +242,6 @@ export const mountMeibel = (
       reducedMotion.removeEventListener('change', syncPlayback);
       window.removeEventListener('resize', handleResize);
       panel.removeEventListener('toggle', followPointer);
-      button.removeEventListener('pointerenter', handleWave);
-      button.removeEventListener('focus', handleWave);
       button.removeEventListener('click', pet);
     },
   };

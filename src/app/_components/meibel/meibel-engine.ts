@@ -2,15 +2,12 @@ export type MeibelAnimation =
   | 'idle'
   | 'running-right'
   | 'running-left'
-  | 'waving'
   | 'jumping'
   | 'failed'
   | 'waiting'
   | 'running'
   | 'review'
   | 'petting'
-  | 'swatting'
-  | 'lying'
   | 'lounging';
 
 type SpriteClip = {
@@ -33,7 +30,6 @@ export type MeibelFrame = {
   column: number;
   offsetX: number;
   offsetY: number;
-  facing?: 'left' | 'right';
 };
 
 interface MeibelState {
@@ -52,14 +48,6 @@ export const MEIBEL_SHEET = {
   columns: 8,
 };
 
-export const MEIBEL_PLAY_SHEET = {
-  ...MEIBEL_SHEET,
-  source: '/pets/meibel-play.png',
-  width: 768,
-  height: 416,
-  columns: 4,
-};
-
 export const MEIBEL_LOUNGE_SHEET = {
   ...MEIBEL_SHEET,
   source: '/pets/meibel-lounging.png',
@@ -72,7 +60,6 @@ export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
   idle: { row: 0, durations: [3200, 140, 90, 90, 140, 4500] },
   'running-right': { row: 1, durations: Array(8).fill(90) },
   'running-left': { row: 2, durations: Array(8).fill(90) },
-  waving: { row: 3, durations: [200, 180, 200, 260] },
   jumping: { row: 4, durations: [180, 120, 240, 140, 220] },
   failed: { row: 5, durations: Array(8).fill(180) },
   waiting: { row: 6, durations: Array(6).fill(220) },
@@ -83,12 +70,6 @@ export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
     columns: [2, 3, 3, 3, 4],
     durations: [100, 180, 240, 240, 160],
   },
-  swatting: {
-    row: 0,
-    durations: [180, 120, 80, 100, 80, 90, 120, 250],
-    sheet: MEIBEL_PLAY_SHEET,
-  },
-  lying: { row: 0, durations: [900], sheet: MEIBEL_PLAY_SHEET },
   lounging: {
     row: 0,
     durations: [12000, 1800, 300, 15900],
@@ -223,10 +204,6 @@ class ActionState implements MeibelState {
 
   handle(event: MeibelEvent, time: number): MeibelState {
     if (event.type === 'play') {
-      const lounging = this.behavior.animation === 'lounging';
-      if (lounging && event.animation === 'waving') {
-        return this;
-      }
       const requested = actionState(event.animation, time);
       if (requested.priority > this.priority) {
         return requested;
@@ -239,15 +216,15 @@ class ActionState implements MeibelState {
 class MovingState implements MeibelState {
   readonly endsAt = Infinity;
   readonly priority = 0;
-  protected speed = 0.16;
-  protected target: { x: number; y: number };
-  protected walking: MeibelAnimation | null = null;
-  protected action: MeibelState;
+  private readonly speed = 0.16;
+  private target: { x: number; y: number };
+  private walking: MeibelAnimation | null = null;
+  private action: MeibelState;
 
   constructor(
-    protected clock: number,
-    protected x: number,
-    protected y: number,
+    private clock: number,
+    private x: number,
+    private y: number,
   ) {
     this.target = { x, y };
     this.action = new IdleState(clock, Infinity);
@@ -292,7 +269,11 @@ class MovingState implements MeibelState {
     const movement = Math.min(distance, travel);
     this.x += (x / distance) * movement;
     this.y += (y / distance) * movement;
-    this.walking = x < 0 ? 'running-left' : 'running-right';
+    if (movement === distance) {
+      this.walking = null;
+    } else {
+      this.walking = x < 0 ? 'running-left' : 'running-right';
+    }
   }
 
   frame(time: number): MeibelFrame {
@@ -306,74 +287,10 @@ class MovingState implements MeibelState {
   }
 
   handle(event: MeibelEvent, time: number): MeibelState {
-    this.action = this.action.handle(event, time);
+    if (event.type === 'play') {
+      this.action = this.action.handle(event, time);
+    }
     return this;
-  }
-}
-
-class MousePlayState extends MovingState {
-  protected speed = 0.18;
-  private cursor: { x: number; y: number } | null = null;
-  private phase: 'chasing' | 'resting' | 'circling' = 'chasing';
-  private phaseStarted = 0;
-  private side = 1;
-
-  followTo(x: number, y: number): void {
-    if (!this.cursor || Math.hypot(x - this.cursor.x, y - this.cursor.y) > 8) {
-      this.phase = 'chasing';
-      this.side = Math.sign(this.x - x) || this.side;
-      if (this.action.priority < 2) {
-        this.action = new IdleState(this.clock, Infinity);
-      }
-    }
-    this.cursor = { x, y };
-    if (this.phase === 'chasing') {
-      super.followTo(x + this.side * 40, y);
-    }
-  }
-
-  pause(): void {
-    this.cursor = null;
-    super.pause();
-  }
-
-  advance(time: number): void {
-    const reaching = this.action.frame(this.clock).animation === 'swatting';
-    if (this.phase === 'circling' && this.cursor) {
-      const angle = Math.PI * Math.min(1, (time - this.phaseStarted) / 1400);
-      super.followTo(
-        this.cursor.x + this.side * 40 * Math.cos(angle),
-        this.cursor.y - 40 * Math.sin(angle),
-      );
-    }
-    super.advance(time);
-    if (!this.cursor || this.action.priority > 0) {
-      return;
-    }
-    if (reaching) {
-      this.phase = 'resting';
-      this.phaseStarted = time;
-      this.action = actionState('lying', time);
-    }
-    const phaseTime = time - this.phaseStarted;
-    if (this.phase === 'chasing' && this.settled) {
-      this.action = actionState('swatting', time);
-      this.phaseStarted = time;
-    } else if (this.phase === 'resting' && phaseTime >= 900) {
-      this.phase = 'circling';
-      this.phaseStarted = time;
-    } else if (this.phase === 'circling' && phaseTime >= 1400) {
-      this.phase = 'chasing';
-      this.side *= -1;
-      super.followTo(this.cursor.x + this.side * 40, this.cursor.y);
-    }
-  }
-
-  frame(time: number): MeibelFrame {
-    const frame = super.frame(time);
-    const sign = Math.sign((this.cursor?.x ?? this.x) - this.x) || -this.side;
-    frame.facing = sign > 0 ? 'right' : 'left';
-    return frame;
   }
 }
 
@@ -454,10 +371,7 @@ export class MeibelEngine {
     }
     const frame = this.frame();
     this.mode = mode;
-    const pursuit =
-      mode === 'following'
-        ? new MousePlayState(this.elapsed, frame.offsetX, frame.offsetY)
-        : new MovingState(this.elapsed, frame.offsetX, frame.offsetY);
+    const pursuit = new MovingState(this.elapsed, frame.offsetX, frame.offsetY);
     if (mode === 'resting') {
       pursuit.followTo(0, 0);
     }
