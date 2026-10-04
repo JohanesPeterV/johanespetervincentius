@@ -40,7 +40,7 @@ Choose **Lounge** to hold the four actual photographed poses for 12s, 1.8s, 0.3s
 - `meibel-play.png`: 768 × 416 RGBA, four columns and two rows, 192 × 208 cells. One intact photographed head, body, hind legs, and tail stay fixed; only the actual forepaw patches change across eight cells. The lying photograph is rotated horizontally with a common 178-pixel width and maximum baseline of 178 pixels. Head and rear-body rectangles are pixel-identical across poses. These frames run only during swatting and its brief lying rest. Walking, circling, petting, and returning home use the original atlas. The source is dim with closed eyes; the pose is relaxed lying play, and its photographic lighting differs from the original walking atlas.
 - `meibel-lounging.png`: 768 × 208 RGBA, four columns. The user's supplied neutral, tilted, open-mouth, and neutral photographs preserve her real face, body, and fur. The open-mouth pose is brief rather than repeatedly looping.
 
-Both sheets retain original photograph RGB pixels. Built-in imagegen supplied foreground masks only; masks become alpha before ordinary downsampling into sprite cells. No generated cat texture or anatomy is used in these two sheets.
+Both sheets retain original photograph RGB pixels. Built-in imagegen supplied foreground masks only; masks become alpha before ordinary downsampling into sprite cells. No generated cat texture or anatomy is used in these two sheets. The play photograph receives a display-only brightness adjustment of 1.8 so the paw stays visible on dark backgrounds; its stored pixels remain unchanged.
 
 ### Play foreground-mask prompt
 

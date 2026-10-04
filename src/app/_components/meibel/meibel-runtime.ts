@@ -94,6 +94,7 @@ export const mountMeibel = (
       sheet === MEIBEL_PLAY_SHEET && frame.facing === 'right'
         ? 'scaleX(-1)'
         : '';
+    sprite.style.filter = sheet === MEIBEL_PLAY_SHEET ? 'brightness(1.8)' : '';
     button.dataset.animation = frame.animation;
     dock.style.pointerEvents = engine.followMode === 'following' ? 'none' : '';
     panel.style.pointerEvents = 'auto';

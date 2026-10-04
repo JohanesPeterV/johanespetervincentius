@@ -7,7 +7,12 @@ test('rendered walking, petting, swatting, and return-home keep their own atlase
   let now = 0;
   let nextFrame: FrameRequestCallback | null = null;
   const sprite = {
-    style: { backgroundImage: '', backgroundPosition: '', transform: '' },
+    style: {
+      backgroundImage: '',
+      backgroundPosition: '',
+      transform: '',
+      filter: '',
+    },
   };
   const panel = Object.assign(new EventTarget(), {
     matches: () => false,
@@ -113,6 +118,7 @@ test('rendered walking, petting, swatting, and return-home keep their own atlase
     assert.equal(sprite.style.backgroundImage, "url('/pets/meibel.png')");
     assert.equal(button.dataset.frame.split(':')[0], '2');
     assert.equal(sprite.style.transform, '');
+    assert.equal(sprite.style.filter, '');
 
     moveMouse(1200, 200);
     advance(500);
@@ -138,6 +144,7 @@ test('rendered walking, petting, swatting, and return-home keep their own atlase
     assert.equal(button.dataset.animation, 'swatting');
     assert.equal(sprite.style.backgroundImage, "url('/pets/meibel-play.png')");
     assert.equal(sprite.style.transform, 'scaleX(-1)');
+    assert.equal(sprite.style.filter, 'brightness(1.8)');
     const cells = new Set<string>();
     while (button.dataset.animation === 'swatting') {
       cells.add(button.dataset.frame);
@@ -149,6 +156,7 @@ test('rendered walking, petting, swatting, and return-home keep their own atlase
     advance(32);
     assert.equal(sprite.style.backgroundImage, "url('/pets/meibel.png')");
     assert.equal(sprite.style.transform, '');
+    assert.equal(sprite.style.filter, '');
     advance(6000);
     assert.equal(dock.style.transform, 'translate(0px, 0px)');
     assert.equal(button.dataset.animation, 'idle');
