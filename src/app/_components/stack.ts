@@ -1,4 +1,6 @@
 import type { IconType } from 'react-icons';
+
+import type { AiUsageProvider } from '@/lib/ai-usage';
 import { FaIcons, FaJava, FaTheaterMasks } from 'react-icons/fa';
 import {
   SiAmazonwebservices,
@@ -73,18 +75,18 @@ export type StackGroup = {
   id: string;
   title: string;
   description: string;
-  technologies: { name: string; icon: IconType }[];
+  technologies: { name: string; icon: IconType; usage?: AiUsageProvider }[];
 };
 
 export const STACK_GROUPS: StackGroup[] = [
   {
     id: 'main',
-    title: 'AI-native',
-    description: 'T3 Code · Codex · Claude Code',
+    title: 'Main stack',
+    description: 'The foundation of my current web products.',
     technologies: [
       { name: 'T3 Code', icon: TbTerminal2 },
-      { name: 'Claude Code', icon: SiClaude },
-      { name: 'Codex', icon: SiOpenai },
+      { name: 'Claude Code', icon: SiClaude, usage: 'claude' },
+      { name: 'Codex', icon: SiOpenai, usage: 'codex' },
       { name: 'TypeScript', icon: SiTypescript },
       { name: 'React', icon: SiReact },
       { name: 'Next.js', icon: SiNextdotjs },

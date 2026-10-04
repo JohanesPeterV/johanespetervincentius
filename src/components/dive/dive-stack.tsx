@@ -2,7 +2,7 @@
 
 import { STACK_GROUPS } from '@/app/_components/stack';
 
-import { AiConsumption } from './ai-consumption';
+import { AiUsageBadge } from './ai-usage-badge';
 import { AiUsageChart } from './ai-usage-chart';
 
 export const DiveStack = () => (
@@ -27,22 +27,18 @@ export const DiveStack = () => (
           </h3>
           <div>
             <ul className="flex flex-wrap gap-x-7 gap-y-2">
-              {group.technologies.map(({ name, icon: Icon }) => (
+              {group.technologies.map(({ name, icon: Icon, usage }) => (
                 <li
                   key={name}
                   className="stack-technology flex items-center gap-3"
                 >
                   <Icon aria-hidden="true" className="stack-icon shrink-0" />
                   <span>{name}</span>
+                  {usage ? <AiUsageBadge provider={usage} /> : null}
                 </li>
               ))}
             </ul>
-            {group.id === 'main' ? (
-              <>
-                <AiConsumption />
-                <AiUsageChart />
-              </>
-            ) : null}
+            {group.id === 'main' ? <AiUsageChart /> : null}
           </div>
         </section>
       ))}

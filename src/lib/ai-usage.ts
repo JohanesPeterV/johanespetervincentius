@@ -1,6 +1,7 @@
 import snapshot from '@/data/ai-usage.json';
 
 export type AiUsage = typeof snapshot;
+export type AiUsageProvider = keyof AiUsage['providers'];
 
 export const INITIAL_AI_USAGE: AiUsage = snapshot;
 export const AI_USAGE_URL =

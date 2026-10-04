@@ -1,6 +1,6 @@
 # Automatic AI consumption
 
-The stack page shows aggregate Codex and Claude token consumption for the last 30 calendar days, including today, in Asia/Jakarta. Below those totals, an interactive chart plots the same window day by day. T3 Code is the workspace, not a third token provider.
+Codex and Claude Code in Main stack carry badges with their aggregate token consumption for the last 30 calendar days, including today, in Asia/Jakarta. In the Stack chapter, an interactive chart plots the same window day by day. T3 Code is the workspace, not a third token provider.
 
 The Mac scans local Codex and Claude usage telemetry every 15 minutes, then updates one public GitHub Gist. The website reads that JSON on mount and every 15 minutes. This needs no website secret, deployment per update, or automated Git commit/push. Only dates, provider token totals per window and per day, and session counts are published. Prompts, models, costs, project names, session IDs and local paths stay private.
 

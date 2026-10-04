@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 
 import { STACK_GROUPS } from '@/app/_components/stack';
 
-import { AiConsumption } from './ai-consumption';
+import { AiUsageBadge } from './ai-usage-badge';
 
 const IceModel = dynamic(() => import('./ice-model'), {
   ssr: false,
@@ -106,7 +106,7 @@ export const StackIceExhibit = () => {
               className={`col-start-1 row-start-1 ${index !== groupIndex ? 'invisible pointer-events-none' : ''}`}
             >
               <p className="identity-tag type-meta">
-                {group.id === 'main' ? 'My main stack' : 'Also work with'}
+                {group.id === 'main' ? 'My core stack' : 'Also work with'}
               </p>
               <h3
                 id={`skill-${group.id}`}
@@ -117,15 +117,15 @@ export const StackIceExhibit = () => {
               <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
                 {group.description}
               </p>
-              {group.id === 'main' ? <AiConsumption /> : null}
               <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
-                {group.technologies.map(({ name, icon: Icon }) => (
+                {group.technologies.map(({ name, icon: Icon, usage }) => (
                   <li
                     key={name}
-                    className="stack-technology flex items-center gap-3"
+                    className="stack-technology flex flex-wrap items-center gap-x-3 gap-y-1"
                   >
                     <Icon aria-hidden="true" className="stack-icon shrink-0" />
                     <span className="min-w-0 break-words">{name}</span>
+                    {usage ? <AiUsageBadge provider={usage} /> : null}
                   </li>
                 ))}
               </ul>

@@ -67,7 +67,7 @@ const buildCurve = (points: readonly Point[]): string => {
 };
 
 export const AiUsageChart = () => {
-  const { usage } = useAiUsage();
+  const { usage, status, error } = useAiUsage();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const { daily } = usage;
   const lastIndex = daily.length - 1;
@@ -265,6 +265,11 @@ export const AiUsageChart = () => {
           <span>{formatDay(daily[lastIndex].date)}</span>
         </div>
       </div>
+      {status === 'error' ? (
+        <p role="status" title={error ?? undefined} className="type-meta">
+          Update unavailable. Showing last recorded usage.
+        </p>
+      ) : null}
     </figure>
   );
 };
