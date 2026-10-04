@@ -61,86 +61,26 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
     ],
     showcases: [
       {
+        title: 'Gifting & fulfilment',
+        metrics: [{ value: '230+', label: 'company accounts' }],
+        description:
+          'Own corporate gifting end to end, from checkout, Stripe, and company credits through recipient campaigns, stock, automated courier booking, tracking, and Xero reconciliation.',
+      },
+      {
+        title: 'IG vouchers & rewards',
+        description:
+          'Own provider integrations, points wallets, and digital redemptions, with automatic retries that recover stuck activations.',
+      },
+      {
         title: 'Custom merchandise',
         metrics: [{ value: '100', label: 'invoiced merchandise jobs' }],
         description:
-          'Build proposals, quantity-based pricing, customer approvals, revised quotes, production documents, and inventory reservations.',
+          'Take orders from quote to production with quantity-based pricing, customer approvals, production documents, inventory reservations, and AI-assisted catalogue imports.',
       },
       {
-        title: 'Gifting & fulfilment',
-        metrics: [
-          { value: '9K+', label: 'delivery orders managed' },
-          { value: '8.7K+', label: 'gift sets ordered' },
-          { value: '230+', label: 'company accounts' },
-        ],
+        title: 'Engineering leadership',
         description:
-          'Connect checkout, recipient campaigns, stock reservations, packing, dispatch, and tracking. The September 2026 all-time GMS snapshot records 9,032 delivery orders, 8,707 gift sets ordered, 232 company accounts, and 305 campaigns. Delivery orders cover multiple lifecycle stages.',
-      },
-      {
-        title: 'Payments & accounting',
-        metrics: [{ value: '544', label: 'paid gift orders' }],
-        description:
-          'Connect Stripe, company credits, Xero, and reconciliation across gifting and merchandise workflows.',
-      },
-      {
-        title: 'Courier automation',
-        metrics: [
-          { value: '5,879', label: 'noncancelled SPX bookings' },
-          { value: '5,752', label: 'booked parcels marked delivered' },
-        ],
-        description:
-          'Build batch courier booking, labels, dispatch, and tracking callbacks. January–September 2026 booking cohorts contain 5,879 noncancelled SPX bookings, with 5,752 marked delivered at the October snapshot.',
-      },
-      {
-        title: 'IG digital voucher delivery',
-        metrics: [{ value: '4,527', label: 'successful digital activations' }],
-        description:
-          'Own provider integrations, redemption reporting, expiry rules, and activation recovery. January–September 2026 provider activation records contain 4,527 successful vouchers with unique provider order IDs. Activation establishes issuance; retailer spending is a separate event.',
-      },
-      {
-        title: 'IG points wallets & rewards',
-        description:
-          'Manage points wallets, refunds, physical gifts, and digital redemptions.',
-      },
-      {
-        title: 'Provider failure recovery',
-        metrics: [{ value: '15', label: 'retried vouchers later activated' }],
-        description:
-          'Build automatic activation retries and follow through on stuck provider orders. Fifteen vouchers with recorded retry attempts ultimately activated. Require an authoritative provider outcome before another redemption attempt.',
-      },
-      {
-        title: 'Operational automation',
-        description:
-          'Automate courier bookings and merchandise production documents to streamline operational handoffs.',
-      },
-      {
-        title: 'Technology spending decisions',
-        description:
-          'Minimise technology costs by deliberately keeping the stack and operations simple and matching subscriptions to team needs.',
-      },
-      {
-        title: 'Catalogue automation',
-        description:
-          'Turn supplier data into product listings with reusable import tools and AI-assisted categorisation, copy, and SEO. Validate structured output and flag uncertain results for review.',
-      },
-      {
-        title: 'Engineering foundations',
-        metrics: [
-          { value: '2 → 1', label: 'shared form-submission owner' },
-          { value: '3 → 1', label: 'payment settlement owner' },
-        ],
-        description:
-          'Consolidate duplicated storefront/GMS form submission and unify webhook, customer-return, and reconciliation settlement. Repay payment, inventory, and form debt while shipping Xero, fulfilment, and finance features. Establish database/browser tests, review standards, implementation briefs, and engineer onboarding.',
-      },
-      {
-        title: 'AI-assisted engineering at scale',
-        description:
-          'Design rules and workflows for AI-assisted implementation, delegation, and verification.',
-      },
-      {
-        title: 'Product & architecture judgment',
-        description:
-          'Challenge infrastructure tenancy per customer company and retain company membership/access controls within a shared GMS dataset. Deliberately separate the future Giftstack product from Smilie-specific workflows. Own product sequencing, interface design, hiring input, and founder/provider follow-through alongside implementation.',
+          'Consolidate duplicated payment and form flows, set testing and review standards, onboard engineers, and design AI-assisted delivery workflows. Keep the stack and subscriptions deliberately lean.',
       },
     ],
   },
