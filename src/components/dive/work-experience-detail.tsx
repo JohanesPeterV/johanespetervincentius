@@ -42,55 +42,59 @@ export const WorkExperienceDetail = ({
         ) : null}
       </div>
     </div>
-    {job.deliverables ? (
-      <ul className="work-deliverables grid content-start gap-6 sm:grid-cols-2">
-        {job.deliverables.map((deliverable) => (
-          <li key={deliverable.screenshot.src}>
-            <a
-              className="work-deliverable grid gap-3"
-              href={deliverable.href}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src={deliverable.screenshot.src}
-                alt={deliverable.screenshot.alt}
-                width={1200}
-                height={750}
-                // REASON: details sit in a clipped scroller and swap in hidden,
-                // so lazy loading would pop the shot in only once revealed.
-                loading="eager"
-                sizes="(min-width: 1024px) 26rem, (min-width: 640px) 45vw, 90vw"
-                className="work-deliverable-shot h-auto w-full"
-              />
-              <span className="flex items-center justify-between gap-4">
-                <span className="grid gap-1">
-                  <span className="type-label">{deliverable.name}</span>
-                  <span className="type-meta text-muted-foreground">
-                    {deliverable.description}
+    <div className="grid content-start gap-6">
+      {job.deliverables ? (
+        <ul className="work-deliverables grid content-start gap-4 sm:grid-cols-2">
+          {job.deliverables.map((deliverable) => (
+            <li key={deliverable.screenshot.src}>
+              <a
+                className="work-deliverable grid gap-3 lg:grid-cols-[7rem_minmax(0,1fr)] lg:items-start"
+                href={deliverable.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src={deliverable.screenshot.src}
+                  alt={deliverable.screenshot.alt}
+                  width={1200}
+                  height={750}
+                  // REASON: details sit in a clipped scroller and swap in hidden,
+                  // so lazy loading would pop the shot in only once revealed.
+                  loading="eager"
+                  sizes="(min-width: 1024px) 7rem, (min-width: 640px) 45vw, 90vw"
+                  className="work-deliverable-shot h-auto w-full"
+                />
+                <span className="flex items-center justify-between gap-4">
+                  <span className="grid gap-1">
+                    <span className="type-label">{deliverable.name}</span>
+                    <span className="type-meta text-muted-foreground">
+                      {deliverable.description}
+                    </span>
                   </span>
+                  <ArrowUpRight size={18} aria-hidden />
                 </span>
-                <ArrowUpRight size={18} aria-hidden />
-              </span>
-            </a>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <ul className="work-contributions grid gap-6 sm:grid-cols-2">
+        {job.showcases.map((showcase) => (
+          <li key={showcase.title}>
+            <h4 className="type-label mb-2">{showcase.title}</h4>
+            {showcase.metrics ? (
+              <p className="type-label mb-2">
+                {showcase.metrics
+                  .map((metric) => `${metric.value} ${metric.label}`)
+                  .join(' · ')}
+              </p>
+            ) : null}
+            <p className="work-description text-muted-foreground">
+              {showcase.description}
+            </p>
           </li>
         ))}
       </ul>
-    ) : null}
-    <ul className="work-contributions grid gap-6 sm:grid-cols-2">
-      {job.showcases.map((showcase) => (
-        <li key={showcase.title}>
-          <h4 className="type-label mb-2">{showcase.title}</h4>
-          {showcase.metrics ? (
-            <div className="my-3">
-              <WorkExperienceMetrics metrics={showcase.metrics} />
-            </div>
-          ) : null}
-          <p className="work-description text-muted-foreground">
-            {showcase.description}
-          </p>
-        </li>
-      ))}
-    </ul>
+    </div>
   </article>
 );

@@ -497,16 +497,6 @@
     padding: clamp(1.25rem, 3vw, 2.5rem);
   }
 
-  .work-deliverables + .work-contributions {
-    grid-column: 1 / -1;
-  }
-
-  @media (min-width: 1024px) {
-    .work-deliverables + .work-contributions {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
   .work-deliverable {
     transition: color 200ms;
   }

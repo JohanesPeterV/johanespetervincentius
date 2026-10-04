@@ -56,7 +56,7 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Lead Software Engineer',
         workPeriod: 'Sep 2025 – Present',
         description:
-          'Lead engineering delivery across commerce, gifting, and rewards, working directly with the Founder. Own product scope, architecture, workflow design, hands-on implementation, briefs, reviews, and production follow-through. Direct other engineers and remain accountable for the team’s delivery.',
+          'Lead commerce, gifting, and rewards engineering with the Founder. Own scope, architecture, workflows, implementation, briefs, reviews, and production delivery; direct engineers and stay accountable for team outcomes.',
       },
     ],
     showcases: [
@@ -64,23 +64,23 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         title: 'Gifting & fulfilment',
         metrics: [{ value: '230+', label: 'company accounts' }],
         description:
-          'Own corporate gifting end to end, from checkout, Stripe, and company credits through recipient campaigns, stock, automated courier booking, tracking, and Xero reconciliation.',
+          'Own gifting from Stripe checkout and company credits to recipient campaigns, stock, automated courier booking, tracking, and Xero reconciliation.',
       },
       {
         title: 'IG vouchers & rewards',
         description:
-          'Own provider integrations, points wallets, and digital redemptions, with automatic retries that recover stuck activations.',
+          'Own provider integrations, points wallets, and digital redemptions; recover stuck activations with automatic retries.',
       },
       {
         title: 'Custom merchandise',
         metrics: [{ value: '100', label: 'invoiced merchandise jobs' }],
         description:
-          'Take orders from quote to production with quantity-based pricing, customer approvals, production documents, inventory reservations, and AI-assisted catalogue imports.',
+          'Own quote-to-production workflows: quantity pricing, customer approvals, production documents, inventory reservations, and AI-assisted catalogue imports.',
       },
       {
         title: 'Engineering leadership',
         description:
-          'Consolidate duplicated payment and form flows, set testing and review standards, onboard engineers, and design AI-assisted delivery workflows. Keep the stack and subscriptions deliberately lean.',
+          'Unify payment and form flows, set testing and review standards, onboard engineers, and design AI-assisted delivery. Keep the stack and subscriptions lean.',
       },
     ],
   },
@@ -134,24 +134,24 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Senior Software Engineer',
         workPeriod: 'Feb – Sep 2025',
         description:
-          'Delivered QR ordering, dynamic menus, and real-time guest operations while standardizing the shared architecture behind them.',
+          'Shipped QR ordering, dynamic menus, and real-time guest operations on a shared architecture.',
       },
     ],
     showcases: [
       {
         title: 'Shared frontend architecture',
         description:
-          'Standardized Next.js and Vite apps with reusable components, authoring Storybook documentation for 19 UI components.',
+          'Unified Next.js and Vite apps with reusable components; documented 19 UI components in Storybook.',
       },
       {
         title: 'Real-time infrastructure',
         description:
-          'Designed shared data infrastructure for synchronized operational tables and live updates.',
+          'Designed shared data infrastructure to synchronize operational tables and live updates.',
       },
       {
         title: 'Code review and releases',
         description:
-          'Reduced debt across services and strengthened code review and release practices. Migrated developer tooling for 12 engineers.',
+          'Reduced service debt, strengthened reviews and releases, and migrated developer tooling for 12 engineers.',
       },
     ],
   },
@@ -187,24 +187,24 @@ export const WORK_EXPERIENCES: WorkExperience[] = [
         name: 'Software Engineer',
         workPeriod: 'Nov 2023 – Nov 2024',
         description:
-          'Shipped WhatsApp-to-order automation with GPT-3.5 and established code and review conventions as the team grew.',
+          'Automated WhatsApp-to-order with GPT-3.5; established code and review conventions for a growing team.',
       },
     ],
     showcases: [
       {
         title: 'Agent Portal',
         description:
-          'Designed and built the Agent Portal end to end, from authentication to UI.',
+          'Designed and built the Agent Portal end to end, including authentication and UI.',
       },
       {
         title: 'Price integrity',
         description:
-          'Moved checkout pricing to the backend for consistent prices across platforms.',
+          'Centralized checkout pricing in the backend for consistent prices across platforms.',
       },
       {
         title: 'Shared components and localization',
         description:
-          'Consolidated 10+ duplicated pages into shared components and standardized internationalization across three locales.',
+          'Replaced 10+ duplicated pages with shared components; standardized internationalization across three locales.',
       },
     ],
   },
