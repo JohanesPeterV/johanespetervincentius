@@ -1,8 +1,8 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
+import { Preload, useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import type { MotionMode } from './descent';
 import type { DivePalette } from './dive-palette';
@@ -12,6 +12,7 @@ import { createWorkspaceModels } from './workspace-models';
 type FloatingWorkspaceParams = {
   palette: DivePalette;
   motionMode: MotionMode;
+  onPrepared: () => void;
 };
 
 type DevicePlacement = {
@@ -55,10 +56,15 @@ const DEVICES: DevicePlacement[] = [
 
 const ASSET_PATHS = DEVICES.map((device) => device.path);
 
-const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
+export default function FloatingWorkspace({
+  palette,
+  motionMode,
+  onPrepared,
+}: FloatingWorkspaceParams) {
   const assets = useGLTF(ASSET_PATHS);
   const renderer = useThree(({ gl }) => gl);
   const starfield = useContext(StarfieldMotionContext);
+  const preparedRef = useRef(false);
   const [stars] = useState(() => {
     if (!starfield) {
       throw new Error(
@@ -123,10 +129,15 @@ const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
       }
       instances.update();
     });
+    if (!preparedRef.current) {
+      preparedRef.current = true;
+      onPrepared();
+    }
   }, -0.5);
 
   return (
     <group name="floating-workspace">
+      {workspace ? <Preload all /> : null}
       {workspace?.models.map(({ object }, index) => (
         <primitive
           key={DEVICES[index].path}
@@ -136,13 +147,5 @@ const WorkspaceDevices = ({ palette, motionMode }: FloatingWorkspaceParams) => {
         />
       ))}
     </group>
-  );
-};
-
-export default function FloatingWorkspace(props: FloatingWorkspaceParams) {
-  return (
-    <Suspense fallback={null}>
-      <WorkspaceDevices {...props} />
-    </Suspense>
   );
 }

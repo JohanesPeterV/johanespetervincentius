@@ -26,10 +26,18 @@ type DiveCanvasParams = {
   motionMode: MotionMode;
 };
 
-const LoadedSignal = ({ stageRef }: { stageRef: RefObject<DiveStage> }) => {
+const LoadedSignal = ({
+  stageRef,
+  handoffRef,
+  motionMode,
+}: {
+  stageRef: RefObject<DiveStage>;
+  handoffRef: RefObject<HeroHandoff>;
+  motionMode: MotionMode;
+}) => {
   const firstFrameRef = useRef<number | null>(null);
-  // REASON: a mounted scene can still block on its first WebGL render, so the
-  // arrival waits until a complete scene frame has reached the renderer.
+  // REASON: arrival starts after model warmup and initial DOM rasterization,
+  // then waits for a complete prepared frame to reach the renderer.
   useEffect(() => {
     stageRef.current = 'loading';
     return () => {
@@ -37,6 +45,14 @@ const LoadedSignal = ({ stageRef }: { stageRef: RefObject<DiveStage> }) => {
     };
   }, [stageRef]);
   useFrame(({ gl }) => {
+    const handoff = handoffRef.current;
+    if (
+      stageRef.current === 'loading' ||
+      (motionMode === 'full' && handoff.snapshotState === 'pending')
+    ) {
+      firstFrameRef.current = null;
+      return;
+    }
     if (firstFrameRef.current === null) {
       firstFrameRef.current = gl.info.render.frame;
     } else if (gl.info.render.frame > firstFrameRef.current) {
@@ -104,8 +120,15 @@ export default function DiveCanvas({
           handoffRef={handoffRef}
           motionMode={motionMode}
           gpuTier={tier}
+          onPrepared={() => {
+            stageRef.current = 'prepared';
+          }}
         />
-        <LoadedSignal stageRef={stageRef} />
+        <LoadedSignal
+          stageRef={stageRef}
+          handoffRef={handoffRef}
+          motionMode={motionMode}
+        />
       </Suspense>
       <DiveDirector
         driveRef={driveRef}

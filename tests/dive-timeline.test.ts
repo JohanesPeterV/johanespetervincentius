@@ -42,7 +42,7 @@ const near = (actual: number, expected: number): void => {
   assert.ok(Math.abs(actual - expected) < 0.000001, `${actual} != ${expected}`);
 };
 
-test('loading preserves queued navigation until the scene is live', () => {
+test('loading and preparation preserve queued navigation until the scene is live', () => {
   const drive = createDrive();
   const handoff = createHeroHandoff(route);
   const timeline = createDiveTimeline(drive, handoff);
@@ -60,6 +60,13 @@ test('loading preserves queued navigation until the scene is live', () => {
   assert.equal(timeline.step, 0);
   assert.equal(timeline.velocity, 0);
   near(timeline.renderProgress, DIVE_START);
+  advanceDiveTimeline(timeline, {
+    delta: 1 / 60,
+    stage: 'prepared',
+    motionMode: 'full',
+  });
+  assert.deepEqual(drive, queued);
+  assert.equal(handoff.arrival, 0);
   advanceDiveTimeline(timeline, {
     delta: 1 / 60,
     stage: 'live',

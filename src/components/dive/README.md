@@ -60,6 +60,10 @@ the authored camera keys. HTML visibility follows the handoff journey.
 and writes that frame at priority -3. Camera rendering reads it at -2, world
 updates at -1, and the director updates HTML at 0 before compositing. Loading
 pauses drive movement and arrival so the existing opening stays synchronized.
+The opening waits for workspace assets, their GPU warmup, and the initial
+snapshot attempt to finish, then for a complete prepared render. Snapshot
+failure releases the loader with the existing visible fallback message;
+reduced motion skips snapshot preparation.
 
 The camera never advances navigation or writes HTML. It reads the sampled
 pose, timing, arrival, and travel from the frame. World visibility and atmosphere

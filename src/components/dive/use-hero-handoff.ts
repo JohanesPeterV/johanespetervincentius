@@ -24,6 +24,7 @@ export const useHeroHandoff = (
   // motion never composites these textures and must not start rasterization.
   useEffect(() => {
     setError(null);
+    handoffRef.current.snapshotState = 'pending';
     if (motionMode === 'reduced') {
       return;
     }
@@ -31,12 +32,19 @@ export const useHeroHandoff = (
     const entry = overlayRef.current.sections.get(entryId);
     const last = overlayRef.current.sections.get(lastId);
     if (!hero || !entry || !last) {
+      handoffRef.current.snapshotState = 'settled';
+      setError('Scene content could not be prepared for the transition.');
       return;
     }
     const snapshots = new HandoffSnapshots(
       handoffRef.current,
       createHandoffCapture(hero, entry, last),
-      setError,
+      (message) => {
+        // REASON: initial rasterization must finish under the loader, including
+        // failures that leave the visible fallback transition available.
+        handoffRef.current.snapshotState = 'settled';
+        setError(message);
+      },
     );
     // REASON: keep the final canvas pose and reading position current at rest,
     // then retain that endpoint while the wave crosses or reverses.

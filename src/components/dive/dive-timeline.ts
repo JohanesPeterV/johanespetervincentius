@@ -5,7 +5,7 @@ import type { MotionMode } from './descent';
 import { sampleHeroHandoff } from './hero-handoff';
 import type { HeroHandoff } from './hero-handoff';
 
-export type DiveStage = 'loading' | 'live';
+export type DiveStage = 'loading' | 'prepared' | 'live';
 
 type TimelineTick = {
   delta: number;

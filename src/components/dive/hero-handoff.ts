@@ -25,6 +25,7 @@ export type HeroHandoff = {
   journey: number;
   // REASON: the loader, camera, and content share one arrival clock.
   arrival: number;
+  snapshotState: 'pending' | 'settled';
 };
 
 export const HANDOFF_START = DIVE_START + 0.1;
@@ -47,6 +48,7 @@ export const createHeroHandoff = (route: DiveRoute): HeroHandoff => ({
   progress: 0,
   journey: DIVE_START,
   arrival: 0,
+  snapshotState: 'pending',
 });
 
 const clampHandoffProgress = (value: number): number => {

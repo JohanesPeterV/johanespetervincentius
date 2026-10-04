@@ -22,6 +22,7 @@ type SpaceWorldParams = {
   handoffRef: RefObject<HeroHandoff>;
   motionMode: MotionMode;
   gpuTier: number;
+  onPrepared: () => void;
 };
 
 export default function SpaceWorld({
@@ -30,6 +31,7 @@ export default function SpaceWorld({
   handoffRef,
   motionMode,
   gpuTier,
+  onPrepared,
 }: SpaceWorldParams) {
   const firstWorldRef = useRef<Group>(null);
   const secondWorldRef = useRef<Group>(null);
@@ -63,7 +65,11 @@ export default function SpaceWorld({
           gpuTier={gpuTier}
           motionMode={motionMode}
         >
-          <FloatingWorkspace palette={palette} motionMode={motionMode} />
+          <FloatingWorkspace
+            palette={palette}
+            motionMode={motionMode}
+            onPrepared={onPrepared}
+          />
         </DiveAtmosphere>
         <AsteroidField
           reality="watchers"
