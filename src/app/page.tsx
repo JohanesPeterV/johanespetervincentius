@@ -1,4 +1,3 @@
-import { AiUsageBackground } from '@/app/_components/ai-usage-background';
 import LinktreeSection, { type CardType } from '@/app/_components/linktree';
 import Meibel from '@/app/_components/meibel/meibel';
 import DiveScene from '@/components/dive/dive-scene';
@@ -31,12 +30,7 @@ export default async function Home({ searchParams }: HomeParams) {
   return (
     <main className="relative h-svh w-full overflow-hidden">
       <DiveScene
-        hero={
-          <>
-            <AiUsageBackground />
-            <LinktreeSection cardType={cardType} />
-          </>
-        }
+        hero={<LinktreeSection cardType={cardType} />}
         heroTitle={'Johanes Peter\nVincentius'}
         chapters={[
           { id: 'work', title: 'Work', content: <DiveWork /> },

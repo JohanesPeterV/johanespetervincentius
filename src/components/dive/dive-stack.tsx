@@ -3,6 +3,7 @@
 import { STACK_GROUPS } from '@/app/_components/stack';
 
 import { AiConsumption } from './ai-consumption';
+import { AiUsageChart } from './ai-usage-chart';
 
 export const DiveStack = () => (
   <>
@@ -36,7 +37,12 @@ export const DiveStack = () => (
                 </li>
               ))}
             </ul>
-            {group.id === 'main' ? <AiConsumption /> : null}
+            {group.id === 'main' ? (
+              <>
+                <AiConsumption />
+                <AiUsageChart />
+              </>
+            ) : null}
           </div>
         </section>
       ))}

@@ -50,18 +50,16 @@ export const useHeroHandoff = (
     };
     last.addEventListener('dive-canvas-change', invalidateLast);
     last.addEventListener('scroll', invalidateLast);
-    // REASON: observe content and theme changes, not animation style writes.
+    // REASON: observe content and theme changes, not animation style writes;
+    // live chart paths ('d') change whenever their data refreshes.
     const observer = new MutationObserver(snapshots.invalidate);
-    observer.observe(hero, {
-      attributes: true,
-      attributeFilter: ['d'],
-      subtree: true,
-    });
-    observer.observe(entry, {
-      attributes: true,
-      attributeFilter: ['data-active'],
-      subtree: true,
-    });
+    for (const section of [hero, entry, last]) {
+      observer.observe(section, {
+        attributes: true,
+        attributeFilter: ['data-active', 'd'],
+        subtree: true,
+      });
+    }
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'style'],
