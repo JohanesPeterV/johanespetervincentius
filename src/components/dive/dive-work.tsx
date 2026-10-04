@@ -85,7 +85,7 @@ export const DiveWork = () => {
   return (
     <>
       <span className="work-screen-edge" aria-hidden="true" />
-      <header className="px-4 pb-6">
+      <header className="px-4 pb-4">
         <p className="identity-tag type-meta">Professional experience</p>
         <h2 className="work-section-title font-display">Work</h2>
       </header>

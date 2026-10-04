@@ -446,7 +446,7 @@
 
   .work-section-title {
     margin-top: 0.5rem;
-    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.055em;
@@ -475,7 +475,7 @@
   .work-card .work-metrics {
     grid-template-columns: max-content minmax(0, 1fr);
     align-content: center;
-    gap: 0.75rem 1rem;
+    gap: 0.5rem 1rem;
   }
 
   .work-card .work-metric {
@@ -536,7 +536,8 @@
     align-items: start;
     gap: 1.25rem;
     width: calc(100% - 3rem);
-    margin: 3rem auto 1rem;
+    max-width: 72rem;
+    margin: 1rem auto 1rem;
     isolation: isolate;
   }
 
@@ -552,7 +553,7 @@
     --card-angle: -1.5deg;
     --motion-delay: 0s;
     position: relative;
-    margin-top: 2.4rem;
+    margin-top: 1.5rem;
     min-width: 0;
     z-index: 1;
   }
@@ -609,8 +610,8 @@
     position: relative;
     display: grid;
     grid-template-rows: auto 1fr auto;
-    gap: 1.25rem;
-    aspect-ratio: 3 / 4;
+    gap: 1rem;
+    aspect-ratio: 1;
     min-height: min-content;
     padding: clamp(1rem, 6cqw, 1.5rem);
     cursor: pointer;
@@ -899,7 +900,7 @@
   @media (max-width: 1439px) {
     .work-card-spread {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      max-width: 48rem;
+      max-width: 40rem;
     }
 
     .work-card-slot:nth-child(n) {
@@ -923,6 +924,11 @@
       grid-template-columns: 1fr;
       gap: 1rem;
       max-width: 22rem;
+    }
+
+    .work-card {
+      aspect-ratio: auto;
+      grid-template-rows: repeat(3, auto);
     }
 
     .work-card-slot:nth-child(n) {
