@@ -74,7 +74,7 @@ The screenshots above preserve the initial reference; the visible totals roll
 forward with the latest 30 days of retained usage, following T3's counting rules.
 
 The presentation is deliberately quiet: Main stack lists the AI tools beside the
-rest of the stack, and Codex and Claude Code each carry a small "/month" token
+rest of the stack, and Codex and Claude Code each carry a small "tokens/mo"
 badge. Session counts and the lifetime profile counter are not displayed.
 
 Processed tokens include input, output, and cached context. The profile lifetime

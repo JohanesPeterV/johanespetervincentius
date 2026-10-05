@@ -16,7 +16,7 @@ export const AiUsageBadge = ({ provider }: AiUsageBadgeProps) => {
       title={`${tokens} tokens in the past 30 days`}
       className="type-meta shrink-0 rounded-full border border-border px-2 text-muted-foreground"
     >
-      {tokens}/month
+      {tokens} tokens/mo
     </span>
   );
 };
