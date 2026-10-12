@@ -843,21 +843,6 @@
     color: hsl(var(--muted-foreground));
   }
 
-  .stack-group[data-group='main'] .stack-group-title {
-    font-size: 2rem;
-  }
-
-  .stack-group[data-group='main'] .stack-technology {
-    font-size: 1rem;
-    font-weight: 500;
-  }
-
-  .stack-group[data-group='main'] .stack-icon {
-    width: 2rem;
-    height: 2rem;
-    color: hsl(var(--primary-text));
-  }
-
   .project-card:focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 5px;

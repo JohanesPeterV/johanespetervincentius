@@ -2,9 +2,6 @@
 
 import { STACK_GROUPS } from '@/app/_components/stack';
 
-import { AiUsageBadge } from './ai-usage-badge';
-import { AiUsageChart } from './ai-usage-chart';
-
 export const DiveStack = () => (
   <>
     <header className="px-4 pb-6">
@@ -16,7 +13,6 @@ export const DiveStack = () => (
         <section
           key={group.id}
           aria-labelledby={`stack-${group.id}`}
-          data-group={group.id}
           className="stack-group grid gap-3 py-3 lg:grid-cols-[14rem_1fr] lg:gap-12"
         >
           <h3
@@ -25,21 +21,17 @@ export const DiveStack = () => (
           >
             {group.title}
           </h3>
-          <div>
-            <ul className="flex flex-wrap gap-x-7 gap-y-2">
-              {group.technologies.map(({ name, icon: Icon, usage }) => (
-                <li
-                  key={name}
-                  className="stack-technology flex items-center gap-3"
-                >
-                  <Icon aria-hidden="true" className="stack-icon shrink-0" />
-                  <span>{name}</span>
-                  {usage ? <AiUsageBadge provider={usage} /> : null}
-                </li>
-              ))}
-            </ul>
-            {group.id === 'main' ? <AiUsageChart /> : null}
-          </div>
+          <ul className="flex flex-wrap gap-x-7 gap-y-2">
+            {group.technologies.map(({ name, icon: Icon }) => (
+              <li
+                key={name}
+                className="stack-technology flex items-center gap-3"
+              >
+                <Icon aria-hidden="true" className="stack-icon shrink-0" />
+                <span>{name}</span>
+              </li>
+            ))}
+          </ul>
         </section>
       ))}
     </div>

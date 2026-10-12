@@ -89,29 +89,30 @@ export type StackGroup = {
   technologies: { name: string; icon: IconType; usage?: AiUsageProvider }[];
 };
 
+export const MAIN_STACK: StackGroup = {
+  id: 'main',
+  title: 'Main stack',
+  description: 'The foundation of my current web products.',
+  technologies: [
+    { name: 'T3 Code', icon: TbTerminal2 },
+    { name: 'Claude Code', icon: SiClaude, usage: 'claude' },
+    { name: 'Codex', icon: SiOpenai, usage: 'codex' },
+    { name: 'TypeScript', icon: SiTypescript },
+    { name: 'React', icon: SiReact },
+    { name: 'Next.js', icon: SiNextdotjs },
+    { name: 'Turborepo', icon: SiTurborepo },
+    { name: 'tRPC', icon: SiTrpc },
+    { name: 'TanStack Query', icon: SiReactquery },
+    { name: 'React Hook Form', icon: SiReacthookform },
+    { name: 'Tailwind CSS', icon: SiTailwindcss },
+    { name: 'shadcn/ui', icon: SiShadcnui },
+    { name: 'Prisma', icon: SiPrisma },
+    { name: 'PostgreSQL', icon: SiPostgresql },
+    { name: 'Convex', icon: TbDatabase },
+  ],
+};
+
 export const STACK_GROUPS: StackGroup[] = [
-  {
-    id: 'main',
-    title: 'Main stack',
-    description: 'The foundation of my current web products.',
-    technologies: [
-      { name: 'T3 Code', icon: TbTerminal2 },
-      { name: 'Claude Code', icon: SiClaude, usage: 'claude' },
-      { name: 'Codex', icon: SiOpenai, usage: 'codex' },
-      { name: 'TypeScript', icon: SiTypescript },
-      { name: 'React', icon: SiReact },
-      { name: 'Next.js', icon: SiNextdotjs },
-      { name: 'Turborepo', icon: SiTurborepo },
-      { name: 'tRPC', icon: SiTrpc },
-      { name: 'TanStack Query', icon: SiReactquery },
-      { name: 'React Hook Form', icon: SiReacthookform },
-      { name: 'Tailwind CSS', icon: SiTailwindcss },
-      { name: 'shadcn/ui', icon: SiShadcnui },
-      { name: 'Prisma', icon: SiPrisma },
-      { name: 'PostgreSQL', icon: SiPostgresql },
-      { name: 'Convex', icon: TbDatabase },
-    ],
-  },
   {
     id: 'backend',
     title: 'Backend & APIs',

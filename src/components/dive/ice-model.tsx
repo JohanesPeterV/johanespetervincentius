@@ -74,7 +74,7 @@ const IceLighting = () => (
   />
 );
 
-export default function IceModel({ turn }: { turn: number }) {
+export default function IceModel() {
   const { tier } = useDetectGPU();
 
   return (
@@ -103,7 +103,7 @@ export default function IceModel({ turn }: { turn: number }) {
         }
       >
         <IceLighting />
-        <IceScrollRotation turn={turn}>
+        <IceScrollRotation>
           <FrozenMacbook />
         </IceScrollRotation>
         <HandoffCanvas />

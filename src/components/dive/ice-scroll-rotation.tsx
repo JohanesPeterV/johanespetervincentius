@@ -20,15 +20,8 @@ const distanceToFitSphere = (
   return radius / Math.sin(Math.min(verticalHalfFov, horizontalHalfFov));
 };
 
-export const IceScrollRotation = ({
-  children,
-  turn,
-}: {
-  children: ReactNode;
-  turn: number;
-}) => {
+export const IceScrollRotation = ({ children }: { children: ReactNode }) => {
   const groupRef = useRef<Group>(null);
-  const turnAngle = useRef(0);
   const scrollAngle = useRef(0);
   const [centeredExhibit, setCenteredExhibit] =
     useState<OnCenterCallbackProps | null>(null);
@@ -55,10 +48,6 @@ export const IceScrollRotation = ({
     };
   }, [gl, invalidate]);
 
-  // REASON: the demand canvas renders only on request; a newly picked group
-  // needs a frame to start turning the ice toward it.
-  useEffect(() => invalidate(), [turn, invalidate]);
-
   useFrame(({ camera }, delta) => {
     const group = groupRef.current;
     if (!group) {
@@ -77,14 +66,10 @@ export const IceScrollRotation = ({
       0,
       1,
     );
-    const targetTurn = turn * Math.PI * 2;
     const targetScroll = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
     // REASON: an idle demand canvas reports the whole pause as its next delta;
     // capping it keeps the first turn after a pause animated instead of snapping.
     const step = Math.min(delta, 1 / 30);
-    turnAngle.current = reducedMotion
-      ? targetTurn
-      : MathUtils.damp(turnAngle.current, targetTurn, 4, step);
     // REASON: wheel input moves the chapter in whole steps; easing the scroll
     // angle turns the ice through each step instead of jumping between poses.
     scrollAngle.current = MathUtils.damp(
@@ -93,13 +78,10 @@ export const IceScrollRotation = ({
       10,
       step,
     );
-    if (
-      Math.abs(targetTurn - turnAngle.current) > 0.001 ||
-      Math.abs(targetScroll - scrollAngle.current) > 0.001
-    ) {
+    if (Math.abs(targetScroll - scrollAngle.current) > 0.001) {
       invalidate();
     }
-    group.rotation.y = scrollAngle.current + turnAngle.current;
+    group.rotation.y = scrollAngle.current;
   });
 
   return (

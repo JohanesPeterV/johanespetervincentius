@@ -6,8 +6,8 @@ This broad first pass uses the research in T3 thread
 
 Work content lives in `src/app/_components/work-experience/work-experiences.ts`.
 Personal AI consumption appears as `AiUsageBadge` totals on Codex and Claude Code
-in Main stack, shared by the Skills exhibit and Stack chapter, with the daily
-`AiUsageChart` in the Stack chapter. These notes preserve the meaning and source
+in Main stack, with the daily `AiUsageChart` under them in the Skills exhibit.
+These notes preserve the meaning and source
 of the figures for later editing.
 
 ## Publication scope
