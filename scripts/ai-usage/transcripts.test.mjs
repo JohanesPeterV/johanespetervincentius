@@ -34,13 +34,21 @@ const claude = (timestamp, sessionId, id, usage) => ({
   requestId: 'request',
   message: { id, model: 'claude', usage },
 });
+const rates = {
+  claude: {
+    input_cost_per_token: 1,
+    cache_read_input_token_cost: 0.1,
+    cache_creation_input_token_cost: 2,
+    output_cost_per_token: 10,
+  },
+};
 const codex = (timestamp, usage) => ({
   type: 'event_msg',
   timestamp,
   payload: { type: 'token_count', info: { last_token_usage: usage } },
 });
 
-test('Claude totals include cache reads and writes, globally deduplicate content blocks and forks', async () => {
+test('Claude totals include cache reads and writes, priced per model, globally deduplicate content blocks and forks', async () => {
   const entry = claude('2026-10-02T18:00:00Z', 'session', 'message', {
     input_tokens: 10,
     cache_read_input_tokens: 100,
@@ -54,9 +62,14 @@ test('Claude totals include cache reads and writes, globally deduplicate content
       first: { provider: 'claude', records: first },
       fork: { provider: 'claude', records: fork },
     },
+    rates,
     new Date('2026-10-03T01:00:00Z'),
   );
-  assert.deepEqual(usage.providers.claude, { tokens: 145, sessions: 1 });
+  assert.deepEqual(usage.providers.claude, {
+    tokens: 145,
+    sessions: 1,
+    cost: 130,
+  });
 });
 
 test('Codex excludes consecutive repeated usage and copied fork history; reasoning is part of output', async () => {
@@ -79,12 +92,21 @@ test('Codex excludes consecutive repeated usage and copied fork history; reasoni
     codex('2026-10-02T18:00:07Z', { ...usage, output_tokens: 70 }),
   ]);
   assert.deepEqual(rows, [
-    [Date.parse('2026-10-02T18:00:06Z'), 'child', 1070, null],
+    [Date.parse('2026-10-02T18:00:06Z'), 'child', 'gpt', 200, 800, 0, 70, null],
   ]);
 });
 
 test('Calendar rolling window expires old days and uses Jakarta boundaries', () => {
-  const makeRow = (date) => [Date.parse(date), 'session', 100, null];
+  const makeRow = (date) => [
+    Date.parse(date),
+    'session',
+    'claude',
+    100,
+    0,
+    0,
+    0,
+    null,
+  ];
   const usage = aggregateUsage(
     {
       file: {
@@ -97,18 +119,19 @@ test('Calendar rolling window expires old days and uses Jakarta boundaries', () 
         ],
       },
     },
+    rates,
     new Date('2026-10-03T01:00:00Z'),
   );
   assert.equal(usage.windowStart, '2026-09-04');
   assert.equal(usage.windowEnd, '2026-10-03');
   assert.equal(usage.providers.codex.tokens, 200);
-  assert.equal(usage.daily.length, 30);
-  assert.deepEqual(usage.daily[0], {
+  assert.equal(usage.dailyCost.length, 30);
+  assert.deepEqual(usage.dailyCost[0], {
     date: '2026-09-04',
     codex: 100,
     claude: 0,
   });
-  assert.deepEqual(usage.daily[29], {
+  assert.deepEqual(usage.dailyCost[29], {
     date: '2026-10-03',
     codex: 100,
     claude: 0,
@@ -120,7 +143,7 @@ test('Calendar rolling window expires old days and uses Jakarta boundaries', () 
     'updatedAt',
     'sourceUpdatedAt',
     'providers',
-    'daily',
+    'dailyCost',
   ]);
   assert.equal(JSON.stringify(usage).includes('session"'), false);
 });
@@ -167,12 +190,15 @@ test('Configured --local sync scans without invoking GitHub publication', async 
       ),
     );
     const cachePath = join(directory, 't3.json');
+    const ratesPath = join(directory, 'rates.json');
+    await writeFile(ratesPath, JSON.stringify({ document: rates }));
     await writeFile(
       cachePath,
       JSON.stringify({
         version: 4,
         files: {},
         sessions: [],
+        models: [],
         sources: {
           'codex\0root': { dir: codexDirectory },
           'claude\0root': { dir: claudeDirectory },
@@ -195,6 +221,7 @@ test('Configured --local sync scans without invoking GitHub publication', async 
           PATH: binDirectory,
           AI_USAGE_STATE_DIR: stateDirectory,
           AI_USAGE_T3_CACHE: cachePath,
+          AI_USAGE_T3_RATES: ratesPath,
         },
         encoding: 'utf8',
       },

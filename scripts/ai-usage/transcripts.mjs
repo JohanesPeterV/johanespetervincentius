@@ -57,16 +57,20 @@ export const readTranscript = async (path, provider, size) => {
       ) {
         continue;
       }
-      const tokens =
-        tokenCount(usage.input_tokens) +
-        tokenCount(usage.cache_read_input_tokens) +
-        tokenCount(usage.cache_creation_input_tokens) +
-        tokenCount(usage.output_tokens);
       const key =
         entry.message.id || entry.requestId
           ? `${entry.message.id ?? ''}:${entry.requestId ?? ''}`
           : null;
-      records.push([timestamp, entry.sessionId ?? '', tokens, key]);
+      records.push([
+        timestamp,
+        entry.sessionId ?? '',
+        entry.message.model,
+        tokenCount(usage.input_tokens),
+        tokenCount(usage.cache_read_input_tokens),
+        tokenCount(usage.cache_creation_input_tokens),
+        tokenCount(usage.output_tokens),
+        key,
+      ]);
       continue;
     }
     const payload = entry.payload;
@@ -109,48 +113,75 @@ export const readTranscript = async (path, provider, size) => {
     const input = tokenCount(usage.input_tokens);
     const cached = tokenCount(usage.cached_input_tokens);
     const creation = tokenCount(usage.cache_write_input_tokens);
-    const tokens =
-      Math.max(0, input - cached - creation) +
-      cached +
-      creation +
-      tokenCount(usage.output_tokens);
-    if (tokens > 0) {
-      records.push([timestamp, session, tokens, null]);
+    const uncached = Math.max(0, input - cached - creation);
+    const output = tokenCount(usage.output_tokens);
+    if (uncached + cached + creation + output > 0) {
+      records.push([
+        timestamp,
+        session,
+        model,
+        uncached,
+        cached,
+        creation,
+        output,
+        null,
+      ]);
     }
   }
   return records;
 };
 
-export const aggregateUsage = (files, now = new Date()) => {
+const toCents = (amount) => Math.round(amount * 100) / 100;
+
+export const aggregateUsage = (files, rates, now = new Date()) => {
   const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' });
   const windowEnd = day.format(now);
   const end = new Date(`${windowEnd}T00:00:00+07:00`);
   const dates = Array.from({ length: 30 }, (_, index) =>
     day.format(new Date(end.getTime() - (29 - index) * 86400000)),
   );
-  const daily = new Map(
+  const dailyCost = new Map(
     dates.map((date) => [date, { date, codex: 0, claude: 0 }]),
   );
   const providers = {
-    codex: { tokens: 0, sessions: 0 },
-    claude: { tokens: 0, sessions: 0 },
+    codex: { tokens: 0, sessions: 0, cost: 0 },
+    claude: { tokens: 0, sessions: 0, cost: 0 },
   };
   const sessions = { codex: new Set(), claude: new Set() };
   const seen = new Set();
   for (const file of Object.values(files)) {
-    for (const [timestamp, session, tokens, key] of file.records) {
+    for (const [
+      timestamp,
+      session,
+      model,
+      input,
+      cacheRead,
+      cacheWrite,
+      output,
+      key,
+    ] of file.records) {
       if (key !== null) {
         if (seen.has(key)) {
           continue;
         }
         seen.add(key);
       }
-      const dayUsage = daily.get(day.format(timestamp));
-      if (!dayUsage) {
+      const dayCost = dailyCost.get(day.format(timestamp));
+      if (!dayCost) {
         continue;
       }
-      dayUsage[file.provider] += tokens;
-      providers[file.provider].tokens += tokens;
+      // REASON: models missing from the price list cost $0, matching T3's API
+      // estimate, so a brand-new model never blocks publication.
+      const rate = rates[model] ?? {};
+      const cost =
+        input * (rate.input_cost_per_token ?? 0) +
+        cacheRead * (rate.cache_read_input_token_cost ?? 0) +
+        cacheWrite * (rate.cache_creation_input_token_cost ?? 0) +
+        output * (rate.output_cost_per_token ?? 0);
+      dayCost[file.provider] += cost;
+      providers[file.provider].tokens +=
+        input + cacheRead + cacheWrite + output;
+      providers[file.provider].cost += cost;
       if (session) {
         sessions[file.provider].add(session);
       }
@@ -158,14 +189,19 @@ export const aggregateUsage = (files, now = new Date()) => {
   }
   for (const provider of ['codex', 'claude']) {
     providers[provider].sessions = sessions[provider].size;
+    providers[provider].cost = toCents(providers[provider].cost);
   }
   return {
-    version: 1,
+    version: 2,
     windowStart: dates[0],
     windowEnd,
     updatedAt: now.toISOString(),
     sourceUpdatedAt: now.toISOString(),
     providers,
-    daily: [...daily.values()],
+    dailyCost: [...dailyCost.values()].map(({ date, codex, claude }) => ({
+      date,
+      codex: toCents(codex),
+      claude: toCents(claude),
+    })),
   };
 };

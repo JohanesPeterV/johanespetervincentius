@@ -17,6 +17,9 @@ const stateDir =
 const t3CachePath =
   process.env.AI_USAGE_T3_CACHE ??
   join(homedir(), '.t3', 'userdata', 'usage-scan-cache.json');
+const t3RatesPath =
+  process.env.AI_USAGE_T3_RATES ??
+  join(homedir(), '.t3', 'userdata', 'usage-model-rates.json');
 const statePath = join(stateDir, 'scan.json');
 const configPath = join(stateDir, 'config.json');
 const snapshotPath = resolve('src/data/ai-usage.json');
@@ -52,15 +55,17 @@ if (
   t3?.version !== 4 ||
   !t3.files ||
   !t3.sources ||
-  !Array.isArray(t3.sessions)
+  !Array.isArray(t3.sessions) ||
+  !Array.isArray(t3.models)
 ) {
   throw new Error('Unsupported T3 usage cache. Expected schema version 4.');
 }
-const previous = await readJson(statePath);
-if (previous && previous.version !== 1) {
-  throw new Error('Unsupported portfolio usage cache.');
+const rates = (await readJson(t3RatesPath))?.document;
+if (!rates || typeof rates !== 'object') {
+  throw new Error('T3 model rates are unavailable.');
 }
-const files = previous?.files ?? {};
+const previous = await readJson(statePath);
+const files = previous?.version === 2 ? previous.files : {};
 const roots = [];
 for (const [key, source] of Object.entries(t3.sources)) {
   const provider = key.split('\0')[0];
@@ -106,7 +111,8 @@ for (const { provider, directory } of roots) {
         return [
           row[0],
           t3.sessions[row[2]] ?? '',
-          row.slice(3, 7).reduce((sum, value) => sum + value, 0),
+          t3.models[row[1]],
+          ...row.slice(3, 7),
           row[8],
         ];
       });
@@ -122,7 +128,7 @@ for (const { provider, directory } of roots) {
     };
   }
 }
-const usage = aggregateUsage(current);
+const usage = aggregateUsage(current, rates);
 const config = await readJson(configPath);
 if (process.argv.includes('--create')) {
   if (config) {
@@ -179,7 +185,7 @@ if (process.argv.includes('--create')) {
 }
 await writeFile(
   statePath + '.tmp',
-  JSON.stringify({ version: 1, files: current }),
+  JSON.stringify({ version: 2, files: current }),
   { mode: 0o600 },
 );
 await rename(statePath + '.tmp', statePath);

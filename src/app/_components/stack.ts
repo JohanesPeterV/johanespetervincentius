@@ -82,11 +82,17 @@ import {
   TbTruckDelivery,
 } from 'react-icons/tb';
 
+export type StackTechnology = {
+  name: string;
+  icon: IconType;
+  usage?: AiUsageProvider;
+};
+
 export type StackGroup = {
   id: string;
   title: string;
   description: string;
-  technologies: { name: string; icon: IconType; usage?: AiUsageProvider }[];
+  technologies: StackTechnology[];
 };
 
 export const MAIN_STACK: StackGroup = {
@@ -94,9 +100,6 @@ export const MAIN_STACK: StackGroup = {
   title: 'Main stack',
   description: 'The foundation of my current web products.',
   technologies: [
-    { name: 'T3 Code', icon: TbTerminal2 },
-    { name: 'Claude Code', icon: SiClaude, usage: 'claude' },
-    { name: 'Codex', icon: SiOpenai, usage: 'codex' },
     { name: 'TypeScript', icon: SiTypescript },
     { name: 'React', icon: SiReact },
     { name: 'Next.js', icon: SiNextdotjs },
@@ -111,6 +114,12 @@ export const MAIN_STACK: StackGroup = {
     { name: 'Convex', icon: TbDatabase },
   ],
 };
+
+export const AI_TOOLS: StackTechnology[] = [
+  { name: 'Claude Code', icon: SiClaude, usage: 'claude' },
+  { name: 'Codex', icon: SiOpenai, usage: 'codex' },
+  { name: 'T3 Code', icon: TbTerminal2 },
+];
 
 export const STACK_GROUPS: StackGroup[] = [
   {

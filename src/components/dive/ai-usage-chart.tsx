@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import type { KeyboardEvent, PointerEvent } from 'react';
-import { SiClaude, SiOpenai } from 'react-icons/si';
 
 import { useAiUsage } from '@/hooks/use-ai-usage';
-import { formatTokens } from '@/lib/ai-usage';
+import { AI_USAGE_TOOLS, formatCost } from '@/lib/ai-usage';
 
 type Point = { x: number; y: number };
 
@@ -69,13 +68,13 @@ const buildCurve = (points: readonly Point[]): string => {
 export const AiUsageChart = () => {
   const { usage, status, error } = useAiUsage();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const { daily } = usage;
-  const lastIndex = daily.length - 1;
-  const totals = daily.map(({ codex, claude }) => codex + claude);
+  const { dailyCost } = usage;
+  const lastIndex = dailyCost.length - 1;
+  const totals = dailyCost.map(({ codex, claude }) => codex + claude);
   const busiestIndex = totals.indexOf(Math.max(...totals));
   const peak = Math.max(
     1,
-    ...daily.flatMap(({ codex, claude }) => [codex, claude]),
+    ...dailyCost.flatMap(({ codex, claude }) => [codex, claude]),
   );
   const scaleMax = peak * 1.1;
   const step = tickStep(scaleMax);
@@ -84,30 +83,15 @@ export const AiUsageChart = () => {
     (_, index) => (index + 1) * step,
   );
   const shownIndex = activeIndex ?? busiestIndex;
-  const shown = daily[shownIndex];
+  const shown = dailyCost[shownIndex];
   const xPercent = (index: number): number => (index / lastIndex) * 100;
   const yPercent = (value: number): number => (value / scaleMax) * 100;
-  const series = [
-    {
-      id: 'codex',
-      tool: 'Codex',
-      icon: SiOpenai,
-      color: 'text-secondary',
-      values: daily.map(({ codex }) => codex),
-    },
-    {
-      id: 'claude',
-      tool: 'Claude Code',
-      icon: SiClaude,
-      color: 'text-primary',
-      values: daily.map(({ claude }) => claude),
-    },
-  ];
+  const series = AI_USAGE_TOOLS.map((tool) => ({
+    ...tool,
+    values: dailyCost.map((day) => day[tool.provider]),
+  }));
   const valueText = `${formatDay(shown.date)}: ${series
-    .map(
-      ({ tool, values }) =>
-        `${tool} ${formatTokens(values[shownIndex])} tokens`,
-    )
+    .map(({ name, values }) => `${name} ${formatCost(values[shownIndex])}`)
     .join(', ')}`;
 
   const selectDayAt = (event: PointerEvent<HTMLDivElement>): void => {
@@ -126,25 +110,24 @@ export const AiUsageChart = () => {
   };
 
   return (
-    <figure className="mt-10 grid gap-6">
+    <figure className="grid gap-6">
       <figcaption className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
         <span className="type-meta text-muted-foreground">
-          Daily tokens · last 30 days
+          My daily usage · API cost
         </span>
         <span
           aria-hidden
           className="type-meta flex flex-wrap items-center gap-x-4 gap-y-1"
         >
-          <span className="text-muted-foreground">
+          <span className="min-w-[7ch] text-muted-foreground">
             {formatDay(shown.date)}
-            {shownIndex === busiestIndex ? ' · busiest day' : null}
           </span>
-          {series.map(({ id, tool, icon: Icon, color, values }) => (
-            <span key={id} className="flex items-center gap-1.5">
+          {series.map(({ provider, name, icon: Icon, color, values }) => (
+            <span key={provider} className="flex items-center gap-1.5">
               <Icon aria-hidden className={`size-3.5 ${color}`} />
-              <span className="text-muted-foreground">{tool}</span>
-              <span className="text-foreground">
-                {formatTokens(values[shownIndex])}
+              <span className="text-muted-foreground">{name}</span>
+              <span className="min-w-[9ch] text-foreground">
+                {formatCost(values[shownIndex])}
               </span>
             </span>
           ))}
@@ -154,7 +137,7 @@ export const AiUsageChart = () => {
         <div
           role="slider"
           tabIndex={0}
-          aria-label="Daily AI token usage"
+          aria-label="My daily AI usage at API cost"
           aria-valuemin={0}
           aria-valuemax={lastIndex}
           aria-valuenow={shownIndex}
@@ -175,7 +158,7 @@ export const AiUsageChart = () => {
               style={{ bottom: `${yPercent(tick)}%` }}
             >
               <span className="type-meta absolute bottom-full left-0 mb-1 text-muted-foreground">
-                {formatTokens(tick)}
+                {formatCost(tick)}
               </span>
             </div>
           ))}
@@ -185,7 +168,7 @@ export const AiUsageChart = () => {
             preserveAspectRatio="none"
             className="absolute inset-0 h-full w-full overflow-visible"
           >
-            {series.map(({ id, color, values }) => {
+            {series.map(({ provider, color, values }) => {
               const curve = buildCurve(
                 values.map((value, index) => ({
                   x: (index / lastIndex) * WIDTH,
@@ -193,10 +176,10 @@ export const AiUsageChart = () => {
                 })),
               );
               return (
-                <g key={id} className={color}>
+                <g key={provider} className={color}>
                   <defs>
                     <linearGradient
-                      id={`ai-usage-fill-${id}`}
+                      id={`ai-usage-fill-${provider}`}
                       x1="0"
                       x2="0"
                       y1="0"
@@ -216,7 +199,7 @@ export const AiUsageChart = () => {
                   </defs>
                   <path
                     d={`${curve} L ${WIDTH} ${HEIGHT} L 0 ${HEIGHT} Z`}
-                    fill={`url(#ai-usage-fill-${id})`}
+                    fill={`url(#ai-usage-fill-${provider})`}
                   />
                   <path
                     d={curve}
@@ -234,20 +217,9 @@ export const AiUsageChart = () => {
             className="pointer-events-none absolute inset-y-0 w-px bg-foreground/30"
             style={{ left: `${xPercent(shownIndex)}%` }}
           />
-          {series.map(({ id, color, values }) => (
+          {series.map(({ provider, color, values }) => (
             <span
-              key={`${id}-live`}
-              aria-hidden
-              className={`pointer-events-none absolute size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-current opacity-60 motion-safe:animate-ping ${color}`}
-              style={{
-                left: '100%',
-                bottom: `${yPercent(values[lastIndex])}%`,
-              }}
-            />
-          ))}
-          {series.map(({ id, color, values }) => (
-            <span
-              key={id}
+              key={provider}
               aria-hidden
               className={`pointer-events-none absolute size-2.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-current ring-2 ring-background ${color}`}
               style={{
@@ -261,8 +233,8 @@ export const AiUsageChart = () => {
           aria-hidden
           className="type-meta mt-2 flex justify-between text-muted-foreground"
         >
-          <span>{formatDay(daily[0].date)}</span>
-          <span>{formatDay(daily[lastIndex].date)}</span>
+          <span>{formatDay(dailyCost[0].date)}</span>
+          <span>{formatDay(dailyCost[lastIndex].date)}</span>
         </div>
       </div>
       {status === 'error' ? (

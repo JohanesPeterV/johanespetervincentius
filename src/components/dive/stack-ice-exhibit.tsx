@@ -4,10 +4,12 @@ import dynamic from 'next/dynamic';
 import { Component, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { MAIN_STACK } from '@/app/_components/stack';
+import { AI_TOOLS, MAIN_STACK } from '@/app/_components/stack';
+import type { StackTechnology } from '@/app/_components/stack';
 
 import { AiUsageBadge } from './ai-usage-badge';
 import { AiUsageChart } from './ai-usage-chart';
+import { AiUsageSummary } from './ai-usage-summary';
 
 const IceModel = dynamic(() => import('./ice-model'), {
   ssr: false,
@@ -35,6 +37,25 @@ class IceModelBoundary extends Component<
     return this.props.children;
   }
 }
+
+const StackTechnologyList = ({
+  technologies,
+}: {
+  technologies: StackTechnology[];
+}) => (
+  <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
+    {technologies.map(({ name, icon: Icon, usage }) => (
+      <li
+        key={name}
+        className="stack-technology flex flex-wrap items-center gap-x-3 gap-y-1"
+      >
+        <Icon aria-hidden="true" className="stack-icon shrink-0" />
+        <span className="min-w-0 break-words">{name}</span>
+        {usage ? <AiUsageBadge provider={usage} /> : null}
+      </li>
+    ))}
+  </ul>
+);
 
 export const StackIceExhibit = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -83,19 +104,12 @@ export const StackIceExhibit = () => {
         <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
           {MAIN_STACK.description}
         </p>
-        <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
-          {MAIN_STACK.technologies.map(({ name, icon: Icon, usage }) => (
-            <li
-              key={name}
-              className="stack-technology flex flex-wrap items-center gap-x-3 gap-y-1"
-            >
-              <Icon aria-hidden="true" className="stack-icon shrink-0" />
-              <span className="min-w-0 break-words">{name}</span>
-              {usage ? <AiUsageBadge provider={usage} /> : null}
-            </li>
-          ))}
-        </ul>
-        <AiUsageChart />
+        <StackTechnologyList technologies={MAIN_STACK.technologies} />
+        <StackTechnologyList technologies={AI_TOOLS} />
+        <div className="mt-10 grid gap-10">
+          <AiUsageSummary />
+          <AiUsageChart />
+        </div>
       </div>
     </section>
   );

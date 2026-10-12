@@ -5,8 +5,10 @@ This broad first pass uses the research in T3 thread
 `/Users/peter/Projects/smilie/raise-review-2026/`.
 
 Work content lives in `src/app/_components/work-experience/work-experiences.ts`.
-Personal AI consumption appears as `AiUsageBadge` totals on Codex and Claude Code
-in Main stack, with the daily `AiUsageChart` under them in the Skills exhibit.
+Personal AI consumption appears as `AiUsageBadge` totals on Claude Code and Codex
+in Main stack, with `AiUsageSummary` and the daily cost `AiUsageChart` under them
+in the Skills exhibit. The API-estimated cost is personal tool usage, not a
+company financial amount.
 These notes preserve the meaning and source
 of the figures for later editing.
 
