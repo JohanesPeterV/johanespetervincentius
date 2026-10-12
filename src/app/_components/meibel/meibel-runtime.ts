@@ -7,7 +7,6 @@ import {
 
 type MeibelControls = {
   pet: () => void;
-  lounge: () => void;
   setFollowMode: (mode: MeibelFollowMode) => void;
   dispose: () => void;
 };
@@ -182,14 +181,6 @@ export const mountMeibel = (
     engine.play('petting');
     render();
   };
-  const lounge = (): void => {
-    if (!ready || reducedMotion.matches) {
-      return;
-    }
-    engine.play('lounging');
-    reportFollowMode(engine.followMode);
-    render();
-  };
   const handleResize = (): void => {
     updateBounds();
     followPointer();
@@ -223,7 +214,6 @@ export const mountMeibel = (
 
   return {
     pet,
-    lounge,
     setFollowMode,
     dispose: () => {
       cancelAnimationFrame(request);

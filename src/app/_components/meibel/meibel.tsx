@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { Armchair, MousePointer2, PawPrint } from 'lucide-react';
+import { MousePointer2, PawPrint } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -77,17 +77,6 @@ export default function Meibel() {
             }}
           >
             <PawPrint aria-hidden /> Pet Meibel
-          </Button>
-          <Button
-            variant="link"
-            size="sm"
-            disabled={reducedMotion}
-            onClick={() => {
-              controlsRef.current?.lounge();
-              panelRef.current?.hidePopover();
-            }}
-          >
-            <Armchair aria-hidden /> Lounge
           </Button>
           <Button
             variant="link"

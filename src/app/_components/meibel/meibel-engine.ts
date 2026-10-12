@@ -78,10 +78,10 @@ export const MEIBEL_CLIPS: Record<MeibelAnimation, SpriteClip> = {
 };
 
 const BEHAVIORS: readonly Behavior[] = [
+  { animation: 'idle', duration: 45000 },
+  { animation: 'lounging', duration: 30000 },
   { animation: 'idle', duration: 60000 },
   { animation: 'review', duration: 1500 },
-  { animation: 'idle', duration: 120000 },
-  { animation: 'lounging', duration: 30000 },
 ];
 const CYCLE_DURATION = BEHAVIORS.reduce((sum, pose) => sum + pose.duration, 0);
 
@@ -123,14 +123,12 @@ export const lookDirection = (x: number, y: number): number | null => {
   return (Math.round(Math.atan2(x, -y) / (Math.PI / 8)) + 16) % 16;
 };
 
-const actionState = (animation: MeibelAnimation, time: number): MeibelState => {
-  const priority = animation === 'lounging' ? 0 : 1;
-  return new ActionState(
+const actionState = (animation: MeibelAnimation, time: number): MeibelState =>
+  new ActionState(
     { animation, duration: clipDuration(animation) },
     time,
-    animation === 'jumping' || animation === 'petting' ? 2 : priority,
+    animation === 'jumping' || animation === 'petting' ? 2 : 1,
   );
-};
 
 class IdleState implements MeibelState {
   readonly priority = 0;
@@ -312,7 +310,6 @@ const ambientState = (elapsed: number): MeibelState => {
 export class MeibelEngine {
   private elapsed = 0;
   private state: MeibelState = ambientState(0);
-  private position = { x: 0, y: 0 };
   private mode: MeibelFollowMode = 'resting';
   private motion: 'full' | 'reduced' = 'full';
 
@@ -321,7 +318,6 @@ export class MeibelEngine {
       return;
     }
     this.motion = motion;
-    this.position = { x: 0, y: 0 };
     this.mode = 'resting';
     this.state =
       motion === 'reduced'
@@ -337,7 +333,6 @@ export class MeibelEngine {
     if (this.state instanceof MovingState) {
       this.state.advance(this.elapsed);
       if (this.mode === 'resting' && this.state.settled) {
-        this.position = { x: 0, y: 0 };
         this.state = ambientState(this.elapsed);
       }
       return;
@@ -349,13 +344,6 @@ export class MeibelEngine {
 
   play(animation: MeibelAnimation): void {
     if (this.motion === 'reduced') {
-      return;
-    }
-    if (animation === 'lounging') {
-      const frame = this.frame();
-      this.position = { x: frame.offsetX, y: frame.offsetY };
-      this.mode = 'resting';
-      this.state = actionState(animation, this.elapsed);
       return;
     }
     this.state = this.state.handle({ type: 'play', animation }, this.elapsed);
@@ -402,12 +390,6 @@ export class MeibelEngine {
   }
 
   frame(): MeibelFrame {
-    const frame = this.state.frame(this.elapsed);
-    if (this.state instanceof MovingState) {
-      return frame;
-    }
-    frame.offsetX += this.position.x;
-    frame.offsetY += this.position.y;
-    return frame;
+    return this.state.frame(this.elapsed);
   }
 }

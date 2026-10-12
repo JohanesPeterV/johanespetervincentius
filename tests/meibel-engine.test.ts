@@ -51,7 +51,7 @@ test('ambient behavior stays still with an occasional glance and long lounge', (
     const frame = engine.frame();
     assert.ok(['idle', 'review', 'lounging'].includes(frame.animation));
     assert.equal(frame.offsetX, 0);
-    if (time < 60000) {
+    if (time < 45000) {
       assert.equal(frame.animation, 'idle');
     }
     if (frame.animation !== 'review') {
@@ -305,40 +305,27 @@ test('resting and invalid coordinates never start cursor pursuit', () => {
   assert.equal(engine.frame().offsetY, 0);
 });
 
-test('manual and ambient lounging ignore gaze', () => {
-  for (const trigger of ['manual', 'ambient']) {
-    const engine = new MeibelEngine();
-    if (trigger === 'manual') {
-      engine.play('lounging');
-    } else {
-      engine.advance(181500);
-    }
-    engine.lookAt(-100, 0);
-    engine.advance(12000);
-    assert.equal(engine.frame().animation, 'lounging');
-    assert.equal(engine.frame().column, 1);
-    engine.advance(1800);
-    assert.equal(engine.frame().column, 2);
-    engine.advance(300);
-    assert.equal(engine.frame().column, 3);
-    engine.advance(15900);
-    assert.equal(engine.frame().animation, 'idle');
-  }
+test('ambient lounging ignores gaze', () => {
+  const engine = new MeibelEngine();
+  engine.advance(45000);
+  engine.lookAt(-100, 0);
+  engine.advance(12000);
+  assert.equal(engine.frame().animation, 'lounging');
+  assert.equal(engine.frame().column, 1);
+  engine.advance(1800);
+  assert.equal(engine.frame().column, 2);
+  engine.advance(300);
+  assert.equal(engine.frame().column, 3);
+  engine.advance(15900);
+  assert.equal(engine.frame().animation, 'idle');
 });
 
-test('lounging stops following and petting or Follow can interrupt it', () => {
+test('petting or Follow can interrupt lounging', () => {
   const engine = new MeibelEngine();
-  engine.setFollowMode('following');
-  engine.followTo(-120, 0);
-  advanceFor(engine, 300);
-  const before = engine.frame();
-  engine.play('lounging');
-  assert.equal(engine.followMode, 'resting');
-  assert.equal(engine.frame().offsetX, before.offsetX);
-  assert.equal(engine.frame().offsetY, before.offsetY);
+  engine.advance(45000);
+  assert.equal(engine.frame().animation, 'lounging');
   engine.play('petting');
   assert.equal(engine.frame().animation, 'petting');
-  engine.play('lounging');
   engine.setFollowMode('following');
   engine.followTo(-300, 0);
   advanceFor(engine, 100);
