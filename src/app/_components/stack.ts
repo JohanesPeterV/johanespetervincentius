@@ -100,14 +100,9 @@ export const MAIN_STACK: StackGroup = {
   title: 'Main stack',
   description: 'The foundation of my current web products.',
   technologies: [
-    { name: 'TypeScript', icon: SiTypescript },
-    { name: 'React', icon: SiReact },
     { name: 'Next.js', icon: SiNextdotjs },
     { name: 'Turborepo', icon: SiTurborepo },
     { name: 'tRPC', icon: SiTrpc },
-    { name: 'TanStack Query', icon: SiReactquery },
-    { name: 'React Hook Form', icon: SiReacthookform },
-    { name: 'Tailwind CSS', icon: SiTailwindcss },
     { name: 'shadcn/ui', icon: SiShadcnui },
     { name: 'Prisma', icon: SiPrisma },
     { name: 'PostgreSQL', icon: SiPostgresql },
@@ -144,6 +139,10 @@ export const STACK_GROUPS: StackGroup[] = [
     title: 'Web & mobile',
     description: 'More frameworks and UI libraries from across my work.',
     technologies: [
+      { name: 'React', icon: SiReact },
+      { name: 'Tailwind CSS', icon: SiTailwindcss },
+      { name: 'TanStack Query', icon: SiReactquery },
+      { name: 'React Hook Form', icon: SiReacthookform },
       { name: 'Vue.js', icon: SiVuedotjs },
       { name: 'Nuxt.js', icon: SiNuxtdotjs },
       { name: 'Angular', icon: SiAngular },
@@ -204,9 +203,10 @@ export const STACK_GROUPS: StackGroup[] = [
   },
   {
     id: 'languages',
-    title: 'Other languages',
-    description: 'Languages beyond my main TypeScript stack.',
+    title: 'Languages',
+    description: 'Languages I have shipped with across my work.',
     technologies: [
+      { name: 'TypeScript', icon: SiTypescript },
       { name: 'JavaScript', icon: SiJavascript },
       { name: 'C#', icon: TbBrandCSharp },
       { name: 'C/C++', icon: SiCplusplus },
