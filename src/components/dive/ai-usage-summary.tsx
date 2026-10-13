@@ -1,7 +1,12 @@
 'use client';
 
 import { useAiUsage } from '@/hooks/use-ai-usage';
-import { AI_USAGE_TOOLS, formatCost, formatTokens } from '@/lib/ai-usage';
+import {
+  AI_USAGE_TOOLS,
+  formatCost,
+  formatTokens,
+  totalAiUsageCost,
+} from '@/lib/ai-usage';
 
 const countFormat = new Intl.NumberFormat('en');
 const shareFormat = new Intl.NumberFormat('en', {
@@ -15,7 +20,7 @@ export const AiUsageSummary = () => {
     ...tool,
     ...usage.providers[tool.provider],
   }));
-  const totalCost = tools.reduce((sum, { cost }) => sum + cost, 0);
+  const totalCost = totalAiUsageCost(usage);
   const totalSessions = tools.reduce((sum, { sessions }) => sum + sessions, 0);
   const shareOf = (cost: number): string =>
     shareFormat.format(totalCost > 0 ? cost / totalCost : 0);

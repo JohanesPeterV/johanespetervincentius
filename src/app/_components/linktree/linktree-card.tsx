@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
+import AiUsageLine from './ai-usage-line';
 import { CONTACT_ICONS, LINKTREE_LINKS } from './links';
 import ProfileAvatar from './profile-avatar';
 
@@ -13,6 +14,7 @@ export default function LinktreeCard() {
           <div className="flex flex-col items-center gap-3">
             <h2 className="profile-card-name">Johanes Peter Vincentius</h2>
             <p className="text-sm text-muted-foreground">I build apps.</p>
+            <AiUsageLine />
           </div>
         </div>
         <nav aria-label="Find me online" className="flex w-full flex-col gap-3">

@@ -39,6 +39,12 @@ export const formatTokens = (tokens: number): string =>
 
 export const formatCost = (cost: number): string => costFormat.format(cost);
 
+export const totalAiUsageCost = (usage: AiUsage): number =>
+  AI_USAGE_TOOLS.reduce(
+    (sum, { provider }) => sum + usage.providers[provider].cost,
+    0,
+  );
+
 const isCount = (value: number): boolean =>
   Number.isSafeInteger(value) && value >= 0;
 
