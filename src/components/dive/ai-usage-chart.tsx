@@ -113,7 +113,7 @@ export const AiUsageChart = () => {
     <figure className="grid gap-6">
       <figcaption className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
         <span className="type-meta text-muted-foreground">
-          My daily usage · API cost
+          Daily usage · API cost
         </span>
         <span
           aria-hidden
@@ -137,7 +137,7 @@ export const AiUsageChart = () => {
         <div
           role="slider"
           tabIndex={0}
-          aria-label="My daily AI usage at API cost"
+          aria-label="Daily AI usage at API cost"
           aria-valuemin={0}
           aria-valuemax={lastIndex}
           aria-valuenow={shownIndex}

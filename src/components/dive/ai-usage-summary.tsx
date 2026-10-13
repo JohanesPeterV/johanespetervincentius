@@ -23,7 +23,7 @@ export const AiUsageSummary = () => {
   return (
     <div className="grid gap-8">
       <div>
-        <p className="identity-tag type-meta">My AI usage · last 30 days</p>
+        <p className="identity-tag type-meta">AI usage · last 30 days</p>
         <p className="work-section-title font-display tabular-nums">
           {formatCost(totalCost)}
         </p>
