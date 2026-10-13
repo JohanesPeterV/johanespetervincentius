@@ -1,4 +1,4 @@
-import { scrollDriveBy } from './camera-motion';
+import { jumpDriveToSection, scrollDriveBy } from './camera-motion';
 import type { DriveMotion } from './camera-motion';
 import { CHAPTER_GAP } from './dive-route';
 
@@ -188,9 +188,16 @@ export const createReadingInput = (drive: DriveMotion) => {
     // REASON: without snapping, a coarse wheel step must not jump past a
     // chapter's centre; travel stops there so its reading scroll takes over.
     const toCenter = drive.route.jumpDelta(drive.target, reading.center);
+    const atCenter = Math.abs(toCenter) < READING_CENTER_EPSILON;
+    // REASON: overflow from a neighbouring panel can rest the journey inside
+    // this tolerance yet over a pixel off the centre, where the wait for the
+    // rendered centre below never ends and swallows every input.
+    if (atCenter) {
+      jumpDriveToSection(drive, reading.center);
+    }
     const { travelPixels, readingPixels } = splitReadingInput(
       pixels,
-      Math.abs(toCenter) < READING_CENTER_EPSILON ? 0 : toCenter,
+      atCenter ? 0 : toCenter,
       window.innerHeight,
     );
     if (travelPixels !== 0) {

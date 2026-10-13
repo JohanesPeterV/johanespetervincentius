@@ -8,12 +8,13 @@ import {
   stepDriveToSection,
 } from '../src/components/dive/camera-motion';
 import {
+  createReadingInput,
   journeyDeltaForScroll,
   normalizeWheelDelta,
   scrollSectionBy,
   splitReadingInput,
 } from '../src/components/dive/dive-input';
-import { DiveRoute } from '../src/components/dive/dive-route';
+import { chapterScroll, DiveRoute } from '../src/components/dive/dive-route';
 
 const route = new DiveRoute('Hero', [
   { id: 'work', title: 'Work' },
@@ -161,4 +162,60 @@ test('reverse entry splits one wheel step at the chapter center', () => {
     travelPixels: 0,
     readingPixels: -40,
   });
+});
+
+test('input resting just off a chapter centre lands on it instead of waiting forever', () => {
+  const height = 1334;
+  const stack = route.sections[2];
+  const drive = createDrive(route);
+  // REASON: inside the centre tolerance, yet the chapter renders 1.8px off.
+  drive.current = stack.center - 0.0008;
+  drive.target = drive.current;
+  class StubElement {}
+  class StubHTMLElement extends StubElement {}
+  const chapter = Object.assign(new StubHTMLElement(), {
+    dataset: { diveSection: stack.id },
+    isConnected: true,
+    scrollTop: 0,
+    scrollHeight: height,
+    clientHeight: height,
+    closest: () => chapter,
+    getBoundingClientRect: () => ({
+      top: -chapterScroll(drive.current, stack.center) * height,
+    }),
+  });
+  const frames: FrameRequestCallback[] = [];
+  const globals = {
+    window: { innerHeight: height },
+    Element: StubElement,
+    HTMLElement: StubHTMLElement,
+    requestAnimationFrame: (callback: FrameRequestCallback) =>
+      frames.push(callback),
+    cancelAnimationFrame: () => {
+      frames.length = 0;
+    },
+  };
+  const descriptors = Object.keys(globals).map((name) => ({
+    name,
+    descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
+  }));
+  Object.assign(globalThis, globals);
+  const reading = createReadingInput(drive);
+  try {
+    assert.equal(reading.scroll(chapter as unknown as EventTarget, 40), 0);
+    for (let frame = 0; frame < 60; frame++) {
+      advanceDrive(drive, 1 / 60);
+      frames.shift()?.(frame * 16);
+    }
+    assert.ok(drive.target > stack.center);
+  } finally {
+    reading.dispose();
+    for (const { name, descriptor } of descriptors) {
+      if (descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+      } else {
+        Reflect.deleteProperty(globalThis, name);
+      }
+    }
+  }
 });
