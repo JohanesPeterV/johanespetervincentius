@@ -97,9 +97,8 @@ export type StackGroup = {
 
 export const MAIN_STACK: StackGroup = {
   id: 'main',
-  title: 'Main stack',
-  description:
-    'Everything most businesses need, nothing they don’t. Faster to build, cheaper to run.',
+  title: 'Building with',
+  description: 'Fast. Sufficient. Cheap. But above all, simple.',
   technologies: [
     { name: 'Next.js', icon: SiNextdotjs },
     { name: 'Turborepo', icon: SiTurborepo },

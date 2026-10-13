@@ -94,7 +94,6 @@ export const StackIceExhibit = () => {
         <IceModelBoundary>{active ? <IceModel /> : null}</IceModelBoundary>
       </div>
       <div className="min-w-0">
-        <p className="identity-tag type-meta">My core stack</p>
         <h3
           id={`skill-${MAIN_STACK.id}`}
           className="work-section-title font-display"
