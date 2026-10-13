@@ -66,19 +66,18 @@ export const IceScrollRotation = ({ children }: { children: ReactNode }) => {
       0,
       1,
     );
-    const targetScroll = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
-    // REASON: an idle demand canvas reports the whole pause as its next delta;
-    // capping it keeps the first turn after a pause animated instead of snapping.
-    const step = Math.min(delta, 1 / 30);
+    const targetAngle = reducedMotion ? 0 : (progress - 0.5) * Math.PI * 2;
     // REASON: wheel input moves the chapter in whole steps; easing the scroll
     // angle turns the ice through each step instead of jumping between poses.
+    // An idle demand canvas reports the whole pause as its next delta, so the
+    // cap keeps the first step after a pause eased instead of snapping.
     scrollAngle.current = MathUtils.damp(
       scrollAngle.current,
-      targetScroll,
+      targetAngle,
       10,
-      step,
+      Math.min(delta, 1 / 30),
     );
-    if (Math.abs(targetScroll - scrollAngle.current) > 0.001) {
+    if (Math.abs(targetAngle - scrollAngle.current) > 0.001) {
       invalidate();
     }
     group.rotation.y = scrollAngle.current;

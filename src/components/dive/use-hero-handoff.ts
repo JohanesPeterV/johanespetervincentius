@@ -59,8 +59,7 @@ export const useHeroHandoff = (
     last.addEventListener('dive-canvas-change', invalidateLast);
     last.addEventListener('scroll', invalidateLast);
     // REASON: observe content and theme changes, not animation style writes;
-    // live chart paths ('d') and usage text change whenever their data
-    // refreshes.
+    // live usage text and chart paths ('d') change when their data refreshes.
     const observer = new MutationObserver(snapshots.invalidate);
     for (const section of [hero, entry, last]) {
       observer.observe(section, {
