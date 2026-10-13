@@ -192,7 +192,7 @@ export default function DiveNavigation({
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
       onLostPointerCapture={handlePointerEnd}
-      className="fixed inset-0 touch-none cursor-grab overflow-hidden bg-background text-foreground active:cursor-grabbing"
+      className="fixed inset-0 touch-none overflow-hidden bg-background text-foreground"
     >
       {children}
     </div>
