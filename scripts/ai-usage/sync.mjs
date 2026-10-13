@@ -9,7 +9,12 @@ import {
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { aggregateUsage, readTranscript } from './transcripts.mjs';
+import {
+  aggregateUsage,
+  packRecord,
+  readTranscript,
+  unpackRecord,
+} from './transcripts.mjs';
 
 const stateDir =
   process.env.AI_USAGE_STATE_DIR ??
@@ -21,6 +26,7 @@ const t3RatesPath =
   process.env.AI_USAGE_T3_RATES ??
   join(homedir(), '.t3', 'userdata', 'usage-model-rates.json');
 const statePath = join(stateDir, 'scan.json');
+const scanCacheVersion = 2;
 const configPath = join(stateDir, 'config.json');
 const snapshotPath = resolve('src/data/ai-usage.json');
 const retainedSince = Date.now() - 32 * 86400000;
@@ -65,7 +71,9 @@ if (!rates || typeof rates !== 'object') {
   throw new Error('T3 model rates are unavailable.');
 }
 const previous = await readJson(statePath);
-const files = previous?.version === 2 ? previous.files : {};
+// REASON: the scan cache only saves work, so one written in another record
+// format is dropped and every transcript is rescanned instead of failing.
+const files = previous?.version === scanCacheVersion ? previous.files : {};
 const roots = [];
 for (const [key, source] of Object.entries(t3.sources)) {
   const provider = key.split('\0')[0];
@@ -100,21 +108,33 @@ for (const { provider, directory } of roots) {
       seed?.p === provider
     ) {
       records = [...seed.r, ...seed.t].map((row) => {
+        const [
+          timestamp,
+          modelIndex,
+          sessionIndex,
+          input,
+          cacheRead,
+          cacheWrite,
+          output,
+        ] = row;
         if (
           row.length !== 11 ||
-          !row
-            .slice(3, 7)
-            .every((value) => Number.isSafeInteger(value) && value >= 0)
+          ![input, cacheRead, cacheWrite, output].every(
+            (value) => Number.isSafeInteger(value) && value >= 0,
+          )
         ) {
           throw new Error('Invalid T3 usage record.');
         }
-        return [
-          row[0],
-          t3.sessions[row[2]] ?? '',
-          t3.models[row[1]],
-          ...row.slice(3, 7),
-          row[8],
-        ];
+        return packRecord({
+          timestamp,
+          session: t3.sessions[sessionIndex] ?? '',
+          model: t3.models[modelIndex],
+          input,
+          cacheRead,
+          cacheWrite,
+          output,
+          key: row[8],
+        });
       });
     } else {
       records = await readTranscript(path, provider, info.size);
@@ -124,7 +144,9 @@ for (const { provider, directory } of roots) {
       provider,
       size: info.size,
       mtimeMs: info.mtimeMs,
-      records: records.filter((row) => row[0] >= retainedSince),
+      records: records.filter(
+        (record) => unpackRecord(record).timestamp >= retainedSince,
+      ),
     };
   }
 }
@@ -185,7 +207,7 @@ if (process.argv.includes('--create')) {
 }
 await writeFile(
   statePath + '.tmp',
-  JSON.stringify({ version: 2, files: current }),
+  JSON.stringify({ version: scanCacheVersion, files: current }),
   { mode: 0o600 },
 );
 await rename(statePath + '.tmp', statePath);

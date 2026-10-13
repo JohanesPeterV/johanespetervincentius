@@ -12,7 +12,12 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { aggregateUsage, readTranscript } from './transcripts.mjs';
+import {
+  aggregateUsage,
+  packRecord,
+  readTranscript,
+  unpackRecord,
+} from './transcripts.mjs';
 
 const readEntries = async (provider, entries, tail = '') => {
   const directory = await mkdtemp(join(tmpdir(), 'portfolio-ai-usage-'));
@@ -41,6 +46,7 @@ const rates = {
     cache_creation_input_token_cost: 2,
     output_cost_per_token: 10,
   },
+  gpt: { input_cost_per_token: 1 },
 };
 const codex = (timestamp, usage) => ({
   type: 'event_msg',
@@ -91,31 +97,41 @@ test('Codex excludes consecutive repeated usage and copied fork history; reasoni
     codex('2026-10-02T18:00:06Z', { ...usage, output_tokens: 70 }),
     codex('2026-10-02T18:00:07Z', { ...usage, output_tokens: 70 }),
   ]);
-  assert.deepEqual(rows, [
-    [Date.parse('2026-10-02T18:00:06Z'), 'child', 'gpt', 200, 800, 0, 70, null],
+  assert.deepEqual(rows.map(unpackRecord), [
+    {
+      timestamp: Date.parse('2026-10-02T18:00:06Z'),
+      session: 'child',
+      model: 'gpt',
+      input: 200,
+      cacheRead: 800,
+      cacheWrite: 0,
+      output: 70,
+      key: null,
+    },
   ]);
 });
 
 test('Calendar rolling window expires old days and uses Jakarta boundaries', () => {
-  const makeRow = (date) => [
-    Date.parse(date),
-    'session',
-    'claude',
-    100,
-    0,
-    0,
-    0,
-    null,
-  ];
+  const recordAt = (date) =>
+    packRecord({
+      timestamp: Date.parse(date),
+      session: 'session',
+      model: 'gpt',
+      input: 100,
+      cacheRead: 0,
+      cacheWrite: 0,
+      output: 0,
+      key: null,
+    });
   const usage = aggregateUsage(
     {
       file: {
         provider: 'codex',
         records: [
-          makeRow('2026-09-03T16:59:59Z'),
-          makeRow('2026-09-03T17:00:00Z'),
-          makeRow('2026-10-03T16:59:59Z'),
-          makeRow('2026-10-03T17:00:00Z'),
+          recordAt('2026-09-03T16:59:59Z'),
+          recordAt('2026-09-03T17:00:00Z'),
+          recordAt('2026-10-03T16:59:59Z'),
+          recordAt('2026-10-03T17:00:00Z'),
         ],
       },
     },

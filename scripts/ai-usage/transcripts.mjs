@@ -1,5 +1,39 @@
 import { createReadStream } from 'node:fs';
 
+// REASON: records are positional tuples because the private scan cache holds
+// hundreds of thousands of them; this pair is the only place that knows the
+// field order.
+export const packRecord = ({
+  timestamp,
+  session,
+  model,
+  input,
+  cacheRead,
+  cacheWrite,
+  output,
+  key,
+}) => [timestamp, session, model, input, cacheRead, cacheWrite, output, key];
+
+export const unpackRecord = ([
+  timestamp,
+  session,
+  model,
+  input,
+  cacheRead,
+  cacheWrite,
+  output,
+  key,
+]) => ({
+  timestamp,
+  session,
+  model,
+  input,
+  cacheRead,
+  cacheWrite,
+  output,
+  key,
+});
+
 const tokenCount = (value) => {
   if (value === undefined || value === null) {
     return 0;
@@ -61,16 +95,18 @@ export const readTranscript = async (path, provider, size) => {
         entry.message.id || entry.requestId
           ? `${entry.message.id ?? ''}:${entry.requestId ?? ''}`
           : null;
-      records.push([
-        timestamp,
-        entry.sessionId ?? '',
-        entry.message.model,
-        tokenCount(usage.input_tokens),
-        tokenCount(usage.cache_read_input_tokens),
-        tokenCount(usage.cache_creation_input_tokens),
-        tokenCount(usage.output_tokens),
-        key,
-      ]);
+      records.push(
+        packRecord({
+          timestamp,
+          session: entry.sessionId ?? '',
+          model: entry.message.model,
+          input: tokenCount(usage.input_tokens),
+          cacheRead: tokenCount(usage.cache_read_input_tokens),
+          cacheWrite: tokenCount(usage.cache_creation_input_tokens),
+          output: tokenCount(usage.output_tokens),
+          key,
+        }),
+      );
       continue;
     }
     const payload = entry.payload;
@@ -116,22 +152,36 @@ export const readTranscript = async (path, provider, size) => {
     const uncached = Math.max(0, input - cached - creation);
     const output = tokenCount(usage.output_tokens);
     if (uncached + cached + creation + output > 0) {
-      records.push([
-        timestamp,
-        session,
-        model,
-        uncached,
-        cached,
-        creation,
-        output,
-        null,
-      ]);
+      records.push(
+        packRecord({
+          timestamp,
+          session,
+          model,
+          input: uncached,
+          cacheRead: cached,
+          cacheWrite: creation,
+          output,
+          key: null,
+        }),
+      );
     }
   }
   return records;
 };
 
-const toCents = (amount) => Math.round(amount * 100) / 100;
+// REASON: models missing from T3's rates cost $0, matching T3's API estimate,
+// so a brand-new model never blocks publication.
+const estimateCost = (record, rates) => {
+  const rate = rates[record.model] ?? {};
+  return (
+    record.input * (rate.input_cost_per_token ?? 0) +
+    record.cacheRead * (rate.cache_read_input_token_cost ?? 0) +
+    record.cacheWrite * (rate.cache_creation_input_token_cost ?? 0) +
+    record.output * (rate.output_cost_per_token ?? 0)
+  );
+};
+
+const roundToCents = (dollars) => Math.round(dollars * 100) / 100;
 
 export const aggregateUsage = (files, rates, now = new Date()) => {
   const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' });
@@ -150,46 +200,30 @@ export const aggregateUsage = (files, rates, now = new Date()) => {
   const sessions = { codex: new Set(), claude: new Set() };
   const seen = new Set();
   for (const file of Object.values(files)) {
-    for (const [
-      timestamp,
-      session,
-      model,
-      input,
-      cacheRead,
-      cacheWrite,
-      output,
-      key,
-    ] of file.records) {
-      if (key !== null) {
-        if (seen.has(key)) {
+    for (const record of file.records.map(unpackRecord)) {
+      if (record.key !== null) {
+        if (seen.has(record.key)) {
           continue;
         }
-        seen.add(key);
+        seen.add(record.key);
       }
-      const dayCost = dailyCost.get(day.format(timestamp));
+      const dayCost = dailyCost.get(day.format(record.timestamp));
       if (!dayCost) {
         continue;
       }
-      // REASON: models missing from the price list cost $0, matching T3's API
-      // estimate, so a brand-new model never blocks publication.
-      const rate = rates[model] ?? {};
-      const cost =
-        input * (rate.input_cost_per_token ?? 0) +
-        cacheRead * (rate.cache_read_input_token_cost ?? 0) +
-        cacheWrite * (rate.cache_creation_input_token_cost ?? 0) +
-        output * (rate.output_cost_per_token ?? 0);
+      const cost = estimateCost(record, rates);
       dayCost[file.provider] += cost;
       providers[file.provider].tokens +=
-        input + cacheRead + cacheWrite + output;
+        record.input + record.cacheRead + record.cacheWrite + record.output;
       providers[file.provider].cost += cost;
-      if (session) {
-        sessions[file.provider].add(session);
+      if (record.session) {
+        sessions[file.provider].add(record.session);
       }
     }
   }
   for (const provider of ['codex', 'claude']) {
     providers[provider].sessions = sessions[provider].size;
-    providers[provider].cost = toCents(providers[provider].cost);
+    providers[provider].cost = roundToCents(providers[provider].cost);
   }
   return {
     version: 2,
@@ -200,8 +234,8 @@ export const aggregateUsage = (files, rates, now = new Date()) => {
     providers,
     dailyCost: [...dailyCost.values()].map(({ date, codex, claude }) => ({
       date,
-      codex: toCents(codex),
-      claude: toCents(claude),
+      codex: roundToCents(codex),
+      claude: roundToCents(claude),
     })),
   };
 };
