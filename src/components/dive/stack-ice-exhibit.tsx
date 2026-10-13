@@ -6,14 +6,12 @@ import type { ReactNode } from 'react';
 
 import { AI_TOOLS, MAIN_STACK } from '@/app/_components/stack';
 import type { StackTechnology } from '@/app/_components/stack';
-import type { AiUsageProvider } from '@/lib/ai-usage';
 
-import { AiUsageBadge } from './ai-usage-badge';
 import { AiUsageChart } from './ai-usage-chart';
 import { AiUsageSummary } from './ai-usage-summary';
 
 type StackTechnologyListProps = {
-  technologies: (StackTechnology & { provider?: AiUsageProvider })[];
+  technologies: StackTechnology[];
 };
 
 const IceModel = dynamic(() => import('./ice-model'), {
@@ -45,14 +43,10 @@ class IceModelBoundary extends Component<
 
 const StackTechnologyList = ({ technologies }: StackTechnologyListProps) => (
   <ul className="stack-group mt-6 grid grid-cols-2 gap-x-4 gap-y-4 pt-6">
-    {technologies.map(({ name, icon: Icon, provider }) => (
-      <li
-        key={name}
-        className="stack-technology flex flex-wrap items-center gap-x-3 gap-y-1"
-      >
+    {technologies.map(({ name, icon: Icon }) => (
+      <li key={name} className="stack-technology flex items-center gap-3">
         <Icon aria-hidden="true" className="stack-icon shrink-0" />
         <span className="min-w-0 break-words">{name}</span>
-        {provider ? <AiUsageBadge provider={provider} /> : null}
       </li>
     ))}
   </ul>
@@ -99,7 +93,7 @@ export const StackIceExhibit = () => {
         <h3 id={titleId} className="work-section-title font-display">
           {MAIN_STACK.title}
         </h3>
-        <p className="type-label mt-4 max-w-[40ch] text-muted-foreground">
+        <p className="work-description mt-4 max-w-[40ch] text-muted-foreground">
           {MAIN_STACK.description}
         </p>
         <StackTechnologyList technologies={MAIN_STACK.technologies} />

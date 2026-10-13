@@ -1,6 +1,6 @@
 # Automatic AI consumption
 
-Claude Code and Codex sit on their own line in Main stack, with badges showing their aggregate token consumption for the last 30 calendar days, including today, in Asia/Jakarta. Under them in the Skills chapter, `AiUsageSummary` shows the window's API-estimated cost, sessions and tokens per tool, and an interactive chart plots the daily cost. The hero card repeats the total cost and each tool's tokens under its tagline. T3 Code is the workspace, not a third token provider.
+Claude Code and Codex sit on their own line in Main stack. Under them in the Skills chapter, `AiUsageSummary` shows the API-estimated cost, sessions and tokens per tool for the last 30 calendar days, including today, in Asia/Jakarta, and an interactive chart plots the daily cost. The hero card repeats the total cost and each tool's tokens under its tagline. T3 Code is the workspace, not a third token provider.
 
 The Mac scans local Codex and Claude usage telemetry every 15 minutes, then updates one public GitHub Gist. The website reads that JSON on mount and every 15 minutes. This needs no website secret, deployment per update, or automated Git commit/push. Only dates, per-provider token, session and cost totals for the window, and per-provider cost per day are published. Prompts, models, project names, session IDs and local paths stay private.
 

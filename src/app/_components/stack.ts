@@ -123,7 +123,7 @@ export const AI_USAGE_TOOLS: AiUsageTool[] = [
   { name: 'Codex', icon: SiOpenai, provider: 'codex', color: 'text-secondary' },
 ];
 
-export const AI_TOOLS: (StackTechnology | AiUsageTool)[] = [
+export const AI_TOOLS: StackTechnology[] = [
   ...AI_USAGE_TOOLS,
   { name: 'T3 Code', icon: TbTerminal2 },
 ];
