@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import type { KeyboardEvent, PointerEvent } from 'react';
 
+import { AI_USAGE_TOOLS } from '@/app/_components/stack';
 import { useAiUsage } from '@/hooks/use-ai-usage';
-import { AI_USAGE_TOOLS, formatCost } from '@/lib/ai-usage';
+import { formatCost } from '@/lib/ai-usage';
 
 type Point = { x: number; y: number };
 

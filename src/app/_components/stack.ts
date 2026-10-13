@@ -85,7 +85,11 @@ import {
 export type StackTechnology = {
   name: string;
   icon: IconType;
-  usage?: AiUsageProvider;
+};
+
+export type AiUsageTool = StackTechnology & {
+  provider: AiUsageProvider;
+  color: string;
 };
 
 export type StackGroup = {
@@ -95,8 +99,7 @@ export type StackGroup = {
   technologies: StackTechnology[];
 };
 
-export const MAIN_STACK: StackGroup = {
-  id: 'main',
+export const MAIN_STACK: Omit<StackGroup, 'id'> = {
   title: 'Building with',
   description: 'Fast. Sufficient. Cheap. But above all, simple.',
   technologies: [
@@ -110,9 +113,18 @@ export const MAIN_STACK: StackGroup = {
   ],
 };
 
-export const AI_TOOLS: StackTechnology[] = [
-  { name: 'Claude Code', icon: SiClaude, usage: 'claude' },
-  { name: 'Codex', icon: SiOpenai, usage: 'codex' },
+export const AI_USAGE_TOOLS: AiUsageTool[] = [
+  {
+    name: 'Claude Code',
+    icon: SiClaude,
+    provider: 'claude',
+    color: 'text-primary',
+  },
+  { name: 'Codex', icon: SiOpenai, provider: 'codex', color: 'text-secondary' },
+];
+
+export const AI_TOOLS: (StackTechnology | AiUsageTool)[] = [
+  ...AI_USAGE_TOOLS,
   { name: 'T3 Code', icon: TbTerminal2 },
 ];
 

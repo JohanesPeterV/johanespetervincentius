@@ -1,26 +1,9 @@
-import type { IconType } from 'react-icons';
-import { SiClaude, SiOpenai } from 'react-icons/si';
-
 import snapshot from '@/data/ai-usage.json';
 
 export type AiUsage = typeof snapshot;
 export type AiUsageProvider = keyof AiUsage['providers'];
 
 export const INITIAL_AI_USAGE: AiUsage = snapshot;
-export const AI_USAGE_TOOLS: {
-  provider: AiUsageProvider;
-  name: string;
-  icon: IconType;
-  color: string;
-}[] = [
-  {
-    provider: 'claude',
-    name: 'Claude Code',
-    icon: SiClaude,
-    color: 'text-primary',
-  },
-  { provider: 'codex', name: 'Codex', icon: SiOpenai, color: 'text-secondary' },
-];
 export const AI_USAGE_URL =
   'https://gist.githubusercontent.com/JohanesPeterV/39230a0a9b68ec5f7d218c1a704d93b0/raw/ai-usage.json';
 
@@ -40,10 +23,7 @@ export const formatTokens = (tokens: number): string =>
 export const formatCost = (cost: number): string => costFormat.format(cost);
 
 export const totalAiUsageCost = (usage: AiUsage): number =>
-  AI_USAGE_TOOLS.reduce(
-    (sum, { provider }) => sum + usage.providers[provider].cost,
-    0,
-  );
+  Object.values(usage.providers).reduce((sum, { cost }) => sum + cost, 0);
 
 const isCount = (value: number): boolean =>
   Number.isSafeInteger(value) && value >= 0;

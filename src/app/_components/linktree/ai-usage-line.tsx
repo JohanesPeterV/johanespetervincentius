@@ -1,12 +1,8 @@
 'use client';
 
+import { AI_USAGE_TOOLS } from '@/app/_components/stack';
 import { useAiUsage } from '@/hooks/use-ai-usage';
-import {
-  AI_USAGE_TOOLS,
-  formatCost,
-  formatTokens,
-  totalAiUsageCost,
-} from '@/lib/ai-usage';
+import { formatCost, formatTokens, totalAiUsageCost } from '@/lib/ai-usage';
 
 export default function AiUsageLine() {
   const { usage } = useAiUsage();

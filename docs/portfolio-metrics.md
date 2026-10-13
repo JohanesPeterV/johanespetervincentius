@@ -8,9 +8,8 @@ Work content lives in `src/app/_components/work-experience/work-experiences.ts`.
 Personal AI consumption appears as `AiUsageBadge` totals on Claude Code and Codex
 in Main stack, with `AiUsageSummary` and the daily cost `AiUsageChart` under them
 in the Skills exhibit. The API-estimated cost is personal tool usage, not a
-company financial amount.
-These notes preserve the meaning and source
-of the figures for later editing.
+company financial amount. These notes preserve the meaning and source of the
+figures for later editing.
 
 ## Publication scope
 
@@ -75,11 +74,12 @@ scheduled local usage collector. See [automatic updates](ai-usage-sync.md).
 The screenshots above preserve the initial reference; the visible totals roll
 forward with the latest 30 days of retained usage, following T3's counting rules.
 
-The presentation is deliberately quiet: Main stack lists the AI tools beside the
-rest of the stack, and Codex and Claude Code each carry a small "tokens/mo"
-badge. Session counts and the lifetime profile counter are not displayed.
+The presentation is deliberately quiet: the AI tools sit on their own line in
+Main stack, and Claude Code and Codex each carry a small "tokens/mo" badge.
+`AiUsageSummary` adds each tool's API-estimated cost, sessions and tokens, and
+the hero card repeats the total cost and each tool's tokens. The lifetime
+profile counter is not displayed.
 
 Processed tokens include input, output, and cached context. The profile lifetime
 counter has a different scope from the monthly retained usage. These activity
-measures do not establish productivity or savings. The screenshots also show
-monetary API estimates; these are not published.
+measures do not establish productivity or savings.
