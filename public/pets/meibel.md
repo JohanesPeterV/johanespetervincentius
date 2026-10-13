@@ -25,17 +25,17 @@ Look poses run clockwise in viewer coordinates: up is index 0, right 4, down 8, 
 
 `meibel-runtime.ts` connects the engine to the sprite element. Each engine frame carries its atlas; the runtime renders that atlas directly. Walking always uses the original directional rows at 90 milliseconds per cell. The runtime uses one animation clock, renders without React updates per frame, pauses outside the viewport or a visible browser tab, and removes listeners on unmount. Reduced motion holds a still pose and allows direct gaze changes. The React component owns the accessible pet button, native popover, and visible loading errors. The home page mounts her at the bottom-right of the screen, above navigation and the device safe area, so she stays with the visitor across chapters.
 
-Meibel normally sits and blinks about once every eight seconds. She lounges for thirty seconds after 45 seconds, rests for a minute, gives a brief curious glance, then repeats. Click, tap, Enter, or Space to pet her and reveal her frameless text actions. Hover and focus do not trigger a wave. Cursor movement controls all sixteen gaze poses during idle. Running, jumping, busy paws, waiting, and disappointment remain available through `MeibelEngine.play` and do not run automatically.
+Meibel normally sits and blinks about once every eight seconds. After 45 seconds she lounges for thirty seconds, rests for a minute, gives a brief curious glance, then repeats. Click, tap, Enter, or Space to pet her and reveal her frameless text actions. Hover and focus do not trigger a wave. Cursor movement controls all sixteen gaze poses during idle. Running, jumping, busy paws, waiting, and disappointment remain available through `MeibelEngine.play` and do not run automatically.
 
 Petting only blinks using the idle row’s closed-eye pose, with no tilt, scaling, or other effects. `MeibelEngine` owns sprite selection, clip timing, and movement; the runtime owns the viewport bounds and mouse coordinates. Opening her controls or leaving the browser pauses pursuit. Turning following off walks her home at 160 pixels per second. Following is unavailable on touch-only devices and with reduced motion; changing to reduced motion cancels movement. Escape or an outside click dismisses the native popover.
 
-Run `npm run test:meibel` to verify frame coverage, gaze mapping, action priority, pointer pursuit, stopping, petting, and reduced motion.
+Run `npm run test:meibel` to verify frame coverage, the ambient schedule, gaze mapping, action priority, pointer pursuit, stopping, petting, and reduced motion.
 
 ## Following and lounging
 
 Choose **Follow mouse** to walk toward the cursor at 160 pixels per second using her original walking animation. On arrival she sits and blinks, staying there until the cursor moves again. Her dock is centered horizontally and placed 28 pixels below the cursor, clamped inside the viewport. There is no play, paw reaching, or circling. Opening controls or leaving the document pauses pursuit. Her entire dock passes mouse clicks through during following. **Stop following** or Escape walks her home with the original gait.
 
-Lounging has no button; it only appears in her quiet ambient schedule, holding the four actual photographed poses for 12s, 1.8s, 0.3s, and 15.9s. Gaze and hover do not interrupt her; petting or **Follow mouse** can.
+Lounging appears only in her quiet ambient schedule, holding the four actual photographed poses for 12s, 1.8s, 0.3s, and 15.9s. Gaze and hover do not interrupt her; petting or **Follow mouse** can.
 
 ## Photo provenance
 

@@ -44,22 +44,20 @@ test('every standard animation can play every populated cell', () => {
   }
 });
 
-test('ambient behavior stays still with an occasional glance and long lounge', () => {
+test('ambient behavior sits 45s, lounges 30s, sits 60s, glances 1.5s, and repeats', () => {
+  const schedule: { animation: MeibelAnimation; duration: number }[] = [
+    { animation: 'idle', duration: 45000 },
+    { animation: 'lounging', duration: 30000 },
+    { animation: 'idle', duration: 60000 },
+    { animation: 'review', duration: 1500 },
+  ];
   const engine = new MeibelEngine();
-  let idleSamples = 0;
-  for (let time = 0; time < 200000; time += 100) {
-    const frame = engine.frame();
-    assert.ok(['idle', 'review', 'lounging'].includes(frame.animation));
-    assert.equal(frame.offsetX, 0);
-    if (time < 45000) {
-      assert.equal(frame.animation, 'idle');
+  for (const { animation, duration } of [...schedule, ...schedule]) {
+    for (let time = 0; time < duration; time += 100) {
+      assert.equal(engine.frame().animation, animation);
+      engine.advance(100);
     }
-    if (frame.animation !== 'review') {
-      idleSamples += 1;
-    }
-    engine.advance(100);
   }
-  assert.ok(idleSamples / 2000 > 0.99);
 });
 
 test('all sixteen clockwise gaze directions map to the final two atlas rows', () => {
@@ -305,12 +303,12 @@ test('resting and invalid coordinates never start cursor pursuit', () => {
   assert.equal(engine.frame().offsetY, 0);
 });
 
-test('ambient lounging ignores gaze', () => {
+test('ambient lounging ignores gaze and holds its four poses', () => {
   const engine = new MeibelEngine();
   engine.advance(45000);
   engine.lookAt(-100, 0);
-  engine.advance(12000);
   assert.equal(engine.frame().animation, 'lounging');
+  engine.advance(12000);
   assert.equal(engine.frame().column, 1);
   engine.advance(1800);
   assert.equal(engine.frame().column, 2);
@@ -320,12 +318,14 @@ test('ambient lounging ignores gaze', () => {
   assert.equal(engine.frame().animation, 'idle');
 });
 
-test('petting or Follow can interrupt lounging', () => {
+test('petting or Follow can interrupt ambient lounging', () => {
   const engine = new MeibelEngine();
   engine.advance(45000);
   assert.equal(engine.frame().animation, 'lounging');
   engine.play('petting');
   assert.equal(engine.frame().animation, 'petting');
+  engine.advance(920);
+  assert.equal(engine.frame().animation, 'lounging');
   engine.setFollowMode('following');
   engine.followTo(-300, 0);
   advanceFor(engine, 100);
