@@ -13,7 +13,6 @@ export const POMODORO_PLANTER = {
     'Turn focused time into a growing garden. A complete product with custom timer cycles, persistent plants, and a timer that syncs across devices when you sign in.',
   technologies: ['Next.js', 'TypeScript', 'Convex', 'Clerk'],
   link: 'https://pomoplanter.com',
-  previewLink: 'https://www.pomoplanter.com/yard/akyejevz8umyfnb4',
   accountCountUrl: 'https://www.pomoplanter.com/api/account-count',
   image: '/projects/pomoplanter-morning.webp',
   screenshots: [

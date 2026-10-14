@@ -12,10 +12,10 @@ export const PomoplanterPreview = () => {
   return (
     <figure className="project-preview w-full">
       <a
-        href={POMODORO_PLANTER.previewLink}
+        href={POMODORO_PLANTER.link}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Open Pomodoro Planter yard preview"
+        aria-label="Open Pomodoro Planter"
         className="project-preview-stage pointer-events-auto relative block w-full"
       >
         {POMODORO_PLANTER.screenshots.map((screenshot, index) => (
